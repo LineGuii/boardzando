@@ -1,0 +1,8 @@
+{
+  "extends": "@board-games/typescript-config/react.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["vite/client"]
+  },
+  "include": ["src"]
+}

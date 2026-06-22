@@ -1,0 +1,28 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# builds
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+deploy/cloudflared/*.json
+deploy/cloudflared/cert.pem
+
+# editor / os
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
