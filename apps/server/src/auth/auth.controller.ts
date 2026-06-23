@@ -32,7 +32,10 @@ export class AuthController {
     if (!this.registry.get(dto.gameId)) {
       throw new BadRequestException('Jogo desconhecido.');
     }
-    const passwordHash = await this.auth.hashRoomPassword(dto.roomPassword);
+    // Sala publica: dto.roomPassword vazio/ausente => passwordHash = '' (skip).
+    const passwordHash = dto.roomPassword
+      ? await this.auth.hashRoomPassword(dto.roomPassword)
+      : '';
     const playerId = randomUUID();
     const room = this.rooms.createRoom({
       gameId: dto.gameId,
@@ -49,8 +52,11 @@ export class AuthController {
     const room = this.rooms.get(dto.roomId);
     if (!room) throw new NotFoundException('Sala nao encontrada.');
 
-    const ok = await this.auth.verifyRoomPassword(room.passwordHash, dto.roomPassword);
-    if (!ok) throw new UnauthorizedException('Senha incorreta.');
+    // Se a sala tem senha, valida. Sala publica (hash vazio) pula a verificacao.
+    if (room.passwordHash) {
+      const ok = await this.auth.verifyRoomPassword(room.passwordHash, dto.roomPassword ?? '');
+      if (!ok) throw new UnauthorizedException('Senha incorreta.');
+    }
 
     const playerId = randomUUID();
     try {

@@ -29,7 +29,14 @@ export interface ServerToClientEvents {
   /** Estado da sala mudou (jogador entrou/saiu, jogo iniciou). */
   'room:update': (snapshot: RoomSnapshot) => void;
   /** Novo estado de jogo, JA filtrado por playerView para este cliente. */
-  'game:state': (payload: { roomId: RoomId; view: unknown; turn: number; phase: string }) => void;
+  'game:state': (payload: {
+    roomId: RoomId;
+    view: unknown;
+    turn: number;
+    phase: string;
+    /** Quem deve jogar agora. A casca usa para bloquear inputs fora da vez. */
+    currentPlayer: PlayerId;
+  }) => void;
   /** O jogo terminou. */
   'game:over': (payload: { roomId: RoomId; result: GameOverResult }) => void;
   'chat:message': (msg: ChatMessage) => void;

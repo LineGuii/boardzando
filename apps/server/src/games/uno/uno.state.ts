@@ -23,6 +23,18 @@ export interface UnoState {
   direction: 1 | -1;
   /** Se o proximo jogador deve ser pulado (consumido em turn.onBegin). */
   skipNext: boolean;
+  /**
+   * Total de cartas pendentes para compra encadeada por draw2.
+   * Enquanto > 0, o jogador da vez SO pode jogar outra draw2 (acumula +2) ou
+   * usar `drawCard` para "pegar o stack" (compra tudo e perde a vez).
+   */
+  pendingDraw: number;
+  /**
+   * Marca, por jogador, se ele ja "cantou" UNO. So importa quando o jogador
+   * tem 1 carta na mao: se `false`, qualquer outro jogador pode `contestUno`
+   * (penalidade de +2). Resetado para `false` cada vez que a mao vai a 1.
+   */
+  unoCalled: Record<PlayerId, boolean>;
   /** Vencedor, quando alguem zera a mao. */
   winner?: PlayerId;
 }

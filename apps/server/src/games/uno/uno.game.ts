@@ -3,8 +3,13 @@ import type { GameContext, GameDefinition, PlayerId } from '@boardzando/contract
 import { INVALID_MOVE } from '@boardzando/contracts';
 import { GamePlugin } from '../../core/registry/game-plugin.decorator';
 import { buildDeck, drawCards } from './uno.deck';
-import { drawCard, playCard, unoNextPlayer } from './uno.moves';
-import type { DrawPayload, PlayCardPayload } from './uno.moves';
+import { callUno, contestUno, drawCard, playCard, unoNextPlayer } from './uno.moves';
+import type {
+  CallUnoPayload,
+  ContestUnoPayload,
+  DrawPayload,
+  PlayCardPayload,
+} from './uno.moves';
 import type { UnoColor, UnoState } from './uno.state';
 
 /**
@@ -15,9 +20,11 @@ import type { UnoColor, UnoState } from './uno.state';
  * foram deixados como exercicio (ver skill add-game-plugin) para manter o
  * exemplo focado no contrato.
  */
+type UnoMovePayload = PlayCardPayload | DrawPayload | CallUnoPayload | ContestUnoPayload;
+
 @Injectable()
 @GamePlugin()
-export class UnoGame implements GameDefinition<UnoState, PlayCardPayload | DrawPayload> {
+export class UnoGame implements GameDefinition<UnoState, UnoMovePayload> {
   readonly id = 'uno';
   readonly name = 'UNO';
   readonly minPlayers = 2;
@@ -32,11 +39,15 @@ export class UnoGame implements GameDefinition<UnoState, PlayCardPayload | DrawP
       activeColor: 'red',
       direction: 1,
       skipNext: false,
+      pendingDraw: 0,
+      unoCalled: {},
     };
 
     // 7 cartas por jogador
     for (const playerId of ctx.players) {
       state.hands[playerId] = drawCards(state, ctx.random, 7);
+      // comecam com 7 -> sem obrigacao de cantar UNO; flag so importa quando mao = 1
+      state.unoCalled[playerId] = true;
     }
 
     // vira a primeira carta (garante que nao seja curinga, por simplicidade)
@@ -54,7 +65,12 @@ export class UnoGame implements GameDefinition<UnoState, PlayCardPayload | DrawP
   readonly moves = {
     playCard,
     drawCard,
-  } as Record<string, (state: UnoState, ctx: GameContext, payload: PlayCardPayload | DrawPayload) => UnoState | typeof INVALID_MOVE>;
+    callUno,
+    contestUno,
+  } as Record<string, (state: UnoState, ctx: GameContext, payload: UnoMovePayload) => UnoState | typeof INVALID_MOVE>;
+
+  /** callUno e contestUno podem ser invocados por qualquer jogador a qualquer hora. */
+  readonly offTurnMoves = ['callUno', 'contestUno'] as const;
 
   turn = {
     nextPlayer: unoNextPlayer,
@@ -80,6 +96,9 @@ export class UnoGame implements GameDefinition<UnoState, PlayCardPayload | DrawP
       activeColor: state.activeColor,
       direction: state.direction,
       deckCount: state.deck.length,
+      pendingDraw: state.pendingDraw,
+      /** Para a UI decidir quem ja cantou UNO (chave -> bool). */
+      unoCalled: state.unoCalled,
     };
   }
 }

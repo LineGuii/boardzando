@@ -1,0 +1,54 @@
+import type { ReactNode } from 'react';
+import { selectIsMyTurn, useGame } from '../net/store';
+
+/**
+ * Fronteira da CASCA: bloqueia inputs do jogo quando nao e a vez do jogador.
+ * Usa `<fieldset disabled>` (HTML nativo) + `pointer-events: none` — isso
+ * desabilita botoes, inputs E o inicio de drag dos plugins de jogo, sem que
+ * eles precisem cooperar. O servidor tambem recusa moves fora da vez
+ * (`NotYourTurnError`); esta camada e UX.
+ *
+ * Plugins (UnoBoard etc.) renderizam-se normalmente; NAO devem replicar a
+ * logica de turno aqui.
+ */
+export function TurnGate({ children }: { children: ReactNode }): JSX.Element {
+  const isMyTurn = useGame(selectIsMyTurn);
+  const room = useGame((s) => s.room);
+  const currentPlayer = useGame((s) => s.currentPlayer);
+
+  if (isMyTurn === undefined) {
+    return <p style={{ color: '#6b5f4e' }}>Aguardando estado...</p>;
+  }
+
+  if (isMyTurn) {
+    return (
+      <>
+        <div className="shell-turn-pill mine">Sua vez</div>
+        {children}
+      </>
+    );
+  }
+
+  const currentName =
+    room?.players.find((p) => p.id === currentPlayer)?.name ?? 'o oponente';
+
+  return (
+    <>
+      <div className="shell-turn-pill theirs">
+        Aguardando jogada de <b style={{ marginLeft: 4 }}>{currentName}</b>...
+      </div>
+      <fieldset
+        disabled
+        style={{
+          border: 'none',
+          padding: 0,
+          margin: 0,
+          opacity: 0.5,
+          pointerEvents: 'none',
+        }}
+      >
+        {children}
+      </fieldset>
+    </>
+  );
+}

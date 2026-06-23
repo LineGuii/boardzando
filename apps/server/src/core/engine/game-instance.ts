@@ -37,8 +37,9 @@ export class GameInstance<TState = unknown> {
   ) {}
 
   /** Cria e inicializa uma nova partida. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static create<TState>(
-    def: GameDefinition<TState>,
+    def: GameDefinition<TState, any>,
     players: PlayerId[],
     seed: number,
     setupData?: unknown,
@@ -72,8 +73,9 @@ export class GameInstance<TState = unknown> {
   }
 
   /** Restaura uma partida persistida. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static restore<TState>(
-    def: GameDefinition<TState>,
+    def: GameDefinition<TState, any>,
     match: MatchState<TState>,
   ): GameInstance<TState> {
     return new GameInstance(def, { ...match, players: [...match.players] });
@@ -94,14 +96,16 @@ export class GameInstance<TState = unknown> {
    */
   applyMove(playerId: PlayerId, moveType: string, payload: unknown): void {
     if (this.isOver) throw new InvalidMoveError(moveType);
-    if (playerId !== this.match.currentPlayer) throw new NotYourTurnError();
+
+    const isOffTurn = this.def.offTurnMoves?.includes(moveType) ?? false;
+    if (!isOffTurn && playerId !== this.match.currentPlayer) throw new NotYourTurnError();
 
     const phaseCfg = this.def.phases?.[this.match.phase];
     const move = phaseCfg?.moves?.[moveType] ?? this.def.moves[moveType];
     if (!move) throw new InvalidMoveError(moveType);
 
     const rng = SeededRandom.fromState(this.match.rngState);
-    const ctx = this.buildContext(rng);
+    const ctx = this.buildContext(rng, playerId);
 
     const next = move(this.match.state, ctx, payload);
     if (next === INVALID_MOVE) throw new InvalidMoveError(moveType);
@@ -112,7 +116,8 @@ export class GameInstance<TState = unknown> {
     if (this.checkGameOver(ctx)) return;
     this.maybeAdvancePhase(ctx);
     if (this.isOver) return;
-    this.advanceTurn();
+    // Moves off-turn nao consomem o turno do jogador da vez.
+    if (!isOffTurn) this.advanceTurn();
   }
 
   /** Estado filtrado para um jogador (esconde info secreta). */
@@ -124,10 +129,11 @@ export class GameInstance<TState = unknown> {
 
   // ---------- internals ----------
 
-  private buildContext(rng: SeededRandom): GameContext {
+  private buildContext(rng: SeededRandom, actor?: PlayerId): GameContext {
     return {
       players: this.match.players,
       currentPlayer: this.match.currentPlayer,
+      actor: actor ?? this.match.currentPlayer,
       phase: this.match.phase,
       turn: this.match.turn,
       random: rng,

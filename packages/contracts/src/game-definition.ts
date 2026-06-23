@@ -8,6 +8,13 @@ import type { RandomAPI } from './random';
 export interface GameContext {
   readonly players: readonly PlayerId[];
   readonly currentPlayer: PlayerId;
+  /**
+   * Jogador que originou o move atual. Em moves normais, igual a
+   * `currentPlayer`. Para moves listados em `GameDefinition.offTurnMoves`
+   * (ex.: "callUno"/"contestUno"), pode ser QUALQUER jogador — use `actor`
+   * para identificar quem invocou.
+   */
+  readonly actor: PlayerId;
   readonly phase: string;
   /** Numero do turno atual (comeca em 1). */
   readonly turn: number;
@@ -80,6 +87,14 @@ export interface GameDefinition<TState = unknown, TMovePayload = unknown> {
 
   /** Moves globais (validos em qualquer fase, salvo override por fase). */
   moves: Record<string, Move<TState, TMovePayload>>;
+
+  /**
+   * Nomes de moves que podem ser executados POR QUALQUER jogador a qualquer
+   * momento, NAO so na vez. O engine pula a checagem de turno e NAO avanca o
+   * turno apos esses moves. Use `ctx.actor` (e nao `ctx.currentPlayer`) para
+   * identificar quem invocou. Ex.: chamar "UNO!" e contestar.
+   */
+  offTurnMoves?: readonly string[];
 
   /** Fases opcionais. Se omitido, o jogo roda numa unica fase implicita "main". */
   phases?: Record<string, PhaseConfig<TState>>;

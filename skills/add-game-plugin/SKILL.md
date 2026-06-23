@@ -89,6 +89,14 @@ export class MeuJogo implements GameDefinition<MeuEstado> {
 - **Validação**: retorne `INVALID_MOVE` (de `@boardzando/contracts`) para
   qualquer jogada ilegal (carta que não possui, fora das regras, etc.). O engine
   já valida "é a vez deste jogador" antes de chamar o move.
+- **Moves off-turn** (chamar UNO!, contestar, votar): liste o nome em
+  `offTurnMoves: readonly string[]` da `GameDefinition`. O engine pula a
+  checagem de turno e **não** avança o turno depois. Dentro desses reducers
+  use `ctx.actor` (quem invocou) — `ctx.currentPlayer` continua sendo o
+  jogador da vez "principal". UNO tem `callUno`/`contestUno` como exemplo.
+- **Fim de jogo**: declare via `endIf` retornando `{ winner }` / `{ draw: true }`
+  / `{ ranking }`. A casca recebe `game:over` e exibe `GameOverBanner`
+  automaticamente — **não** renderize tela de vitória no plugin.
 
 ### 3. Registre o módulo
 
@@ -108,6 +116,24 @@ Crie `apps/web/src/games/<id>/<Id>Board.tsx` lendo o `view` do store
 (`useGame`) — que já é o resultado do seu `playerView` — e emitindo `game:move`
 com `{ type, data }`. Renderize a `<Id>Board` quando `room.gameId === '<id>'`.
 A UI de **lobby/sala/chat é genérica** e já funciona para qualquer jogo.
+
+**Não reimplemente gating de turno no tabuleiro.** A casca envolve o jogo em
+`<TurnGate>` (`apps/web/src/shell/TurnGate.tsx`), que desabilita inputs com
+`<fieldset disabled>` quando não é a vez do jogador (usa `currentPlayer` do
+`game:state`). Renderize seus botões/inputs normalmente — eles ficam disabled
+de graça. O servidor também rejeita moves fora da vez (`NotYourTurnError`); o
+`TurnGate` é só UX.
+
+**Controles off-turn (UNO!, contestar, votar) ficam FORA do `<TurnGate>`** —
+crie um componente irmão (ex.: `UnoOffTurnControls.tsx`) e renderize-o ao lado
+do `<TurnGate>` no `App.tsx`. Emita o `game:move` com o `type` listado em
+`offTurnMoves` da `GameDefinition`. O servidor aceita off-turn; UX de timing
+(janela de 1s, etc.) é client-side com `setTimeout`.
+
+**Não renderize tela de vitória no plugin.** A casca tem `GameOverBanner` que
+mostra "Você venceu!" / "Vencedor: X" / "Empate!" lendo o `gameOver` do store.
+Se precisar de pontuação por jogo, devolva em `endIf` via
+`GameOverResult.meta`.
 
 ### 5. Testes (faça antes da UI)
 

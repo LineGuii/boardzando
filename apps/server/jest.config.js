@@ -4,6 +4,6 @@ module.exports = {
   rootDir: 'src',
   testRegex: '.*\\.spec\\.ts$',
   moduleNameMapper: {
-    '^@board-games/contracts$': '<rootDir>/../../../packages/contracts/src/index.ts',
+    '^@boardzando/contracts$': '<rootDir>/../../../packages/contracts/src/index.ts',
   },
 };

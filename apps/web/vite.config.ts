@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
+    allowedHosts: ['localhost', 'boardzando.rpgzando.com'],
     port: 5173,
     proxy: {
       // encaminha REST e WS para o NestJS em dev

@@ -1,4 +1,14 @@
-import { IsInt, IsNotEmpty, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import {
+  Allow,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 /**
  * DTOs validados em runtime (class-validator). TypeScript some em runtime,
@@ -15,8 +25,9 @@ export class CreateRoomDto {
   @IsString() @MinLength(2) @MaxLength(24)
   playerName!: string;
 
-  @IsString() @MinLength(4) @MaxLength(128)
-  roomPassword!: string;
+  /** Opcional. String vazia / ausente = sala publica (sem senha). */
+  @IsOptional() @IsString() @MaxLength(128)
+  roomPassword?: string;
 }
 
 // ---- HTTP: entrar na sala ----
@@ -27,8 +38,9 @@ export class JoinRoomDto {
   @IsString() @MinLength(2) @MaxLength(24)
   playerName!: string;
 
-  @IsString() @MinLength(4) @MaxLength(128)
-  roomPassword!: string;
+  /** Opcional. Se a sala foi criada sem senha, este campo e ignorado. */
+  @IsOptional() @IsString() @MaxLength(128)
+  roomPassword?: string;
 }
 
 // ---- WS: executar um move ----
@@ -40,6 +52,8 @@ export class GameMoveDto {
   type!: string;
 
   // `data` e validado pelo proprio jogo (cada move conhece seu payload).
+  // @Allow() libera o campo no ValidationPipe (que usa forbidNonWhitelisted).
+  @Allow()
   data!: unknown;
 }
 

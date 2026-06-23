@@ -66,10 +66,10 @@ describe('UnoGame', () => {
     expect(seeded2.snapshot.state.activeColor).toBe('green');
   });
 
-  it('"draw2" faz o proximo jogador comprar 2 e perder a vez', () => {
+  it('"draw2" abre um stack pendingDraw=2 e passa a vez para o proximo decidir', () => {
     const match = newMatch();
     const s = structuredClone(match.snapshot.state);
-    const color = (s.activeColor === 'wild' ? 'red' : s.activeColor) as UnoState['activeColor'];
+    const color = s.activeColor;
     const draw2 = { id: 'd2', color, kind: 'draw2' } as const;
     s.activeColor = color;
     s.hands['alice'] = [draw2, ...s.hands['alice']!.slice(0, 6)];
@@ -77,14 +77,115 @@ describe('UnoGame', () => {
     const seeded = GameInstance.restore(new UnoGame(), { ...match.snapshot, state: s });
 
     seeded.applyMove('alice', 'playCard', { cardId: 'd2' });
-    expect(seeded.snapshot.state.hands['bob']).toHaveLength(bobBefore + 2);
-    expect(seeded.snapshot.currentPlayer).toBe('carol'); // bob pulado
+    // bob NAO compra na hora — agora ele decide (empilhar outro draw2 ou comprar 2).
+    expect(seeded.snapshot.state.hands['bob']).toHaveLength(bobBefore);
+    expect(seeded.snapshot.state.pendingDraw).toBe(2);
+    expect(seeded.snapshot.currentPlayer).toBe('bob');
+  });
+
+  it('empilha draw2 sobre draw2; quem nao tem, compra o stack inteiro', () => {
+    const match = newMatch();
+    const s = structuredClone(match.snapshot.state);
+    const color = s.activeColor;
+    const aD2 = { id: 'a-d2', color, kind: 'draw2' } as const;
+    const bD2 = { id: 'b-d2', color: 'blue', kind: 'draw2' } as const; // cor diferente: jogavel por kind
+    s.hands['alice'] = [aD2, ...s.hands['alice']!.slice(0, 6)];
+    s.hands['bob'] = [bD2, ...s.hands['bob']!.slice(0, 6)];
+    const carolBefore = s.hands['carol']!.length;
+    const seeded = GameInstance.restore(new UnoGame(), { ...match.snapshot, state: s });
+
+    seeded.applyMove('alice', 'playCard', { cardId: 'a-d2' });
+    expect(seeded.snapshot.state.pendingDraw).toBe(2);
+    expect(seeded.snapshot.currentPlayer).toBe('bob');
+
+    seeded.applyMove('bob', 'playCard', { cardId: 'b-d2' });
+    expect(seeded.snapshot.state.pendingDraw).toBe(4);
+    expect(seeded.snapshot.currentPlayer).toBe('carol');
+
+    // carol nao tem draw2 -> compra 4 e perde a vez
+    seeded.applyMove('carol', 'drawCard', {});
+    expect(seeded.snapshot.state.hands['carol']).toHaveLength(carolBefore + 4);
+    expect(seeded.snapshot.state.pendingDraw).toBe(0);
+    expect(seeded.snapshot.currentPlayer).toBe('alice'); // volta para o proximo apos carol
+  });
+
+  it('com stack aberto, jogar carta nao-draw2 e invalido', () => {
+    const match = newMatch();
+    const s = structuredClone(match.snapshot.state);
+    const color = s.activeColor;
+    const aD2 = { id: 'a-d2', color, kind: 'draw2' } as const;
+    const bNum = { id: 'b-num', color, kind: 'number', value: 5 } as const;
+    s.hands['alice'] = [aD2, ...s.hands['alice']!.slice(0, 6)];
+    s.hands['bob'] = [bNum, ...s.hands['bob']!.slice(0, 6)];
+    const seeded = GameInstance.restore(new UnoGame(), { ...match.snapshot, state: s });
+
+    seeded.applyMove('alice', 'playCard', { cardId: 'a-d2' });
+    expect(() => seeded.applyMove('bob', 'playCard', { cardId: 'b-num' })).toThrow(
+      InvalidMoveError,
+    );
+  });
+
+  it('callUno marca o jogador como "ja cantou" e nao avanca o turno', () => {
+    const match = newMatch();
+    const s = structuredClone(match.snapshot.state);
+    const color = s.activeColor;
+    // alice fica com 1 carta apos jogar; precisa cantar UNO.
+    const last1 = { id: 'L1', color, kind: 'number', value: 3 } as const;
+    const last2 = { id: 'L2', color, kind: 'number', value: 3 } as const;
+    s.discard = [{ id: 'top3', color, kind: 'number', value: 3 }];
+    s.hands['alice'] = [last1, last2];
+    const seeded = GameInstance.restore(new UnoGame(), { ...match.snapshot, state: s });
+
+    seeded.applyMove('alice', 'playCard', { cardId: 'L1' });
+    expect(seeded.snapshot.state.hands['alice']).toHaveLength(1);
+    expect(seeded.snapshot.state.unoCalled['alice']).toBe(false);
+    expect(seeded.snapshot.currentPlayer).toBe('bob');
+
+    // off-turn: alice canta UNO mesmo sendo a vez do bob; turno NAO avanca.
+    seeded.applyMove('alice', 'callUno', {});
+    expect(seeded.snapshot.state.unoCalled['alice']).toBe(true);
+    expect(seeded.snapshot.currentPlayer).toBe('bob');
+  });
+
+  it('contestUno: bob penaliza alice (+2) se ela esquecer de cantar', () => {
+    const match = newMatch();
+    const s = structuredClone(match.snapshot.state);
+    const color = s.activeColor;
+    const last1 = { id: 'L1', color, kind: 'number', value: 3 } as const;
+    const last2 = { id: 'L2', color, kind: 'number', value: 3 } as const;
+    s.discard = [{ id: 'top3', color, kind: 'number', value: 3 }];
+    s.hands['alice'] = [last1, last2];
+    const seeded = GameInstance.restore(new UnoGame(), { ...match.snapshot, state: s });
+
+    seeded.applyMove('alice', 'playCard', { cardId: 'L1' });
+    // alice nao cantou; bob contesta off-turn (vez segue dele)
+    seeded.applyMove('bob', 'contestUno', { target: 'alice' });
+    expect(seeded.snapshot.state.hands['alice']).toHaveLength(3); // 1 + 2 de penalidade
+    expect(seeded.snapshot.state.unoCalled['alice']).toBe(true); // janela fechada
+    expect(seeded.snapshot.currentPlayer).toBe('bob'); // off-turn nao avanca
+  });
+
+  it('contestUno e invalido se o alvo ja cantou UNO', () => {
+    const match = newMatch();
+    const s = structuredClone(match.snapshot.state);
+    const color = s.activeColor;
+    const last1 = { id: 'L1', color, kind: 'number', value: 3 } as const;
+    const last2 = { id: 'L2', color, kind: 'number', value: 3 } as const;
+    s.discard = [{ id: 'top3', color, kind: 'number', value: 3 }];
+    s.hands['alice'] = [last1, last2];
+    const seeded = GameInstance.restore(new UnoGame(), { ...match.snapshot, state: s });
+
+    seeded.applyMove('alice', 'playCard', { cardId: 'L1' });
+    seeded.applyMove('alice', 'callUno', {});
+    expect(() => seeded.applyMove('bob', 'contestUno', { target: 'alice' })).toThrow(
+      InvalidMoveError,
+    );
   });
 
   it('zerar a mao encerra o jogo com vencedor', () => {
     const match = newMatch();
     const s = structuredClone(match.snapshot.state);
-    const color = (s.activeColor === 'wild' ? 'red' : s.activeColor) as UnoState['activeColor'];
+    const color = s.activeColor;
     const last = { id: 'last', color, kind: 'number', value: 7 } as const;
     s.activeColor = color;
     s.discard = [{ id: 'topN', color, kind: 'number', value: 7 }];

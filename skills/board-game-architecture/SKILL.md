@@ -45,10 +45,17 @@ cliente --(WS game:move, validado)--> GameGateway
    do Socket.IO que valida o JWT de sessão **antes** de aceitar a conexão e
    popula `socket.data.player` / `socket.data.roomId`. Não reintroduza
    verificação de token por evento — é cara e não desconecta de fato.
+   **Importante:** `server.use()` só cobre o namespace raiz; como o gateway usa
+   `namespace: 'games'`, o adapter também registra o middleware via
+   `server.on('new_namespace', ns => ns.use(...))`. Se você criar outro
+   namespace, o middleware já será aplicado nele — não duplique a lógica.
 2. **Validação de payload.** O `GameGateway` usa `ValidationPipe` com
    `whitelist`, `forbidNonWhitelisted`, `transform` e um `exceptionFactory` que
    lança `WsException` (senão erros viram "Internal server error" — armadilha
    conhecida). DTOs são **classes** em `packages/contracts/src/dtos.ts`.
+   **Pegadinha:** campos de payload opaco — como `data` em `GameMoveDto`, cujo
+   formato cada jogo conhece — precisam de `@Allow()`. Sem decorator algum,
+   `forbidNonWhitelisted` rejeita o campo com `whitelistValidation`.
 3. **Rate limiting.** `WsThrottlerGuard` (estende `ThrottlerGuard`) aplicado por
    handler com `@Throttle`. Lembre: **não** pode ser `APP_GUARD` global; precisa
    de um listener para o evento de exceção. Limites atuais: move 15/s, chat
@@ -58,7 +65,11 @@ cliente --(WS game:move, validado)--> GameGateway
 5. **Login por sala.** `AuthService` faz Argon2id (params OWASP 2024) na senha
    da sala e emite JWT curto. O `/rooms/join` tem `@Throttle` apertado
    (anti-brute-force). Não baixe os parâmetros do Argon nem alargue o throttle
-   do join sem motivo.
+   do join sem motivo. **Salas públicas** (sem senha) são suportadas: o
+   `auth.controller` armazena `passwordHash: ''` quando o criador deixa em
+   branco e PULA a verificação no join. Não permita brincadeira tipo "qualquer
+   string vazia é considerada senha válida" — o ramo "tem senha" continua
+   exigindo verificação Argon2id integral.
 
 Ao adicionar um novo evento WS: crie o DTO em `contracts`, adicione ao
 `ClientToServerEvents`/`ServerToClientEvents`, aplique `@Throttle` adequado e
@@ -87,6 +98,47 @@ side-effects entram só adicionando um `@EventsHandler`. Veja
 
 Para notificações leves dentro de um módulo, `EventEmitter2`
 (`@nestjs/event-emitter`) é suficiente e mais simples que CQRS.
+
+## UI da casca vs UI do plugin
+
+`apps/web/src/shell/` é a UI da casca — coisas que valem para qualquer jogo.
+Componentes atuais:
+
+- **`TurnGate`** — envolve o tabuleiro do jogo e desabilita inputs
+  (`<fieldset disabled>` + `pointer-events: none`) quando não é a vez do
+  jogador, lendo `currentPlayer` do `game:state`. Plugins **não** devem
+  reimplementar gating de turno.
+- **`GameOverBanner`** — ao receber `game:over` o store guarda o resultado;
+  o banner mostra "Você venceu!" / "Vencedor: X" / "Empate!". A regra de
+  vencer é do jogo (via `endIf` → `GameOverResult`); a UI de vitória é da
+  casca. Plugins **não** devem renderizar tela de vitória.
+- **`Lobby`** (em `App.tsx`) — abas "Criar"/"Entrar", com **deep-link** via
+  `?room=<id>` (pré-popula o id e abre a aba "Entrar"). Após entrar, a URL
+  é sincronizada via `history.replaceState` para que F5 e "Compartilhar"
+  preservem a sala. Não acople a logística desse deep-link a um jogo
+  específico — é responsabilidade da casca.
+- **`RoomHeader`** (em `App.tsx`) — mostra o ID e dois `CopyButton`s
+  (id da sala e link de convite, via `navigator.clipboard.writeText` com
+  fallback para `document.execCommand('copy')`). Reuse `CopyButton` se
+  precisar copiar outros valores.
+
+Para enriquecer (timer, "última jogada", ranking final), evolua o componente
+da casca, não duplique no plugin.
+
+## Moves "off-turn" (UNO!, contestar, etc.)
+
+Por padrão, o engine recusa moves fora da vez (`NotYourTurnError`). Para moves
+que qualquer jogador pode disparar a qualquer hora (chamar "UNO!", contestar,
+votar), declare em `GameDefinition.offTurnMoves: readonly string[]`. O engine:
+
+1. Pula a checagem de turno para esses moves.
+2. **Não** avança o turno depois (o jogador da vez segue com a palavra).
+3. Popula `ctx.actor` com quem invocou (≠ `ctx.currentPlayer`). Sempre use
+   `ctx.actor` no reducer de um off-turn move; `ctx.currentPlayer` continua
+   sendo o jogador da vez "principal".
+
+A validação de domínio (quem pode invocar, sob que condições) fica no próprio
+reducer — devolva `INVALID_MOVE` quando não couber.
 
 ## Quando (e quando não) adicionar Redis/BullMQ
 
@@ -119,6 +171,23 @@ Trate-o como **API pública**: mudança quebrada nos payloads = major bump
 (SemVer). Como TypeScript some em runtime, a validação real está nos DTOs
 (`class-validator`); mantenha DTO e tipo de evento em sincronia. Para um novo
 campo opcional, prefira aditivo (não-quebrante).
+
+## Setup local (dev)
+
+Antes de `pnpm dev`, garanta um `.env` na raiz (a partir de `.env.example`).
+**`JWT_SECRET` é obrigatório**: o `AuthModule` usa `config.getOrThrow('JWT_SECRET')`
+em `useFactory`, então sem ele o servidor não sobe. Se o frontend retornar
+`Internal Server Error` ao criar/entrar em sala, confira primeiro o terminal do
+NestJS — boot quebrado ou exceção em `argon2.hash` é a causa mais provável.
+
+Gere um segredo:
+`node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`
+
+**Pacotes internos compilam para `dist/`**: `@boardzando/contracts` é consumido
+pelo NestJS em runtime como JavaScript (`main: ./dist/index.js`), então precisa
+ter sido buildado antes do servidor rodar. O `turbo.json` faz `dev` depender de
+`^build`, e o `dev` do contracts é `tsc --watch`. Não aponte `main` para
+`./src/index.ts` — Node carrega `.ts` como JS e estoura `SyntaxError` no boot.
 
 ## Convenções gerais
 

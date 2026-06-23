@@ -144,7 +144,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private broadcastState(roomId: string): void {
     const room = this.rooms.get(roomId);
     if (!room?.instance) return;
-    const { turn, phase } = room.instance.snapshot;
+    const { turn, phase, currentPlayer } = room.instance.snapshot;
 
     for (const player of room.players.values()) {
       if (!player.connected || !player.socketId) continue;
@@ -153,6 +153,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         view: room.instance.viewFor(player.id),
         turn,
         phase,
+        currentPlayer,
       });
     }
   }

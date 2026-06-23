@@ -18,8 +18,10 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 }
 
 export const api = {
-  createRoom: (gameId: string, playerName: string, roomPassword: string) =>
+  /** `roomPassword` opcional: vazio/undefined cria sala publica. */
+  createRoom: (gameId: string, playerName: string, roomPassword?: string) =>
     post<SessionResponse>('/rooms', { gameId, playerName, roomPassword }),
-  joinRoom: (roomId: string, playerName: string, roomPassword: string) =>
+  /** `roomPassword` opcional: ignorado se a sala for publica. */
+  joinRoom: (roomId: string, playerName: string, roomPassword?: string) =>
     post<SessionResponse>('/rooms/join', { roomId, playerName, roomPassword }),
 };

@@ -28,7 +28,7 @@ export class AuthIoAdapter extends IoAdapter {
       cors: { origin: this.origin, credentials: true },
     });
 
-    server.use((socket: Socket, next: (err?: Error) => void) => {
+    const authMiddleware = (socket: Socket, next: (err?: Error) => void): void => {
       // prefira `auth` ao inves de query string (nao vaza em logs/URLs)
       const token = socket.handshake.auth?.token as string | undefined;
       if (!token) return next(new Error('UNAUTHORIZED'));
@@ -41,7 +41,13 @@ export class AuthIoAdapter extends IoAdapter {
         this.logger.warn(`Handshake recusado de ${socket.handshake.address}`);
         next(new Error('UNAUTHORIZED'));
       }
-    });
+    };
+
+    // server.use() so cobre o namespace raiz "/". O gateway usa namespace
+    // "/games", entao precisamos aplicar o middleware aos namespaces ja
+    // criados e aos que vierem a ser criados pelo NestJS.
+    server.use(authMiddleware);
+    server.on('new_namespace', (namespace) => namespace.use(authMiddleware));
 
     return server;
   }

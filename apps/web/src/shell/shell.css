@@ -1,0 +1,353 @@
+/* =========================================================
+ * Casca do Boardzando: lobby + cabecalho de sala.
+ * Visual de "hub de board games": fundo quente, paineis com
+ * cantos arredondados, gradiente colorido no titulo.
+ * ========================================================= */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #222;
+}
+
+.shell-bg {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 10%, #ffe9d1 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, #ffdada 0%, transparent 45%),
+    radial-gradient(circle at 50% 90%, #d6efe2 0%, transparent 50%),
+    linear-gradient(180deg, #fbf6ee 0%, #f3ead7 100%);
+  padding: 32px 16px 48px;
+}
+
+.shell-container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* ---- Hero / titulo ---- */
+
+.shell-hero {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.shell-hero h1 {
+  margin: 0;
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  background: linear-gradient(135deg, #d4332b 0%, #f59e0b 30%, #2d932d 65%, #205db2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.05;
+}
+
+.shell-hero .shell-tagline {
+  color: #6b5f4e;
+  font-size: 17px;
+  margin: 10px 0 0;
+}
+
+.shell-dice {
+  display: inline-flex;
+  gap: 10px;
+  font-size: 28px;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+}
+
+/* ---- Cartoes brancos ---- */
+
+.shell-card {
+  background: white;
+  padding: 24px 24px 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+}
+
+.shell-card h2 {
+  margin: 0 0 14px;
+  font-size: 18px;
+  color: #2b2b2b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shell-card h2 .shell-icon {
+  font-size: 22px;
+}
+
+/* ---- Tabs ---- */
+
+.shell-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f1ece1;
+  padding: 4px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+
+.shell-tab {
+  flex: 1;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  color: #6b5f4e;
+  font-size: 14px;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.shell-tab.active {
+  background: white;
+  color: #2b2b2b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* ---- Form ---- */
+
+.shell-field { margin-bottom: 12px; }
+
+.shell-label {
+  display: block;
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.shell-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e2dccf;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  background: white;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.shell-input:focus {
+  outline: none;
+  border-color: #2d932d;
+  box-shadow: 0 0 0 3px rgba(45, 147, 45, 0.18);
+}
+
+.shell-hint {
+  font-size: 12px;
+  color: #8a7d65;
+  margin-top: -2px;
+}
+
+/* ---- Botoes ---- */
+
+.shell-button {
+  width: 100%;
+  padding: 13px 16px;
+  background: linear-gradient(135deg, #d4332b 0%, #f59e0b 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(212, 51, 43, 0.35);
+  transition: transform 0.1s, box-shadow 0.15s;
+  font-family: inherit;
+  margin-top: 6px;
+}
+
+.shell-button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(212, 51, 43, 0.45); }
+.shell-button:active { transform: translateY(0); }
+.shell-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.shell-button.secondary {
+  background: linear-gradient(135deg, #205db2 0%, #2d932d 100%);
+  box-shadow: 0 6px 16px rgba(32, 93, 178, 0.35);
+}
+
+.shell-button.secondary:hover { box-shadow: 0 8px 20px rgba(32, 93, 178, 0.45); }
+
+.shell-button.start-game {
+  background: linear-gradient(135deg, #2d932d 0%, #f5cb1a 100%);
+  box-shadow: 0 6px 16px rgba(45, 147, 45, 0.35);
+  max-width: 280px;
+  margin: 12px auto 0;
+  display: block;
+}
+
+/* ---- Mensagens ---- */
+
+.shell-error {
+  background: #fff0ee;
+  color: #b41818;
+  border: 1px solid #ffcec9;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+/* ---- Cabecalho da sala ---- */
+
+.shell-room-card {
+  background: white;
+  padding: 18px 22px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+  margin-bottom: 14px;
+}
+
+.shell-room-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.shell-room-id-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shell-room-id-block .label {
+  font-size: 11px;
+  color: #8a7d65;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.shell-room-id {
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-size: 13px;
+  color: #2b2b2b;
+  background: #f6f1e6;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.shell-room-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.shell-copy-btn {
+  padding: 8px 14px;
+  background: white;
+  border: 1.5px solid #e2dccf;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #205db2;
+  font-weight: 700;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.shell-copy-btn:hover {
+  background: #f7f3eb;
+  border-color: #205db2;
+}
+
+.shell-copy-btn.copied {
+  background: #e7f7ec;
+  border-color: #2d932d;
+  color: #2d932d;
+}
+
+/* ---- Lista de jogadores ---- */
+
+.shell-players {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.shell-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  background: #f6f1e6;
+  border-radius: 999px;
+  font-size: 14px;
+  color: #2b2b2b;
+}
+
+.shell-player.offline { opacity: 0.5; }
+
+.shell-player-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d4332b, #f59e0b);
+  color: white;
+  font-weight: 800;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.shell-player .host-badge {
+  background: #f5cb1a;
+  color: #111;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.shell-player .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2d932d;
+}
+
+.shell-player.offline .dot { background: #999; }
+
+/* ---- Turn pill (substitui textinho do TurnGate) ---- */
+
+.shell-turn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.shell-turn-pill.mine {
+  background: #e7f7ec;
+  color: #2d932d;
+}
+
+.shell-turn-pill.theirs {
+  background: #f1ece1;
+  color: #6b5f4e;
+}
