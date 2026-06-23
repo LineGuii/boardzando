@@ -16,7 +16,7 @@ export class WsThrottlerGuard extends ThrottlerGuard {
 
   protected override async handleRequest(requestProps: any): Promise<boolean> {
     const { context, limit, ttl, throttler, blockDuration, generateKey } = requestProps;
-    const client = context.switchToWs().getClient<Socket>();
+    const client = context.switchToWs().getClient() as Socket;
     const tracker = await this.getTracker(client);
     const key = generateKey(context, tracker, throttler.name);
 

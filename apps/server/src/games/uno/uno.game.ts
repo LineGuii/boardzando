@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import type { GameContext, GameDefinition, PlayerId } from '@boardzando/contracts';
+import { INVALID_MOVE } from '@boardzando/contracts';
 import { GamePlugin } from '../../core/registry/game-plugin.decorator';
 import { buildDeck, drawCards } from './uno.deck';
 import { drawCard, playCard, unoNextPlayer } from './uno.moves';
+import type { DrawPayload, PlayCardPayload } from './uno.moves';
 import type { UnoColor, UnoState } from './uno.state';
 
 /**
@@ -15,7 +17,7 @@ import type { UnoColor, UnoState } from './uno.state';
  */
 @Injectable()
 @GamePlugin()
-export class UnoGame implements GameDefinition<UnoState> {
+export class UnoGame implements GameDefinition<UnoState, PlayCardPayload | DrawPayload> {
   readonly id = 'uno';
   readonly name = 'UNO';
   readonly minPlayers = 2;
@@ -49,10 +51,10 @@ export class UnoGame implements GameDefinition<UnoState> {
     return state;
   }
 
-  moves = {
+  readonly moves = {
     playCard,
     drawCard,
-  };
+  } as Record<string, (state: UnoState, ctx: GameContext, payload: PlayCardPayload | DrawPayload) => UnoState | typeof INVALID_MOVE>;
 
   turn = {
     nextPlayer: unoNextPlayer,
