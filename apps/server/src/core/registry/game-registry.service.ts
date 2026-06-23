@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { DiscoveryService } from '@nestjs/core';
-import type { GameDefinition, GameId } from '@board-games/contracts';
+import type { GameDefinition, GameId } from '@boardzando/contracts';
 import { GamePlugin } from './game-plugin.decorator';
 
 /**

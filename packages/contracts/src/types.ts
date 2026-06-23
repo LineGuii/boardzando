@@ -24,5 +24,5 @@ export interface GameOverResult {
 }
 
 /** Constante retornada por um move quando a jogada e invalida. */
-export const INVALID_MOVE = Symbol.for('board-games/INVALID_MOVE');
+export const INVALID_MOVE = Symbol.for('boardzando/INVALID_MOVE');
 export type InvalidMove = typeof INVALID_MOVE;

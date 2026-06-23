@@ -86,7 +86,7 @@ export class MeuJogo implements GameDefinition<MeuEstado> {
   move. Toda aleatoriedade vem de `ctx.random` (RNG seeded e server-side).
 - **Imutabilidade**: não mute `state`; produza um novo objeto
   (`structuredClone` + alterações, ou immer). O engine assume imutabilidade.
-- **Validação**: retorne `INVALID_MOVE` (de `@board-games/contracts`) para
+- **Validação**: retorne `INVALID_MOVE` (de `@boardzando/contracts`) para
   qualquer jogada ilegal (carta que não possui, fora das regras, etc.). O engine
   já valida "é a vez deste jogador" antes de chamar o move.
 

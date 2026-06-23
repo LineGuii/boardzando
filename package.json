@@ -1,5 +1,5 @@
 {
-  "name": "board-games",
+  "name": "boardzando",
   "version": "0.1.0",
   "private": true,
   "description": "Plataforma plugável de board games multiplayer (NestJS + WebSocket + React)",

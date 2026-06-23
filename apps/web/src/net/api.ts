@@ -1,4 +1,4 @@
-import type { RoomSnapshot } from '@board-games/contracts';
+import type { RoomSnapshot } from '@boardzando/contracts';
 
 export interface SessionResponse {
   roomId: string;

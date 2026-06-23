@@ -1,4 +1,4 @@
-import type { PlayerId } from '@board-games/contracts';
+import type { PlayerId } from '@boardzando/contracts';
 
 export type UnoColor = 'red' | 'yellow' | 'green' | 'blue';
 export type CardKind = 'number' | 'skip' | 'reverse' | 'draw2' | 'wild' | 'wild_draw4';

@@ -1,4 +1,4 @@
-import type { PlayerId, RoomId } from '@board-games/contracts';
+import type { PlayerId, RoomId } from '@boardzando/contracts';
 
 /** Claims do JWT de sessao de sala. Vida curta; reautentica reconexoes. */
 export interface RoomSessionPayload {

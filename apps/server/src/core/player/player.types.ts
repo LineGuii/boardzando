@@ -1,4 +1,4 @@
-import type { PlayerId } from '@board-games/contracts';
+import type { PlayerId } from '@boardzando/contracts';
 
 export interface Player {
   id: PlayerId;

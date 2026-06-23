@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { CreateRoomDto, JoinRoomDto } from '@board-games/contracts';
+import { CreateRoomDto, JoinRoomDto } from '@boardzando/contracts';
 import { RoomService } from '../core/room/room.service';
 import { GameRegistryService } from '../core/registry/game-registry.service';
 import { AuthService } from './auth.service';

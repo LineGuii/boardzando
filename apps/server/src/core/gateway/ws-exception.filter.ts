@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch } from '@nestjs/common';
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
 import type { Socket } from 'socket.io';
-import type { WsError } from '@board-games/contracts';
+import type { WsError } from '@boardzando/contracts';
 
 /**
  * Sem este filtro, erros de validacao viram "Internal server error" no cliente

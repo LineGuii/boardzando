@@ -1,5 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
-import type { ClientToServerEvents, ServerToClientEvents } from '@board-games/contracts';
+import type { ClientToServerEvents, ServerToClientEvents } from '@boardzando/contracts';
 
 export type GameClientSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 

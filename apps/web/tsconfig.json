@@ -1,5 +1,5 @@
 {
-  "extends": "@board-games/typescript-config/react.json",
+  "extends": "@boardzando/typescript-config/react.json",
   "compilerOptions": {
     "baseUrl": ".",
     "types": ["vite/client"]

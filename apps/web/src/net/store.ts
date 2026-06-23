@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ChatMessage, RoomSnapshot, WsError } from '@board-games/contracts';
+import type { ChatMessage, RoomSnapshot, WsError } from '@boardzando/contracts';
 import type { GameClientSocket } from './socket';
 
 interface GameStore {

@@ -127,7 +127,7 @@ campo opcional, prefira aditivo (não-quebrante).
 - **Imutabilidade**: moves retornam novo estado; o engine assume snapshots.
 - **Núcleo agnóstico**: nada em `core/` importa de `games/`.
 - **Tipos compartilhados**: cliente e servidor importam de
-  `@board-games/contracts` — nunca duplique tipos de evento/estado.
+  `@boardzando/contracts` — nunca duplique tipos de evento/estado.
 - **Testes**: regras testadas como funções puras (`GameInstance` +
   `applyMove`); gateways testados com `socket.io-client` em e2e.
 

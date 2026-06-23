@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { randomInt } from 'node:crypto';
-import type { GameId, PlayerId, RoomId } from '@board-games/contracts';
+import type { GameId, PlayerId, RoomId } from '@boardzando/contracts';
 import { GameRegistryService } from '../registry/game-registry.service';
 import { GameInstance } from '../engine/game-instance';
 import type { Player } from '../player/player.types';

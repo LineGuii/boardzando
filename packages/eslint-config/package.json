@@ -1,5 +1,5 @@
 {
-  "name": "@board-games/eslint-config",
+  "name": "@boardzando/eslint-config",
   "version": "0.1.0",
   "private": true,
   "main": "index.js",

@@ -1,4 +1,4 @@
-import type { PlayerId } from '@board-games/contracts';
+import type { PlayerId } from '@boardzando/contracts';
 import { GameInstance, InvalidMoveError } from '../../core/engine/game-instance';
 import { UnoGame } from './uno.game';
 import type { UnoState } from './uno.state';

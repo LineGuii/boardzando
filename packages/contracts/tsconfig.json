@@ -1,5 +1,5 @@
 {
-  "extends": "@board-games/typescript-config/base.json",
+  "extends": "@boardzando/typescript-config/base.json",
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "Node",

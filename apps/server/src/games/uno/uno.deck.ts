@@ -1,4 +1,4 @@
-import type { RandomAPI } from '@board-games/contracts';
+import type { RandomAPI } from '@boardzando/contracts';
 import { UNO_COLORS, type UnoCard, type UnoColor, type UnoState } from './uno.state';
 
 /** Monta um baralho UNO padrao (108 cartas). Ids estaveis para referencia. */

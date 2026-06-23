@@ -1,4 +1,4 @@
-import type { RandomAPI } from '@board-games/contracts';
+import type { RandomAPI } from '@boardzando/contracts';
 
 /**
  * RNG deterministico (mulberry32). Vive no servidor. O `state` e serializavel,

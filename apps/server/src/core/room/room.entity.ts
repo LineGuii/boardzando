@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { GameId, PlayerId, RoomId, RoomSnapshot } from '@board-games/contracts';
+import type { GameId, PlayerId, RoomId, RoomSnapshot } from '@boardzando/contracts';
 import type { Player } from '../player/player.types';
 import type { GameInstance } from '../engine/game-instance';
 

@@ -1,4 +1,4 @@
-# Board Games — plataforma plugável de jogos multiplayer
+# Boardzando — plataforma plugável de jogos multiplayer
 
 Casca (framework) para hospedar **vários jogos de tabuleiro/cartas** sobre um
 mesmo núcleo: salas, jogadores, turnos, chat, reconexão e WebSocket seguro.

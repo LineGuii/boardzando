@@ -16,7 +16,7 @@ import {
   GameMoveDto,
   type ClientToServerEvents,
   type ServerToClientEvents,
-} from '@board-games/contracts';
+} from '@boardzando/contracts';
 import { RoomService } from '../room/room.service';
 import { InvalidMoveError, NotYourTurnError } from '../engine/game-instance';
 import { WsAllExceptionsFilter } from './ws-exception.filter';

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { GameContext, GameDefinition, PlayerId } from '@board-games/contracts';
+import type { GameContext, GameDefinition, PlayerId } from '@boardzando/contracts';
 import { GamePlugin } from '../../core/registry/game-plugin.decorator';
 import { buildDeck, drawCards } from './uno.deck';
 import { drawCard, playCard, unoNextPlayer } from './uno.moves';

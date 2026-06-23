@@ -1,5 +1,5 @@
 {
-  "extends": "@board-games/typescript-config/nest.json",
+  "extends": "@boardzando/typescript-config/nest.json",
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "dist",

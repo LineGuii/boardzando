@@ -1,5 +1,5 @@
-import type { GameContext, GameDefinition, GameOverResult, PlayerId } from '@board-games/contracts';
-import { INVALID_MOVE } from '@board-games/contracts';
+import type { GameContext, GameDefinition, GameOverResult, PlayerId } from '@boardzando/contracts';
+import { INVALID_MOVE } from '@boardzando/contracts';
 import { SeededRandom } from './seeded-random';
 
 /** Tudo que descreve uma partida em andamento (serializavel, exceto o RNG vivo). */

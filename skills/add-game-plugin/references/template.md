@@ -6,7 +6,7 @@ Copie estes quatro arquivos para `apps/server/src/games/<id>/`, troque `<id>` /
 ## `<id>.state.ts`
 
 ```ts
-import type { PlayerId } from '@board-games/contracts';
+import type { PlayerId } from '@boardzando/contracts';
 
 // Descreva TUDO que define uma partida. Mantenha serializável (sem métodos).
 export interface MeuEstado {
@@ -20,8 +20,8 @@ export interface MeuEstado {
 ## `<id>.moves.ts`
 
 ```ts
-import type { Move } from '@board-games/contracts';
-import { INVALID_MOVE } from '@board-games/contracts';
+import type { Move } from '@boardzando/contracts';
+import { INVALID_MOVE } from '@boardzando/contracts';
 import type { MeuEstado } from './<id>.state';
 
 export interface JogarPayload {
@@ -42,7 +42,7 @@ export const jogar: Move<MeuEstado, JogarPayload> = (state, ctx, payload) => {
 
 ```ts
 import { Injectable } from '@nestjs/common';
-import type { GameContext, GameDefinition, PlayerId } from '@board-games/contracts';
+import type { GameContext, GameDefinition, PlayerId } from '@boardzando/contracts';
 import { GamePlugin } from '../../core/registry/game-plugin.decorator';
 import { jogar } from './<id>.moves';
 import type { MeuEstado } from './<id>.state';

@@ -1,5 +1,5 @@
 {
-  "name": "@board-games/contracts",
+  "name": "@boardzando/contracts",
   "version": "0.1.0",
   "private": true,
   "type": "commonjs",
@@ -18,7 +18,7 @@
     "class-transformer": "^0.5.1"
   },
   "devDependencies": {
-    "@board-games/typescript-config": "workspace:*",
+    "@boardzando/typescript-config": "workspace:*",
     "typescript": "^5.6.2"
   }
 }

@@ -4,15 +4,15 @@
 #
 # Passos:
 #   1. cloudflared tunnel login
-#   2. cloudflared tunnel create board-games   (gera o <UUID>.json em ~/.cloudflared)
-#   3. cloudflared tunnel route dns board-games jogos.seudominio.com
+#   2. cloudflared tunnel create boardzando   (gera o <UUID>.json em ~/.cloudflared)
+#   3. cloudflared tunnel route dns boardzando jogos.seudominio.com
 #   4. cloudflared tunnel --config deploy/cloudflared/config.yml run
 #
 # WebSocket/WSS funciona sem config extra: o TLS termina na borda da Cloudflare.
 # IMPORTANTE: a Cloudflare encerra WS ociosos e pode reiniciar servidores ao
 # liberar codigo novo -> o heartbeat do socket.io e a reconexao sao obrigatorios.
 
-tunnel: board-games
+tunnel: boardzando
 credentials-file: /root/.cloudflared/SEU-UUID-AQUI.json
 
 ingress:

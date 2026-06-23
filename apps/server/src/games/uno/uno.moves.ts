@@ -1,5 +1,5 @@
-import type { GameContext, Move, PlayerId } from '@board-games/contracts';
-import { INVALID_MOVE } from '@board-games/contracts';
+import type { GameContext, Move, PlayerId } from '@boardzando/contracts';
+import { INVALID_MOVE } from '@boardzando/contracts';
 import { drawCards, isPlayable } from './uno.deck';
 import type { UnoCard, UnoColor, UnoState } from './uno.state';
 
