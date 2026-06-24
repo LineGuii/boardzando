@@ -3,6 +3,15 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  // @boardzando/contracts e CJS (workspace package). Sem pre-bundling, o Vite
+  // tenta inferir named exports estaticamente do dist/index.js e nao acha as
+  // reexports feitas via TS `__exportStar` em runtime — quebra com erros do
+  // tipo "does not provide an export named 'X'" quando um novo arquivo e
+  // adicionado e o cache esta stale. Forcando o esbuild a empacotar o dep,
+  // a interop CJS/ESM funciona corretamente.
+  optimizeDeps: {
+    include: ['@boardzando/contracts'],
+  },
   server: {
     allowedHosts: ['localhost', 'boardzando.rpgzando.com'],
     port: 5173,
