@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
+import type { GameSummary, RoomSummary } from '@boardzando/contracts';
 import { api } from './net/api';
 import { connectSocket } from './net/socket';
 import { useGame } from './net/store';
 import { UnoBoard } from './games/uno/UnoBoard';
-import { UnoOffTurnControls } from './games/uno/UnoOffTurnControls';
+import { HuesBoard } from './games/hues/HuesBoard';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
+import { GameOptionsPanel } from './shell/GameOptionsPanel';
 import './shell/shell.css';
 
 /**
@@ -33,6 +35,11 @@ function Lobby(): JSX.Element {
   const [busy, setBusy] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const [games, setGames] = useState<GameSummary[]>([]);
+  const [selectedGameId, setSelectedGameId] = useState<string>('');
+  const [rooms, setRooms] = useState<RoomSummary[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState(false);
+
   // Pre-seleciona "Entrar" se a URL tem ?room=<id>
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -43,13 +50,40 @@ function Lobby(): JSX.Element {
     }
   }, []);
 
+  // Carrega a lista de jogos uma vez.
+  useEffect(() => {
+    api
+      .listGames()
+      .then((gs) => {
+        setGames(gs);
+        if (gs.length > 0 && !selectedGameId) setSelectedGameId(gs[0]!.id);
+      })
+      .catch(() => {
+        /* silencioso: o usuario ve quando tentar criar */
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Carrega a lista de salas ao abrir a aba "Entrar".
+  function refreshRooms(): void {
+    setLoadingRooms(true);
+    api
+      .listRooms()
+      .then(setRooms)
+      .catch(() => setRooms([]))
+      .finally(() => setLoadingRooms(false));
+  }
+  useEffect(() => {
+    if (tab === 'join') refreshRooms();
+  }, [tab]);
+
   async function enter(action: 'create' | 'join'): Promise<void> {
     setBusy(true);
     setErrorMsg(null);
     try {
       const res =
         action === 'create'
-          ? await api.createRoom('uno', name.trim(), password || undefined)
+          ? await api.createRoom(selectedGameId || 'uno', name.trim(), password || undefined)
           : await api.joinRoom(roomId.trim(), name.trim(), password || undefined);
       const socket = connectSocket(res.token);
       setSocket(socket, { roomId: res.roomId, playerId: res.playerId });
@@ -59,6 +93,9 @@ function Lobby(): JSX.Element {
       setBusy(false);
     }
   }
+
+  const gameNameById = (id: string): string =>
+    games.find((g) => g.id === id)?.name ?? id;
 
   return (
     <div className="shell-bg">
@@ -96,8 +133,25 @@ function Lobby(): JSX.Element {
           {tab === 'create' ? (
             <>
               <h2>
-                <span className="shell-icon">🎴</span> Nova sala de UNO
+                <span className="shell-icon">🎴</span> Nova sala
               </h2>
+              <div className="shell-field">
+                <label className="shell-label" htmlFor="game-create">Jogo</label>
+                <select
+                  id="game-create"
+                  className="shell-input"
+                  value={selectedGameId}
+                  onChange={(e) => setSelectedGameId(e.target.value)}
+                  disabled={games.length === 0}
+                >
+                  {games.length === 0 && <option value="">Carregando...</option>}
+                  {games.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name} ({g.minPlayers}-{g.maxPlayers} jogadores)
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="shell-field">
                 <label className="shell-label" htmlFor="name-create">Seu nome</label>
                 <input
@@ -129,10 +183,12 @@ function Lobby(): JSX.Element {
               </div>
               <button
                 className="shell-button"
-                disabled={busy || name.trim().length < 2}
+                disabled={busy || name.trim().length < 2 || !selectedGameId}
                 onClick={() => enter('create')}
               >
-                {busy ? 'Criando...' : 'Criar sala de UNO'}
+                {busy
+                  ? 'Criando...'
+                  : `Criar sala de ${gameNameById(selectedGameId) || '...'}`}
               </button>
             </>
           ) : (
@@ -140,6 +196,50 @@ function Lobby(): JSX.Element {
               <h2>
                 <span className="shell-icon">🚪</span> Entrar em uma sala
               </h2>
+              <div className="shell-field">
+                <div className="shell-rooms-header">
+                  <label className="shell-label">Salas abertas</label>
+                  <button
+                    type="button"
+                    className="shell-link-btn"
+                    onClick={refreshRooms}
+                    disabled={loadingRooms}
+                  >
+                    {loadingRooms ? 'Atualizando...' : '↻ Atualizar'}
+                  </button>
+                </div>
+                {rooms.length === 0 ? (
+                  <p className="shell-hint">
+                    {loadingRooms
+                      ? 'Buscando salas...'
+                      : 'Nenhuma sala pública aberta. Crie uma ou cole um código abaixo.'}
+                  </p>
+                ) : (
+                  <ul className="shell-room-list">
+                    {rooms.map((r) => (
+                      <li
+                        key={r.roomId}
+                        className={`shell-room-row ${
+                          roomId === r.roomId ? 'selected' : ''
+                        }`}
+                        onClick={() => setRoomId(r.roomId)}
+                      >
+                        <div className="shell-room-row-main">
+                          <span className="shell-room-row-game">
+                            {gameNameById(r.gameId)}
+                          </span>
+                          <span className="shell-room-row-host">
+                            host: <b>{r.hostName}</b>
+                          </span>
+                        </div>
+                        <span className="shell-room-row-meta">
+                          {r.playerCount}/{r.maxPlayers}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <div className="shell-field">
                 <label className="shell-label" htmlFor="name-join">Seu nome</label>
                 <input
@@ -204,6 +304,7 @@ function RoomPage(): JSX.Element {
   const session = useGame((s) => s.session)!;
   const room = useGame((s) => s.room);
   const lastError = useGame((s) => s.lastError);
+  const [gameOptions, setGameOptions] = useState<unknown>(undefined);
 
   // Sincroniza a URL com o roomId atual para que F5 / Compartilhar preservem a sala.
   useEffect(() => {
@@ -224,13 +325,21 @@ function RoomPage(): JSX.Element {
       <div className="shell-container">
         <RoomHeader roomId={session.roomId} inviteLink={inviteLink} />
 
+        {room?.status === 'lobby' && isHost && room?.gameId && (
+          <GameOptionsPanel
+            gameId={room.gameId}
+            value={gameOptions}
+            onChange={setGameOptions}
+          />
+        )}
+
         {room?.status === 'lobby' && isHost && (
           <button
             className="shell-button start-game"
             onClick={() =>
               useGame.getState().socket?.emit(
                 'room:start',
-                { roomId: session.roomId },
+                { roomId: session.roomId, gameOptions },
                 () => {},
               )
             }
@@ -247,13 +356,12 @@ function RoomPage(): JSX.Element {
           </p>
         )}
 
-        {room?.status === 'playing' && (
-          <>
-            <UnoOffTurnControls />
-            <TurnGate>
-              <UnoBoard />
-            </TurnGate>
-          </>
+        {room?.status === 'playing' && room?.gameId === 'hues' && <HuesBoard />}
+
+        {room?.status === 'playing' && room?.gameId === 'uno' && (
+          <TurnGate>
+            <UnoBoard />
+          </TurnGate>
         )}
 
         <GameOverBanner />
@@ -300,17 +408,39 @@ function RoomHeader({
 
       {room?.players && room.players.length > 0 && (
         <ul className="shell-players">
-          {room.players.map((p) => (
-            <li key={p.id} className={`shell-player ${p.connected ? '' : 'offline'}`}>
-              <span className="shell-player-avatar">{p.name[0] ?? '?'}</span>
-              <span>
-                {p.name}
-                {p.id === session?.playerId ? ' (você)' : ''}
-              </span>
-              {p.isHost && <span className="host-badge">HOST</span>}
-              <span className="dot" />
-            </li>
-          ))}
+          {room.players.map((p) => {
+            const isMe = p.id === session?.playerId;
+            const iAmHost = room.hostId === session?.playerId;
+            const canKick = iAmHost && !isMe && room.status === 'lobby';
+            return (
+              <li key={p.id} className={`shell-player ${p.connected ? '' : 'offline'}`}>
+                <span className="shell-player-avatar">{p.name[0] ?? '?'}</span>
+                <span>
+                  {p.name}
+                  {isMe ? ' (você)' : ''}
+                </span>
+                {p.isHost && <span className="host-badge">HOST</span>}
+                <span className="dot" />
+                {canKick && (
+                  <button
+                    type="button"
+                    className="shell-kick-btn"
+                    title={`Remover ${p.name} da sala`}
+                    onClick={() => {
+                      if (!window.confirm(`Remover ${p.name} da sala?`)) return;
+                      useGame.getState().socket?.emit(
+                        'room:kick',
+                        { roomId: room.roomId, playerId: p.id },
+                        () => {},
+                      );
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

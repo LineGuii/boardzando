@@ -1,0 +1,349 @@
+/* =========================================================
+ * Hues & Cues — board 30x16, paineis de cue/guess, scoreboard.
+ * Paleta neutra (cinza/branco) para nao competir com as cores
+ * do tabuleiro.
+ * ========================================================= */
+
+.hues-room {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .hues-room {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hues-main {
+  background: #fafafa;
+  border: 1px solid #e2dccf;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.hues-step-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f1ece1;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #6b5f4e;
+}
+
+.hues-step-banner b {
+  color: #2b2b2b;
+}
+
+/* ---------- Grid 30x16 ---------- */
+
+.hues-grid {
+  display: grid;
+  grid-template-columns: repeat(30, 1fr);
+  gap: 1px;
+  background: #ccc;
+  border: 2px solid #2b2b2b;
+  border-radius: 4px;
+  overflow: hidden;
+  aspect-ratio: 30 / 16;
+  width: 100%;
+  user-select: none;
+  position: relative;
+}
+
+.hues-cell {
+  position: relative;
+  cursor: default;
+}
+
+.hues-cell.clickable {
+  cursor: crosshair;
+}
+
+.hues-cell.clickable:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.25);
+  outline: 2px solid white;
+}
+
+.hues-cell.target-frame {
+  outline: 3px solid #fff;
+  outline-offset: -3px;
+  box-shadow: inset 0 0 0 1px #000;
+}
+
+.hues-cell.target-exact {
+  outline: 4px solid gold;
+  outline-offset: -4px;
+}
+
+/* anel externo ortogonal (5x5 sem cantos) */
+.hues-cell.target-ring {
+  outline: 2px dashed rgba(255, 255, 255, 0.85);
+  outline-offset: -2px;
+}
+
+/* ---------- Cones ---------- */
+
+.hues-cone {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-size: 10px;
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  z-index: 2;
+}
+
+.hues-cone-dot {
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Carta do cue-giver (4 swatches) ---------- */
+
+.hues-card-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.hues-card-swatch {
+  flex: 1 1 100px;
+  min-width: 80px;
+  height: 64px;
+  border-radius: 8px;
+  border: 3px solid white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.12s, box-shadow 0.15s;
+}
+
+.hues-card-swatch:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+.hues-card-swatch .coord {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 10px;
+  font-family: 'Consolas', monospace;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Cue input ---------- */
+
+.hues-cue-input {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.hues-cue-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #e2dccf;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.hues-cue-input input:focus {
+  outline: none;
+  border-color: #205db2;
+  box-shadow: 0 0 0 3px rgba(32, 93, 178, 0.18);
+}
+
+.hues-cue-input button {
+  padding: 8px 18px;
+  background: #205db2;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.hues-cue-input button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hues-cue-hint {
+  font-size: 12px;
+  color: #8a7d65;
+  margin: 6px 0 0;
+}
+
+.hues-cue-hint.error {
+  color: #b41818;
+}
+
+/* ---------- Painel do palpitador ---------- */
+
+.hues-guess-panel {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: #fff7ed;
+  border: 1px dashed #f59e0b;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.hues-guess-panel b {
+  color: #2b2b2b;
+}
+
+.hues-guess-panel.locked {
+  background: #e7f7ec;
+  border-color: #2d932d;
+  color: #2d932d;
+}
+
+/* ---------- Scoreboard ---------- */
+
+.hues-scoreboard {
+  background: white;
+  border: 1px solid #e2dccf;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.hues-scoreboard h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #6b5f4e;
+}
+
+.hues-score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f1ece1;
+  font-size: 14px;
+}
+
+.hues-score-row:last-child {
+  border-bottom: 0;
+}
+
+.hues-score-row.cue-giver {
+  background: #fffbea;
+  margin: 0 -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-radius: 6px;
+}
+
+.hues-score-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hues-score-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.hues-score-points {
+  font-weight: 800;
+  color: #2b2b2b;
+}
+
+.hues-score-delta {
+  font-size: 11px;
+  color: #2d932d;
+  margin-left: 4px;
+}
+
+/* ---------- Painel de opcoes (sala) ---------- */
+
+.shell-options-panel {
+  background: white;
+  border: 1px solid #e2dccf;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.shell-options-panel h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #6b5f4e;
+}
+
+.shell-options-field {
+  margin-bottom: 8px;
+}
+
+.shell-options-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.shell-options-btn {
+  padding: 6px 12px;
+  border: 1.5px solid #e2dccf;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b5f4e;
+  transition: all 0.12s;
+}
+
+.shell-options-btn:hover {
+  border-color: #205db2;
+}
+
+.shell-options-btn.active {
+  background: #205db2;
+  border-color: #205db2;
+  color: white;
+}
+
+.shell-options-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2b2b2b;
+}
+
+.shell-options-toggle input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}

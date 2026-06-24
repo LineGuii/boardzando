@@ -14,6 +14,8 @@ import type { Server, Socket } from 'socket.io';
 import {
   ChatSendDto,
   GameMoveDto,
+  KickPlayerDto,
+  StartGameDto,
   type ClientToServerEvents,
   type ServerToClientEvents,
 } from '@boardzando/contracts';
@@ -79,10 +81,40 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.broadcastRoom(roomId);
   }
 
-  @SubscribeMessage('room:start')
-  onStart(@ConnectedSocket() client: GameSocket): { ok: true } {
+  @SubscribeMessage('room:kick')
+  onKick(@ConnectedSocket() client: GameSocket, @MessageBody() dto: KickPlayerDto): { ok: true } {
     const { roomId, player } = client.data;
-    this.rooms.startGame(roomId, player.id);
+    if (dto.roomId !== roomId) {
+      throw new WsException({ code: 'VALIDATION', message: 'roomId divergente da sessao.' });
+    }
+    let socketId: string | undefined;
+    try {
+      ({ socketId } = this.rooms.kickPlayer(roomId, player.id, dto.playerId));
+    } catch (e) {
+      const msg = (e as Error).message;
+      throw new WsException({ code: 'VALIDATION', message: msg });
+    }
+    // notifica o expulso e fecha o socket dele
+    if (socketId) {
+      this.server
+        .to(socketId)
+        .emit('error', { code: 'KICKED', message: 'Voce foi removido da sala pelo host.' });
+      this.server.in(socketId).disconnectSockets(true);
+    }
+    this.broadcastRoom(roomId);
+    return { ok: true };
+  }
+
+  @SubscribeMessage('room:start')
+  onStart(
+    @ConnectedSocket() client: GameSocket,
+    @MessageBody() dto: StartGameDto,
+  ): { ok: true } {
+    const { roomId, player } = client.data;
+    if (dto.roomId !== roomId) {
+      throw new WsException({ code: 'VALIDATION', message: 'roomId divergente da sessao.' });
+    }
+    this.rooms.startGame(roomId, player.id, dto.gameOptions);
     this.broadcastRoom(roomId);
     this.broadcastState(roomId);
     return { ok: true };

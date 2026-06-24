@@ -3,12 +3,18 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   NotFoundException,
   Post,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { CreateRoomDto, JoinRoomDto } from '@boardzando/contracts';
+import {
+  CreateRoomDto,
+  JoinRoomDto,
+  type GameSummary,
+  type RoomSummary,
+} from '@boardzando/contracts';
 import { RoomService } from '../core/room/room.service';
 import { GameRegistryService } from '../core/registry/game-registry.service';
 import { AuthService } from './auth.service';
@@ -18,7 +24,7 @@ import { AuthService } from './auth.service';
  * JWT), depois conectar o WebSocket usando esse JWT. O throttle por IP no /join
  * e a defesa principal contra brute-force da senha de sala.
  */
-@Controller('rooms')
+@Controller()
 export class AuthController {
   constructor(
     private readonly rooms: RoomService,
@@ -26,7 +32,19 @@ export class AuthController {
     private readonly auth: AuthService,
   ) {}
 
-  @Post()
+  /** Lista jogos plugados disponiveis para escolha no lobby de criacao. */
+  @Get('games')
+  listGames(): GameSummary[] {
+    return this.registry.list();
+  }
+
+  /** Lista salas publicas (sem senha) em lobby. */
+  @Get('rooms')
+  listRooms(): RoomSummary[] {
+    return this.rooms.listPublic();
+  }
+
+  @Post('rooms')
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async create(@Body() dto: CreateRoomDto) {
     if (!this.registry.get(dto.gameId)) {
@@ -46,7 +64,7 @@ export class AuthController {
     return { roomId: room.id, playerId, token, snapshot: room.toSnapshot() };
   }
 
-  @Post('join')
+  @Post('rooms/join')
   @Throttle({ default: { limit: 5, ttl: 60_000 } }) // anti brute-force
   async join(@Body() dto: JoinRoomDto) {
     const room = this.rooms.get(dto.roomId);

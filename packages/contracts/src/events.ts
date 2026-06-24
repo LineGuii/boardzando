@@ -15,7 +15,15 @@ export interface ClientToServerEvents {
     ack: (res: AckResult<RoomSnapshot>) => void,
   ) => void;
   'room:leave': (payload: { roomId: RoomId }) => void;
-  'room:start': (payload: { roomId: RoomId }, ack: (res: AckResult) => void) => void;
+  /** Host expulsa um jogador (so antes da partida comecar). */
+  'room:kick': (
+    payload: { roomId: RoomId; playerId: PlayerId },
+    ack: (res: AckResult) => void,
+  ) => void;
+  'room:start': (
+    payload: { roomId: RoomId; gameOptions?: unknown },
+    ack: (res: AckResult) => void,
+  ) => void;
   /** Executa um move do jogo plugado. `type` e a chave em GameDefinition.moves. */
   'game:move': (
     payload: { roomId: RoomId; type: string; data: unknown },
@@ -60,6 +68,24 @@ export interface RoomSnapshot {
   hostId: PlayerId;
 }
 
+/** Resumo publico de uma sala aberta (sem senha) para a tela de lobby. */
+export interface RoomSummary {
+  roomId: RoomId;
+  gameId: GameId;
+  hostName: string;
+  playerCount: number;
+  maxPlayers: number;
+  createdAt: number;
+}
+
+/** Resumo de um jogo plugado, para o selector de criacao de sala. */
+export interface GameSummary {
+  id: GameId;
+  name: string;
+  minPlayers: number;
+  maxPlayers: number;
+}
+
 export interface ChatMessage {
   roomId: RoomId;
   from: PlayerId;
@@ -77,6 +103,7 @@ export interface WsError {
     | 'ROOM_NOT_FOUND'
     | 'VALIDATION'
     | 'RATE_LIMITED'
+    | 'KICKED'
     | 'INTERNAL';
   message: string;
 }

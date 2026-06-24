@@ -329,6 +329,31 @@ body {
 
 .shell-player.offline .dot { background: #999; }
 
+.shell-kick-btn {
+  margin-left: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 0;
+  background: #fbe1e1;
+  color: #b41818;
+  font-weight: 900;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-family: inherit;
+  transition: background 0.12s, transform 0.12s;
+}
+
+.shell-kick-btn:hover {
+  background: #dc2626;
+  color: white;
+  transform: scale(1.1);
+}
+
 /* ---- Turn pill (substitui textinho do TurnGate) ---- */
 
 .shell-turn-pill {
@@ -350,4 +375,85 @@ body {
 .shell-turn-pill.theirs {
   background: #f1ece1;
   color: #6b5f4e;
+}
+
+/* ---- Lista de salas abertas ---- */
+
+.shell-rooms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.shell-link-btn {
+  background: transparent;
+  border: 0;
+  color: #205db2;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 2px 4px;
+}
+
+.shell-link-btn:hover { text-decoration: underline; }
+.shell-link-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.shell-room-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #e2dccf;
+  border-radius: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #fbf6ee;
+}
+
+.shell-room-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #e8e1d0;
+  transition: background 0.12s;
+}
+
+.shell-room-row:last-child { border-bottom: 0; }
+.shell-room-row:hover { background: #f4ecd7; }
+.shell-room-row.selected {
+  background: #e7f0ff;
+  box-shadow: inset 3px 0 0 #205db2;
+}
+
+.shell-room-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shell-room-row-game {
+  font-weight: 700;
+  color: #2b2b2b;
+  font-size: 14px;
+}
+
+.shell-room-row-host {
+  font-size: 12px;
+  color: #6b5f4e;
+}
+
+.shell-room-row-meta {
+  background: white;
+  border: 1px solid #e2dccf;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #205db2;
+  font-family: 'Consolas', 'Menlo', monospace;
 }

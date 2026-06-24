@@ -110,6 +110,12 @@ export class GameInstance<TState = unknown> {
     const next = move(this.match.state, ctx, payload);
     if (next === INVALID_MOVE) throw new InvalidMoveError(moveType);
 
+    // O reducer pode sinalizar "mantenha o turno comigo" setando __keepTurn
+    // no estado retornado (ex.: UNO drawCard quando ainda nao houve stack).
+    // O campo e interno: removido antes de persistir/expor.
+    const keepTurn = (next as unknown as Record<string, unknown>).__keepTurn === true;
+    if (keepTurn) delete (next as unknown as Record<string, unknown>).__keepTurn;
+
     this.match.state = next;
     this.match.rngState = rng.getState();
 
@@ -117,7 +123,8 @@ export class GameInstance<TState = unknown> {
     this.maybeAdvancePhase(ctx);
     if (this.isOver) return;
     // Moves off-turn nao consomem o turno do jogador da vez.
-    if (!isOffTurn) this.advanceTurn();
+    // Moves que setaram __keepTurn tambem nao avancam (jogador continua decidindo).
+    if (!isOffTurn && !keepTurn) this.advanceTurn();
   }
 
   /** Estado filtrado para um jogador (esconde info secreta). */

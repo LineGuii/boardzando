@@ -35,6 +35,12 @@ export interface UnoState {
    * (penalidade de +2). Resetado para `false` cada vez que a mao vai a 1.
    */
   unoCalled: Record<PlayerId, boolean>;
+  /**
+   * Setado quando o jogador da vez acabou de comprar 1 carta (sem stack
+   * `pendingDraw`). Ele pode entao jogar essa carta (se for valida) OU
+   * apertar `passTurn` para encerrar o turno. Limpo a cada playCard/passTurn.
+   */
+  mustDecideAfterDraw?: { playerId: PlayerId; cardIndex: number };
   /** Vencedor, quando alguem zera a mao. */
   winner?: PlayerId;
 }

@@ -3,11 +3,19 @@ import type { GameContext, GameDefinition, PlayerId } from '@boardzando/contract
 import { INVALID_MOVE } from '@boardzando/contracts';
 import { GamePlugin } from '../../core/registry/game-plugin.decorator';
 import { buildDeck, drawCards } from './uno.deck';
-import { callUno, contestUno, drawCard, playCard, unoNextPlayer } from './uno.moves';
+import {
+  callUno,
+  contestUno,
+  drawCard,
+  passTurn,
+  playCard,
+  unoNextPlayer,
+} from './uno.moves';
 import type {
   CallUnoPayload,
   ContestUnoPayload,
   DrawPayload,
+  PassTurnPayload,
   PlayCardPayload,
 } from './uno.moves';
 import type { UnoColor, UnoState } from './uno.state';
@@ -20,7 +28,12 @@ import type { UnoColor, UnoState } from './uno.state';
  * foram deixados como exercicio (ver skill add-game-plugin) para manter o
  * exemplo focado no contrato.
  */
-type UnoMovePayload = PlayCardPayload | DrawPayload | CallUnoPayload | ContestUnoPayload;
+type UnoMovePayload =
+  | PlayCardPayload
+  | DrawPayload
+  | PassTurnPayload
+  | CallUnoPayload
+  | ContestUnoPayload;
 
 @Injectable()
 @GamePlugin()
@@ -65,6 +78,7 @@ export class UnoGame implements GameDefinition<UnoState, UnoMovePayload> {
   readonly moves = {
     playCard,
     drawCard,
+    passTurn,
     callUno,
     contestUno,
   } as Record<string, (state: UnoState, ctx: GameContext, payload: UnoMovePayload) => UnoState | typeof INVALID_MOVE>;
@@ -89,6 +103,11 @@ export class UnoGame implements GameDefinition<UnoState, UnoMovePayload> {
     for (const [pid, hand] of Object.entries(state.hands)) {
       if (pid !== playerId) opponents[pid] = hand.length;
     }
+    // mustDecideAfterDraw e privado do jogador da vez (so quem comprou ve).
+    const mustDecide =
+      state.mustDecideAfterDraw && state.mustDecideAfterDraw.playerId === playerId
+        ? state.mustDecideAfterDraw
+        : undefined;
     return {
       myHand: state.hands[playerId] ?? [],
       opponents,
@@ -99,6 +118,8 @@ export class UnoGame implements GameDefinition<UnoState, UnoMovePayload> {
       pendingDraw: state.pendingDraw,
       /** Para a UI decidir quem ja cantou UNO (chave -> bool). */
       unoCalled: state.unoCalled,
+      /** Se setado, o jogador comprou e precisa escolher: jogar a carta ou passar. */
+      mustDecideAfterDraw: mustDecide,
     };
   }
 }

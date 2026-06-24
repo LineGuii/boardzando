@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { randomInt } from 'node:crypto';
-import type { GameId, PlayerId, RoomId } from '@boardzando/contracts';
+import type { GameId, PlayerId, RoomId, RoomSummary } from '@boardzando/contracts';
 import { GameRegistryService } from '../registry/game-registry.service';
 import { GameInstance } from '../engine/game-instance';
 import type { Player } from '../player/player.types';
@@ -81,8 +81,26 @@ export class RoomService {
     }, RECONNECT_GRACE_MS);
   }
 
+  /**
+   * Host expulsa um jogador. Permitido apenas em lobby e nao pode kickar a si
+   * proprio. Retorna o `socketId` do jogador removido (se conectado) para o
+   * gateway desconectar o socket.
+   */
+  kickPlayer(roomId: RoomId, requesterId: PlayerId, targetId: PlayerId): { socketId?: string } {
+    const room = this.getOrThrow(roomId);
+    if (requesterId !== room.hostId) throw new Error('ONLY_HOST_CAN_KICK');
+    if (room.status !== 'lobby') throw new Error('GAME_ALREADY_STARTED');
+    if (requesterId === targetId) throw new Error('CANNOT_KICK_SELF');
+    const target = room.players.get(targetId);
+    if (!target) throw new Error('PLAYER_NOT_IN_ROOM');
+    const socketId = target.socketId;
+    room.players.delete(targetId);
+    if (room.players.size === 0) this.dispose(room.id);
+    return { socketId };
+  }
+
   /** Inicia a partida: instancia a GameInstance com a GameDefinition do jogo. */
-  startGame(roomId: RoomId, requesterId: PlayerId): Room {
+  startGame(roomId: RoomId, requesterId: PlayerId, gameOptions?: unknown): Room {
     const room = this.getOrThrow(roomId);
     const def = this.registry.getOrThrow(room.gameId);
     if (requesterId !== room.hostId) throw new Error('ONLY_HOST_CAN_START');
@@ -90,10 +108,33 @@ export class RoomService {
     if (room.players.size < def.minPlayers) throw new Error('NOT_ENOUGH_PLAYERS');
 
     const seed = randomInt(0, 2 ** 31 - 1);
-    room.instance = GameInstance.create(def, room.playerIds, seed);
+    room.instance = GameInstance.create(def, room.playerIds, seed, gameOptions);
     room.status = 'playing';
     this.logger.log(`Partida iniciada na sala ${roomId} (seed ${seed})`);
     return room;
+  }
+
+  /**
+   * Lista salas publicas (sem senha) ainda em lobby. Salas com senha ficam
+   * escondidas — quem tem o id continua entrando colando o codigo.
+   */
+  listPublic(): RoomSummary[] {
+    const summaries: RoomSummary[] = [];
+    for (const room of this.rooms.values()) {
+      if (room.status !== 'lobby') continue;
+      if (room.passwordHash) continue;
+      const host = room.players.get(room.hostId);
+      const def = this.registry.get(room.gameId);
+      summaries.push({
+        roomId: room.id,
+        gameId: room.gameId,
+        hostName: host?.name ?? '???',
+        playerCount: room.players.size,
+        maxPlayers: def?.maxPlayers ?? 0,
+        createdAt: room.createdAt,
+      });
+    }
+    return summaries.sort((a, b) => b.createdAt - a.createdAt);
   }
 
   dispose(roomId: RoomId): void {

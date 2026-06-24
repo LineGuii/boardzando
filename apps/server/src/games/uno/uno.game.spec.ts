@@ -18,12 +18,23 @@ describe('UnoGame', () => {
     expect(s.discard[0]!.color).not.toBe('wild'); // primeira carta nunca e curinga
   });
 
-  it('comeca no primeiro jogador e passa a vez ao comprar', () => {
+  it('comeca no primeiro jogador; comprar mantem a vez ate jogar/pular', () => {
     const match = newMatch();
     expect(match.snapshot.currentPlayer).toBe('alice');
     match.applyMove('alice', 'drawCard', {});
+    // a regra nova: drawCard sem stack mantem o turno para o jogador decidir.
+    expect(match.snapshot.currentPlayer).toBe('alice');
+    expect(match.snapshot.state.hands['alice']).toHaveLength(8);
+    expect(match.snapshot.state.mustDecideAfterDraw?.playerId).toBe('alice');
+
+    match.applyMove('alice', 'passTurn', {});
     expect(match.snapshot.currentPlayer).toBe('bob');
-    expect(match.snapshot.state.hands['alice']).toHaveLength(8); // comprou 1
+    expect(match.snapshot.state.mustDecideAfterDraw).toBeUndefined();
+  });
+
+  it('passTurn fora do contexto de "mustDecideAfterDraw" e invalido', () => {
+    const match = newMatch();
+    expect(() => match.applyMove('alice', 'passTurn', {})).toThrow(InvalidMoveError);
   });
 
   it('rejeita jogada fora da vez', () => {

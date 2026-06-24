@@ -8,128 +8,77 @@ interface UnoView {
 }
 
 /**
- * Controles do UNO que rodam FORA do TurnGate (a qualquer momento):
- *   - botao "UNO!" quando voce tem 1 carta e ainda nao cantou;
- *   - botao "Contestar UNO de {nome}" que aparece 1s depois para cada
- *     oponente que tem 1 carta e nao cantou.
- *
- * Os moves `callUno` e `contestUno` estao em `offTurnMoves` do UnoGame, entao
- * o servidor os aceita off-turn. O timer de 1s e puramente UX: server nao
- * mede tempo — quem clicar primeiro vence.
+ * Botao "UNO!" do proprio jogador, encaixado na mesa (perto da mao).
+ * So aparece quando voce tem 1 carta e ainda nao cantou. Levemente opaco
+ * em repouso para nao roubar a atencao; ganha opacidade total no hover.
  */
-export function UnoOffTurnControls(): JSX.Element | null {
+export function UnoCallButton(): JSX.Element | null {
+  const view = useGame((s) => s.view) as UnoView | undefined;
+  const session = useGame((s) => s.session);
+  const socket = useGame((s) => s.socket);
+
+  if (!view || !session) return null;
+  const meCalled = view.unoCalled[session.playerId];
+  if (view.myHand.length !== 1 || meCalled !== false) return null;
+
+  return (
+    <button
+      type="button"
+      className="uno-call-button"
+      onClick={() =>
+        socket?.emit(
+          'game:move',
+          { roomId: session.roomId, type: 'callUno', data: {} },
+          () => {},
+        )
+      }
+    >
+      UNO!
+    </button>
+  );
+}
+
+/**
+ * Botao "Contestar UNO" preso ao card do oponente em questao. Aparece 1s
+ * apos detectarmos que o oponente esta com 1 carta sem ter cantado.
+ */
+export function UnoContestButton({ opponentId }: { opponentId: string }): JSX.Element | null {
   const view = useGame((s) => s.view) as UnoView | undefined;
   const session = useGame((s) => s.session);
   const room = useGame((s) => s.room);
   const socket = useGame((s) => s.socket);
 
-  // chave -> momento em que vimos o oponente com 1 carta nao-cantado.
-  const [seenAt, setSeenAt] = useState<Record<string, number>>({});
-  // chave -> tornou-se contestavel (passou de 1s)
-  const [contestable, setContestable] = useState<Record<string, boolean>>({});
+  const count = view?.opponents[opponentId] ?? 0;
+  const called = view?.unoCalled[opponentId];
+  const eligible = count === 1 && called === false;
 
-  // identifica os "alvos de contest" atuais: oponentes com 1 carta sem cantar.
-  const targets: string[] = [];
-  if (view && session) {
-    for (const [pid, count] of Object.entries(view.opponents)) {
-      if (count === 1 && view.unoCalled[pid] === false) targets.push(pid);
+  const [contestable, setContestable] = useState(false);
+  useEffect(() => {
+    if (!eligible) {
+      setContestable(false);
+      return;
     }
-  }
-  const targetsKey = targets.sort().join('|');
+    const t = setTimeout(() => setContestable(true), 1000);
+    return () => clearTimeout(t);
+  }, [eligible]);
 
-  useEffect(() => {
-    if (!view) return;
-    const now = Date.now();
-    setSeenAt((prev) => {
-      const next = { ...prev };
-      // limpa quem nao e mais alvo (cantou ou comprou)
-      for (const k of Object.keys(next)) if (!targets.includes(k)) delete next[k];
-      // adiciona novos alvos com timestamp
-      for (const t of targets) if (next[t] === undefined) next[t] = now;
-      return next;
-    });
-    // o `contestable` recalcula via outro effect com setTimeout
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetsKey]);
-
-  useEffect(() => {
-    // agenda 1 timer por alvo ainda nao contestavel
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    for (const [pid, t0] of Object.entries(seenAt)) {
-      if (contestable[pid]) continue;
-      const remaining = Math.max(0, 1000 - (Date.now() - t0));
-      timers.push(
-        setTimeout(() => setContestable((prev) => ({ ...prev, [pid]: true })), remaining),
-      );
-    }
-    return () => timers.forEach(clearTimeout);
-  }, [seenAt, contestable]);
-
-  // limpa contestable para alvos que sairam do conjunto
-  useEffect(() => {
-    setContestable((prev) => {
-      const next = { ...prev };
-      for (const k of Object.keys(next)) if (!targets.includes(k)) delete next[k];
-      return next;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetsKey]);
-
-  if (!view || !session) return null;
-
-  const myHandSize = view.myHand.length;
-  const meCalled = view.unoCalled[session.playerId];
-  const showCallButton = myHandSize === 1 && meCalled === false;
-
-  const showableContests = targets.filter((pid) => contestable[pid]);
-  if (!showCallButton && showableContests.length === 0) return null;
+  if (!view || !session || !eligible || !contestable) return null;
+  const name = room?.players.find((p) => p.id === opponentId)?.name ?? '???';
 
   return (
-    <section
-      style={{
-        display: 'flex',
-        gap: 8,
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        margin: '8px 0',
-        padding: 8,
-        background: '#fff7ed',
-        border: '1px dashed #f59e0b',
-        borderRadius: 6,
-      }}
+    <button
+      type="button"
+      className="uno-contest-button"
+      onClick={() =>
+        socket?.emit(
+          'game:move',
+          { roomId: session.roomId, type: 'contestUno', data: { target: opponentId } },
+          () => {},
+        )
+      }
+      title={`Contestar UNO de ${name}`}
     >
-      {showCallButton && (
-        <button
-          style={{ background: '#f59e0b', color: 'white', fontWeight: 'bold', padding: '6px 14px' }}
-          onClick={() =>
-            socket?.emit(
-              'game:move',
-              { roomId: session.roomId, type: 'callUno', data: {} },
-              () => {},
-            )
-          }
-        >
-          UNO!
-        </button>
-      )}
-      {showableContests.map((pid) => {
-        const name = room?.players.find((p) => p.id === pid)?.name ?? pid.slice(0, 4);
-        return (
-          <button
-            key={pid}
-            style={{ background: '#dc2626', color: 'white', padding: '6px 14px' }}
-            onClick={() =>
-              socket?.emit(
-                'game:move',
-                { roomId: session.roomId, type: 'contestUno', data: { target: pid } },
-                () => {},
-              )
-            }
-          >
-            Contestar UNO de {name}
-          </button>
-        );
-      })}
-    </section>
+      Contestar UNO!
+    </button>
   );
 }

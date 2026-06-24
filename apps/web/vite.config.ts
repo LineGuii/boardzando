@@ -18,6 +18,7 @@ export default defineConfig({
     proxy: {
       // encaminha REST e WS para o NestJS em dev
       '/rooms': 'http://localhost:3000',
+      '/games': 'http://localhost:3000',
       '/socket.io': { target: 'http://localhost:3000', ws: true },
     },
   },

@@ -57,6 +57,25 @@ export class GameMoveDto {
   data!: unknown;
 }
 
+// ---- WS: host inicia a partida (com opcoes opcionais do jogo) ----
+export class StartGameDto {
+  @IsString() @IsNotEmpty() @MaxLength(64)
+  roomId!: string;
+
+  /** Opcoes especificas do jogo (shape definido pelo plugin). */
+  @IsOptional() @Allow()
+  gameOptions?: unknown;
+}
+
+// ---- WS: host expulsa um jogador (so em lobby) ----
+export class KickPlayerDto {
+  @IsString() @IsNotEmpty() @MaxLength(64)
+  roomId!: string;
+
+  @IsString() @IsNotEmpty() @MaxLength(64)
+  playerId!: string;
+}
+
 // ---- WS: chat ----
 export class ChatSendDto {
   @IsString() @IsNotEmpty() @MaxLength(64)

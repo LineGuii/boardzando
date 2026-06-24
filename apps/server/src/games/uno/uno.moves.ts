@@ -10,6 +10,7 @@ export interface PlayCardPayload {
   chosenColor?: UnoColor;
 }
 export type DrawPayload = Record<string, never>;
+export type PassTurnPayload = Record<string, never>;
 export type CallUnoPayload = Record<string, never>;
 export interface ContestUnoPayload {
   target: PlayerId;
@@ -45,6 +46,8 @@ export const playCard: Move<UnoState, PlayCardPayload> = (state, ctx, payload) =
   if (isWild && !payload.chosenColor) return INVALID_MOVE; // curinga exige cor
 
   const next = clone(state);
+  // sempre que jogamos, a "decisao apos comprar" se resolve
+  next.mustDecideAfterDraw = undefined;
   // remove a carta da mao e descarta
   next.hands[me] = (next.hands[me] ?? []).filter((c) => c.id !== card.id);
   next.discard.push(card);
@@ -92,17 +95,52 @@ export const playCard: Move<UnoState, PlayCardPayload> = (state, ctx, payload) =
 };
 
 /**
- * MOVE: comprar uma carta. Regra simplificada: comprar encerra o turno.
- * Se houver um stack de draw2 aberto (pendingDraw > 0), compra TUDO que esta
- * acumulado, zera o stack e perde a vez normalmente.
+ * MOVE: comprar uma carta.
+ *  - Se houver stack de draw2 aberto (`pendingDraw > 0`), compra TUDO,
+ *    zera o stack e **encerra o turno** (comportamento antigo).
+ *  - Sem stack, compra 1 carta, marca `mustDecideAfterDraw` apontando para
+ *    o indice da carta recem-comprada e **mantem o turno** (sinaliza com
+ *    a flag interna `__keepTurn`). O jogador entao escolhe `playCard` ou
+ *    `passTurn`.
  */
 export const drawCard: Move<UnoState, DrawPayload> = (state, ctx) => {
   const me = ctx.actor;
   const next = clone(state);
-  const count = state.pendingDraw > 0 ? state.pendingDraw : 1;
-  const drawn = drawCards(next, ctx.random, count);
-  if (drawn.length > 0) next.hands[me] = [...(next.hands[me] ?? []), ...drawn];
-  if (state.pendingDraw > 0) next.pendingDraw = 0;
+
+  if (state.pendingDraw > 0) {
+    const drawn = drawCards(next, ctx.random, state.pendingDraw);
+    if (drawn.length > 0) next.hands[me] = [...(next.hands[me] ?? []), ...drawn];
+    next.pendingDraw = 0;
+    next.mustDecideAfterDraw = undefined;
+    return next; // turno avanca normalmente
+  }
+
+  const drawn = drawCards(next, ctx.random, 1);
+  if (drawn.length === 0) {
+    // baralho vazio sem reciclar — no minimo, marca decisao (nada para jogar)
+    next.mustDecideAfterDraw = { playerId: me, cardIndex: -1 };
+    (next as unknown as Record<string, unknown>).__keepTurn = true;
+    return next;
+  }
+  next.hands[me] = [...(next.hands[me] ?? []), ...drawn];
+  next.mustDecideAfterDraw = {
+    playerId: me,
+    cardIndex: next.hands[me]!.length - 1,
+  };
+  (next as unknown as Record<string, unknown>).__keepTurn = true;
+  return next;
+};
+
+/**
+ * MOVE: pular o turno apos comprar. Permitido apenas quando ha
+ * `mustDecideAfterDraw` para `ctx.actor`. Limpa a marcacao e cede a vez.
+ */
+export const passTurn: Move<UnoState, PassTurnPayload> = (state, ctx) => {
+  const me = ctx.actor;
+  const pending = state.mustDecideAfterDraw;
+  if (!pending || pending.playerId !== me) return INVALID_MOVE;
+  const next = clone(state);
+  next.mustDecideAfterDraw = undefined;
   return next;
 };
 

@@ -28,7 +28,24 @@ export const useGame = create<GameStore>((set) => ({
     );
     socket.on('chat:message', (msg) => set((st) => ({ chat: [...st.chat, msg] })));
     socket.on('game:over', ({ result }) => set({ gameOver: result }));
-    socket.on('error', (lastError) => set({ lastError }));
+    socket.on('error', (lastError) => {
+      // se fomos expulsos, encerra a sessao para voltar ao lobby.
+      if (lastError.code === 'KICKED') {
+        try { socket.disconnect(); } catch { /* ja desconectado */ }
+        set({
+          socket: undefined,
+          session: undefined,
+          room: undefined,
+          view: undefined,
+          currentPlayer: undefined,
+          gameOver: undefined,
+          chat: [],
+          lastError,
+        });
+        return;
+      }
+      set({ lastError });
+    });
     set({ socket, session });
   },
   reset: () =>
