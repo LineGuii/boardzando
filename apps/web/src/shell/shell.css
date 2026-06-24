@@ -27,6 +27,11 @@ body {
   margin: 0 auto;
 }
 
+/* Largura expandida (usada por jogos com tabuleiro grande, ex.: Hues & Cues) */
+.shell-container.wide {
+  max-width: min(1200px, 96vw);
+}
+
 /* ---- Hero / titulo ---- */
 
 .shell-hero {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { HuesCoord, HuesOptions } from '@boardzando/contracts';
 import { cellColor } from '@boardzando/contracts';
 import { useGame } from '../../net/store';
-import { HuesGrid } from './HuesGrid';
+import { HuesGrid, coordLabel } from './HuesGrid';
 import './hues.css';
 
 interface HuesLastRoundView {
@@ -35,10 +35,6 @@ function coneColorFor(playerId: string): string {
   return `hsl(${h} 70% 45%)`;
 }
 
-function colLabel(col: number): string {
-  if (col < 26) return String.fromCharCode(65 + col);
-  return 'A' + String.fromCharCode(65 + (col - 26));
-}
 
 export function HuesBoard(): JSX.Element {
   const view = useGame((s) => s.view) as HuesView | undefined;
@@ -87,7 +83,7 @@ export function HuesBoard(): JSX.Element {
           <CueGiverPick options={view.cardOptions} />
         )}
         {isCueGiver && (view.step === 'cue1' || view.step === 'cue2') && (
-          <CueGiverCueInput step={view.step} />
+          <CueGiverCueInput step={view.step} target={view.target} />
         )}
 
         {/* === Painel do palpitador === */}
@@ -195,10 +191,7 @@ function CueGiverPick({ options }: { options: HuesCoord[] }): JSX.Element {
             style={{ background: cellColor(c.col, c.row) }}
             onClick={() => send(i)}
           >
-            <span className="coord">
-              {colLabel(c.col)}
-              {c.row + 1}
-            </span>
+            <span className="coord">{coordLabel(c)}</span>
           </button>
         ))}
       </div>
@@ -206,7 +199,13 @@ function CueGiverPick({ options }: { options: HuesCoord[] }): JSX.Element {
   );
 }
 
-function CueGiverCueInput({ step }: { step: 'cue1' | 'cue2' }): JSX.Element {
+function CueGiverCueInput({
+  step,
+  target,
+}: {
+  step: 'cue1' | 'cue2';
+  target?: HuesCoord;
+}): JSX.Element {
   const session = useGame((s) => s.session)!;
   const socket = useGame((s) => s.socket);
   const lastError = useGame((s) => s.lastError);
@@ -226,27 +225,44 @@ function CueGiverCueInput({ step }: { step: 'cue1' | 'cue2' }): JSX.Element {
 
   return (
     <div>
-      <div className="hues-cue-input">
-        <input
-          type="text"
-          placeholder={
-            step === 'cue1' ? 'Dica de 1 palavra...' : 'Dica de 2 palavras...'
-          }
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && submit()}
-          maxLength={80}
-        />
-        <button
-          type="button"
-          onClick={submit}
-          disabled={words.length !== expectedWords}
-        >
-          Enviar
-        </button>
+      <div className="hues-cue-row">
+        {target && (
+          <div
+            className="hues-target-badge"
+            title="Sua cor secreta — só você vê"
+          >
+            <div
+              className="hues-target-badge-swatch"
+              style={{ background: cellColor(target.col, target.row) }}
+            />
+            <div className="hues-target-badge-meta">
+              <span className="hues-target-badge-coord">{coordLabel(target)}</span>
+              <span className="hues-target-badge-label">sua cor</span>
+            </div>
+          </div>
+        )}
+        <div className="hues-cue-input">
+          <input
+            type="text"
+            placeholder={
+              step === 'cue1' ? 'Dica de 1 palavra...' : 'Dica de 2 palavras...'
+            }
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && submit()}
+            maxLength={80}
+          />
+          <button
+            type="button"
+            onClick={submit}
+            disabled={words.length !== expectedWords}
+          >
+            Enviar
+          </button>
+        </div>
       </div>
       <p className="hues-cue-hint">
-        {words.length}/{expectedWords} palavra(s). Nao use nomes de cor nem
+        {words.length}/{expectedWords} palavra(s). Não use nomes de cor nem
         &quot;claro&quot;/&quot;escuro&quot;.
       </p>
       {lastError?.code === 'INVALID_MOVE' && (
@@ -282,7 +298,7 @@ function GuesserBanner({
       <br />
       {canClick
         ? `Clique no tabuleiro para colocar seu ${myConeCount === 0 ? 'cone' : `${myConeCount + 1}o cone`}.`
-        : `Voce ja colocou ${expectedMyCones}/${expectedMyCones} cones. Aguardando os outros...`}
+        : `Você já colocou ${expectedMyCones}/${expectedMyCones} cones. Aguardando os outros...`}
     </div>
   );
 }
@@ -312,7 +328,7 @@ function RevealPanel({
     // ainda nao calculado server-side (so o cue-giver vera depois do click)
     return (
       <div className="hues-guess-panel">
-        Alvo revelado: <b>{colLabel(view.target.col)}{view.target.row + 1}</b>.
+        Alvo revelado: <b>{coordLabel(view.target)}</b>.
         {isCueGiver && (
           <button
             type="button"
@@ -333,7 +349,7 @@ function RevealPanel({
   return (
     <div className="hues-guess-panel">
       <div style={{ marginBottom: 6 }}>
-        Alvo: <b>{colLabel(lr.target.col)}{lr.target.row + 1}</b>.{' '}
+        Alvo: <b>{coordLabel(lr.target)}</b>.{' '}
         {lr.cue1 && (
           <>
             Dicas: <b>{lr.cue1}</b> / <b>{lr.cue2}</b>.

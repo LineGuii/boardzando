@@ -120,11 +120,14 @@ export class HuesGame implements GameDefinition<HuesState, HuesMovePayload> {
       }
     }
 
+    // O cue-giver sempre ve o proprio alvo (precisa lembrar enquanto digita as
+    // dicas); demais jogadores so veem no reveal.
+    const showTarget = isRevealOrLater || isCueGiver;
     return {
       options: state.options,
       step: state.step,
       cardOptions: isCueGiver ? state.cardOptions : undefined,
-      target: isRevealOrLater ? state.target : undefined,
+      target: showTarget ? state.target : undefined,
       cue1: state.cue1,
       cue2: state.cue2,
       guesses: visibleGuesses,

@@ -320,9 +320,11 @@ function RoomPage(): JSX.Element {
   const playerCount = room?.players?.length ?? 0;
   const isHost = room?.hostId === session.playerId;
 
+  const wide = room?.status === 'playing' && room?.gameId === 'hues';
+
   return (
     <div className="shell-bg">
-      <div className="shell-container">
+      <div className={`shell-container ${wide ? 'wide' : ''}`}>
         <RoomHeader roomId={session.roomId} inviteLink={inviteLink} />
 
         {room?.status === 'lobby' && isHost && room?.gameId && (
@@ -395,7 +397,7 @@ function RoomHeader({
             {roomId}
           </span>
         </div>
-        <div className="shell-room-actions">
+        <div className="shell-room-actions" hidden={room?.status === 'playing'}>
           <CopyButton text={roomId} label="Copiar ID" copiedLabel="ID copiado!" icon="📋" />
           <CopyButton
             text={inviteLink}
