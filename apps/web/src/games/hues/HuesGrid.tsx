@@ -38,20 +38,26 @@ export function coordLabel(coord: { col: number; row: number }): string {
 }
 
 /**
- * Tabuleiro 30x16 com labels de coluna (A..AD) e linha (1..16), magnifier
+ * Tabuleiro 30x16 com labels de coluna (1..30) e linha (A..P), magnifier
  * que segue o cursor mostrando a cor amplificada, e overlays de moldura
- * 3x3 + anel ortogonal no reveal.
+ * 3x3 + anel ortogonal no reveal. Quando recebe `pendingCoord`, renderiza
+ * um cone pontilhado naquela posicao (preview antes de confirmar — usado
+ * no fluxo mobile).
  */
 export function HuesGrid({
   cones,
   clickable,
   onPick,
   revealedTarget,
+  pendingCoord,
+  pendingConeColor,
 }: {
   cones: ConeMark[];
   clickable: boolean;
   onPick?: (coord: HuesCoord) => void;
   revealedTarget?: HuesCoord;
+  pendingCoord?: HuesCoord;
+  pendingConeColor?: string;
 }): JSX.Element {
   const [hover, setHover] = useState<HoverState | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
@@ -75,6 +81,8 @@ export function HuesGrid({
         manhattan(revealedTarget, here) === 2;
       const conesHere = cones.filter((c) => c.coord.col === col && c.coord.row === row);
       const isHovered = hover && hover.col === col && hover.row === row;
+      const isPending =
+        !!pendingCoord && pendingCoord.col === col && pendingCoord.row === row;
       const cls = [
         'hues-cell',
         clickable ? 'clickable' : '',
@@ -82,6 +90,7 @@ export function HuesGrid({
         inFrame ? 'target-frame' : '',
         inRing ? 'target-ring' : '',
         isHovered ? 'hovered' : '',
+        isPending ? 'pending' : '',
       ]
         .filter(Boolean)
         .join(' ');
@@ -110,6 +119,18 @@ export function HuesGrid({
               </div>
             </div>
           ))}
+          {isPending && (
+            <div className="hues-cone hues-cone-pending">
+              <div
+                className="hues-cone-dot"
+                style={{
+                  background: pendingConeColor ?? 'rgba(255, 255, 255, 0.6)',
+                }}
+              >
+                ?
+              </div>
+            </div>
+          )}
         </div>,
       );
     }
@@ -143,11 +164,13 @@ export function HuesGrid({
 
   return (
     <>
-      <div ref={gridRef} className="hues-grid" onMouseLeave={handleLeave}>
-        <div className="hues-corner" style={{ gridColumn: 1, gridRow: 1 }} />
-        {colLabels}
-        {rowLabels}
-        {cells}
+      <div className="hues-grid-scroll">
+        <div ref={gridRef} className="hues-grid" onMouseLeave={handleLeave}>
+          <div className="hues-corner" style={{ gridColumn: 1, gridRow: 1 }} />
+          {colLabels}
+          {rowLabels}
+          {cells}
+        </div>
       </div>
       {hover && <Magnifier hover={hover} />}
     </>
