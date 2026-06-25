@@ -5,6 +5,7 @@ import { connectSocket } from './net/socket';
 import { useGame } from './net/store';
 import { UnoBoard } from './games/uno/UnoBoard';
 import { HuesBoard } from './games/hues/HuesBoard';
+import { SandboxBoard } from './games/sandbox/SandboxBoard';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
 import { GameOptionsPanel } from './shell/GameOptionsPanel';
@@ -303,6 +304,7 @@ function Lobby(): JSX.Element {
 function RoomPage(): JSX.Element {
   const session = useGame((s) => s.session)!;
   const room = useGame((s) => s.room);
+  const view = useGame((s) => s.view) as { kind?: string } | undefined;
   const lastError = useGame((s) => s.lastError);
   const [gameOptions, setGameOptions] = useState<unknown>(undefined);
 
@@ -320,7 +322,9 @@ function RoomPage(): JSX.Element {
   const playerCount = room?.players?.length ?? 0;
   const isHost = room?.hostId === session.playerId;
 
-  const wide = room?.status === 'playing' && room?.gameId === 'hues';
+  const wide =
+    room?.status === 'playing' &&
+    (room?.gameId === 'hues' || room?.gameId === 'monopoly');
 
   return (
     <div className="shell-bg">
@@ -357,6 +361,8 @@ function RoomPage(): JSX.Element {
             Aguardando o host iniciar o jogo...
           </p>
         )}
+
+        {room?.status === 'playing' && view?.kind === 'sandbox' && <SandboxBoard />}
 
         {room?.status === 'playing' && room?.gameId === 'hues' && <HuesBoard />}
 

@@ -2,6 +2,16 @@ import { create } from 'zustand';
 import type { ChatMessage, GameOverResult, RoomSnapshot, WsError } from '@boardzando/contracts';
 import type { GameClientSocket } from './socket';
 
+/** Posicao ao vivo de uma peca sendo arrastada por outro jogador (efemera). */
+export interface DragOverride {
+  x: number;
+  y: number;
+  z?: number;
+  rotation?: number;
+  by: string;
+  at: number;
+}
+
 interface GameStore {
   socket?: GameClientSocket;
   session?: { roomId: string; playerId: string };
@@ -13,6 +23,8 @@ interface GameStore {
   currentPlayer?: string;
   /** Resultado da partida (vencedor, etc.); alimentado pelo `game:over`. */
   gameOver?: GameOverResult;
+  /** Posicoes ao vivo de pecas arrastadas por outros (jogos sandbox). */
+  dragOverrides: Record<string, DragOverride>;
   chat: ChatMessage[];
   lastError?: WsError;
   setSocket: (s: GameClientSocket, session: { roomId: string; playerId: string }) => void;
@@ -21,6 +33,7 @@ interface GameStore {
 
 export const useGame = create<GameStore>((set) => ({
   chat: [],
+  dragOverrides: {},
   setSocket: (socket, session) => {
     socket.on('room:update', (room) => set({ room }));
     socket.on('game:state', ({ view, phase, turn, currentPlayer }) =>
@@ -28,6 +41,14 @@ export const useGame = create<GameStore>((set) => ({
     );
     socket.on('chat:message', (msg) => set((st) => ({ chat: [...st.chat, msg] })));
     socket.on('game:over', ({ result }) => set({ gameOver: result }));
+    socket.on('placeable:dragging', ({ id, x, y, z, rotation, by }) =>
+      set((st) => ({
+        dragOverrides: {
+          ...st.dragOverrides,
+          [id]: { x, y, z, rotation, by, at: Date.now() },
+        },
+      })),
+    );
     socket.on('error', (lastError) => {
       // se fomos expulsos, encerra a sessao para voltar ao lobby.
       if (lastError.code === 'KICKED') {
@@ -56,6 +77,7 @@ export const useGame = create<GameStore>((set) => ({
       view: undefined,
       currentPlayer: undefined,
       gameOver: undefined,
+      dragOverrides: {},
       chat: [],
     }),
 }));

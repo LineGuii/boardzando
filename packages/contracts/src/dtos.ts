@@ -2,6 +2,7 @@ import {
   Allow,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -55,6 +56,27 @@ export class GameMoveDto {
   // @Allow() libera o campo no ValidationPipe (que usa forbidNonWhitelisted).
   @Allow()
   data!: unknown;
+}
+
+// ---- WS: stream efemero de drag (jogos sandbox) ----
+export class PlaceableDragDto {
+  @IsString() @IsNotEmpty() @MaxLength(64)
+  roomId!: string;
+
+  @IsString() @IsNotEmpty() @MaxLength(64)
+  id!: string;
+
+  @IsNumber()
+  x!: number;
+
+  @IsNumber()
+  y!: number;
+
+  @IsOptional() @IsNumber()
+  z?: number;
+
+  @IsOptional() @IsNumber()
+  rotation?: number;
 }
 
 // ---- WS: host inicia a partida (com opcoes opcionais do jogo) ----

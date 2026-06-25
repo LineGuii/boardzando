@@ -15,6 +15,7 @@ import {
   ChatSendDto,
   GameMoveDto,
   KickPlayerDto,
+  PlaceableDragDto,
   StartGameDto,
   type ClientToServerEvents,
   type ServerToClientEvents,
@@ -146,6 +147,31 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         .emit('game:over', { roomId: dto.roomId, result: room.instance.snapshot.gameover! });
     }
     return { ok: true };
+  }
+
+  /**
+   * Stream EFEMERO de drag (jogos sandbox): apenas rebroadcast da posicao ao
+   * vivo para os OUTROS na sala. Nao toca no estado nem persiste — a posicao
+   * autoritativa chega via `game:move` no fim do arraste. Throttle generoso
+   * (relay barato; o cliente ja limita a ~30/s).
+   */
+  @SubscribeMessage('placeable:drag')
+  @Throttle({ default: { limit: 60, ttl: 1000 } })
+  @UseGuards(WsThrottlerGuard)
+  onPlaceableDrag(
+    @ConnectedSocket() client: GameSocket,
+    @MessageBody() dto: PlaceableDragDto,
+  ): void {
+    const { roomId, player } = client.data;
+    if (dto.roomId !== roomId) return;
+    client.to(this.roomChannel(roomId)).emit('placeable:dragging', {
+      id: dto.id,
+      x: dto.x,
+      y: dto.y,
+      z: dto.z,
+      rotation: dto.rotation,
+      by: player.id,
+    });
   }
 
   @SubscribeMessage('chat:send')

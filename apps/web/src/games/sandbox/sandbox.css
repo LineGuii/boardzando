@@ -1,0 +1,250 @@
+/* =========================================================
+ * Mesa livre (sandbox) — placeables arrastáveis, mão, pilhas.
+ * ========================================================= */
+
+.sbx-root {
+  margin-top: 12px;
+}
+
+.sbx-hint {
+  font-size: 12px;
+  color: #6b5f4e;
+  margin: 6px 2px;
+}
+
+/* ---------- Mesa ---------- */
+
+.sbx-board {
+  position: relative;
+  width: 100%;
+  height: 62vh;
+  min-height: 420px;
+  background:
+    radial-gradient(ellipse at center, #14794a 0%, #0a4d2e 85%);
+  border-radius: 14px;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  touch-action: none;
+}
+
+.sbx-pile {
+  position: absolute;
+  cursor: grab;
+  touch-action: none;
+  transition: filter 0.12s;
+}
+
+.sbx-pile:hover {
+  filter: brightness(1.06);
+  z-index: 9999 !important;
+}
+
+.sbx-count-badge {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  background: #111;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 999px;
+  border: 1px solid #fff;
+  pointer-events: none;
+}
+
+/* ---------- Face de uma peça ---------- */
+
+.sbx-face {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 2px;
+  position: relative;
+}
+
+.sbx-label {
+  font-weight: 800;
+  font-size: 12px;
+  line-height: 1.05;
+}
+
+.sbx-sub {
+  font-size: 8px;
+  opacity: 0.92;
+  line-height: 1.05;
+  margin-top: 2px;
+  max-height: 60%;
+  overflow: hidden;
+}
+
+.sbx-emoji {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.sbx-value {
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.sbx-cat-card .sbx-label {
+  font-size: 10px;
+}
+
+/* ---------- Ghost (peça sendo arrastada) ---------- */
+
+.sbx-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 4000;
+  opacity: 0.92;
+  transform: scale(1.05);
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.45));
+}
+
+/* ---------- Mão do jogador ---------- */
+
+.sbx-hand {
+  margin-top: 12px;
+  background: #2b2b2b;
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-height: 96px;
+  border: 1px solid #444;
+}
+
+.sbx-hand-label {
+  color: #d4cfc0;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.sbx-hand-items {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  min-height: 70px;
+}
+
+.sbx-hand-empty {
+  color: #8a8275;
+  font-size: 13px;
+}
+
+.sbx-hand-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sbx-hand-card {
+  width: 48px;
+  height: 68px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.sbx-hand-flip {
+  font-size: 10px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: #555;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.sbx-hand-flip:hover {
+  background: #6b6b6b;
+}
+
+/* ---------- Mãos dos oponentes ---------- */
+
+.sbx-opponents {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.sbx-opponent {
+  background: #f1ece1;
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+
+.sbx-opponent-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4a4133;
+  margin-bottom: 4px;
+}
+
+.sbx-opponent-hand {
+  display: flex;
+}
+
+.sbx-mini {
+  width: 20px;
+  height: 28px;
+  margin-left: -10px;
+}
+
+.sbx-mini:first-child {
+  margin-left: 0;
+}
+
+/* ---------- Menu de pilha ---------- */
+
+.sbx-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 4500;
+}
+
+.sbx-menu {
+  position: fixed;
+  z-index: 4600;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+}
+
+.sbx-menu button {
+  text-align: left;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  color: #2b2b2b;
+}
+
+.sbx-menu button:hover {
+  background: #f1ece1;
+}
