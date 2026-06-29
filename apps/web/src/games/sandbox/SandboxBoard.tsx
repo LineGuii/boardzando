@@ -4,12 +4,13 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
-import type { BackEntry, CatalogEntry } from '@boardzando/contracts';
+import type { BackEntry, CatalogEntry, SandboxBoard as SandboxBoardData } from '@boardzando/contracts';
 import { useGame } from '../../net/store';
 import { SandboxPlaceableView } from './SandboxPlaceable';
 import { SandboxHand, type HandItem } from './SandboxHand';
 import { SandboxOpponentHands } from './SandboxOpponentHands';
 import { SandboxStackMenu, type StackMenuTarget } from './SandboxStackMenu';
+import { SandboxPerimeterBoard } from './SandboxPerimeterBoard';
 import './sandbox.css';
 
 interface ClientPlaceable {
@@ -33,6 +34,7 @@ interface SandboxView {
   allowHand: boolean;
   catalog: Record<string, CatalogEntry>;
   backs: Record<string, BackEntry>;
+  board?: SandboxBoardData;
   placeables: Record<string, ClientPlaceable>;
 }
 
@@ -341,6 +343,7 @@ export function SandboxBoard(): JSX.Element {
       </p>
 
       <div className="sbx-board" ref={boardRef}>
+        {view.board?.kind === 'perimeter' && <SandboxPerimeterBoard board={view.board} />}
         {piles.map((pile) => {
           const hidden = drag?.kind === 'table' && drag.id === pile.top.id;
           if (hidden) return null;

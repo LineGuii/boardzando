@@ -27,11 +27,104 @@
   touch-action: none;
 }
 
+/* ---------- Tabuleiro perimetral (fundo) ---------- */
+
+.sbx-perimeter {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  gap: 2px;
+  padding: 4px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sbx-space {
+  background: #e9f2e9;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-width: 0;
+}
+
+.sbx-space-bar {
+  height: 22%;
+  min-height: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.sbx-space-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1px;
+  gap: 1px;
+  min-height: 0;
+}
+
+.sbx-space-emoji {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.sbx-space-name {
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.02;
+  color: #1f2a1f;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.sbx-space-price {
+  font-size: 7px;
+  font-weight: 800;
+  color: #2b5a2b;
+}
+
+/* casas especiais */
+.sbx-space-go { background: #cdeccd; }
+.sbx-space-jail { background: #ffd9b3; }
+.sbx-space-parking { background: #d6e8ff; }
+.sbx-space-gotojail { background: #ffc9c9; }
+.sbx-space-chance { background: #fff0d6; }
+.sbx-space-chest { background: #dbe9ff; }
+.sbx-space-tax { background: #efe2c8; }
+.sbx-space-railroad,
+.sbx-space-utility { background: #f3f3ee; }
+
+.sbx-perimeter-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.sbx-perimeter-title {
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(14px, 3.2vw, 34px);
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.16);
+  transform: rotate(-12deg);
+  text-align: center;
+  user-select: none;
+}
+
 .sbx-pile {
   position: absolute;
   cursor: grab;
   touch-action: none;
   transition: filter 0.12s;
+  z-index: 1;
 }
 
 .sbx-pile:hover {
