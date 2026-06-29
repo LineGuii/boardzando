@@ -23,6 +23,11 @@ interface GameStore {
   currentPlayer?: string;
   /** Resultado da partida (vencedor, etc.); alimentado pelo `game:over`. */
   gameOver?: GameOverResult;
+  /**
+   * Geracao da partida: incrementa a cada (re)inicio. Usado como `key` do
+   * tabuleiro para forca-lo a remontar limpo num "Reiniciar jogo".
+   */
+  matchGen: number;
   /** Posicoes ao vivo de pecas arrastadas por outros (jogos sandbox). */
   dragOverrides: Record<string, DragOverride>;
   chat: ChatMessage[];
@@ -33,9 +38,19 @@ interface GameStore {
 
 export const useGame = create<GameStore>((set) => ({
   chat: [],
+  matchGen: 0,
   dragOverrides: {},
   setSocket: (socket, session) => {
-    socket.on('room:update', (room) => set({ room }));
+    socket.on('room:update', (room) =>
+      set((st) => {
+        // Reinicio: a sala voltou a "playing" enquanto havia um game over.
+        // Limpa o resultado e bumpa a geracao para remontar o tabuleiro.
+        if (room.status === 'playing' && st.gameOver) {
+          return { room, gameOver: undefined, matchGen: st.matchGen + 1 };
+        }
+        return { room };
+      }),
+    );
     socket.on('game:state', ({ view, phase, turn, currentPlayer }) =>
       set({ view, phase, turn, currentPlayer }),
     );
@@ -77,6 +92,7 @@ export const useGame = create<GameStore>((set) => ({
       view: undefined,
       currentPlayer: undefined,
       gameOver: undefined,
+      matchGen: 0,
       dragOverrides: {},
       chat: [],
     }),

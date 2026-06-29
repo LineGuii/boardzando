@@ -335,6 +335,7 @@ function RoomPage(): JSX.Element {
   const session = useGame((s) => s.session)!;
   const room = useGame((s) => s.room);
   const view = useGame((s) => s.view) as { kind?: string } | undefined;
+  const matchGen = useGame((s) => s.matchGen);
   const lastError = useGame((s) => s.lastError);
   const [gameOptions, setGameOptions] = useState<unknown>(undefined);
 
@@ -392,14 +393,16 @@ function RoomPage(): JSX.Element {
           </p>
         )}
 
-        {room?.status === 'playing' && view?.kind === 'sandbox' && <SandboxBoard />}
+        {room?.status === 'playing' && view?.kind === 'sandbox' && (
+          <SandboxBoard key={matchGen} />
+        )}
 
-        {room?.status === 'playing' && room?.gameId === 'ito' && <ItoBoard />}
+        {room?.status === 'playing' && room?.gameId === 'ito' && <ItoBoard key={matchGen} />}
 
-        {room?.status === 'playing' && room?.gameId === 'hues' && <HuesBoard />}
+        {room?.status === 'playing' && room?.gameId === 'hues' && <HuesBoard key={matchGen} />}
 
         {room?.status === 'playing' && room?.gameId === 'uno' && (
-          <TurnGate>
+          <TurnGate key={matchGen}>
             <UnoBoard />
           </TurnGate>
         )}

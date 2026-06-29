@@ -104,7 +104,9 @@ export class RoomService {
     const room = this.getOrThrow(roomId);
     const def = this.registry.getOrThrow(room.gameId);
     if (requesterId !== room.hostId) throw new Error('ONLY_HOST_CAN_START');
-    if (room.status !== 'lobby') throw new Error('ALREADY_STARTED');
+    // Permite iniciar do lobby OU reiniciar uma partida ja finalizada
+    // ("Reiniciar jogo"); so bloqueia se houver partida em andamento.
+    if (room.status === 'playing') throw new Error('ALREADY_STARTED');
     if (room.players.size < def.minPlayers) throw new Error('NOT_ENOUGH_PLAYERS');
 
     const seed = randomInt(0, 2 ** 31 - 1);
