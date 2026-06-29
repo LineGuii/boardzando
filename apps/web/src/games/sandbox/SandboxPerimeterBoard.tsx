@@ -1,4 +1,4 @@
-import type { BoardSpace, SandboxBoard } from '@boardzando/contracts';
+import type { SandboxBoard } from '@boardzando/contracts';
 
 /**
  * Tabuleiro perimetral (estilo Monopoly) renderizado como camada de FUNDO da
