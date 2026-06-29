@@ -2,6 +2,7 @@ import {
   Allow,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -28,6 +29,10 @@ export class CreateRoomDto {
   /** Opcional. String vazia / ausente = sala publica (sem senha). */
   @IsOptional() @IsString() @MaxLength(128)
   roomPassword?: string;
+
+  /** Cor de avatar escolhida (validada contra a paleta no servidor). */
+  @IsOptional() @IsString() @MaxLength(16)
+  color?: string;
 }
 
 // ---- HTTP: entrar na sala ----
@@ -41,6 +46,10 @@ export class JoinRoomDto {
   /** Opcional. Se a sala foi criada sem senha, este campo e ignorado. */
   @IsOptional() @IsString() @MaxLength(128)
   roomPassword?: string;
+
+  /** Cor de avatar escolhida (validada contra a paleta no servidor). */
+  @IsOptional() @IsString() @MaxLength(16)
+  color?: string;
 }
 
 // ---- WS: executar um move ----
@@ -55,6 +64,27 @@ export class GameMoveDto {
   // @Allow() libera o campo no ValidationPipe (que usa forbidNonWhitelisted).
   @Allow()
   data!: unknown;
+}
+
+// ---- WS: stream efemero de drag (jogos sandbox) ----
+export class PlaceableDragDto {
+  @IsString() @IsNotEmpty() @MaxLength(64)
+  roomId!: string;
+
+  @IsString() @IsNotEmpty() @MaxLength(64)
+  id!: string;
+
+  @IsNumber()
+  x!: number;
+
+  @IsNumber()
+  y!: number;
+
+  @IsOptional() @IsNumber()
+  z?: number;
+
+  @IsOptional() @IsNumber()
+  rotation?: number;
 }
 
 // ---- WS: host inicia a partida (com opcoes opcionais do jogo) ----

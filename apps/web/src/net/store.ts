@@ -2,6 +2,16 @@ import { create } from 'zustand';
 import type { ChatMessage, GameOverResult, RoomSnapshot, WsError } from '@boardzando/contracts';
 import type { GameClientSocket } from './socket';
 
+/** Posicao ao vivo de uma peca sendo arrastada por outro jogador (efemera). */
+export interface DragOverride {
+  x: number;
+  y: number;
+  z?: number;
+  rotation?: number;
+  by: string;
+  at: number;
+}
+
 interface GameStore {
   socket?: GameClientSocket;
   session?: { roomId: string; playerId: string };
@@ -13,6 +23,13 @@ interface GameStore {
   currentPlayer?: string;
   /** Resultado da partida (vencedor, etc.); alimentado pelo `game:over`. */
   gameOver?: GameOverResult;
+  /**
+   * Geracao da partida: incrementa a cada (re)inicio. Usado como `key` do
+   * tabuleiro para forca-lo a remontar limpo num "Reiniciar jogo".
+   */
+  matchGen: number;
+  /** Posicoes ao vivo de pecas arrastadas por outros (jogos sandbox). */
+  dragOverrides: Record<string, DragOverride>;
   chat: ChatMessage[];
   lastError?: WsError;
   setSocket: (s: GameClientSocket, session: { roomId: string; playerId: string }) => void;
@@ -21,13 +38,32 @@ interface GameStore {
 
 export const useGame = create<GameStore>((set) => ({
   chat: [],
+  matchGen: 0,
+  dragOverrides: {},
   setSocket: (socket, session) => {
-    socket.on('room:update', (room) => set({ room }));
+    socket.on('room:update', (room) =>
+      set((st) => {
+        // Reinicio: a sala voltou a "playing" enquanto havia um game over.
+        // Limpa o resultado e bumpa a geracao para remontar o tabuleiro.
+        if (room.status === 'playing' && st.gameOver) {
+          return { room, gameOver: undefined, matchGen: st.matchGen + 1 };
+        }
+        return { room };
+      }),
+    );
     socket.on('game:state', ({ view, phase, turn, currentPlayer }) =>
       set({ view, phase, turn, currentPlayer }),
     );
     socket.on('chat:message', (msg) => set((st) => ({ chat: [...st.chat, msg] })));
     socket.on('game:over', ({ result }) => set({ gameOver: result }));
+    socket.on('placeable:dragging', ({ id, x, y, z, rotation, by }) =>
+      set((st) => ({
+        dragOverrides: {
+          ...st.dragOverrides,
+          [id]: { x, y, z, rotation, by, at: Date.now() },
+        },
+      })),
+    );
     socket.on('error', (lastError) => {
       // se fomos expulsos, encerra a sessao para voltar ao lobby.
       if (lastError.code === 'KICKED') {
@@ -56,6 +92,8 @@ export const useGame = create<GameStore>((set) => ({
       view: undefined,
       currentPlayer: undefined,
       gameOver: undefined,
+      matchGen: 0,
+      dragOverrides: {},
       chat: [],
     }),
 }));

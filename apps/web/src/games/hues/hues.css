@@ -9,11 +9,13 @@
   grid-template-columns: minmax(0, 1fr) 240px;
   gap: 16px;
   margin-top: 12px;
+  /* impede que o min-width do grid interno vaze para o container externo */
+  min-width: 0;
 }
 
 @media (max-width: 900px) {
   .hues-room {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -22,6 +24,9 @@
   border: 1px solid #e2dccf;
   border-radius: 12px;
   padding: 12px;
+  /* item de grid: min-width: 0 para que o filho com min-width (a area
+     scrollavel do tabuleiro) seja contido em vez de empurrar o pai. */
+  min-width: 0;
 }
 
 .hues-step-banner {
@@ -40,7 +45,13 @@
   color: #2b2b2b;
 }
 
-/* ---------- Grid 30x16 com labels A..AD / 1..16 ---------- */
+/* ---------- Grid 30x16 com labels 1..30 / A..P ---------- */
+
+.hues-grid-scroll {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+}
 
 .hues-grid {
   --label-size: 22px;
@@ -51,7 +62,6 @@
   background: #2b2b2b;
   border: 2px solid #2b2b2b;
   border-radius: 6px;
-  overflow: hidden;
   width: 100%;
   /* mesa um pouco mais alta para ler as cores melhor */
   min-height: 480px;
@@ -62,6 +72,39 @@
 @media (min-width: 1100px) {
   .hues-grid {
     min-height: 580px;
+  }
+}
+
+/* ---------- Mobile / touch ---------- */
+
+@media (max-width: 760px) {
+  /* Scroll horizontal: as 30 colunas ficam ilegiveis abaixo de ~720px.
+     Mantemos cada celula tatil em ~24px e o usuario rola o tabuleiro. */
+  .hues-grid-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    border: 2px solid #2b2b2b;
+  }
+  .hues-grid {
+    min-width: 760px;
+    min-height: 380px;
+    border: 0;
+    border-radius: 0;
+  }
+  /* Labels da coluna A..P + corner ficam fixos a esquerda durante o scroll */
+  .hues-grid .hues-corner,
+  .hues-grid .hues-row-label {
+    position: sticky;
+    left: 0;
+    z-index: 6;
+  }
+}
+
+/* Magnifier so faz sentido com mouse: ocultar em touch. */
+@media (hover: none) {
+  .hues-magnifier {
+    display: none;
   }
 }
 
@@ -466,4 +509,80 @@
   width: 16px;
   height: 16px;
   cursor: pointer;
+}
+
+/* ---------- Cone pendente (preview antes de confirmar) ---------- */
+
+.hues-cell.pending {
+  outline: 2px solid #f5cb1a;
+  outline-offset: -2px;
+  z-index: 4;
+}
+
+.hues-cone-pending .hues-cone-dot {
+  opacity: 0.85;
+  border-style: dashed;
+  animation: hues-pending-pulse 1s ease-in-out infinite;
+}
+
+@keyframes hues-pending-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.18); }
+}
+
+/* ---------- Barra de confirmacao (so no mobile) ---------- */
+
+.hues-confirm-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #fffbea;
+  border: 2px solid #f5cb1a;
+  border-radius: 10px;
+  font-size: 14px;
+  flex-wrap: wrap;
+  position: sticky;
+  bottom: 8px;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.hues-confirm-bar b {
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-size: 16px;
+  color: #2b2b2b;
+}
+
+.hues-confirm-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.hues-confirm-cancel,
+.hues-confirm-ok {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.hues-confirm-cancel {
+  background: #f1ece1;
+  color: #6b5f4e;
+}
+
+.hues-confirm-ok {
+  background: #2d932d;
+  color: white;
+  box-shadow: 0 2px 6px rgba(45, 147, 45, 0.4);
+}
+
+.hues-confirm-ok:active {
+  transform: translateY(1px);
 }

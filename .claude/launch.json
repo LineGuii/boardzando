@@ -1,0 +1,28 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "All (turbo dev)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 5173
+    },
+    {
+      "name": "Web (Vite)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@boardzando/web", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "Server (NestJS)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@boardzando/server", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "Contracts (tsc watch)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@boardzando/contracts", "dev"]
+    }
+  ]
+}

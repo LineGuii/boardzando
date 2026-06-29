@@ -29,6 +29,20 @@ export interface ClientToServerEvents {
     payload: { roomId: RoomId; type: string; data: unknown },
     ack: (res: AckResult) => void,
   ) => void;
+  /**
+   * Stream EFEMERO de drag (jogos sandbox): posicao ao vivo de uma peca
+   * enquanto arrastada. Nao muta estado nem persiste — o servidor apenas
+   * rebroadcast para a sala. A posicao autoritativa vai via `game:move` no
+   * fim do arraste.
+   */
+  'placeable:drag': (payload: {
+    roomId: RoomId;
+    id: string;
+    x: number;
+    y: number;
+    z?: number;
+    rotation?: number;
+  }) => void;
   'chat:send': (payload: { roomId: RoomId; text: string }) => void;
 }
 
@@ -47,6 +61,15 @@ export interface ServerToClientEvents {
   }) => void;
   /** O jogo terminou. */
   'game:over': (payload: { roomId: RoomId; result: GameOverResult }) => void;
+  /** Rebroadcast efemero do drag de uma peca (jogos sandbox). */
+  'placeable:dragging': (payload: {
+    id: string;
+    x: number;
+    y: number;
+    z?: number;
+    rotation?: number;
+    by: PlayerId;
+  }) => void;
   'chat:message': (msg: ChatMessage) => void;
   /** Erro nao-fatal (move invalido, rate limit etc.). */
   'error': (err: WsError) => void;
@@ -58,6 +81,8 @@ export interface PlayerSnapshot {
   name: string;
   connected: boolean;
   isHost: boolean;
+  /** Cor de fundo do avatar escolhida pelo jogador (paleta AVATAR_COLORS). */
+  color?: string;
 }
 
 export interface RoomSnapshot {

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import type { GameSummary, RoomSummary } from '@boardzando/contracts';
+import { AVATAR_COLORS, randomAvatarColor } from '@boardzando/contracts';
 import { api } from './net/api';
 import { connectSocket } from './net/socket';
 import { useGame } from './net/store';
 import { UnoBoard } from './games/uno/UnoBoard';
 import { HuesBoard } from './games/hues/HuesBoard';
+import { SandboxBoard } from './games/sandbox/SandboxBoard';
+import { ItoBoard } from './games/ito/ItoBoard';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
 import { GameOptionsPanel } from './shell/GameOptionsPanel';
@@ -39,6 +42,8 @@ function Lobby(): JSX.Element {
   const [selectedGameId, setSelectedGameId] = useState<string>('');
   const [rooms, setRooms] = useState<RoomSummary[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(false);
+  // Cor do avatar: começa numa cor aleatória da paleta.
+  const [color, setColor] = useState<string>(() => randomAvatarColor());
 
   // Pre-seleciona "Entrar" se a URL tem ?room=<id>
   useEffect(() => {
@@ -83,8 +88,8 @@ function Lobby(): JSX.Element {
     try {
       const res =
         action === 'create'
-          ? await api.createRoom(selectedGameId || 'uno', name.trim(), password || undefined)
-          : await api.joinRoom(roomId.trim(), name.trim(), password || undefined);
+          ? await api.createRoom(selectedGameId || 'uno', name.trim(), password || undefined, color)
+          : await api.joinRoom(roomId.trim(), name.trim(), password || undefined, color);
       const socket = connectSocket(res.token);
       setSocket(socket, { roomId: res.roomId, playerId: res.playerId });
     } catch (e) {
@@ -98,7 +103,7 @@ function Lobby(): JSX.Element {
     games.find((g) => g.id === id)?.name ?? id;
 
   return (
-    <div className="shell-bg">
+    <div className={`shell-bg shell-bg-${tab}`}>
       <div className="shell-container">
         <div className="shell-hero">
           <div className="shell-dice" aria-hidden>🎲 🃏 🎯</div>
@@ -108,7 +113,7 @@ function Lobby(): JSX.Element {
           </p>
         </div>
 
-        <div className="shell-card">
+        <div className={`shell-card shell-card-${tab}`}>
           <div className="shell-tabs" role="tablist">
             <button
               type="button"
@@ -128,6 +133,32 @@ function Lobby(): JSX.Element {
             >
               Entrar em sala
             </button>
+          </div>
+
+          <div className="shell-field">
+            <label className="shell-label">Cor do seu ícone</label>
+            <div className="shell-avatar-row">
+              <span
+                className="shell-avatar-preview"
+                style={{ background: color }}
+                title="Prévia do seu ícone"
+              >
+                {(name.trim()[0] ?? '?').toUpperCase()}
+              </span>
+              <div className="shell-color-grid">
+                {AVATAR_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`shell-color-swatch ${color === c ? 'active' : ''}`}
+                    style={{ background: c }}
+                    onClick={() => setColor(c)}
+                    aria-label={`Cor ${c}`}
+                    aria-pressed={color === c}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
 
           {tab === 'create' ? (
@@ -303,6 +334,8 @@ function Lobby(): JSX.Element {
 function RoomPage(): JSX.Element {
   const session = useGame((s) => s.session)!;
   const room = useGame((s) => s.room);
+  const view = useGame((s) => s.view) as { kind?: string } | undefined;
+  const matchGen = useGame((s) => s.matchGen);
   const lastError = useGame((s) => s.lastError);
   const [gameOptions, setGameOptions] = useState<unknown>(undefined);
 
@@ -320,7 +353,9 @@ function RoomPage(): JSX.Element {
   const playerCount = room?.players?.length ?? 0;
   const isHost = room?.hostId === session.playerId;
 
-  const wide = room?.status === 'playing' && room?.gameId === 'hues';
+  const wide =
+    room?.status === 'playing' &&
+    (room?.gameId === 'hues' || room?.gameId === 'monopoly' || room?.gameId === 'ito');
 
   return (
     <div className="shell-bg">
@@ -358,10 +393,16 @@ function RoomPage(): JSX.Element {
           </p>
         )}
 
-        {room?.status === 'playing' && room?.gameId === 'hues' && <HuesBoard />}
+        {room?.status === 'playing' && view?.kind === 'sandbox' && (
+          <SandboxBoard key={matchGen} />
+        )}
+
+        {room?.status === 'playing' && room?.gameId === 'ito' && <ItoBoard key={matchGen} />}
+
+        {room?.status === 'playing' && room?.gameId === 'hues' && <HuesBoard key={matchGen} />}
 
         {room?.status === 'playing' && room?.gameId === 'uno' && (
-          <TurnGate>
+          <TurnGate key={matchGen}>
             <UnoBoard />
           </TurnGate>
         )}
@@ -416,7 +457,12 @@ function RoomHeader({
             const canKick = iAmHost && !isMe && room.status === 'lobby';
             return (
               <li key={p.id} className={`shell-player ${p.connected ? '' : 'offline'}`}>
-                <span className="shell-player-avatar">{p.name[0] ?? '?'}</span>
+                <span
+                  className="shell-player-avatar"
+                  style={p.color ? { background: p.color } : undefined}
+                >
+                  {p.name[0] ?? '?'}
+                </span>
                 <span>
                   {p.name}
                   {isMe ? ' (você)' : ''}

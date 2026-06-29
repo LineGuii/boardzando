@@ -27,18 +27,37 @@ export function GameOverBanner(): JSX.Element | null {
     );
   };
 
+  // Jogos cooperativos: a equipe inteira vence ou perde junta.
+  const coop = gameOver.coop;
+  const coopWin = coop?.outcome === 'win';
+
   return (
     <div
       style={{
         marginTop: 16,
         padding: 16,
         borderRadius: 8,
-        background: youWon ? '#e7f7ec' : '#f4f4f4',
+        background: coop
+          ? coopWin
+            ? '#e7f7ec'
+            : '#fdeaea'
+          : youWon
+            ? '#e7f7ec'
+            : '#f4f4f4',
         border: '1px solid #cbd5e1',
         textAlign: 'center',
       }}
     >
-      {gameOver.draw ? (
+      {coop ? (
+        <>
+          <h2 style={{ margin: 0, color: coopWin ? 'seagreen' : '#b41818' }}>
+            {coopWin ? '🎉 Vitória da equipe!' : '💀 Derrota da equipe'}
+          </h2>
+          {coop.detail && (
+            <p style={{ margin: '6px 0 0', color: '#555' }}>{coop.detail}</p>
+          )}
+        </>
+      ) : gameOver.draw ? (
         <h2 style={{ margin: 0 }}>Empate!</h2>
       ) : youWon ? (
         <h2 style={{ margin: 0, color: 'seagreen' }}>🎉 Voce venceu!</h2>

@@ -28,12 +28,12 @@ async function get<T>(path: string): Promise<T> {
 }
 
 export const api = {
-  /** `roomPassword` opcional: vazio/undefined cria sala publica. */
-  createRoom: (gameId: string, playerName: string, roomPassword?: string) =>
-    post<SessionResponse>('/rooms', { gameId, playerName, roomPassword }),
-  /** `roomPassword` opcional: ignorado se a sala for publica. */
-  joinRoom: (roomId: string, playerName: string, roomPassword?: string) =>
-    post<SessionResponse>('/rooms/join', { roomId, playerName, roomPassword }),
+  /** `roomPassword` opcional: vazio/undefined cria sala publica. `color`: avatar. */
+  createRoom: (gameId: string, playerName: string, roomPassword?: string, color?: string) =>
+    post<SessionResponse>('/rooms', { gameId, playerName, roomPassword, color }),
+  /** `roomPassword` opcional: ignorado se a sala for publica. `color`: avatar. */
+  joinRoom: (roomId: string, playerName: string, roomPassword?: string, color?: string) =>
+    post<SessionResponse>('/rooms/join', { roomId, playerName, roomPassword, color }),
   /** Lista jogos plugados disponiveis. */
   listGames: () => get<GameSummary[]>('/games'),
   /** Lista salas publicas em lobby. */
