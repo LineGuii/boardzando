@@ -47,30 +47,73 @@ export function ItoBoard(): JSX.Element {
 
   const [muted, setMutedState] = useState(isMuted());
 
-  // ----- sons: acerto / erro / nível concluído -----
+  // overlays de feedback/tema
+  const [feedback, setFeedback] = useState<'success' | 'error' | null>(null);
+  const [feedbackKey, setFeedbackKey] = useState(0);
+  const [heartLoss, setHeartLoss] = useState(0);
+  const [themeIntro, setThemeIntro] = useState(false);
+
+  const feedbackTimer = useRef<number | undefined>(undefined);
+  const themeTimer = useRef<number | undefined>(undefined);
+
+  // ----- orquestra som + animação a cada mudança de estado -----
   const prevPlayed = useRef(0);
-  const prevMistake = useRef<string | undefined>(undefined);
+  const prevLives = useRef(0);
   const prevLevel = useRef(0);
+  const inited = useRef(false);
   useEffect(() => {
     if (!view) return;
     const playedLen = view.playedPile.length;
-    const mistakeStr = view.lastMistake
-      ? `${view.lastMistake.byValue}:${view.lastMistake.count}`
-      : undefined;
-    if (prevLevel.current === 0) {
-      // primeira leitura: só inicializa, sem tocar
-      prevLevel.current = view.level;
-      prevPlayed.current = playedLen;
-      prevMistake.current = mistakeStr;
-      return;
+    const lives = view.lives;
+    const level = view.level;
+
+    const showFeedback = (type: 'success' | 'error'): void => {
+      setFeedback(type);
+      setFeedbackKey((k) => k + 1);
+      window.clearTimeout(feedbackTimer.current);
+      feedbackTimer.current = window.setTimeout(() => setFeedback(null), 1800);
+    };
+    const showThemeIntro = (): void => {
+      setThemeIntro(true);
+      window.clearTimeout(themeTimer.current);
+      themeTimer.current = window.setTimeout(() => setThemeIntro(false), 5000);
+    };
+
+    if (!inited.current) {
+      inited.current = true;
+      showThemeIntro(); // primeira tela de tema
+    } else if (level !== prevLevel.current) {
+      // novo nível (novo tema): tela de 5s; se também perdeu vida, mostra a quebra por cima
+      showThemeIntro();
+      if (lives < prevLives.current) {
+        setHeartLoss(prevLives.current - lives);
+        showFeedback('error');
+        playError();
+      } else {
+        playSuccess();
+      }
+    } else if (lives < prevLives.current) {
+      setHeartLoss(prevLives.current - lives);
+      showFeedback('error');
+      playError();
+    } else if (playedLen > prevPlayed.current) {
+      showFeedback('success');
+      playSuccess();
     }
-    if (view.lastMistake && mistakeStr !== prevMistake.current) playError();
-    else if (view.level > prevLevel.current) playSuccess();
-    else if (playedLen > prevPlayed.current) playSuccess();
-    prevLevel.current = view.level;
+
     prevPlayed.current = playedLen;
-    prevMistake.current = mistakeStr;
+    prevLives.current = lives;
+    prevLevel.current = level;
   }, [view]);
+
+  // limpa timers ao desmontar
+  useEffect(
+    () => () => {
+      window.clearTimeout(feedbackTimer.current);
+      window.clearTimeout(themeTimer.current);
+    },
+    [],
+  );
 
   // ----- som de fim de jogo (vitória/derrota) -----
   const prevOver = useRef(false);
@@ -151,7 +194,10 @@ export function ItoBoard(): JSX.Element {
           <span className="ito-level">
             Nível {view.level}/{view.maxLevel}
           </span>
-          <span className="ito-lives" title={`${view.lives} vidas`}>
+          <span
+            className={`ito-lives ${feedback === 'error' ? 'shake' : ''}`}
+            title={`${view.lives} vidas`}
+          >
             {view.lives > 0 ? '❤️'.repeat(view.lives) : '—'}
           </span>
         </div>
@@ -268,6 +314,53 @@ export function ItoBoard(): JSX.Element {
       )}
 
       <GameChat />
+
+      {/* feedback grande e explícito de acerto/erro (+ vida sendo destruída) */}
+      {feedback && (
+        <div key={feedbackKey} className={`ito-feedback ${feedback}`}>
+          {feedback === 'success' ? (
+            <div className="ito-feedback-inner success">
+              <span className="ito-feedback-icon">✓</span>
+              <span className="ito-feedback-text">Acertou!</span>
+              <span className="ito-feedback-sub">carta na ordem certa</span>
+            </div>
+          ) : (
+            <div className="ito-feedback-inner error">
+              <span className="ito-heartbreak" aria-hidden>
+                <span className="ito-heartbreak-emoji">💔</span>
+                <span className="ito-shard s1" />
+                <span className="ito-shard s2" />
+                <span className="ito-shard s3" />
+              </span>
+              <span className="ito-feedback-text">Erro!</span>
+              <span className="ito-feedback-sub">
+                −{heartLoss} vida{heartLoss > 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* tela de novo tema (5s) antes das cartas */}
+      {themeIntro && (
+        <div className="ito-theme-intro">
+          <div className="ito-theme-intro-card">
+            <span className="ito-theme-intro-eyebrow">Novo tema · Nível {view.level}</span>
+            <h2 className="ito-theme-intro-topic">{view.theme.topic}</h2>
+            <div className="ito-theme-intro-scale">
+              <span>1 · {view.theme.low}</span>
+              <div className="ito-theme-intro-bar" />
+              <span>{view.theme.high} · 100</span>
+            </div>
+            <p className="ito-theme-intro-hint">
+              Memorizem a escala… as cartas chegam em instantes!
+            </p>
+            <div className="ito-theme-intro-progress">
+              <span />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
