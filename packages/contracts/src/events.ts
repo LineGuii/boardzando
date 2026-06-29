@@ -81,6 +81,8 @@ export interface PlayerSnapshot {
   name: string;
   connected: boolean;
   isHost: boolean;
+  /** Cor de fundo do avatar escolhida pelo jogador (paleta AVATAR_COLORS). */
+  color?: string;
 }
 
 export interface RoomSnapshot {

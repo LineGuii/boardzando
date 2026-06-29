@@ -66,6 +66,7 @@ export function sandboxPlayerView(
     allowHand: state.allowHand,
     catalog: state.catalog,
     backs: state.backs,
+    board: state.board,
     placeables: visible,
   };
 }

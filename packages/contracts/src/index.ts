@@ -5,3 +5,4 @@ export * from './events';
 export * from './dtos';
 export * from './hues-board';
 export * from './sandbox';
+export * from './avatar';

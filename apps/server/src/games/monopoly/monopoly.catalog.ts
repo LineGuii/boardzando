@@ -1,9 +1,11 @@
 import type {
   BackEntry,
+  BoardSpace,
   CatalogEntry,
   Placeable,
   PlayerId,
   RandomAPI,
+  SandboxBoard,
   SandboxState,
 } from '@boardzando/contracts';
 
@@ -31,42 +33,100 @@ const HOTELS = 12;
 
 const TOKENS = ['🎩', '🚗', '🐕', '🚢', '👢', '🧵', '🐈', '🛒'];
 
+const GROUP_COLOR: Record<string, string> = {
+  brown: '#955436',
+  lightblue: '#aae0fa',
+  pink: '#d93a96',
+  orange: '#f7941d',
+  red: '#ed1b24',
+  yellow: '#fef200',
+  green: '#1fb25a',
+  darkblue: '#0072bb',
+  railroad: '#2b2b2b',
+  utility: '#8a9bb0',
+};
+
 interface PropertyDef {
   name: string;
   group: string;
   color: string;
+  /** Casa do tabuleiro (0..39) onde esta propriedade fica. */
+  boardIndex: number;
+  /** Preco cosmetico. */
+  price: number;
+  emoji?: string;
 }
 
+/**
+ * As 28 propriedades com CIDADES BRASILEIRAS (22 cidades + 4 aeroportos +
+ * 2 concessionarias), em ordem de tabuleiro. `deed-i` mapeia 1:1 com este
+ * array e tambem alimenta as casas do tabuleiro.
+ */
 const PROPERTIES: PropertyDef[] = [
-  { name: 'Mediterranean Ave', group: 'brown', color: '#955436' },
-  { name: 'Baltic Ave', group: 'brown', color: '#955436' },
-  { name: 'Oriental Ave', group: 'lightblue', color: '#aae0fa' },
-  { name: 'Vermont Ave', group: 'lightblue', color: '#aae0fa' },
-  { name: 'Connecticut Ave', group: 'lightblue', color: '#aae0fa' },
-  { name: 'St. Charles Pl', group: 'pink', color: '#d93a96' },
-  { name: 'States Ave', group: 'pink', color: '#d93a96' },
-  { name: 'Virginia Ave', group: 'pink', color: '#d93a96' },
-  { name: 'St. James Pl', group: 'orange', color: '#f7941d' },
-  { name: 'Tennessee Ave', group: 'orange', color: '#f7941d' },
-  { name: 'New York Ave', group: 'orange', color: '#f7941d' },
-  { name: 'Kentucky Ave', group: 'red', color: '#ed1b24' },
-  { name: 'Indiana Ave', group: 'red', color: '#ed1b24' },
-  { name: 'Illinois Ave', group: 'red', color: '#ed1b24' },
-  { name: 'Atlantic Ave', group: 'yellow', color: '#fef200' },
-  { name: 'Ventnor Ave', group: 'yellow', color: '#fef200' },
-  { name: 'Marvin Gardens', group: 'yellow', color: '#fef200' },
-  { name: 'Pacific Ave', group: 'green', color: '#1fb25a' },
-  { name: 'North Carolina Ave', group: 'green', color: '#1fb25a' },
-  { name: 'Pennsylvania Ave', group: 'green', color: '#1fb25a' },
-  { name: 'Park Place', group: 'darkblue', color: '#0072bb' },
-  { name: 'Boardwalk', group: 'darkblue', color: '#0072bb' },
-  { name: 'Reading Railroad', group: 'railroad', color: '#111' },
-  { name: 'Pennsylvania RR', group: 'railroad', color: '#111' },
-  { name: 'B. & O. Railroad', group: 'railroad', color: '#111' },
-  { name: 'Short Line', group: 'railroad', color: '#111' },
-  { name: 'Electric Company', group: 'utility', color: '#f0e68c' },
-  { name: 'Water Works', group: 'utility', color: '#9fd3ff' },
+  { name: 'Boa Vista', group: 'brown', color: GROUP_COLOR.brown!, boardIndex: 1, price: 60 },
+  { name: 'Macapá', group: 'brown', color: GROUP_COLOR.brown!, boardIndex: 3, price: 60 },
+  { name: 'Santos Dumont', group: 'railroad', color: GROUP_COLOR.railroad!, boardIndex: 5, price: 200, emoji: '✈️' },
+  { name: 'Rio Branco', group: 'lightblue', color: GROUP_COLOR.lightblue!, boardIndex: 6, price: 100 },
+  { name: 'Porto Velho', group: 'lightblue', color: GROUP_COLOR.lightblue!, boardIndex: 8, price: 100 },
+  { name: 'Palmas', group: 'lightblue', color: GROUP_COLOR.lightblue!, boardIndex: 9, price: 120 },
+  { name: 'Teresina', group: 'pink', color: GROUP_COLOR.pink!, boardIndex: 11, price: 140 },
+  { name: 'Cia. de Energia', group: 'utility', color: GROUP_COLOR.utility!, boardIndex: 12, price: 150, emoji: '⚡' },
+  { name: 'Aracaju', group: 'pink', color: GROUP_COLOR.pink!, boardIndex: 13, price: 140 },
+  { name: 'João Pessoa', group: 'pink', color: GROUP_COLOR.pink!, boardIndex: 14, price: 160 },
+  { name: 'Congonhas', group: 'railroad', color: GROUP_COLOR.railroad!, boardIndex: 15, price: 200, emoji: '✈️' },
+  { name: 'Natal', group: 'orange', color: GROUP_COLOR.orange!, boardIndex: 16, price: 180 },
+  { name: 'Maceió', group: 'orange', color: GROUP_COLOR.orange!, boardIndex: 18, price: 180 },
+  { name: 'Campo Grande', group: 'orange', color: GROUP_COLOR.orange!, boardIndex: 19, price: 200 },
+  { name: 'Cuiabá', group: 'red', color: GROUP_COLOR.red!, boardIndex: 21, price: 220 },
+  { name: 'Vitória', group: 'red', color: GROUP_COLOR.red!, boardIndex: 23, price: 220 },
+  { name: 'Florianópolis', group: 'red', color: GROUP_COLOR.red!, boardIndex: 24, price: 240 },
+  { name: 'Brasília Intl.', group: 'railroad', color: GROUP_COLOR.railroad!, boardIndex: 25, price: 200, emoji: '✈️' },
+  { name: 'Belém', group: 'yellow', color: GROUP_COLOR.yellow!, boardIndex: 26, price: 260 },
+  { name: 'Goiânia', group: 'yellow', color: GROUP_COLOR.yellow!, boardIndex: 27, price: 260 },
+  { name: 'Cia. de Água', group: 'utility', color: GROUP_COLOR.utility!, boardIndex: 28, price: 150, emoji: '💧' },
+  { name: 'Manaus', group: 'yellow', color: GROUP_COLOR.yellow!, boardIndex: 29, price: 280 },
+  { name: 'Recife', group: 'green', color: GROUP_COLOR.green!, boardIndex: 31, price: 300 },
+  { name: 'Fortaleza', group: 'green', color: GROUP_COLOR.green!, boardIndex: 32, price: 300 },
+  { name: 'Salvador', group: 'green', color: GROUP_COLOR.green!, boardIndex: 34, price: 320 },
+  { name: 'Guarulhos', group: 'railroad', color: GROUP_COLOR.railroad!, boardIndex: 35, price: 200, emoji: '✈️' },
+  { name: 'Rio de Janeiro', group: 'darkblue', color: GROUP_COLOR.darkblue!, boardIndex: 37, price: 350 },
+  { name: 'São Paulo', group: 'darkblue', color: GROUP_COLOR.darkblue!, boardIndex: 39, price: 400 },
 ];
+
+/** Casas especiais (nao-propriedade) do tabuleiro perimetral de 40 casas. */
+const SPECIAL_SPACES: BoardSpace[] = [
+  { index: 0, name: 'Ponto de Partida', type: 'go', emoji: '➡️' },
+  { index: 2, name: 'Cofre', type: 'chest', emoji: '🎁' },
+  { index: 4, name: 'Imposto de Renda', type: 'tax', price: 200, emoji: '💸' },
+  { index: 7, name: 'Sorte', type: 'chance', emoji: '❓' },
+  { index: 10, name: 'Prisão / Visita', type: 'jail', emoji: '🔒' },
+  { index: 17, name: 'Cofre', type: 'chest', emoji: '🎁' },
+  { index: 20, name: 'Estacionamento', type: 'parking', emoji: '🅿️' },
+  { index: 22, name: 'Sorte', type: 'chance', emoji: '❓' },
+  { index: 30, name: 'Vá para a Prisão', type: 'gotojail', emoji: '👮' },
+  { index: 33, name: 'Cofre', type: 'chest', emoji: '🎁' },
+  { index: 36, name: 'Sorte', type: 'chance', emoji: '❓' },
+  { index: 38, name: 'Imposto de Luxo', type: 'tax', price: 100, emoji: '💎' },
+];
+
+/** Monta as 40 casas do tabuleiro a partir das propriedades + especiais. */
+function buildBoard(): SandboxBoard {
+  const spaces: BoardSpace[] = [...SPECIAL_SPACES];
+  for (const p of PROPERTIES) {
+    const type: BoardSpace['type'] =
+      p.group === 'railroad' ? 'railroad' : p.group === 'utility' ? 'utility' : 'property';
+    spaces.push({
+      index: p.boardIndex,
+      name: p.name,
+      type,
+      color: p.color,
+      price: p.price,
+      emoji: p.emoji,
+    });
+  }
+  spaces.sort((a, b) => a.index - b.index);
+  return { kind: 'perimeter', size: 11, spaces };
+}
 
 // 16 cartas Sorte e 16 Cofre da Comunidade (acoes canonicas curtas).
 const CHANCE_CARDS = [
@@ -108,6 +168,11 @@ const CHEST_CARDS = [
 ];
 
 // ---------- catalogo + versos ----------
+
+/** Texto legivel sobre a cor do grupo (claro -> texto escuro). */
+function readableText(group: string): string {
+  return group === 'yellow' || group === 'lightblue' || group === 'utility' ? '#111' : '#fff';
+}
 
 function buildBacks(): Record<string, BackEntry> {
   const backs: BackEntry[] = [
@@ -176,7 +241,12 @@ function buildCatalog(): Record<string, CatalogEntry> {
       typeId: `deed-${i}`,
       category: 'card',
       stackGroup: 'deck-deed',
-      front: { label: p.name, sub: p.group.toUpperCase(), color: p.color, textColor: '#fff' },
+      front: {
+        label: `${p.emoji ? p.emoji + ' ' : ''}${p.name}`,
+        sub: `$${p.price}`,
+        color: p.color,
+        textColor: readableText(p.group),
+      },
       backId: 'back-deed',
       canHold: true,
       w: 1.1,
@@ -270,24 +340,25 @@ export function buildMonopolySandbox(_rng: RandomAPI, _players: PlayerId[]): San
     }
   };
 
-  // linha de dinheiro (banco) no topo
+  // Tudo comeca na AREA CENTRAL do tabuleiro (a borda e ocupada pelas casas).
+  // linha de dinheiro (banco)
   MONEY.forEach((m, i) => {
-    const x = 0.05 + i * 0.13;
-    pile(`money-${m.value}`, m.count, x, 0.06, true);
+    const x = 0.14 + i * 0.1;
+    pile(`money-${m.value}`, m.count, x, 0.15, true);
   });
 
   // decks no centro: Sorte e Cofre viradas para baixo, num stack por deck.
   {
     const chanceStack = 'stk-deck-chance';
     CHANCE_CARDS.forEach((_t, i) => {
-      const p = makePlaceable(`chance-${i}`, 0.32, 0.42, false);
+      const p = makePlaceable(`chance-${i}`, 0.32, 0.4, false);
       p.stackId = chanceStack;
       p.stackOrder = i;
       place(p);
     });
     const chestStack = 'stk-deck-chest';
     CHEST_CARDS.forEach((_t, i) => {
-      const p = makePlaceable(`chest-${i}`, 0.46, 0.42, false);
+      const p = makePlaceable(`chest-${i}`, 0.45, 0.4, false);
       p.stackId = chestStack;
       p.stackOrder = i;
       place(p);
@@ -295,7 +366,7 @@ export function buildMonopolySandbox(_rng: RandomAPI, _players: PlayerId[]): San
     // titulos de propriedade (virados para cima, empilhados)
     const deedStack = 'stk-deck-deed';
     PROPERTIES.forEach((_p, i) => {
-      const p = makePlaceable(`deed-${i}`, 0.60, 0.42, true);
+      const p = makePlaceable(`deed-${i}`, 0.58, 0.4, true);
       p.stackId = deedStack;
       p.stackOrder = i;
       place(p);
@@ -303,23 +374,24 @@ export function buildMonopolySandbox(_rng: RandomAPI, _players: PlayerId[]): San
   }
 
   // casas e hoteis
-  pile('house', HOUSES, 0.74, 0.42, true);
-  pile('hotel', HOTELS, 0.86, 0.42, true);
+  pile('house', HOUSES, 0.7, 0.4, true);
+  pile('hotel', HOTELS, 0.8, 0.4, true);
 
-  // peoes em linha embaixo
+  // peoes em linha no centro
   TOKENS.forEach((_e, i) => {
-    place(makePlaceable(`token-${i}`, 0.06 + i * 0.06, 0.74, true));
+    place(makePlaceable(`token-${i}`, 0.16 + i * 0.05, 0.6, true));
   });
 
   // dois dados
-  place(makePlaceable('die', 0.62, 0.74, true));
-  place(makePlaceable('die', 0.68, 0.74, true));
+  place(makePlaceable('die', 0.6, 0.6, true));
+  place(makePlaceable('die', 0.66, 0.6, true));
 
   return {
     kind: 'sandbox',
     allowHand: true,
     catalog,
     backs,
+    board: buildBoard(),
     placeables,
     zCounter: counter + 1000,
   };

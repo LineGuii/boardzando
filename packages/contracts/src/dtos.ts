@@ -29,6 +29,10 @@ export class CreateRoomDto {
   /** Opcional. String vazia / ausente = sala publica (sem senha). */
   @IsOptional() @IsString() @MaxLength(128)
   roomPassword?: string;
+
+  /** Cor de avatar escolhida (validada contra a paleta no servidor). */
+  @IsOptional() @IsString() @MaxLength(16)
+  color?: string;
 }
 
 // ---- HTTP: entrar na sala ----
@@ -42,6 +46,10 @@ export class JoinRoomDto {
   /** Opcional. Se a sala foi criada sem senha, este campo e ignorado. */
   @IsOptional() @IsString() @MaxLength(128)
   roomPassword?: string;
+
+  /** Cor de avatar escolhida (validada contra a paleta no servidor). */
+  @IsOptional() @IsString() @MaxLength(16)
+  color?: string;
 }
 
 // ---- WS: executar um move ----

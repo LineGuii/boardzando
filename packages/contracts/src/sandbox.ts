@@ -73,6 +73,42 @@ export interface Placeable {
   value?: number;
 }
 
+/** Tipo de casa num tabuleiro perimetral estilo Monopoly. */
+export type BoardSpaceType =
+  | 'go'
+  | 'property'
+  | 'railroad'
+  | 'utility'
+  | 'chance'
+  | 'chest'
+  | 'tax'
+  | 'jail'
+  | 'parking'
+  | 'gotojail';
+
+/** Uma casa do tabuleiro (decorativa — sem regras). */
+export interface BoardSpace {
+  index: number; // 0..39
+  name: string;
+  type: BoardSpaceType;
+  /** Cor do grupo (property/railroad/utility). */
+  color?: string;
+  /** Preco/valor (cosmetico). */
+  price?: number;
+  emoji?: string;
+}
+
+/**
+ * Tabuleiro perimetral (estilo Monopoly): N*N celulas, 4*(N-1) casas na borda.
+ * Puramente decorativo — os placeables ficam por cima. O jogo decide se tem um.
+ */
+export interface SandboxBoard {
+  kind: 'perimeter';
+  /** Lado do grid (ex.: 11 -> 40 casas na borda). */
+  size: number;
+  spaces: BoardSpace[];
+}
+
 export interface SandboxState {
   /** Marcador de roteamento p/ o cliente escolher o SandboxBoard. */
   kind: 'sandbox';
@@ -81,6 +117,8 @@ export interface SandboxState {
   catalog: Record<string, CatalogEntry>;
   backs: Record<string, BackEntry>;
   placeables: Record<string, Placeable>;
+  /** Tabuleiro de fundo opcional (o jogo fornece; decorativo). */
+  board?: SandboxBoard;
   /** Proximo valor de z a atribuir. */
   zCounter: number;
 }

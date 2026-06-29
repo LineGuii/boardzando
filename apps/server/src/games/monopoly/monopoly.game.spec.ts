@@ -176,4 +176,31 @@ describe('MonopolyGame (sandbox)', () => {
     m.applyMove('alice', 'rollDie', { id });
     expect(m.isOver).toBe(false);
   });
+
+  it('expõe um tabuleiro perimetral de 40 casas com cidades brasileiras', () => {
+    const s = newMatch().snapshot.state;
+    expect(s.board?.kind).toBe('perimeter');
+    expect(s.board?.size).toBe(11);
+    expect(s.board?.spaces).toHaveLength(40);
+    // índices 0..39 únicos
+    const idxs = s.board!.spaces.map((sp) => sp.index).sort((a, b) => a - b);
+    expect(idxs).toEqual(Array.from({ length: 40 }, (_, i) => i));
+    // cantos canônicos
+    const byIndex = Object.fromEntries(s.board!.spaces.map((sp) => [sp.index, sp]));
+    expect(byIndex[0]!.type).toBe('go');
+    expect(byIndex[10]!.type).toBe('jail');
+    expect(byIndex[20]!.type).toBe('parking');
+    expect(byIndex[30]!.type).toBe('gotojail');
+    // 22 propriedades + 4 ferrovias + 2 utilidades = 28 casas "compráveis"
+    const props = s.board!.spaces.filter((sp) => sp.type === 'property');
+    const rails = s.board!.spaces.filter((sp) => sp.type === 'railroad');
+    const utils = s.board!.spaces.filter((sp) => sp.type === 'utility');
+    expect(props).toHaveLength(22);
+    expect(rails).toHaveLength(4);
+    expect(utils).toHaveLength(2);
+    // São Paulo é a propriedade mais cara (casa 39)
+    expect(byIndex[39]!.name).toBe('São Paulo');
+    // o nº de casas compráveis bate com os 28 títulos (deeds)
+    expect(props.length + rails.length + utils.length).toBe(countType(s, 'deed-'));
+  });
 });

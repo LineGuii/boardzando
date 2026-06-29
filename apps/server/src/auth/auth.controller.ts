@@ -12,6 +12,8 @@ import { Throttle } from '@nestjs/throttler';
 import {
   CreateRoomDto,
   JoinRoomDto,
+  isAvatarColor,
+  randomAvatarColor,
   type GameSummary,
   type RoomSummary,
 } from '@boardzando/contracts';
@@ -55,10 +57,11 @@ export class AuthController {
       ? await this.auth.hashRoomPassword(dto.roomPassword)
       : '';
     const playerId = randomUUID();
+    const color = isAvatarColor(dto.color) ? dto.color : randomAvatarColor();
     const room = this.rooms.createRoom({
       gameId: dto.gameId,
       passwordHash,
-      host: { id: playerId, name: dto.playerName, connected: false },
+      host: { id: playerId, name: dto.playerName, connected: false, color },
     });
     const token = this.auth.signSession({ sub: playerId, roomId: room.id, name: dto.playerName });
     return { roomId: room.id, playerId, token, snapshot: room.toSnapshot() };
@@ -77,11 +80,13 @@ export class AuthController {
     }
 
     const playerId = randomUUID();
+    const color = isAvatarColor(dto.color) ? dto.color : randomAvatarColor();
     try {
       this.rooms.addPlayer(dto.roomId, {
         id: playerId,
         name: dto.playerName,
         connected: false,
+        color,
       });
     } catch (e) {
       throw new BadRequestException((e as Error).message);
