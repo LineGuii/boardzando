@@ -104,9 +104,9 @@ function Lobby(): JSX.Element {
 
   return (
     <div className={`shell-bg shell-bg-${tab}`}>
+      <ShellDoodles />
       <div className="shell-container">
         <div className="shell-hero">
-          <div className="shell-dice" aria-hidden>🎲 🃏 🎯</div>
           <h1>Boardzando</h1>
           <p className="shell-tagline">
             Jogue board games com seus amigos. Sem cadastro, sem fricção.
@@ -135,32 +135,6 @@ function Lobby(): JSX.Element {
             </button>
           </div>
 
-          <div className="shell-field">
-            <label className="shell-label">Cor do seu ícone</label>
-            <div className="shell-avatar-row">
-              <span
-                className="shell-avatar-preview"
-                style={{ background: color }}
-                title="Prévia do seu ícone"
-              >
-                {(name.trim()[0] ?? '?').toUpperCase()}
-              </span>
-              <div className="shell-color-grid">
-                {AVATAR_COLORS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    className={`shell-color-swatch ${color === c ? 'active' : ''}`}
-                    style={{ background: c }}
-                    onClick={() => setColor(c)}
-                    aria-label={`Cor ${c}`}
-                    aria-pressed={color === c}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
           {tab === 'create' ? (
             <>
               <h2>
@@ -183,17 +157,14 @@ function Lobby(): JSX.Element {
                   ))}
                 </select>
               </div>
-              <div className="shell-field">
-                <label className="shell-label" htmlFor="name-create">Seu nome</label>
-                <input
-                  id="name-create"
-                  className="shell-input"
-                  placeholder="Ex.: Alice"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  maxLength={24}
-                />
-              </div>
+              <NameField
+                id="name-create"
+                placeholder="Ex.: Alice"
+                name={name}
+                setName={setName}
+                color={color}
+                setColor={setColor}
+              />
               <div className="shell-field">
                 <label className="shell-label" htmlFor="pw-create">
                   Senha da sala{' '}
@@ -219,7 +190,7 @@ function Lobby(): JSX.Element {
               >
                 {busy
                   ? 'Criando...'
-                  : `Criar sala de ${gameNameById(selectedGameId) || '...'}`}
+                  : `🎮 Criar sala de ${gameNameById(selectedGameId) || '...'}`}
               </button>
             </>
           ) : (
@@ -271,17 +242,14 @@ function Lobby(): JSX.Element {
                   </ul>
                 )}
               </div>
-              <div className="shell-field">
-                <label className="shell-label" htmlFor="name-join">Seu nome</label>
-                <input
-                  id="name-join"
-                  className="shell-input"
-                  placeholder="Ex.: Bob"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  maxLength={24}
-                />
-              </div>
+              <NameField
+                id="name-join"
+                placeholder="Ex.: Bob"
+                name={name}
+                setName={setName}
+                color={color}
+                setColor={setColor}
+              />
               <div className="shell-field">
                 <label className="shell-label" htmlFor="room-join">ID da sala</label>
                 <input
@@ -313,7 +281,7 @@ function Lobby(): JSX.Element {
                 disabled={busy || name.trim().length < 2 || roomId.trim().length < 1}
                 onClick={() => enter('join')}
               >
-                {busy ? 'Entrando...' : 'Entrar na sala'}
+                {busy ? 'Entrando...' : '🚪 Entrar na sala'}
               </button>
             </>
           )}
@@ -324,6 +292,134 @@ function Lobby(): JSX.Element {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Campo "Seu nome" com o ícone do jogador ao lado. Clicar no ícone abre um
+ * popover com as cores (escondido por padrão — menos poluído).
+ */
+function NameField({
+  id,
+  placeholder,
+  name,
+  setName,
+  color,
+  setColor,
+}: {
+  id: string;
+  placeholder: string;
+  name: string;
+  setName: (v: string) => void;
+  color: string;
+  setColor: (v: string) => void;
+}): JSX.Element {
+  const [open, setOpen] = useState(false);
+  const initial = (name.trim()[0] ?? '?').toUpperCase();
+
+  return (
+    <div className="shell-field">
+      <label className="shell-label" htmlFor={id}>Seu nome</label>
+      <div className="shell-name-row">
+        <div className="shell-avatar-wrap">
+          <button
+            type="button"
+            className="shell-avatar-btn"
+            style={{ background: color }}
+            onClick={() => setOpen((o) => !o)}
+            title="Escolher a cor do seu ícone"
+            aria-label="Escolher a cor do seu ícone"
+            aria-expanded={open}
+          >
+            {initial}
+            <span className="shell-avatar-edit" aria-hidden>🎨</span>
+          </button>
+          {open && (
+            <>
+              <div className="shell-color-backdrop" onClick={() => setOpen(false)} />
+              <div className="shell-color-pop" role="listbox" aria-label="Cores do ícone">
+                {AVATAR_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`shell-color-swatch ${color === c ? 'active' : ''}`}
+                    style={{ background: c }}
+                    onClick={() => {
+                      setColor(c);
+                      setOpen(false);
+                    }}
+                    aria-label={`Cor ${c}`}
+                    aria-selected={color === c}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        <input
+          id={id}
+          className="shell-input"
+          placeholder={placeholder}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={24}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Fundo decorativo com rabiscos de board game (estilo "portal de jogos"). */
+function ShellDoodles(): JSX.Element {
+  return (
+    <svg className="shell-doodles" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern
+          id="bz-doodles"
+          width="150"
+          height="150"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(-8)"
+        >
+          <g
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          >
+            {/* dado */}
+            <rect x="14" y="18" width="32" height="32" rx="7" />
+            <circle cx="23" cy="27" r="2.2" fill="currentColor" stroke="none" />
+            <circle cx="30" cy="34" r="2.2" fill="currentColor" stroke="none" />
+            <circle cx="37" cy="41" r="2.2" fill="currentColor" stroke="none" />
+            {/* carta */}
+            <rect
+              x="0"
+              y="0"
+              width="24"
+              height="34"
+              rx="5"
+              transform="translate(98 12) rotate(14)"
+            />
+            {/* estrela */}
+            <path
+              transform="translate(18 84)"
+              d="M12 2 l2.9 6.3 6.9 .6 -5.2 4.6 1.6 6.8 -6.2 -3.6 -6.2 3.6 1.6 -6.8 -5.2 -4.6 6.9 -.6 z"
+            />
+            {/* coração */}
+            <path
+              transform="translate(96 80)"
+              d="M12 21 C12 21 4 13.5 4 8.5 C4 5.5 6.5 4 8.5 4 C10.5 4 12 6 12 6 C12 6 13.5 4 15.5 4 C17.5 4 20 5.5 20 8.5 C20 13.5 12 21 12 21 Z"
+            />
+            {/* bolinhas */}
+            <circle cx="132" cy="126" r="5" />
+            <circle cx="74" cy="66" r="3" />
+          </g>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#bz-doodles)" />
+    </svg>
   );
 }
 
