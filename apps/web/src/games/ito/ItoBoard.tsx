@@ -143,10 +143,11 @@ export function ItoBoard(): JSX.Element {
   const colorOf = (pid: string): string =>
     room.players.find((p) => p.id === pid)?.color ?? '#888';
 
-  const played = view.playedPile
-    .map((id) => view.cards[id])
-    .filter((c): c is ItoCardView => !!c);
-  const discarded = all.filter((c) => c.discarded);
+  // placar único: todas as cartas reveladas (jogadas certas + descartadas por
+  // erro), em ordem crescente de valor. Assim acertos e erros ficam no mesmo lugar.
+  const resolved = all
+    .filter((c) => c.played || c.discarded)
+    .sort((a, b) => (a.value ?? 0) - (b.value ?? 0));
 
   // votos: voter -> cardId; agrupa por carta
   const votersByCard: Record<string, Voter[]> = {};
@@ -210,15 +211,19 @@ export function ItoBoard(): JSX.Element {
         </div>
       )}
 
-      {/* pilha jogada */}
+      {/* placar único: acertos e erros juntos, em ordem crescente */}
       <div className="ito-played">
-        <span className="ito-played-label">Mesa (ordem crescente):</span>
-        {played.length === 0 ? (
-          <span className="ito-played-empty">nada jogado ainda</span>
+        <span className="ito-played-label">Placar (ordem crescente):</span>
+        {resolved.length === 0 ? (
+          <span className="ito-played-empty">nada revelado ainda</span>
         ) : (
           <div className="ito-played-row">
-            {played.map((c) => (
-              <div key={c.id} className="ito-chip played">
+            {resolved.map((c) => (
+              <div
+                key={c.id}
+                className={`ito-chip ${c.discarded ? 'discarded' : 'played'}`}
+                title={c.discarded ? 'Erro: ficou para trás' : 'Jogada na ordem'}
+              >
                 <span className="ito-chip-value">{c.value}</span>
                 <span className="ito-chip-owner">{nameOf(c.ownerId)[0]}</span>
               </div>
@@ -280,17 +285,6 @@ export function ItoBoard(): JSX.Element {
           Cliquem nas cartas para <b>votar</b> qual deve ser jogada (a sua ou a de outro). O dono
           confirma para jogar.
         </p>
-      )}
-
-      {discarded.length > 0 && (
-        <div className="ito-discarded">
-          <span>Descartadas (erros):</span>
-          {discarded.map((c) => (
-            <span key={c.id} className="ito-chip discarded">
-              {c.value} ✗
-            </span>
-          ))}
-        </div>
       )}
 
       {/* barra de confirmação (sua intenção de jogar a própria carta) */}

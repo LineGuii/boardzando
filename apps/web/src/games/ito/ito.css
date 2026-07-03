@@ -161,13 +161,39 @@
   text-transform: uppercase;
 }
 
+/* carta descartada por erro: mesmo lugar/layout do placar, marcada de vermelho */
 .ito-chip.discarded {
+  position: relative;
   background: #fdeaea;
   border-color: #e0a0a0;
+}
+
+.ito-chip.discarded .ito-chip-value {
   color: #b41818;
-  font-weight: 800;
-  flex-direction: row;
-  font-size: 14px;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.ito-chip.discarded .ito-chip-owner {
+  color: #b41818;
+}
+
+.ito-chip.discarded::after {
+  content: '✗';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fff;
 }
 
 /* ---------- Jogadores ---------- */
@@ -438,16 +464,6 @@
   color: #6b5f4e;
   font-size: 15px;
   margin-top: 14px;
-}
-
-.ito-discarded {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: 13px;
-  color: #6b5f4e;
 }
 
 /* ---------- Barra de confirmação (intenção de jogar) ---------- */
