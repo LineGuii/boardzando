@@ -87,3 +87,22 @@ export function playLose(): void {
   if (muted) return;
   [392, 330, 262].forEach((f, i) => tone(f, i * 0.17, 0.38, 'sawtooth', 0.18));
 }
+
+/**
+ * "Quá!" — nota nasal (sawtooth) que cai rapidinho, imitando o som de um pato.
+ * Duas notas curtas em sequência ficam mais convincentes.
+ */
+export function playQuack(): void {
+  if (muted) return;
+  tone(440, 0, 0.09, 'sawtooth', 0.22);
+  tone(330, 0.08, 0.14, 'sawtooth', 0.2);
+}
+
+/** Vitória-de-pato: 3 quacks ascendentes. */
+export function playQuackWin(): void {
+  if (muted) return;
+  [{ f: 330, t: 0 }, { f: 440, t: 0.15 }, { f: 587, t: 0.32 }].forEach(({ f, t }) => {
+    tone(f, t, 0.1, 'sawtooth', 0.22);
+    tone(f * 0.75, t + 0.09, 0.14, 'sawtooth', 0.18);
+  });
+}

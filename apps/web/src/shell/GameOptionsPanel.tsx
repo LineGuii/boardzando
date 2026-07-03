@@ -31,7 +31,52 @@ export function GameOptionsPanel({
       />
     );
   }
+  if (gameId === 'pato') {
+    return (
+      <PatoOptionsPanel
+        value={(value ?? PATO_DEFAULT_OPTIONS) as PatoOptions}
+        onChange={onChange as (v: PatoOptions) => void}
+      />
+    );
+  }
   return null;
+}
+
+interface PatoOptions {
+  roundsTotal: 5 | 8 | 12;
+}
+const PATO_DEFAULT_OPTIONS: PatoOptions = { roundsTotal: 8 };
+
+function PatoOptionsPanel({
+  value,
+  onChange,
+}: {
+  value: PatoOptions;
+  onChange: (next: PatoOptions) => void;
+}): JSX.Element {
+  return (
+    <div className="shell-options-panel">
+      <h3>Opções da partida (Nem a Pato) 🦆</h3>
+      <div className="shell-options-field">
+        <label className="shell-label">Número de rodadas</label>
+        <div className="shell-options-buttons">
+          {([5, 8, 12] as const).map((n) => (
+            <button
+              key={n}
+              type="button"
+              className={`shell-options-btn ${value.roundsTotal === n ? 'active' : ''}`}
+              onClick={() => onChange({ roundsTotal: n })}
+            >
+              {n} {n === 5 ? '(rápido)' : n === 8 ? '(padrão)' : '(longo)'}
+            </button>
+          ))}
+        </div>
+        <p className="shell-hint">
+          Perguntas de fatos curiosos e absurdos — ganha quem chegar mais perto.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 interface ItoOptions {

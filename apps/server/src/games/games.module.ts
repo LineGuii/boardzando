@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { HuesModule } from './hues/hues.module';
 import { ItoModule } from './ito/ito.module';
 import { MonopolyModule } from './monopoly/monopoly.module';
+import { PatoModule } from './pato/pato.module';
 import { UnoModule } from './uno/uno.module';
 
 /**
@@ -12,6 +13,6 @@ import { UnoModule } from './uno/uno.module';
  * (Ver skill `add-game-plugin`.)
  */
 @Module({
-  imports: [UnoModule, HuesModule, MonopolyModule, ItoModule],
+  imports: [UnoModule, HuesModule, MonopolyModule, ItoModule, PatoModule],
 })
 export class GamesModule {}

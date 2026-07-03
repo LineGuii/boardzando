@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { ChatMessage, GameOverResult, RoomSnapshot, WsError } from '@boardzando/contracts';
+import { clearSession } from './session';
 import type { GameClientSocket } from './socket';
 
 /** Posicao ao vivo de uma peca sendo arrastada por outro jogador (efemera). */
@@ -65,9 +66,20 @@ export const useGame = create<GameStore>((set) => ({
       })),
     );
     socket.on('error', (lastError) => {
-      // se fomos expulsos, encerra a sessao para voltar ao lobby.
-      if (lastError.code === 'KICKED') {
+      // Situacoes terminais: apaga a sessao salva para que um F5 nao tente
+      // reconectar num assento que nao existe mais.
+      const terminal = lastError.code === 'KICKED' || lastError.code === 'ROOM_NOT_FOUND';
+      if (terminal) {
         try { socket.disconnect(); } catch { /* ja desconectado */ }
+        clearSession();
+        // remove `?room` da URL para o refresh seguinte cair no lobby limpo
+        try {
+          const url = new URL(window.location.href);
+          if (url.searchParams.has('room')) {
+            url.searchParams.delete('room');
+            window.history.replaceState(null, '', url.toString());
+          }
+        } catch { /* SSR/edge */ }
         set({
           socket: undefined,
           session: undefined,
@@ -75,6 +87,7 @@ export const useGame = create<GameStore>((set) => ({
           view: undefined,
           currentPlayer: undefined,
           gameOver: undefined,
+          matchGen: 0,
           chat: [],
           lastError,
         });

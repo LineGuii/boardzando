@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import type { GameSummary, RoomSummary } from '@boardzando/contracts';
 import { AVATAR_COLORS, randomAvatarColor } from '@boardzando/contracts';
 import { api } from './net/api';
+import { clearSession, loadSession, saveSession } from './net/session';
 import { connectSocket } from './net/socket';
 import { useGame } from './net/store';
 import { UnoBoard } from './games/uno/UnoBoard';
 import { HuesBoard } from './games/hues/HuesBoard';
 import { SandboxBoard } from './games/sandbox/SandboxBoard';
 import { ItoBoard } from './games/ito/ItoBoard';
+import { PatoBoard } from './games/pato/PatoBoard';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
 import { GameOptionsPanel } from './shell/GameOptionsPanel';
@@ -20,14 +22,88 @@ import './shell/shell.css';
  */
 export function App(): JSX.Element {
   const session = useGame((s) => s.session);
-  return session ? <RoomPage /> : <Lobby />;
+  const setSocket = useGame((s) => s.setSocket);
+  // Retomada de sessão: se ?room=<id> na URL bate com uma sessão salva no
+  // localStorage, reconectamos automaticamente usando o token guardado.
+  // Exibe um splash enquanto tenta.
+  const [resuming, setResuming] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const saved = loadSession();
+    if (!saved) return false;
+    const roomFromUrl = new URLSearchParams(window.location.search).get('room');
+    return !!roomFromUrl && roomFromUrl === saved.roomId;
+  });
+  const [resumeError, setResumeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!resuming || session) return;
+    const saved = loadSession();
+    if (!saved) {
+      setResuming(false);
+      return;
+    }
+    const socket = connectSocket(saved.token);
+    let done = false;
+    const onOk = (): void => {
+      if (done) return;
+      done = true;
+      setSocket(socket, { roomId: saved.roomId, playerId: saved.playerId });
+      setResuming(false);
+    };
+    const onErr = (err: Error): void => {
+      if (done) return;
+      done = true;
+      try { socket.disconnect(); } catch { /* ok */ }
+      clearSession();
+      // remove ?room da URL — se o token era ruim, não faz sentido tentar de novo.
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('room');
+        window.history.replaceState(null, '', url.toString());
+      } catch { /* ignora */ }
+      setResumeError(
+        err.message === 'UNAUTHORIZED'
+          ? 'Sua sessão expirou. Entre na sala novamente.'
+          : 'Não foi possível reconectar. Entre na sala novamente.',
+      );
+      setResuming(false);
+    };
+    socket.once('connect', onOk);
+    socket.once('connect_error', onErr);
+    // fallback: se em 5s nada aconteceu, desiste
+    const t = window.setTimeout(() => onErr(new Error('TIMEOUT')), 5000);
+    return () => {
+      window.clearTimeout(t);
+      socket.off('connect', onOk);
+      socket.off('connect_error', onErr);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resuming]);
+
+  if (resuming) return <ResumeSplash />;
+  if (session) return <RoomPage />;
+  return <Lobby initialError={resumeError} />;
+}
+
+function ResumeSplash(): JSX.Element {
+  return (
+    <div className="shell-bg">
+      <div className="shell-container" style={{ textAlign: 'center', padding: '80px 16px' }}>
+        <div style={{ fontSize: 48, marginBottom: 12 }}>🔄</div>
+        <h2 style={{ margin: 0 }}>Reconectando à sala...</h2>
+        <p style={{ color: '#6b5f4e', marginTop: 8 }}>
+          Retomando sua sessão. Se demorar, atualize a página.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 // ============================================================
 // LOBBY
 // ============================================================
 
-function Lobby(): JSX.Element {
+function Lobby({ initialError }: { initialError?: string | null } = {}): JSX.Element {
   const setSocket = useGame((s) => s.setSocket);
   const lastError = useGame((s) => s.lastError);
 
@@ -36,7 +112,7 @@ function Lobby(): JSX.Element {
   const [password, setPassword] = useState('');
   const [roomId, setRoomId] = useState('');
   const [busy, setBusy] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(initialError ?? null);
 
   const [games, setGames] = useState<GameSummary[]>([]);
   const [selectedGameId, setSelectedGameId] = useState<string>('');
@@ -90,6 +166,8 @@ function Lobby(): JSX.Element {
         action === 'create'
           ? await api.createRoom(selectedGameId || 'uno', name.trim(), password || undefined, color)
           : await api.joinRoom(roomId.trim(), name.trim(), password || undefined, color);
+      // persiste sessão para reconectar em F5 / voltar pelo link
+      saveSession({ roomId: res.roomId, playerId: res.playerId, token: res.token });
       const socket = connectSocket(res.token);
       setSocket(socket, { roomId: res.roomId, playerId: res.playerId });
     } catch (e) {
@@ -138,7 +216,7 @@ function Lobby(): JSX.Element {
           {tab === 'create' ? (
             <>
               <h2>
-                <span className="shell-icon">🎴</span> Nova sala
+                Nova sala
               </h2>
               <div className="shell-field">
                 <label className="shell-label" htmlFor="game-create">Jogo</label>
@@ -190,13 +268,13 @@ function Lobby(): JSX.Element {
               >
                 {busy
                   ? 'Criando...'
-                  : `🎮 Criar sala de ${gameNameById(selectedGameId) || '...'}`}
+                  : `Criar sala de ${gameNameById(selectedGameId) || '...'}`}
               </button>
             </>
           ) : (
             <>
               <h2>
-                <span className="shell-icon">🚪</span> Entrar em uma sala
+                Entrar em uma sala
               </h2>
               <div className="shell-field">
                 <div className="shell-rooms-header">
@@ -495,6 +573,8 @@ function RoomPage(): JSX.Element {
 
         {room?.status === 'playing' && room?.gameId === 'ito' && <ItoBoard key={matchGen} />}
 
+        {room?.status === 'playing' && room?.gameId === 'pato' && <PatoBoard key={matchGen} />}
+
         {room?.status === 'playing' && room?.gameId === 'hues' && <HuesBoard key={matchGen} />}
 
         {room?.status === 'playing' && room?.gameId === 'uno' && (
@@ -534,14 +614,36 @@ function RoomHeader({
             {roomId}
           </span>
         </div>
-        <div className="shell-room-actions" hidden={room?.status === 'playing'}>
-          <CopyButton text={roomId} label="Copiar ID" copiedLabel="ID copiado!" icon="📋" />
-          <CopyButton
-            text={inviteLink}
-            label="Copiar link de convite"
-            copiedLabel="Link copiado!"
-            icon="🔗"
-          />
+        <div className="shell-room-actions">
+          {room?.status !== 'playing' && (
+            <>
+              <CopyButton text={roomId} label="Copiar ID" copiedLabel="ID copiado!" icon="📋" />
+              <CopyButton
+                text={inviteLink}
+                label="Copiar link de convite"
+                copiedLabel="Link copiado!"
+                icon="🔗"
+              />
+            </>
+          )}
+          <button
+            type="button"
+            className="shell-copy-btn"
+            title="Sair desta sala"
+            onClick={() => {
+              if (!window.confirm('Sair desta sala?')) return;
+              try { useGame.getState().socket?.disconnect(); } catch { /* ok */ }
+              clearSession();
+              try {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('room');
+                window.history.replaceState(null, '', url.toString());
+              } catch { /* ignora */ }
+              useGame.getState().reset();
+            }}
+          >
+            🚪 Sair
+          </button>
         </div>
       </div>
 
