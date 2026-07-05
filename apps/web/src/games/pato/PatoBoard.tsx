@@ -88,6 +88,10 @@ export function PatoBoard(): JSX.Element {
   const myTurn = view.turnPlayerId === me;
   const lastBid = view.bids[view.bids.length - 1];
   const minBid = (lastBid?.value ?? -1) + 1;
+  // pode gritar quem NÃO deu o último lance (inclusive o jogador da vez, em
+  // vez de subir — com 2 jogadores é o único jeito de existir desafio)
+  const iAmLastBidder = lastBid?.playerId === me;
+  const canCall = view.bids.length > 0 && !iAmLastBidder;
 
   // só inteiro puro: nada de 0.1 / 1,321 / notação estranha
   const raw = bid.trim();
@@ -102,7 +106,7 @@ export function PatoBoard(): JSX.Element {
     setBid('');
   };
   const callDuck = (): void => {
-    if (view.bids.length === 0 || myTurn) return;
+    if (!canCall) return;
     emit('callDuck', {});
   };
   const next = (): void => emit('nextRound', {});
@@ -183,7 +187,7 @@ export function PatoBoard(): JSX.Element {
               )}
             </div>
 
-            {myTurn ? (
+            {myTurn && (
               <div className="pato-guess-row">
                 <input
                   className="pato-input"
@@ -204,15 +208,27 @@ export function PatoBoard(): JSX.Element {
                   🦆 Dar o lance
                 </button>
               </div>
+            )}
+            {raw.length > 0 && !isInteger && myTurn && (
+              <p className="pato-int-warn">Só vale número inteiro — nada de 0.1 ou 1,321 🙃</p>
+            )}
+
+            {/* NEM A PATO: para todos, MENOS quem deu o último lance. O da vez
+                pode gritar EM VEZ de subir. */}
+            {iAmLastBidder ? (
+              <p className="pato-duck-hint">
+                Você deu o último lance — não dá para gritar no próprio número. 🦆
+              </p>
             ) : (
               <div className="pato-duck-zone">
+                {myTurn && canCall && <div className="pato-or">— ou, em vez de subir —</div>}
                 <button
                   type="button"
                   className="pato-duck-btn"
                   onClick={callDuck}
-                  disabled={view.bids.length === 0}
+                  disabled={!canCall}
                   title={
-                    view.bids.length === 0
+                    !canCall
                       ? 'Espere alguém falar um número'
                       : `Acusar: "${formatNumber(lastBid!.value)}" passou da resposta!`
                   }
@@ -223,9 +239,6 @@ export function PatoBoard(): JSX.Element {
                   Acha que o último número passou da resposta? Grite e revele o resultado.
                 </p>
               </div>
-            )}
-            {raw.length > 0 && !isInteger && myTurn && (
-              <p className="pato-int-warn">Só vale número inteiro — nada de 0.1 ou 1,321 🙃</p>
             )}
           </>
         )}

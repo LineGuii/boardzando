@@ -61,17 +61,17 @@ describe('PatoGame (leilao em turnos)', () => {
     expect(m.snapshot.state.turnIdx).toBe(2);
   });
 
-  it('callDuck: qualquer um MENOS o da vez, e só depois do primeiro lance', () => {
+  it('callDuck: qualquer um MENOS quem deu o último lance, e só após o 1º lance', () => {
     const { m } = oneRoundMatch();
     // sem lance ainda: ninguém pode gritar
     expect(() => m.applyMove('b', 'callDuck', {})).toThrow(InvalidMoveError);
     m.applyMove('a', 'placeBid', { value: 1 });
-    // agora a vez é de b: b não pode gritar
-    expect(() => m.applyMove('b', 'callDuck', {})).toThrow(InvalidMoveError);
-    // a e c podem
-    m.applyMove('c', 'callDuck', {});
+    // a deu o último lance: não grita no próprio número
+    expect(() => m.applyMove('a', 'callDuck', {})).toThrow(InvalidMoveError);
+    // b (o da vez!) pode gritar em vez de subir — essencial com 2 jogadores
+    m.applyMove('b', 'callDuck', {});
     expect(m.snapshot.state.step).toBe('reveal');
-    expect(m.snapshot.state.lastRound?.callerId).toBe('c');
+    expect(m.snapshot.state.lastRound?.callerId).toBe('b');
     expect(m.snapshot.state.lastRound?.lastBidderId).toBe('a');
   });
 

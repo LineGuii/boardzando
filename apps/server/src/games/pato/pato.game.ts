@@ -23,11 +23,12 @@ function readOptions(raw: unknown): PatoOptions {
 
 /**
  * "Nem a Pato" — leilao de fatos curiosos com respostas numericas quase
- * impossiveis. Em TURNOS: o jogador da vez e obrigado a dizer um numero
- * inteiro MAIOR que o anterior; qualquer outro pode gritar "Nem a Pato!" a
- * qualquer momento, acusando o ultimo lance de ter passado da resposta. No
- * reveal, vence a rodada (+1) o maior lance que nao passou — quem passou nao
- * ganha nada, mesmo pertinho.
+ * impossiveis. Em TURNOS: o jogador da vez diz um numero inteiro MAIOR que o
+ * anterior OU grita "Nem a Pato!"; qualquer um pode gritar a qualquer
+ * momento, MENOS quem deu o ultimo lance (nao se desafia o proprio numero).
+ * O grito acusa o ultimo lance de ter passado da resposta. No reveal, vence
+ * a rodada (+1) o maior lance que nao passou — quem passou nao ganha nada,
+ * mesmo pertinho.
  *
  * A vez e controlada no ESTADO (turnIdx), nao no motor de turnos: o
  * "Nem a Pato!" e off-turn por natureza, entao todos os moves sao off-turn e

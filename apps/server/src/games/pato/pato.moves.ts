@@ -36,15 +36,19 @@ export const placeBid: Move<PatoState, PlaceBidPayload> = (state, ctx, payload) 
 };
 
 /**
- * MOVE (off-turn): "NEM A PATO!" — qualquer jogador, MENOS o da vez, desafia
- * o ultimo lance dizendo que ele passou da resposta. Revela o resultado:
+ * MOVE (off-turn): "NEM A PATO!" — qualquer jogador desafia o ultimo lance
+ * dizendo que ele passou da resposta, MENOS quem deu esse lance (nao faz
+ * sentido gritar no proprio numero). O jogador da vez pode gritar EM VEZ de
+ * subir — sem isso, com 2 jogadores ninguem conseguiria desafiar (o unico
+ * fora da vez seria sempre o autor do ultimo lance). Revela o resultado:
  * vence a rodada (+1) o dono do maior lance que NAO passou da resposta;
  * quem passou nao ganha nada, mesmo pertinho.
  */
 export const callDuck: Move<PatoState, CallDuckPayload> = (state, ctx) => {
   if (state.step !== 'bid') return INVALID_MOVE;
-  if (state.bids.length === 0) return INVALID_MOVE; // ninguem falou numero ainda
-  if (ctx.players[state.turnIdx] === ctx.actor) return INVALID_MOVE; // o da vez nao pode
+  const last = state.bids[state.bids.length - 1];
+  if (!last) return INVALID_MOVE; // ninguem falou numero ainda
+  if (last.playerId === ctx.actor) return INVALID_MOVE; // nao grita no proprio lance
 
   const q = PATO_QUESTIONS[currentQuestionIndex(state)]!;
   const next = clone(state);
