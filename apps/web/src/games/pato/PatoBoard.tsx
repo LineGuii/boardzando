@@ -15,23 +15,29 @@ interface PatoQuestionView {
   answer?: number;
   explanation?: string;
 }
+interface PatoBidView {
+  playerId: string;
+  value: number;
+}
 interface PatoLastRoundView {
   question: string;
   answer: number;
   unit: string;
   explanation: string;
-  guesses: Record<string, number>;
-  winners: string[];
-  exact: boolean;
-  gained: Record<string, number>;
+  bids: PatoBidView[];
+  callerId: string;
+  lastBidderId: string;
+  overshot: boolean;
+  winnerId?: string;
+  winningValue?: number;
 }
 interface PatoView {
   roundIndex: number;
   roundsTotal: number;
-  step: 'guess' | 'reveal';
+  step: 'bid' | 'reveal';
   currentQuestion: PatoQuestionView;
-  guesses: Record<string, number>;
-  answered: string[];
+  bids: PatoBidView[];
+  turnPlayerId: string;
   scores: Record<string, number>;
   lastRound?: PatoLastRoundView;
   finished?: boolean;
@@ -43,19 +49,24 @@ export function PatoBoard(): JSX.Element {
   const room = useGame((s) => s.room);
   const socket = useGame((s) => s.socket);
 
-  const [guess, setGuess] = useState('');
+  const [bid, setBid] = useState('');
   const [muted, setMutedState] = useState(isMuted());
 
-  // som ao entrar no reveal (quack — win se eu venci; error se ninguém chegou perto)
-  const prevStep = useRef<'guess' | 'reveal' | null>(null);
+  // som ao entrar no reveal (quack-win se eu venci a rodada; quack senão)
+  const prevStep = useRef<'bid' | 'reveal' | null>(null);
   useEffect(() => {
     if (!view || !session) return;
     if (prevStep.current !== 'reveal' && view.step === 'reveal' && view.lastRound) {
-      if (view.lastRound.winners.includes(session.playerId)) playQuackWin();
+      if (view.lastRound.winnerId === session.playerId) playQuackWin();
       else playQuack();
     }
     prevStep.current = view.step;
   }, [view, session]);
+
+  // limpa o campo quando a vez muda / rodada nova
+  useEffect(() => {
+    setBid('');
+  }, [view?.turnPlayerId, view?.roundIndex]);
 
   if (!view || !session || !room) return <p>Aguardando estado...</p>;
   const me = session.playerId;
@@ -74,17 +85,26 @@ export function PatoBoard(): JSX.Element {
   const colorOf = (pid: string): string =>
     room.players.find((p) => p.id === pid)?.color ?? '#f59e0b';
 
-  const iAnswered = view.answered.includes(me);
-  const myGuess = view.guesses[me];
+  const myTurn = view.turnPlayerId === me;
+  const lastBid = view.bids[view.bids.length - 1];
+  const minBid = (lastBid?.value ?? -1) + 1;
 
-  const submit = (): void => {
-    const v = Number(guess.replace(',', '.'));
-    if (!Number.isFinite(v)) return;
+  // só inteiro puro: nada de 0.1 / 1,321 / notação estranha
+  const raw = bid.trim();
+  const isInteger = /^\d+$/.test(raw);
+  const parsed = isInteger ? Number(raw) : NaN;
+  const validBid = isInteger && Number.isSafeInteger(parsed) && parsed >= minBid;
+
+  const submitBid = (): void => {
+    if (!validBid) return;
     playQuack();
-    emit('submitGuess', { value: v });
-    setGuess('');
+    emit('placeBid', { value: parsed });
+    setBid('');
   };
-
+  const callDuck = (): void => {
+    if (view.bids.length === 0 || myTurn) return;
+    emit('callDuck', {});
+  };
   const next = (): void => emit('nextRound', {});
 
   return (
@@ -119,42 +139,104 @@ export function PatoBoard(): JSX.Element {
         <div className="pato-question">{view.currentQuestion.question}</div>
         <div className="pato-unit-hint">Resposta em: <b>{view.currentQuestion.unit}</b></div>
 
-        {view.step === 'guess' && (
-          <div className="pato-guess-row">
-            {iAnswered ? (
-              <div className="pato-answered-box">
-                Seu palpite: <b>{formatNumber(myGuess ?? 0)}</b> {view.currentQuestion.unit}
-                <div className="pato-answered-hint">
-                  Aguardando os outros patos responderem…
+        {view.step === 'bid' && (
+          <>
+            {/* escada de lances */}
+            <div className="pato-ladder">
+              {view.bids.length === 0 ? (
+                <div className="pato-ladder-empty">
+                  Ninguém falou um número ainda — {myTurn ? 'comece você!' : 'aguarde o primeiro lance.'}
                 </div>
-              </div>
-            ) : (
-              <>
+              ) : (
+                <ul className="pato-bids">
+                  {view.bids.map((b, i) => (
+                    <li
+                      key={`${i}-${b.value}`}
+                      className={`pato-bid ${i === view.bids.length - 1 ? 'latest' : ''}`}
+                    >
+                      <span
+                        className="pato-guess-dot"
+                        style={{ background: colorOf(b.playerId) }}
+                        aria-hidden
+                      />
+                      <span className="pato-bid-name">
+                        {nameOf(b.playerId)} {b.playerId === me ? '(você)' : ''}
+                      </span>
+                      <span className="pato-bid-value">{formatNumber(b.value)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* vez + ações */}
+            <div className={`pato-turn ${myTurn ? 'mine' : ''}`}>
+              <span
+                className="pato-guess-dot"
+                style={{ background: colorOf(view.turnPlayerId) }}
+                aria-hidden
+              />
+              {myTurn ? (
+                <b>Sua vez! Diga um número inteiro {lastBid ? `maior que ${formatNumber(lastBid.value)}` : ''}</b>
+              ) : (
+                <>Vez de <b>{nameOf(view.turnPlayerId)}</b> dizer um número maior…</>
+              )}
+            </div>
+
+            {myTurn ? (
+              <div className="pato-guess-row">
                 <input
                   className="pato-input"
                   type="text"
-                  inputMode="decimal"
-                  placeholder="chute um número..."
-                  value={guess}
-                  onChange={(e) => setGuess(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && submit()}
+                  inputMode="numeric"
+                  placeholder={lastBid ? `mínimo ${formatNumber(minBid)}` : 'chute um número inteiro...'}
+                  value={bid}
+                  onChange={(e) => setBid(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && submitBid()}
                   autoFocus
                 />
                 <button
                   type="button"
                   className="pato-submit"
-                  onClick={submit}
-                  disabled={!Number.isFinite(Number(guess.replace(',', '.')))}
+                  onClick={submitBid}
+                  disabled={!validBid}
                 >
-                  🦆 Responder
+                  🦆 Dar o lance
                 </button>
-              </>
+              </div>
+            ) : (
+              <div className="pato-duck-zone">
+                <button
+                  type="button"
+                  className="pato-duck-btn"
+                  onClick={callDuck}
+                  disabled={view.bids.length === 0}
+                  title={
+                    view.bids.length === 0
+                      ? 'Espere alguém falar um número'
+                      : `Acusar: "${formatNumber(lastBid!.value)}" passou da resposta!`
+                  }
+                >
+                  🦆 NEM A PATO!
+                </button>
+                <p className="pato-duck-hint">
+                  Acha que o último número passou da resposta? Grite e revele o resultado.
+                </p>
+              </div>
             )}
-          </div>
+            {raw.length > 0 && !isInteger && myTurn && (
+              <p className="pato-int-warn">Só vale número inteiro — nada de 0.1 ou 1,321 🙃</p>
+            )}
+          </>
         )}
 
         {view.step === 'reveal' && view.lastRound && (
           <div className="pato-reveal">
+            <div className="pato-call-banner">
+              <b>{nameOf(view.lastRound.callerId)}</b> gritou <b>NEM A PATO!</b> em cima do lance de{' '}
+              <b>{nameOf(view.lastRound.lastBidderId)}</b> —{' '}
+              {view.lastRound.overshot ? 'e tinha razão: passou! ✅' : 'mas o lance NÃO tinha passado. ❌'}
+            </div>
             <div className="pato-answer">
               <span className="pato-answer-label">Resposta:</span>
               <span className="pato-answer-value">
@@ -165,25 +247,42 @@ export function PatoBoard(): JSX.Element {
             <p className="pato-explanation">{view.lastRound.explanation}</p>
 
             <ul className="pato-guesses">
-              {rankGuesses(view.lastRound).map(({ pid, g, d, isWinner }) => (
-                <li key={pid} className={`pato-guess ${isWinner ? 'winner' : ''}`}>
-                  <span
-                    className="pato-guess-dot"
-                    style={{ background: colorOf(pid) }}
-                    aria-hidden
-                  />
-                  <span className="pato-guess-name">
-                    {nameOf(pid)}
-                    {isWinner && (view.lastRound?.exact ? ' 🦆👑' : ' 🦆')}
-                  </span>
-                  <span className="pato-guess-value">{formatNumber(g)}</span>
-                  <span className="pato-guess-dist">Δ {formatNumber(d)}</span>
-                  {view.lastRound && view.lastRound.gained[pid]! > 0 && (
-                    <span className="pato-guess-gain">+{view.lastRound.gained[pid]}</span>
-                  )}
-                </li>
-              ))}
+              {view.lastRound.bids.map((b, i) => {
+                const over = b.value > view.lastRound!.answer;
+                const isWinner =
+                  !over &&
+                  view.lastRound!.winnerId === b.playerId &&
+                  view.lastRound!.winningValue === b.value;
+                return (
+                  <li
+                    key={`${i}-${b.value}`}
+                    className={`pato-guess ${isWinner ? 'winner' : ''} ${over ? 'over' : ''}`}
+                  >
+                    <span
+                      className="pato-guess-dot"
+                      style={{ background: colorOf(b.playerId) }}
+                      aria-hidden
+                    />
+                    <span className="pato-guess-name">
+                      {nameOf(b.playerId)}
+                      {isWinner && ' 🦆👑'}
+                    </span>
+                    <span className="pato-guess-value">{formatNumber(b.value)}</span>
+                    {over ? (
+                      <span className="pato-guess-over">passou! nada 🚫</span>
+                    ) : (
+                      <span className="pato-guess-dist">
+                        Δ {formatNumber(view.lastRound!.answer - b.value)}
+                      </span>
+                    )}
+                    {isWinner && <span className="pato-guess-gain">+1</span>}
+                  </li>
+                );
+              })}
             </ul>
+            {view.lastRound.winnerId === undefined && (
+              <p className="pato-nobody">Todos os lances passaram da resposta — ninguém pontua! 🦆💨</p>
+            )}
 
             <button className="pato-next" onClick={next}>
               ▶ Próxima rodada
@@ -199,25 +298,20 @@ export function PatoBoard(): JSX.Element {
           {room.players
             .slice()
             .sort((a, b) => (view.scores[b.id] ?? 0) - (view.scores[a.id] ?? 0))
-            .map((p) => {
-              const answered = view.answered.includes(p.id);
-              return (
-                <li key={p.id} className="pato-score-row">
-                  <span
-                    className="pato-score-dot"
-                    style={{ background: p.color ?? '#f59e0b' }}
-                    aria-hidden
-                  />
-                  <span className="pato-score-name">{nameOf(p.id)}</span>
-                  {view.step === 'guess' && (
-                    <span className={`pato-badge ${answered ? 'ok' : ''}`}>
-                      {answered ? '✓ respondeu' : '…pensando'}
-                    </span>
-                  )}
-                  <span className="pato-score-points">{view.scores[p.id] ?? 0}</span>
-                </li>
-              );
-            })}
+            .map((p) => (
+              <li key={p.id} className="pato-score-row">
+                <span
+                  className="pato-score-dot"
+                  style={{ background: p.color ?? '#f59e0b' }}
+                  aria-hidden
+                />
+                <span className="pato-score-name">{nameOf(p.id)}</span>
+                {view.step === 'bid' && p.id === view.turnPlayerId && (
+                  <span className="pato-badge ok">🎤 na vez</span>
+                )}
+                <span className="pato-score-points">{view.scores[p.id] ?? 0}</span>
+              </li>
+            ))}
         </ul>
       </div>
 
@@ -234,12 +328,4 @@ function formatNumber(n: number): string {
   if (Math.abs(n) >= 1e6) return `${(n / 1e6).toFixed(1)} mi`;
   if (Math.abs(n) >= 10000) return n.toLocaleString('pt-BR');
   return String(n);
-}
-
-function rankGuesses(
-  lr: PatoLastRoundView,
-): Array<{ pid: string; g: number; d: number; isWinner: boolean }> {
-  return Object.entries(lr.guesses)
-    .map(([pid, g]) => ({ pid, g, d: Math.abs(g - lr.answer), isWinner: lr.winners.includes(pid) }))
-    .sort((a, b) => a.d - b.d);
 }

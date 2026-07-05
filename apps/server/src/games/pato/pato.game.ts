@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import type { GameContext, GameDefinition, GameOverResult, PlayerId } from '@boardzando/contracts';
 import { INVALID_MOVE } from '@boardzando/contracts';
 import { GamePlugin } from '../../core/registry/game-plugin.decorator';
-import { nextRound, submitGuess } from './pato.moves';
-import type { NextRoundPayload, SubmitGuessPayload } from './pato.moves';
+import { callDuck, nextRound, placeBid } from './pato.moves';
+import type { CallDuckPayload, NextRoundPayload, PlaceBidPayload } from './pato.moves';
 import { PATO_QUESTIONS } from './pato.questions';
 import type { PatoOptions, PatoState } from './pato.state';
 
-type PatoMovePayload = SubmitGuessPayload | NextRoundPayload;
+type PatoMovePayload = PlaceBidPayload | CallDuckPayload | NextRoundPayload;
 
 const DEFAULTS: PatoOptions = { roundsTotal: 8 };
 
@@ -22,10 +22,16 @@ function readOptions(raw: unknown): PatoOptions {
 }
 
 /**
- * "Nem a Pato" — quiz cooperativo/competitivo de fatos curiosos com respostas
- * numericas quase impossiveis de acertar. Ganha quem chegar mais perto (empate
- * divide). Cravar o valor exato vale +2 ("na mosca 🦆"). Sem turnos: todos os
- * moves sao off-turn.
+ * "Nem a Pato" — leilao de fatos curiosos com respostas numericas quase
+ * impossiveis. Em TURNOS: o jogador da vez e obrigado a dizer um numero
+ * inteiro MAIOR que o anterior; qualquer outro pode gritar "Nem a Pato!" a
+ * qualquer momento, acusando o ultimo lance de ter passado da resposta. No
+ * reveal, vence a rodada (+1) o maior lance que nao passou — quem passou nao
+ * ganha nada, mesmo pertinho.
+ *
+ * A vez e controlada no ESTADO (turnIdx), nao no motor de turnos: o
+ * "Nem a Pato!" e off-turn por natureza, entao todos os moves sao off-turn e
+ * o placeBid valida o ator contra ctx.players[turnIdx].
  */
 @Injectable()
 @GamePlugin()
@@ -50,18 +56,20 @@ export class PatoGame implements GameDefinition<PatoState, PatoMovePayload> {
       options: { roundsTotal },
       questionOrder,
       roundIndex: 0,
-      step: 'guess',
-      guesses: {},
+      step: 'bid',
+      bids: [],
+      turnIdx: 0,
       scores,
     };
   }
 
   readonly moves = {
-    submitGuess,
+    placeBid,
+    callDuck,
     nextRound,
   } as Record<string, (state: PatoState, ctx: GameContext, payload: PatoMovePayload) => PatoState | typeof INVALID_MOVE>;
 
-  readonly offTurnMoves = ['submitGuess', 'nextRound'] as const;
+  readonly offTurnMoves = ['placeBid', 'callDuck', 'nextRound'] as const;
 
   endIf(state: PatoState): GameOverResult | void {
     if (!state.finished) return;
@@ -85,20 +93,12 @@ export class PatoGame implements GameDefinition<PatoState, PatoMovePayload> {
   }
 
   /**
-   * Esconde a pergunta futura (ok — nem precisa), a RESPOSTA da rodada atual
-   * ate o reveal, e os palpites alheios durante 'guess' (mostra so `answered`
-   * como lista de PlayerId).
+   * Os lances sao PUBLICOS (ditos em voz alta) — so a resposta e a explicacao
+   * ficam escondidas ate o reveal.
    */
-  playerView(state: PatoState, _ctx: GameContext, viewer: PlayerId): unknown {
+  playerView(state: PatoState, ctx: GameContext, _viewer: PlayerId): unknown {
     const q = PATO_QUESTIONS[state.questionOrder[state.roundIndex]!]!;
     const isReveal = state.step === 'reveal';
-    // Palpites: no `guess`, so o seu; no `reveal`, todos.
-    const guesses: Record<PlayerId, number> = {};
-    if (isReveal) {
-      Object.assign(guesses, state.guesses);
-    } else if (state.guesses[viewer] !== undefined) {
-      guesses[viewer] = state.guesses[viewer]!;
-    }
     return {
       options: state.options,
       roundIndex: state.roundIndex,
@@ -111,8 +111,8 @@ export class PatoGame implements GameDefinition<PatoState, PatoMovePayload> {
         answer: isReveal ? q.answer : undefined,
         explanation: isReveal ? q.explanation : undefined,
       },
-      guesses,
-      answered: Object.keys(state.guesses),
+      bids: state.bids,
+      turnPlayerId: ctx.players[state.turnIdx],
       scores: state.scores,
       lastRound: state.lastRound,
       finished: state.finished,
