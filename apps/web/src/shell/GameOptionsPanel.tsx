@@ -39,7 +39,53 @@ export function GameOptionsPanel({
       />
     );
   }
+  if (gameId === 'manada') {
+    return (
+      <ManadaOptionsPanel
+        value={(value ?? MANADA_DEFAULT_OPTIONS) as ManadaOptions}
+        onChange={onChange as (v: ManadaOptions) => void}
+      />
+    );
+  }
   return null;
+}
+
+interface ManadaOptions {
+  targetCows: 5 | 8 | 11;
+}
+const MANADA_DEFAULT_OPTIONS: ManadaOptions = { targetCows: 8 };
+
+function ManadaOptionsPanel({
+  value,
+  onChange,
+}: {
+  value: ManadaOptions;
+  onChange: (next: ManadaOptions) => void;
+}): JSX.Element {
+  return (
+    <div className="shell-options-panel">
+      <h3>Opções da partida (Efeito Manada) 🐄</h3>
+      <div className="shell-options-field">
+        <label className="shell-label">Vacas para vencer</label>
+        <div className="shell-options-buttons">
+          {([5, 8, 11] as const).map((n) => (
+            <button
+              key={n}
+              type="button"
+              className={`shell-options-btn ${value.targetCows === n ? 'active' : ''}`}
+              onClick={() => onChange({ targetCows: n })}
+            >
+              🐄 {n} {n === 5 ? '(rápido)' : n === 8 ? '(padrão)' : '(longo)'}
+            </button>
+          ))}
+        </div>
+        <p className="shell-hint">
+          Escreva a mesma resposta que a maioria para ganhar vacas. Ficar sozinho
+          te dá a Vaca Rosa — e com ela você não vence!
+        </p>
+      </div>
+    </div>
+  );
 }
 
 interface PatoOptions {
