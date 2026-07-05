@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useGame } from '../../net/store';
 import { GameChat } from '../../shell/GameChat';
 import { isMuted, playError, playLose, playSuccess, playWin, setMuted } from '../../shell/sfx';
@@ -11,7 +12,8 @@ interface ItoTheme {
 }
 interface ItoCardView {
   id: string;
-  ownerId: string;
+  /** Ausente nas cartas alheias do modo anônimo. */
+  ownerId?: string;
   clue?: string;
   played: boolean;
   discarded?: boolean;
@@ -27,9 +29,17 @@ interface ItoView {
   playedPile: string[];
   lastPlayedValue: number;
   lastMistake?: { count: number; byValue: number };
-  /** voter -> cardId votado. */
+  /** voter -> cardId votado (no modo anônimo, só o próprio voto). */
   votes: Record<string, string>;
   cards: Record<string, ItoCardView>;
+  /** Modo anônimo: mesa embaralhada, dono e votos ocultos. */
+  anonymous: boolean;
+  /** Ordem embaralhada das cartas na mesa (modo anônimo, fase play). */
+  tableOrder?: string[];
+  /** Votos por carta (contagem anônima). */
+  voteCounts?: Record<string, number>;
+  /** Progresso de dicas por jogador (modo anônimo, fase clue). */
+  clueProgress?: Record<string, { done: number; total: number }>;
 }
 
 interface Voter {
@@ -52,9 +62,23 @@ export function ItoBoard(): JSX.Element {
   const [feedbackKey, setFeedbackKey] = useState(0);
   const [heartLoss, setHeartLoss] = useState(0);
   const [themeIntro, setThemeIntro] = useState(false);
+  const [shuffling, setShuffling] = useState(false);
 
   const feedbackTimer = useRef<number | undefined>(undefined);
   const themeTimer = useRef<number | undefined>(undefined);
+  const shuffleTimer = useRef<number | undefined>(undefined);
+
+  // ----- animação de embaralhamento (modo anônimo, clue -> play) -----
+  const prevStep = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const step = view?.step;
+    if (view?.anonymous && step === 'play' && prevStep.current === 'clue') {
+      setShuffling(true);
+      window.clearTimeout(shuffleTimer.current);
+      shuffleTimer.current = window.setTimeout(() => setShuffling(false), 2600);
+    }
+    prevStep.current = step;
+  }, [view?.step, view?.anonymous]);
 
   // ----- orquestra som + animação a cada mudança de estado -----
   const prevPlayed = useRef(0);
@@ -111,6 +135,7 @@ export function ItoBoard(): JSX.Element {
     () => () => {
       window.clearTimeout(feedbackTimer.current);
       window.clearTimeout(themeTimer.current);
+      window.clearTimeout(shuffleTimer.current);
     },
     [],
   );
@@ -143,15 +168,28 @@ export function ItoBoard(): JSX.Element {
   const colorOf = (pid: string): string =>
     room.players.find((p) => p.id === pid)?.color ?? '#888';
 
-  const played = view.playedPile
-    .map((id) => view.cards[id])
-    .filter((c): c is ItoCardView => !!c);
-  const discarded = all.filter((c) => c.discarded);
+  // placar único: todas as cartas reveladas (jogadas certas + descartadas por
+  // erro), em ordem crescente de valor. Assim acertos e erros ficam no mesmo lugar.
+  const resolved = all
+    .filter((c) => c.played || c.discarded)
+    .sort((a, b) => (a.value ?? 0) - (b.value ?? 0));
 
-  // votos: voter -> cardId; agrupa por carta
+  // votos: voter -> cardId; agrupa por carta. No modo anônimo o servidor manda
+  // só contagens — viram bolinhas neutras "?" sem identificar quem votou.
+  const anon = view.anonymous;
   const votersByCard: Record<string, Voter[]> = {};
-  for (const [pid, cid] of Object.entries(view.votes)) {
-    (votersByCard[cid] ??= []).push({ id: pid, name: nameOf(pid), color: colorOf(pid) });
+  if (anon) {
+    for (const [cid, n] of Object.entries(view.voteCounts ?? {})) {
+      votersByCard[cid] = Array.from({ length: n }, (_, i) => ({
+        id: `anon-${i}`,
+        name: '?',
+        color: '#64748b',
+      }));
+    }
+  } else {
+    for (const [pid, cid] of Object.entries(view.votes)) {
+      (votersByCard[cid] ??= []).push({ id: pid, name: nameOf(pid), color: colorOf(pid) });
+    }
   }
   const myVote = view.votes[me];
   // só posso jogar a MINHA carta: a barra de confirmar aparece quando voto nela.
@@ -210,24 +248,111 @@ export function ItoBoard(): JSX.Element {
         </div>
       )}
 
-      {/* pilha jogada */}
+      {/* placar único: acertos e erros juntos, em ordem crescente */}
       <div className="ito-played">
-        <span className="ito-played-label">Mesa (ordem crescente):</span>
-        {played.length === 0 ? (
-          <span className="ito-played-empty">nada jogado ainda</span>
+        <span className="ito-played-label">Placar (ordem crescente):</span>
+        {resolved.length === 0 ? (
+          <span className="ito-played-empty">nada revelado ainda</span>
         ) : (
           <div className="ito-played-row">
-            {played.map((c) => (
-              <div key={c.id} className="ito-chip played">
+            {resolved.map((c) => (
+              <div
+                key={c.id}
+                className={`ito-chip ${c.discarded ? 'discarded' : 'played'}`}
+                title={c.discarded ? 'Erro: ficou para trás' : 'Jogada na ordem'}
+              >
                 <span className="ito-chip-value">{c.value}</span>
-                <span className="ito-chip-owner">{nameOf(c.ownerId)[0]}</span>
+                <span className="ito-chip-owner">{c.ownerId ? nameOf(c.ownerId)[0] : '🎭'}</span>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* jogadores */}
+      {/* modo anônimo, fase de dicas: só as próprias cartas + progresso da equipe */}
+      {anon && view.step === 'clue' && (
+        <div className="ito-players">
+          <div className="ito-player mine">
+            <div className="ito-player-name">
+              <span className="ito-player-dot" style={{ background: colorOf(me) }} aria-hidden />
+              Suas cartas (só você vê) 🎭
+            </div>
+            <div className="ito-cards">
+              {all
+                .filter((c) => c.ownerId === me && !c.played && !c.discarded)
+                .sort((a, b) => (a.value ?? 0) - (b.value ?? 0))
+                .map((c) => (
+                  <ItoCardItem
+                    key={c.id}
+                    card={c}
+                    editable
+                    clickable={false}
+                    voters={[]}
+                    votedByMe={false}
+                    onClue={(text) => emit('setClue', { cardId: c.id, text })}
+                    onClick={() => {}}
+                  />
+                ))}
+            </div>
+          </div>
+          <div className="ito-player ito-anon-progress">
+            <div className="ito-player-name">🎭 Dicas da equipe</div>
+            <ul className="ito-progress-list">
+              {room.players.map((p) => {
+                const pr = view.clueProgress?.[p.id];
+                if (!pr) return null;
+                const ready = pr.done >= pr.total;
+                return (
+                  <li key={p.id} className={ready ? 'ready' : ''}>
+                    <span
+                      className="ito-player-dot"
+                      style={{ background: p.color ?? '#888' }}
+                      aria-hidden
+                    />
+                    {p.name} {p.id === me ? '(você)' : ''}
+                    <span className="ito-progress-badge">
+                      {ready ? '✓ pronto' : `${pr.done}/${pr.total} dicas`}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="ito-hint">
+              As cartas serão embaralhadas: ninguém saberá de quem é cada dica.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* modo anônimo, fase de jogo: mesa central embaralhada */}
+      {anon && view.step === 'play' && (
+        <div className="ito-table">
+          <div className="ito-table-label">
+            🎭 Mesa anônima — ninguém sabe de quem é cada carta
+          </div>
+          <div className="ito-table-cards">
+            {(view.tableOrder ?? [])
+              .map((id) => view.cards[id])
+              .filter((c): c is ItoCardView => !!c && !c.played && !c.discarded)
+              .map((c) => (
+                <ItoCardItem
+                  key={c.id}
+                  card={c}
+                  editable={false}
+                  clickable
+                  mine={c.ownerId === me}
+                  voters={votersByCard[c.id] ?? []}
+                  votedByMe={myVote === c.id}
+                  onClue={() => {}}
+                  onClick={() => onCardClick(c)}
+                />
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* jogadores (modo normal) */}
+      {!anon && (
       <div className="ito-players">
         {room.players.map((p) => {
           const cards = all
@@ -268,29 +393,30 @@ export function ItoBoard(): JSX.Element {
           );
         })}
       </div>
+      )}
 
       {/* controles */}
-      {view.step === 'clue' && (
-        <button className="ito-start-btn" onClick={() => emit('startPlay', {})}>
-          ▶ Começar a jogar
-        </button>
-      )}
+      {view.step === 'clue' &&
+        (() => {
+          // modo anônimo: só libera quando TODAS as dicas estiverem prontas
+          const prs = Object.values(view.clueProgress ?? {});
+          const waiting = anon && (prs.length === 0 || prs.some((pr) => pr.done < pr.total));
+          return (
+            <button
+              className="ito-start-btn"
+              disabled={waiting}
+              onClick={() => emit('startPlay', {})}
+            >
+              {waiting ? '⏳ Aguardando as dicas de todos…' : '▶ Começar a jogar'}
+              {anon && !waiting ? ' (embaralha as cartas!)' : ''}
+            </button>
+          );
+        })()}
       {view.step === 'play' && !intendedCard && (
         <p className="ito-hint">
           Cliquem nas cartas para <b>votar</b> qual deve ser jogada (a sua ou a de outro). O dono
           confirma para jogar.
         </p>
-      )}
-
-      {discarded.length > 0 && (
-        <div className="ito-discarded">
-          <span>Descartadas (erros):</span>
-          {discarded.map((c) => (
-            <span key={c.id} className="ito-chip discarded">
-              {c.value} ✗
-            </span>
-          ))}
-        </div>
       )}
 
       {/* barra de confirmação (sua intenção de jogar a própria carta) */}
@@ -341,6 +467,33 @@ export function ItoBoard(): JSX.Element {
         </div>
       )}
 
+      {/* animação de embaralhamento (modo anônimo): junta tudo no centro e redistribui */}
+      {shuffling && (
+        <div className="ito-shuffle-overlay">
+          <div className="ito-shuffle-stage">
+            {(view.tableOrder ?? []).map((id, i, arr) => (
+              <div
+                key={id}
+                className="ito-shuffle-card"
+                style={
+                  {
+                    '--i': i,
+                    '--n': arr.length,
+                    '--sx': `${(i % 2 ? 1 : -1) * (120 + ((i * 53) % 180))}px`,
+                    '--sy': `${((i * 37) % 140) - 70}px`,
+                    '--sr': `${((i * 47) % 44) - 22}deg`,
+                    '--ex': `${(i - (arr.length - 1) / 2) * 58}px`,
+                  } as CSSProperties
+                }
+              >
+                ?
+              </div>
+            ))}
+          </div>
+          <span className="ito-shuffle-label">🎭 Embaralhando as cartas…</span>
+        </div>
+      )}
+
       {/* tela de novo tema (5s) antes das cartas */}
       {themeIntro && (
         <div className="ito-theme-intro">
@@ -371,6 +524,7 @@ function ItoCardItem({
   clickable,
   voters,
   votedByMe,
+  mine = false,
   onClue,
   onClick,
 }: {
@@ -379,6 +533,8 @@ function ItoCardItem({
   clickable: boolean;
   voters: Voter[];
   votedByMe: boolean;
+  /** Na mesa anônima: marca discretamente a SUA carta (só você vê). */
+  mine?: boolean;
   onClue: (text: string) => void;
   onClick: () => void;
 }): JSX.Element {
@@ -386,7 +542,7 @@ function ItoCardItem({
   const voted = voters.length > 0;
   return (
     <div
-      className={`ito-card ${editable ? 'own' : 'hidden'} ${voted ? 'voted' : ''} ${
+      className={`ito-card ${editable || mine ? 'own' : 'hidden'} ${voted ? 'voted' : ''} ${
         votedByMe ? 'voted-by-me' : ''
       }`}
     >
@@ -401,6 +557,7 @@ function ItoCardItem({
         ) : (
           <span className="ito-card-back">?</span>
         )}
+        {mine && !editable && <span className="ito-mine-badge">sua</span>}
         {voted && (
           <div className="ito-votes" title={`${voters.length} voto(s)`}>
             {voters.map((v) => (

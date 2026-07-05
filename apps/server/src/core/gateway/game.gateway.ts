@@ -73,6 +73,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(this.roomChannel(roomId));
     this.rooms.markConnected(roomId, player.id, client.id);
     this.broadcastRoom(roomId);
+    // Reconexao: se ha partida em andamento (ou terminada), envia o estado
+    // atual SO para este socket — senao quem volta fica sem tabuleiro ate
+    // alguem jogar de novo.
+    if (room.instance) {
+      const { turn, phase, currentPlayer, gameover } = room.instance.snapshot;
+      client.emit('game:state', {
+        roomId,
+        view: room.instance.viewFor(player.id),
+        turn,
+        phase,
+        currentPlayer,
+      });
+      if (gameover) client.emit('game:over', { roomId, result: gameover });
+    }
     this.logger.log(`${player.name} conectou na sala ${roomId}`);
   }
 

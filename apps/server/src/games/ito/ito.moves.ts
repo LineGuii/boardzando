@@ -27,19 +27,27 @@ export function dealLevel(
   level: number,
 ): void {
   const deck = rng.shuffle(Array.from({ length: 100 }, (_, i) => i + 1));
-  const cards: Record<string, ItoCard> = {};
   let idx = 0;
+  const dealt: Array<{ value: number; ownerId: PlayerId }> = [];
   for (const pid of players) {
     for (let k = 0; k < level; k++) {
-      const value = deck[idx++]!;
-      cards[`ito-${value}`] = { id: `ito-${value}`, value, ownerId: pid, played: false };
+      dealt.push({ value: deck[idx++]!, ownerId: pid });
     }
   }
+  // Ids posicionais sobre a lista RE-embaralhada: nem o id nem a ordem de
+  // insercao no Record podem vazar dono/valor (o playerView esconde ambos, mas
+  // um id tipo `ito-<valor>` entregaria o segredo no payload).
+  const cards: Record<string, ItoCard> = {};
+  rng.shuffle(dealt).forEach((c, i) => {
+    const id = `ito-${i + 1}`;
+    cards[id] = { id, value: c.value, ownerId: c.ownerId, played: false };
+  });
   state.cards = cards;
   state.votes = {};
   state.playedPile = [];
   state.lastPlayedValue = 0;
   state.lastMistake = undefined;
+  state.tableOrder = undefined;
   state.step = 'clue';
 }
 
@@ -60,10 +68,20 @@ export const setClue: Move<ItoState, SetCluePayload> = (state, ctx, payload) => 
 };
 
 /** MOVE (off-turn): a equipe decide comecar a jogar as cartas. */
-export const startPlay: Move<ItoState, StartPlayPayload> = (state) => {
+export const startPlay: Move<ItoState, StartPlayPayload> = (state, ctx) => {
   if (state.step !== 'clue') return INVALID_MOVE;
+  const inPlay = remaining(state);
+  // Modo anonimo: so comeca quando TODAS as cartas tem dica — elas vao para a
+  // mesa sem dono, e uma carta sem dica seria injogavel as cegas.
+  if (state.options.anonymousCards && inPlay.some((c) => !(c.clue ?? '').trim())) {
+    return INVALID_MOVE;
+  }
   const next = clone(state);
   next.step = 'play';
+  if (next.options.anonymousCards) {
+    // Mesa embaralhada: a posicao das cartas nao pode revelar o dono.
+    next.tableOrder = ctx.random.shuffle(inPlay.map((c) => c.id));
+  }
   return next;
 };
 
@@ -123,7 +141,13 @@ export const playLowest: Move<ItoState, PlayLowestPayload> = (state, ctx, payloa
       next.outcome = 'win';
     } else {
       next.level += 1;
-      next.theme = ctx.random.pick(ITO_THEMES);
+      // Com uniqueThemes, segue a sequencia pre-sorteada no setup (sem
+      // repeticao); senao, sorteio livre como antes.
+      const orderIdx = next.level - next.options.startLevel;
+      next.theme =
+        next.options.uniqueThemes && next.themeOrder?.[orderIdx] !== undefined
+          ? ITO_THEMES[next.themeOrder[orderIdx]!]!
+          : ctx.random.pick(ITO_THEMES);
       dealLevel(next, ctx.players, ctx.random, next.level);
     }
   }
