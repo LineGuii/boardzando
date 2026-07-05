@@ -14,7 +14,13 @@ import type { ItoOptions, ItoState } from './ito.state';
 
 type ItoMovePayload = SetCluePayload | StartPlayPayload | PlayLowestPayload | VoteCardPayload;
 
-const DEFAULTS: ItoOptions = { lives: 3, maxLevel: 3, startLevel: 1 };
+const DEFAULTS: ItoOptions = {
+  lives: 3,
+  maxLevel: 3,
+  startLevel: 1,
+  uniqueThemes: true,
+  anonymousCards: false,
+};
 
 function readOptions(raw: unknown): ItoOptions {
   const o = (raw ?? {}) as Partial<ItoOptions>;
@@ -25,6 +31,10 @@ function readOptions(raw: unknown): ItoOptions {
     lives: clampInt(o.lives, 1, 9, DEFAULTS.lives),
     maxLevel,
     startLevel: clampInt(o.startLevel, 1, maxLevel, DEFAULTS.startLevel),
+    uniqueThemes:
+      typeof o.uniqueThemes === 'boolean' ? o.uniqueThemes : DEFAULTS.uniqueThemes,
+    anonymousCards:
+      typeof o.anonymousCards === 'boolean' ? o.anonymousCards : DEFAULTS.anonymousCards,
   };
 }
 
@@ -45,12 +55,24 @@ export class ItoGame implements GameDefinition<ItoState, ItoMovePayload> {
 
   setup(ctx: GameContext, setupData?: unknown): ItoState {
     const options = readOptions(setupData);
+    // Com uniqueThemes, a sequencia de temas da partida inteira e pre-sorteada
+    // aqui (um indice por nivel) — garante zero repeticao entre niveis.
+    let themeOrder: number[] | undefined;
+    let theme = ctx.random.pick(ITO_THEMES);
+    if (options.uniqueThemes) {
+      const levels = options.maxLevel - options.startLevel + 1;
+      themeOrder = ctx.random
+        .shuffle(ITO_THEMES.map((_, i) => i))
+        .slice(0, levels);
+      theme = ITO_THEMES[themeOrder[0]!]!;
+    }
     const state: ItoState = {
       options,
       level: options.startLevel,
       maxLevel: options.maxLevel,
       lives: options.lives,
-      theme: ctx.random.pick(ITO_THEMES),
+      theme,
+      themeOrder,
       step: 'clue',
       cards: {},
       votes: {},
@@ -90,14 +112,23 @@ export class ItoGame implements GameDefinition<ItoState, ItoMovePayload> {
    * Esconde o NUMERO das cartas nao reveladas dos outros jogadores; as DICAS
    * sao publicas (e como a equipe se coordena). Numeros aparecem quando a carta
    * e jogada ou descartada, e o jogador sempre ve as proprias.
+   *
+   * Modo anonimo (options.anonymousCards): alem do numero, o DONO das cartas
+   * alheias tambem some (para sempre — nem jogada/descartada revela). Na fase
+   * de dicas o viewer nem recebe as cartas dos outros (senao mapearia dica ->
+   * autor assistindo a digitacao), so um progresso por jogador. Votos viram
+   * contagem anonima; o viewer ve apenas o proprio voto.
    */
-  playerView(state: ItoState, _ctx: GameContext, viewer: PlayerId): unknown {
+  playerView(state: ItoState, ctx: GameContext, viewer: PlayerId): unknown {
+    const anon = state.options.anonymousCards;
     const cards: Record<string, unknown> = {};
     for (const c of Object.values(state.cards)) {
-      const reveal = c.played || c.discarded || c.ownerId === viewer;
+      const mine = c.ownerId === viewer;
+      if (anon && state.step === 'clue' && !mine) continue;
+      const reveal = c.played || c.discarded || mine;
       cards[c.id] = {
         id: c.id,
-        ownerId: c.ownerId,
+        ownerId: anon && !mine ? undefined : c.ownerId,
         clue: c.clue,
         played: c.played,
         discarded: c.discarded,
@@ -105,6 +136,34 @@ export class ItoGame implements GameDefinition<ItoState, ItoMovePayload> {
         value: reveal ? c.value : undefined,
       };
     }
+
+    // Fase de dicas no modo anonimo: progresso (dicas prontas/total) por
+    // jogador, para a UI mostrar quem falta sem expor as cartas.
+    let clueProgress: Record<PlayerId, { done: number; total: number }> | undefined;
+    if (anon && state.step === 'clue') {
+      clueProgress = {};
+      for (const pid of ctx.players) {
+        const own = Object.values(state.cards).filter(
+          (c) => c.ownerId === pid && !c.played && !c.discarded,
+        );
+        clueProgress[pid] = {
+          done: own.filter((c) => (c.clue ?? '').trim().length > 0).length,
+          total: own.length,
+        };
+      }
+    }
+
+    // Votos: no modo anonimo o viewer ve so o proprio; o resto vira contagem.
+    let votes: Record<PlayerId, string> = state.votes;
+    let voteCounts: Record<string, number> | undefined;
+    if (anon) {
+      voteCounts = {};
+      for (const cid of Object.values(state.votes)) {
+        voteCounts[cid] = (voteCounts[cid] ?? 0) + 1;
+      }
+      votes = state.votes[viewer] ? { [viewer]: state.votes[viewer]! } : {};
+    }
+
     return {
       theme: state.theme,
       level: state.level,
@@ -114,7 +173,11 @@ export class ItoGame implements GameDefinition<ItoState, ItoMovePayload> {
       playedPile: state.playedPile,
       lastPlayedValue: state.lastPlayedValue,
       lastMistake: state.lastMistake,
-      votes: state.votes,
+      anonymous: anon,
+      tableOrder: state.tableOrder,
+      clueProgress,
+      votes,
+      voteCounts,
       cards,
     };
   }

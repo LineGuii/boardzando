@@ -82,8 +82,15 @@ function PatoOptionsPanel({
 interface ItoOptions {
   lives: number;
   maxLevel: number;
+  uniqueThemes: boolean;
+  anonymousCards: boolean;
 }
-const ITO_DEFAULT_OPTIONS: ItoOptions = { lives: 3, maxLevel: 3 };
+const ITO_DEFAULT_OPTIONS: ItoOptions = {
+  lives: 3,
+  maxLevel: 3,
+  uniqueThemes: true,
+  anonymousCards: false,
+};
 
 function ItoOptionsPanel({
   value,
@@ -126,6 +133,33 @@ function ItoOptionsPanel({
         </div>
         <p className="shell-hint">
           Cada nível dá uma carta a mais por jogador (1 → {value.maxLevel}).
+        </p>
+      </div>
+      <div className="shell-options-field">
+        <label className="shell-options-toggle">
+          <input
+            type="checkbox"
+            checked={value.uniqueThemes}
+            onChange={(e) => onChange({ ...value, uniqueThemes: e.target.checked })}
+          />
+          Nunca repetir tema entre níveis
+        </label>
+        <p className="shell-hint">
+          Cada nível ganha um tema diferente durante a partida.
+        </p>
+      </div>
+      <div className="shell-options-field">
+        <label className="shell-options-toggle">
+          <input
+            type="checkbox"
+            checked={value.anonymousCards ?? false}
+            onChange={(e) => onChange({ ...value, anonymousCards: e.target.checked })}
+          />
+          Modo anônimo (cartas embaralhadas) 🎭
+        </label>
+        <p className="shell-hint">
+          Ninguém sabe de quem é cada carta nem quem votou nela: depois das
+          dicas, as cartas são embaralhadas na mesa.
         </p>
       </div>
     </div>
