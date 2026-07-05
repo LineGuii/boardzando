@@ -15,105 +15,125 @@ function seed(state: PatoState): GameInstance<PatoState> {
   return GameInstance.restore(new PatoGame(), { ...base.snapshot, state });
 }
 
-describe('PatoGame', () => {
-  it('setup sorteia N perguntas sem repetição e zera pontos', () => {
+/** Partida de 1 rodada com a pergunta 0 (resposta conhecida) e vez do 'a'. */
+function oneRoundMatch(): { m: GameInstance<PatoState>; answer: number } {
+  const s = structuredClone(newMatch().snapshot.state);
+  s.questionOrder = [0];
+  s.options.roundsTotal = 1;
+  s.roundIndex = 0;
+  s.turnIdx = 0;
+  s.bids = [];
+  s.step = 'bid';
+  return { m: seed(s), answer: PATO_QUESTIONS[0]!.answer };
+}
+
+describe('PatoGame (leilao em turnos)', () => {
+  it('setup sorteia N perguntas sem repetição, zera pontos e começa no turno 0', () => {
     const s = newMatch(1, { roundsTotal: 8 }).snapshot.state;
     expect(s.options.roundsTotal).toBe(8);
     expect(s.questionOrder).toHaveLength(8);
     expect(new Set(s.questionOrder).size).toBe(8);
-    expect(s.step).toBe('guess');
+    expect(s.step).toBe('bid');
+    expect(s.turnIdx).toBe(0);
+    expect(s.bids).toEqual([]);
     for (const p of PLAYERS) expect(s.scores[p]).toBe(0);
   });
 
-  it('submitGuess: 1 por rodada, rejeita valor não-numérico', () => {
-    const m = newMatch();
-    m.applyMove('a', 'submitGuess', { value: 42 });
-    expect(m.snapshot.state.guesses['a']).toBe(42);
-    // segundo envio na mesma rodada é inválido
-    expect(() => m.applyMove('a', 'submitGuess', { value: 99 })).toThrow(InvalidMoveError);
-    // NaN inválido
-    expect(() => m.applyMove('b', 'submitGuess', { value: NaN })).toThrow(InvalidMoveError);
+  it('placeBid: só o jogador da vez, inteiro, sempre maior que o anterior', () => {
+    const { m } = oneRoundMatch();
+    // não é a vez de b
+    expect(() => m.applyMove('b', 'placeBid', { value: 10 })).toThrow(InvalidMoveError);
+    // número quebrado é inválido
+    expect(() => m.applyMove('a', 'placeBid', { value: 0.1 })).toThrow(InvalidMoveError);
+    expect(() => m.applyMove('a', 'placeBid', { value: 1.321 })).toThrow(InvalidMoveError);
+    // negativo/NaN inválidos
+    expect(() => m.applyMove('a', 'placeBid', { value: -5 })).toThrow(InvalidMoveError);
+    expect(() => m.applyMove('a', 'placeBid', { value: NaN })).toThrow(InvalidMoveError);
+
+    m.applyMove('a', 'placeBid', { value: 10 });
+    expect(m.snapshot.state.bids).toEqual([{ playerId: 'a', value: 10 }]);
+    expect(m.snapshot.state.turnIdx).toBe(1); // passou a vez para b
+
+    // b é obrigado a subir: igual ou menor é inválido
+    expect(() => m.applyMove('b', 'placeBid', { value: 10 })).toThrow(InvalidMoveError);
+    expect(() => m.applyMove('b', 'placeBid', { value: 9 })).toThrow(InvalidMoveError);
+    m.applyMove('b', 'placeBid', { value: 11 });
+    expect(m.snapshot.state.turnIdx).toBe(2);
   });
 
-  it('quando todos respondem, transiciona para reveal e pontua mais próximo', () => {
-    // força questionOrder controlado (índice 0 → resposta conhecida)
-    const base = newMatch();
-    const s = structuredClone(base.snapshot.state);
-    s.questionOrder = [0]; // primeira pergunta do banco
-    s.options.roundsTotal = 1;
-    const m = seed(s);
-    const correct = PATO_QUESTIONS[0]!.answer;
-    m.applyMove('a', 'submitGuess', { value: correct - 5 });
-    m.applyMove('b', 'submitGuess', { value: correct + 10 });
-    m.applyMove('c', 'submitGuess', { value: correct + 100 });
+  it('callDuck: qualquer um MENOS o da vez, e só depois do primeiro lance', () => {
+    const { m } = oneRoundMatch();
+    // sem lance ainda: ninguém pode gritar
+    expect(() => m.applyMove('b', 'callDuck', {})).toThrow(InvalidMoveError);
+    m.applyMove('a', 'placeBid', { value: 1 });
+    // agora a vez é de b: b não pode gritar
+    expect(() => m.applyMove('b', 'callDuck', {})).toThrow(InvalidMoveError);
+    // a e c podem
+    m.applyMove('c', 'callDuck', {});
     expect(m.snapshot.state.step).toBe('reveal');
-    expect(m.snapshot.state.lastRound?.winners).toEqual(['a']); // mais perto
-    expect(m.snapshot.state.scores['a']).toBe(1);
-    expect(m.snapshot.state.scores['b']).toBe(0);
-    expect(m.snapshot.state.lastRound?.exact).toBe(false);
+    expect(m.snapshot.state.lastRound?.callerId).toBe('c');
+    expect(m.snapshot.state.lastRound?.lastBidderId).toBe('a');
   });
 
-  it('acerto exato dá +2 e mais de um vencedor divide (todos +N)', () => {
-    // exato
-    const base1 = newMatch();
-    const s1 = structuredClone(base1.snapshot.state);
-    s1.questionOrder = [0];
-    s1.options.roundsTotal = 1;
-    const m1 = seed(s1);
-    const correct = PATO_QUESTIONS[0]!.answer;
-    m1.applyMove('a', 'submitGuess', { value: correct });
-    m1.applyMove('b', 'submitGuess', { value: correct + 20 });
-    m1.applyMove('c', 'submitGuess', { value: correct + 40 });
-    expect(m1.snapshot.state.lastRound?.exact).toBe(true);
-    expect(m1.snapshot.state.scores['a']).toBe(2);
-
-    // empate: dois igual perto
-    const base2 = newMatch();
-    const s2 = structuredClone(base2.snapshot.state);
-    s2.questionOrder = [0];
-    s2.options.roundsTotal = 1;
-    const m2 = seed(s2);
-    m2.applyMove('a', 'submitGuess', { value: correct - 3 });
-    m2.applyMove('b', 'submitGuess', { value: correct + 3 });
-    m2.applyMove('c', 'submitGuess', { value: correct + 30 });
-    expect(new Set(m2.snapshot.state.lastRound!.winners)).toEqual(new Set(['a', 'b']));
-    expect(m2.snapshot.state.scores['a']).toBe(1);
-    expect(m2.snapshot.state.scores['b']).toBe(1);
+  it('reveal: vence o maior lance que não passou; quem passou não ganha nada', () => {
+    const { m, answer } = oneRoundMatch();
+    m.applyMove('a', 'placeBid', { value: Math.max(0, answer - 10) });
+    m.applyMove('b', 'placeBid', { value: answer - 1 }); // mais perto, sem passar
+    m.applyMove('c', 'placeBid', { value: answer + 1 }); // passou (pertinho, mas nada)
+    m.applyMove('b', 'callDuck', {}); // vez é de a; b grita
+    const lr = m.snapshot.state.lastRound!;
+    expect(lr.overshot).toBe(true); // o último lance passou
+    expect(lr.winnerId).toBe('b');
+    expect(lr.winningValue).toBe(answer - 1);
+    expect(m.snapshot.state.scores['b']).toBe(1);
+    expect(m.snapshot.state.scores['c']).toBe(0); // passou: nada
   });
 
-  it('nextRound avança e finaliza após roundsTotal', () => {
-    const base = newMatch();
-    const s = structuredClone(base.snapshot.state);
+  it('reveal: se TODOS os lances passaram, ninguém pontua', () => {
+    const { m, answer } = oneRoundMatch();
+    m.applyMove('a', 'placeBid', { value: answer + 1 });
+    m.applyMove('b', 'placeBid', { value: answer + 2 });
+    m.applyMove('a', 'callDuck', {}); // vez é de c; a grita
+    const lr = m.snapshot.state.lastRound!;
+    expect(lr.winnerId).toBeUndefined();
+    for (const p of PLAYERS) expect(m.snapshot.state.scores[p]).toBe(0);
+  });
+
+  it('nextRound: zera lances, rotaciona quem abre e finaliza após roundsTotal', () => {
+    const s = structuredClone(newMatch().snapshot.state);
     s.questionOrder = [0, 1];
     s.options.roundsTotal = 2;
     const m = seed(s);
-    m.applyMove('a', 'submitGuess', { value: 1 });
-    m.applyMove('b', 'submitGuess', { value: 2 });
-    m.applyMove('c', 'submitGuess', { value: 3 });
+    m.applyMove('a', 'placeBid', { value: 5 });
+    m.applyMove('c', 'callDuck', {});
     m.applyMove('a', 'nextRound', {});
-    expect(m.snapshot.state.step).toBe('guess');
+    expect(m.snapshot.state.step).toBe('bid');
     expect(m.snapshot.state.roundIndex).toBe(1);
-    expect(m.snapshot.state.guesses).toEqual({});
+    expect(m.snapshot.state.bids).toEqual([]);
+    expect(m.snapshot.state.turnIdx).toBe(1); // rodada 2 abre com b
 
-    m.applyMove('a', 'submitGuess', { value: 1 });
-    m.applyMove('b', 'submitGuess', { value: 2 });
-    m.applyMove('c', 'submitGuess', { value: 3 });
+    m.applyMove('b', 'placeBid', { value: 5 });
+    m.applyMove('a', 'callDuck', {});
     m.applyMove('c', 'nextRound', {});
     expect(m.isOver).toBe(true);
     expect(m.snapshot.gameover).toBeDefined();
   });
 
-  it('playerView esconde resposta antes do reveal e palpites alheios', () => {
-    const m = newMatch();
-    m.applyMove('a', 'submitGuess', { value: 50 });
-    const va = m.viewFor('a') as {
-      currentQuestion: { answer?: number };
-      guesses: Record<string, number>;
+  it('playerView: lances públicos, resposta escondida até o reveal', () => {
+    const { m } = oneRoundMatch();
+    m.applyMove('a', 'placeBid', { value: 7 });
+    const vb = m.viewFor('b') as {
+      currentQuestion: { answer?: number; explanation?: string };
+      bids: Array<{ playerId: string; value: number }>;
+      turnPlayerId: string;
     };
-    expect(va.currentQuestion.answer).toBeUndefined(); // ainda escondido
-    expect(va.guesses['a']).toBe(50); // vejo o meu
-    const vb = m.viewFor('b') as { guesses: Record<string, number>; answered: string[] };
-    expect(vb.guesses['a']).toBeUndefined(); // não vejo o do outro
-    expect(vb.answered).toContain('a');
+    expect(vb.currentQuestion.answer).toBeUndefined();
+    expect(vb.currentQuestion.explanation).toBeUndefined();
+    expect(vb.bids).toEqual([{ playerId: 'a', value: 7 }]); // público
+    expect(vb.turnPlayerId).toBe('b');
+
+    m.applyMove('c', 'callDuck', {});
+    const vb2 = m.viewFor('b') as { currentQuestion: { answer?: number } };
+    expect(vb2.currentQuestion.answer).toBe(PATO_QUESTIONS[0]!.answer);
   });
 });
