@@ -1,9 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { HuesCoord, HuesOptions } from '@boardzando/contracts';
 import { cellColor } from '@boardzando/contracts';
 import { useGame } from '../../net/store';
 import { HuesGrid, coordLabel } from './HuesGrid';
 import './hues.css';
+
+/** True quando o dispositivo principal e tatil (smartphone/tablet). */
+function useIsCoarsePointer(): boolean {
+  const [coarse, setCoarse] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(pointer: coarse)');
+    setCoarse(mq.matches);
+    const handler = (e: MediaQueryListEvent): void => setCoarse(e.matches);
+    mq.addEventListener?.('change', handler);
+    return () => mq.removeEventListener?.('change', handler);
+  }, []);
+  return coarse;
+}
 
 interface HuesLastRoundView {
   target: HuesCoord;
@@ -42,6 +56,16 @@ export function HuesBoard(): JSX.Element {
   const room = useGame((s) => s.room);
   const currentPlayer = useGame((s) => s.currentPlayer);
   const socket = useGame((s) => s.socket);
+  const isMobile = useIsCoarsePointer();
+  const [pending, setPending] = useState<HuesCoord | null>(null);
+
+  // Limpa o palpite pendente sempre que a fase, a contagem de cones, ou
+  // o cue-giver mudam (ex.: o servidor avancou o step depois do confirmar).
+  const step = view?.step;
+  const myConeCountServer = view && session ? (view.guesses[session.playerId]?.length ?? 0) : 0;
+  useEffect(() => {
+    setPending(null);
+  }, [step, myConeCountServer, currentPlayer]);
 
   if (!view || !session || !room) return <p>Aguardando estado...</p>;
 
@@ -64,14 +88,32 @@ export function HuesBoard(): JSX.Element {
   const expectedMyCones = view.step === 'guess1' ? 1 : view.step === 'guess2' ? 2 : 0;
   const canClick = inGuessPhase && !isCueGiver && myConeCount < expectedMyCones;
 
-  const handlePick = (coord: HuesCoord): void => {
-    if (!canClick) return;
+  const sendCone = (coord: HuesCoord): void => {
     socket?.emit(
       'game:move',
       { roomId: session.roomId, type: 'placeCone', data: { col: coord.col, row: coord.row } },
       () => {},
     );
   };
+
+  const handlePick = (coord: HuesCoord): void => {
+    if (!canClick) return;
+    // No mobile, primeira interacao SO marca o palpite — o jogador
+    // confirma com o botao "Confirmar" abaixo. No desktop, click direto envia.
+    if (isMobile) {
+      setPending(coord);
+    } else {
+      sendCone(coord);
+    }
+  };
+
+  const confirmPending = (): void => {
+    if (pending) {
+      sendCone(pending);
+      setPending(null);
+    }
+  };
+  const cancelPending = (): void => setPending(null);
 
   return (
     <div className="hues-room">
@@ -113,8 +155,37 @@ export function HuesBoard(): JSX.Element {
             clickable={canClick}
             onPick={handlePick}
             revealedTarget={view.step === 'reveal' ? view.target : undefined}
+            pendingCoord={pending ?? undefined}
+            pendingConeColor={coneColorFor(me)}
           />
         </div>
+
+        {/* Barra de confirmacao — so aparece em mobile, quando o palpitador
+            toca uma celula. Permite revisar e confirmar/cancelar antes de
+            enviar o move (no desktop o click envia direto). */}
+        {isMobile && canClick && pending && (
+          <div className="hues-confirm-bar">
+            <span>
+              Palpite em <b>{coordLabel(pending)}</b>
+            </span>
+            <div className="hues-confirm-buttons">
+              <button
+                type="button"
+                className="hues-confirm-cancel"
+                onClick={cancelPending}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="hues-confirm-ok"
+                onClick={confirmPending}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <Scoreboard

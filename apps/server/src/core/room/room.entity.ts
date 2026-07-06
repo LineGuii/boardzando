@@ -44,6 +44,7 @@ export class Room {
         name: p.name,
         connected: p.connected,
         isHost: p.id === this.hostId,
+        color: p.color,
       })),
     };
   }

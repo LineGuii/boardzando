@@ -21,6 +21,11 @@ export interface GameOverResult {
   ranking?: PlayerId[];
   /** Espaco livre para metadados especificos do jogo (pontuacao etc.). */
   meta?: Record<string, unknown>;
+  /**
+   * Desfecho de jogos COOPERATIVOS, onde a equipe inteira vence ou perde junta
+   * (ex.: Ito). A casca renderiza uma mensagem de equipe em vez de "vencedor".
+   */
+  coop?: { outcome: 'win' | 'lose'; detail?: string };
 }
 
 /** Constante retornada por um move quando a jogada e invalida. */

@@ -1,0 +1,538 @@
+/* =========================================================
+ * Efeito Manada — tema de vacas/pasto: cerca de madeira, fichas
+ * de vaca "bonitinhas", Vaca Rosa grande que bloqueia a vitória.
+ * ========================================================= */
+
+.manada-root {
+  margin-top: 12px;
+  --pasto: #6bbf59;
+  --pasto-esc: #3f8f3a;
+  --madeira: #a9713e;
+  --madeira-esc: #7c4f27;
+  --rosa: #ff5fa2;
+}
+
+/* ---------- Cabeçalho ---------- */
+
+.manada-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #3f8f3a 0%, #2f7d55 100%);
+  border-radius: 14px;
+  padding: 14px 18px;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.manada-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.manada-cow {
+  font-size: 40px;
+  line-height: 1;
+  animation: manada-bob 2.4s ease-in-out infinite;
+}
+
+@keyframes manada-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-4px) rotate(2deg); }
+}
+
+.manada-eyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #dff5d8;
+}
+
+.manada-cowboy {
+  font-size: 15px;
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.manada-hat {
+  font-size: 20px;
+  animation: manada-hat-tip 3s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@keyframes manada-hat-tip {
+  0%, 90%, 100% { transform: rotate(0); }
+  95% { transform: rotate(-14deg); }
+}
+
+.manada-mute {
+  background: rgba(255, 255, 255, 0.18);
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* ---------- Carta de tema ---------- */
+
+.manada-theme-card {
+  margin-top: 14px;
+  padding: 20px 22px;
+  border-radius: 16px;
+  background: #fffdf5;
+  border: 3px dashed #cbb994;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  animation: manada-pop 0.35s ease;
+}
+
+.manada-theme-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #a08a5e;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.manada-theme-text {
+  font-size: clamp(20px, 3.4vw, 30px);
+  font-weight: 900;
+  color: #4a3b1e;
+}
+
+@keyframes manada-pop {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- Fase de resposta ---------- */
+
+.manada-answer-zone {
+  margin-top: 14px;
+}
+
+.manada-answer-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.manada-input {
+  flex: 1;
+  min-width: 200px;
+  font-size: 17px;
+  padding: 12px 14px;
+  border: 2px solid #cbb994;
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  color: #4a3b1e;
+  background: #fffdf5;
+}
+
+.manada-input:focus {
+  outline: none;
+  border-color: var(--pasto-esc);
+  box-shadow: 0 0 0 3px rgba(63, 143, 58, 0.2);
+}
+
+.manada-submit,
+.manada-next {
+  padding: 12px 24px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3f8f3a 0%, #2f9e44 100%);
+  color: white;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #256b2a;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.manada-submit:hover:not(:disabled),
+.manada-next:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 #256b2a;
+}
+
+.manada-submit:active:not(:disabled),
+.manada-next:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #256b2a;
+}
+
+.manada-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: 0 4px 0 #9aa39a;
+  background: #b9c2b2;
+}
+
+.manada-answered-box {
+  padding: 14px 18px;
+  background: #eef8e9;
+  border: 2px solid #93c98a;
+  border-radius: 12px;
+  font-size: 16px;
+  color: #2f5f26;
+}
+
+.manada-answered-mark {
+  margin-right: 6px;
+}
+
+.manada-answered-hint {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #5a7a52;
+}
+
+.manada-answered-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.manada-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1ece1;
+  color: #8a7d65;
+}
+
+.manada-badge.done {
+  background: #e2f6e2;
+  color: #2f7d3a;
+}
+
+.manada-badge-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #cbd5e1;
+}
+
+/* ---------- Revelação ---------- */
+
+.manada-reveal {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #fbfff7;
+  border: 2px solid #cbe3bf;
+}
+
+.manada-reveal-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.manada-reveal-verdict {
+  font-size: 18px;
+  font-weight: 800;
+  padding: 10px 14px;
+  border-radius: 10px;
+  animation: manada-pop 0.35s ease;
+}
+
+.manada-reveal-verdict.win {
+  background: #e2f6e2;
+  color: #226b2b;
+}
+
+.manada-reveal-verdict.tie {
+  background: #fff3cd;
+  color: #7a5b14;
+}
+
+.manada-reveal-pink {
+  font-size: 15px;
+  font-weight: 700;
+  color: #c02b7a;
+  background: #ffe6f1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  animation: manada-pinkplop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+.manada-reveal-bump {
+  font-size: 14px;
+  font-weight: 700;
+  color: #8a5a2b;
+  background: #f6ecdb;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.manada-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.manada-group {
+  flex: 1 1 200px;
+  border: 2px solid #e2dccf;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+}
+
+.manada-group.majority {
+  border-color: #2f9e44;
+  background: #eef8e9;
+  box-shadow: 0 0 0 3px rgba(47, 158, 68, 0.2);
+}
+
+.manada-group-answer {
+  font-size: 17px;
+  font-weight: 800;
+  color: #4a3b1e;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.manada-group-cow {
+  font-size: 13px;
+  font-weight: 800;
+  color: #2f7d3a;
+  background: #d8f0d8;
+  padding: 2px 8px;
+  border-radius: 999px;
+  animation: manada-pop 0.4s ease;
+}
+
+.manada-group-players {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.manada-group-player {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #5a4f3a;
+}
+
+.manada-next {
+  display: block;
+  margin: 16px auto 0;
+}
+
+/* ---------- Placar: a cerca / curral ---------- */
+
+.manada-fence {
+  position: relative;
+  margin-top: 18px;
+  padding: 22px 16px 16px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #bfe9b3 0%, #9ede8e 100%);
+  border: 3px solid var(--madeira-esc);
+  overflow: hidden;
+}
+
+/* trilho de madeira da cerca no topo */
+.manada-fence-rail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--madeira) 0,
+      var(--madeira) 46px,
+      var(--madeira-esc) 46px,
+      var(--madeira-esc) 52px
+    );
+  border-bottom: 2px solid var(--madeira-esc);
+}
+
+.manada-fence-title {
+  font-size: 14px;
+  font-weight: 900;
+  color: #2f5f26;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.manada-herds {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.manada-herd {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #cbe3bf;
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.manada-herd.mine {
+  border-color: #2f9e44;
+  box-shadow: 0 0 0 2px rgba(47, 158, 68, 0.25);
+}
+
+.manada-herd.won {
+  border-color: #f0b400;
+  box-shadow: 0 0 0 3px rgba(240, 180, 0, 0.4);
+  background: #fffbe6;
+}
+
+.manada-herd-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #3a3220;
+  margin-bottom: 8px;
+}
+
+.manada-hat-sm {
+  font-size: 17px;
+}
+
+.manada-herd-count {
+  margin-left: auto;
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-weight: 900;
+  color: #2f7d3a;
+  background: #e2f6e2;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.manada-herd-tokens {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 40px;
+}
+
+.manada-no-cows {
+  font-size: 13px;
+  color: #6f8a66;
+  font-style: italic;
+}
+
+/* fichas de vaca "bonitinhas" — moeda branca com manchas e número */
+.manada-token {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, #000 0 5px, transparent 6px),
+    radial-gradient(circle at 70% 60%, #000 0 4px, transparent 5px),
+    #fff;
+  border: 3px solid #2f7d3a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  animation: manada-tokenin 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+.manada-token.three {
+  width: 44px;
+  height: 44px;
+  border-color: #b8860b;
+  background:
+    radial-gradient(circle at 30% 30%, #000 0 6px, transparent 7px),
+    radial-gradient(circle at 72% 62%, #000 0 5px, transparent 6px),
+    #fff6de;
+}
+
+.manada-token-cow {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  font-size: 14px;
+}
+
+.manada-token-num {
+  font-size: 16px;
+  font-weight: 900;
+  color: #2f5f26;
+}
+
+.manada-token.three .manada-token-num {
+  color: #8a6100;
+}
+
+@keyframes manada-tokenin {
+  0% { transform: scale(0) rotate(-40deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* ---------- Vaca Rosa grande ---------- */
+
+.manada-pinkcow {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: auto;
+  animation: manada-pinkplop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+.manada-pinkcow-face {
+  font-size: 44px;
+  line-height: 1;
+  /* deixa o emoji de vaca "rosa" */
+  filter: hue-rotate(280deg) saturate(2.2) brightness(1.05);
+  animation: manada-pink-wobble 1.6s ease-in-out infinite;
+}
+
+.manada-pinkcow-tag {
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+  background: var(--rosa);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+@keyframes manada-pink-wobble {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+@keyframes manada-pinkplop {
+  0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
+}

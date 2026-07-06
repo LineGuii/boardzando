@@ -1,0 +1,958 @@
+/* =========================================================
+ * Ito (cooperativo) — tema/escala, vidas, cartas com dicas
+ * grandes em balão, intenção+confirmação, sons.
+ * ========================================================= */
+
+.ito-root {
+  margin-top: 12px;
+}
+
+/* ---------- Cabeçalho ---------- */
+
+.ito-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  background: linear-gradient(135deg, #2b2350 0%, #1f3a52 100%);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.ito-theme {
+  flex: 1;
+  min-width: 240px;
+}
+
+.ito-theme-topic {
+  font-size: 22px;
+  font-weight: 800;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.ito-scale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #d6dcf0;
+}
+
+.ito-scale-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4a6fff 0%, #2dd4bf 50%, #f97316 100%);
+}
+
+.ito-scale-low,
+.ito-scale-high {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.ito-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ito-mute {
+  background: rgba(255, 255, 255, 0.15);
+  border: 0;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.ito-level {
+  font-size: 13px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.ito-lives {
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+/* ---------- Erro ---------- */
+
+.ito-mistake {
+  margin-top: 10px;
+  padding: 10px 16px;
+  background: #fdeaea;
+  border: 1px solid #f3b4b4;
+  border-radius: 8px;
+  color: #b41818;
+  font-size: 15px;
+  font-weight: 600;
+  animation: ito-shake 0.35s ease;
+}
+
+@keyframes ito-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  60% { transform: translateX(5px); }
+}
+
+/* ---------- Pilha jogada ---------- */
+
+.ito-played {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: #f1ece1;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ito-played-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6b5f4e;
+}
+
+.ito-played-empty {
+  font-size: 13px;
+  color: #8a7d65;
+}
+
+.ito-played-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ito-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 44px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  animation: ito-pop 0.25s ease;
+}
+
+.ito-chip.played {
+  background: #e7f0ff;
+  border-color: #205db2;
+}
+
+.ito-chip-value {
+  font-size: 20px;
+  font-weight: 900;
+  color: #173a6b;
+}
+
+.ito-chip-owner {
+  font-size: 9px;
+  color: #6b5f4e;
+  text-transform: uppercase;
+}
+
+/* carta descartada por erro: mesmo lugar/layout do placar, marcada de vermelho */
+.ito-chip.discarded {
+  position: relative;
+  background: #fdeaea;
+  border-color: #e0a0a0;
+}
+
+.ito-chip.discarded .ito-chip-value {
+  color: #b41818;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.ito-chip.discarded .ito-chip-owner {
+  color: #b41818;
+}
+
+.ito-chip.discarded::after {
+  content: '✗';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fff;
+}
+
+/* ---------- Jogadores ---------- */
+
+.ito-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.ito-player {
+  flex: 1 1 280px;
+  background: white;
+  border: 1px solid #e2dccf;
+  border-radius: 14px;
+  padding: 12px 14px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.ito-player.mine {
+  border-color: #2dd4bf;
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.25);
+}
+
+.ito-player.intending {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.4);
+}
+
+.ito-player-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2b2b2b;
+  margin-bottom: 10px;
+}
+
+.ito-player-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #cbd5e1;
+}
+
+.ito-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.ito-empty {
+  color: #8a7d65;
+}
+
+/* ---------- Carta (maior) ---------- */
+
+.ito-card {
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ito-card-face {
+  position: relative;
+  height: 96px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #cbd5e1;
+}
+
+.ito-card-face.clickable {
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.ito-card-face.clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
+}
+
+.ito-card.own .ito-card-face {
+  background: linear-gradient(135deg, #eef6ff 0%, #dcefe9 100%);
+  border-color: #2dd4bf;
+}
+
+.ito-card.hidden .ito-card-face {
+  background: repeating-linear-gradient(45deg, #2b2350, #2b2350 7px, #34306a 7px, #34306a 14px);
+  border-color: #2b2350;
+}
+
+/* carta votada por alguém */
+.ito-card.voted .ito-card-face {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
+}
+
+/* carta votada por MIM (intenção): pulsa */
+.ito-card.voted-by-me .ito-card-face {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.45);
+  transform: translateY(-4px) scale(1.03);
+  animation: ito-glow 1s ease-in-out infinite;
+}
+
+@keyframes ito-glow {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.45); }
+  50% { box-shadow: 0 0 0 7px rgba(245, 158, 11, 0.6); }
+}
+
+/* avatares de quem votou, no topo-direito da carta */
+.ito-votes {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  display: flex;
+}
+
+.ito-vote-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid white;
+  margin-left: -6px;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  animation: ito-pop 0.3s ease;
+}
+
+.ito-vote-dot:first-child {
+  margin-left: 0;
+}
+
+.ito-card-value {
+  font-size: 40px;
+  font-weight: 900;
+  color: #173a6b;
+}
+
+.ito-card-back {
+  font-size: 40px;
+  font-weight: 900;
+  color: #b9c0e8;
+}
+
+/* ---------- Dica grande em balão ---------- */
+
+.ito-clue-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ito-clue-input {
+  width: 100%;
+  font-size: 15px;
+  padding: 9px 11px;
+  border: 2px solid #e2dccf;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  color: #173a6b;
+  background: #fffef9;
+}
+
+.ito-clue-input:focus {
+  outline: none;
+  border-color: #2dd4bf;
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+}
+
+.ito-saved-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a8f5a;
+  animation: ito-pop 0.35s ease;
+}
+
+.ito-saved-hint {
+  font-size: 11px;
+  color: #9a8f7a;
+}
+
+.ito-clue-bubble {
+  position: relative;
+  background: #fff7e6;
+  border: 2px solid #f3d9a0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #5a4322;
+  text-align: center;
+  min-height: 24px;
+  word-break: break-word;
+}
+
+/* "rabinho" do balão apontando para a carta */
+.ito-clue-bubble::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 9px solid #f3d9a0;
+}
+
+.ito-clue-bubble.empty {
+  background: #f3f0e8;
+  border-color: #e0dccf;
+  color: #a89e88;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.ito-clue-bubble.empty::before {
+  border-bottom-color: #e0dccf;
+}
+
+.ito-clue-bubble.pop {
+  animation: ito-bubble-pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+@keyframes ito-bubble-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes ito-pop {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- Controles ---------- */
+
+.ito-start-btn {
+  display: block;
+  margin: 16px auto 0;
+  padding: 12px 28px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4a6fff 0%, #2dd4bf 100%);
+  color: white;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(74, 111, 255, 0.35);
+  font-family: inherit;
+}
+
+.ito-hint {
+  text-align: center;
+  color: #6b5f4e;
+  font-size: 15px;
+  margin-top: 14px;
+}
+
+/* ---------- Barra de confirmação (intenção de jogar) ---------- */
+
+.ito-confirm-bar {
+  position: sticky;
+  bottom: 10px;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  background: #fffbea;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  font-size: 15px;
+  z-index: 20;
+  animation: ito-pop 0.2s ease;
+}
+
+.ito-confirm-bar b {
+  font-size: 18px;
+  color: #173a6b;
+}
+
+.ito-confirm-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.ito-confirm-cancel,
+.ito-confirm-ok {
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 9px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.ito-confirm-cancel {
+  background: #f1ece1;
+  color: #6b5f4e;
+}
+
+.ito-confirm-ok {
+  background: #2d932d;
+  color: white;
+  box-shadow: 0 3px 8px rgba(45, 147, 45, 0.4);
+}
+
+.ito-confirm-ok:active {
+  transform: translateY(1px);
+}
+
+/* ---------- Vidas (shake ao perder) ---------- */
+
+.ito-lives.shake {
+  display: inline-block;
+  animation: ito-lives-shake 0.6s ease;
+}
+
+@keyframes ito-lives-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px) scale(1.12); }
+  40% { transform: translateX(4px) scale(1.12); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+/* ---------- Feedback grande de acerto/erro ---------- */
+
+.ito-feedback {
+  position: fixed;
+  inset: 0;
+  z-index: 5200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ito-feedback.error {
+  animation: ito-red-vignette 1.8s ease;
+}
+
+@keyframes ito-red-vignette {
+  0% { box-shadow: inset 0 0 0 rgba(180, 24, 24, 0); }
+  15% { box-shadow: inset 0 0 160px rgba(180, 24, 24, 0.55); }
+  100% { box-shadow: inset 0 0 0 rgba(180, 24, 24, 0); }
+}
+
+.ito-feedback-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 30px 50px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+}
+
+.ito-feedback-inner.success {
+  animation: ito-fb-success 1.8s ease forwards;
+}
+
+.ito-feedback-inner.error {
+  animation: ito-fb-error 1.8s ease forwards;
+}
+
+.ito-feedback-icon {
+  font-size: 84px;
+  font-weight: 900;
+  color: #2d932d;
+  line-height: 1;
+  animation: ito-check-pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.5);
+}
+
+.ito-feedback-text {
+  font-size: 36px;
+  font-weight: 900;
+}
+
+.ito-feedback-inner.success .ito-feedback-text { color: #2d932d; }
+.ito-feedback-inner.error .ito-feedback-text { color: #b41818; }
+
+.ito-feedback-sub {
+  font-size: 15px;
+  color: #6b5f4e;
+  font-weight: 600;
+}
+
+@keyframes ito-fb-success {
+  0% { transform: scale(0.5); opacity: 0; }
+  14% { transform: scale(1.06); opacity: 1; }
+  28% { transform: scale(1); }
+  82% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.06); opacity: 0; }
+}
+
+@keyframes ito-fb-error {
+  0% { transform: scale(0.6); opacity: 0; }
+  12% { transform: scale(1.05); opacity: 1; }
+  18% { transform: translateX(-9px); }
+  24% { transform: translateX(9px); }
+  30% { transform: translateX(-7px); }
+  36% { transform: translateX(7px); }
+  42% { transform: translateX(0); }
+  82% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.05); }
+}
+
+@keyframes ito-check-pop {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Coração sendo destruído ---------- */
+
+.ito-heartbreak {
+  position: relative;
+  width: 96px;
+  height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ito-heartbreak-emoji {
+  font-size: 74px;
+  line-height: 1;
+  animation: ito-heart-shatter 1.7s ease forwards;
+}
+
+@keyframes ito-heart-shatter {
+  0% { transform: scale(0.6) rotate(0); opacity: 0; }
+  14% { transform: scale(1.28) rotate(0); opacity: 1; }
+  22% { transform: scale(1.22) rotate(-7deg); }
+  28% { transform: scale(1.26) rotate(7deg); }
+  34% { transform: scale(1.22) rotate(-6deg); }
+  40% { transform: scale(1.26) rotate(6deg); }
+  46% { transform: scale(1.22) rotate(0); }
+  68% { transform: scale(1.05) rotate(0); opacity: 1; filter: none; }
+  100% { transform: scale(0.15) rotate(24deg); opacity: 0; filter: blur(3px); }
+}
+
+.ito-shard {
+  position: absolute;
+  top: 42%;
+  left: 46%;
+  width: 11px;
+  height: 11px;
+  background: #c92a2a;
+  border-radius: 2px;
+  opacity: 0;
+}
+
+.ito-shard.s1 { animation: ito-shard1 1.7s ease forwards; }
+.ito-shard.s2 { animation: ito-shard2 1.7s ease forwards; }
+.ito-shard.s3 { animation: ito-shard3 1.7s ease forwards; }
+
+@keyframes ito-shard1 {
+  0%, 58% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  64% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-54px, -34px) rotate(130deg) scale(1); }
+}
+@keyframes ito-shard2 {
+  0%, 58% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  64% { opacity: 1; }
+  100% { opacity: 0; transform: translate(52px, -28px) rotate(-130deg) scale(1); }
+}
+@keyframes ito-shard3 {
+  0%, 58% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  64% { opacity: 1; }
+  100% { opacity: 0; transform: translate(4px, 54px) rotate(95deg) scale(1); }
+}
+
+/* ---------- Modo anônimo: mesa central + progresso de dicas ---------- */
+
+.ito-table {
+  margin-top: 14px;
+  padding: 18px 16px 22px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #1f4d3f 0%, #14372d 100%);
+  border: 3px solid #0e2a22;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.35);
+}
+
+.ito-table-label {
+  text-align: center;
+  color: #bfe8d6;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.ito-table-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* na mesa escura, o balão de dica ganha contraste extra */
+.ito-table .ito-clue-bubble {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* selo "sua" na própria carta da mesa anônima (só o dono vê) */
+.ito-mine-badge {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2dd4bf;
+  color: #073b33;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 2px solid white;
+}
+
+/* progresso das dicas (fase clue do modo anônimo) */
+.ito-progress-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ito-progress-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b4335;
+}
+
+.ito-progress-badge {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 800;
+  color: #9a8f7a;
+  background: #f1ece1;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.ito-progress-list li.ready .ito-progress-badge {
+  color: #1a8f5a;
+  background: #e2f6ec;
+}
+
+.ito-start-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ---------- Animação de embaralhamento (modo anônimo) ---------- */
+
+.ito-shuffle-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  background: rgba(15, 32, 26, 0.92);
+  pointer-events: none;
+  animation: ito-shuffle-fade 2.6s ease forwards;
+}
+
+@keyframes ito-shuffle-fade {
+  0% { opacity: 0; }
+  8% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.ito-shuffle-stage {
+  position: relative;
+  width: 0;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* cada carta: das bordas -> pilha no centro (giro) -> posição final na fila */
+.ito-shuffle-card {
+  position: absolute;
+  width: 66px;
+  height: 92px;
+  margin-left: -33px;
+  border-radius: 10px;
+  background: repeating-linear-gradient(45deg, #2b2350, #2b2350 7px, #34306a 7px, #34306a 14px);
+  border: 3px solid #4a4390;
+  color: #b9c0e8;
+  font-size: 30px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+  animation: ito-shuffle-move 2.2s cubic-bezier(0.45, 0, 0.25, 1) both;
+}
+
+@keyframes ito-shuffle-move {
+  0% {
+    transform: translate(var(--sx), var(--sy)) rotate(var(--sr)) scale(0.9);
+    opacity: 0;
+  }
+  12% { opacity: 1; }
+  38% {
+    transform: translate(0, 0) rotate(calc((var(--i) - var(--n) / 2) * 4deg)) scale(1);
+  }
+  48% {
+    transform: translate(0, 0) rotate(calc((var(--n) / 2 - var(--i)) * 5deg)) scale(1.06);
+  }
+  58% {
+    transform: translate(0, 0) rotate(calc((var(--i) - var(--n) / 2) * 3deg)) scale(1);
+  }
+  100% {
+    transform: translate(var(--ex), 0) rotate(0deg) scale(1);
+  }
+}
+
+.ito-shuffle-label {
+  color: #bfe8d6;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  animation: ito-pop 0.5s ease;
+}
+
+/* ---------- Tela de novo tema (5s) ---------- */
+
+.ito-theme-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 38%, #2b2350 0%, #130f29 100%);
+  animation: ito-intro-fade 0.4s ease;
+}
+
+.ito-theme-intro-card {
+  text-align: center;
+  color: white;
+  padding: 24px 32px;
+  max-width: 600px;
+}
+
+.ito-theme-intro-eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8fd3ff;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 16px;
+  border-radius: 999px;
+  animation: ito-intro-up 0.5s ease both;
+}
+
+.ito-theme-intro-topic {
+  font-size: clamp(30px, 6vw, 58px);
+  font-weight: 900;
+  margin: 20px 0;
+  animation: ito-intro-up 0.6s 0.1s ease both;
+}
+
+.ito-theme-intro-scale {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #cfd6f0;
+  animation: ito-intro-up 0.6s 0.2s ease both;
+}
+
+.ito-theme-intro-bar {
+  flex: 1;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4a6fff 0%, #2dd4bf 50%, #f97316 100%);
+  transform-origin: left center;
+  animation: ito-bar-grow 0.9s 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.ito-theme-intro-hint {
+  margin-top: 20px;
+  color: #aab3d6;
+  font-size: 15px;
+  animation: ito-intro-up 0.6s 0.4s ease both;
+}
+
+.ito-theme-intro-progress {
+  margin: 24px auto 0;
+  width: 220px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.ito-theme-intro-progress > span {
+  display: block;
+  height: 100%;
+  background: #2dd4bf;
+  animation: ito-progress 5s linear forwards;
+}
+
+@keyframes ito-progress {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes ito-intro-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes ito-bar-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes ito-intro-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

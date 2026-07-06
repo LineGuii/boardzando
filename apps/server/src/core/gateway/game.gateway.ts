@@ -15,6 +15,7 @@ import {
   ChatSendDto,
   GameMoveDto,
   KickPlayerDto,
+  PlaceableDragDto,
   StartGameDto,
   type ClientToServerEvents,
   type ServerToClientEvents,
@@ -72,6 +73,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(this.roomChannel(roomId));
     this.rooms.markConnected(roomId, player.id, client.id);
     this.broadcastRoom(roomId);
+    // Reconexao: se ha partida em andamento (ou terminada), envia o estado
+    // atual SO para este socket — senao quem volta fica sem tabuleiro ate
+    // alguem jogar de novo.
+    if (room.instance) {
+      const { turn, phase, currentPlayer, gameover } = room.instance.snapshot;
+      client.emit('game:state', {
+        roomId,
+        view: room.instance.viewFor(player.id),
+        turn,
+        phase,
+        currentPlayer,
+      });
+      if (gameover) client.emit('game:over', { roomId, result: gameover });
+    }
     this.logger.log(`${player.name} conectou na sala ${roomId}`);
   }
 
@@ -146,6 +161,31 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         .emit('game:over', { roomId: dto.roomId, result: room.instance.snapshot.gameover! });
     }
     return { ok: true };
+  }
+
+  /**
+   * Stream EFEMERO de drag (jogos sandbox): apenas rebroadcast da posicao ao
+   * vivo para os OUTROS na sala. Nao toca no estado nem persiste — a posicao
+   * autoritativa chega via `game:move` no fim do arraste. Throttle generoso
+   * (relay barato; o cliente ja limita a ~30/s).
+   */
+  @SubscribeMessage('placeable:drag')
+  @Throttle({ default: { limit: 60, ttl: 1000 } })
+  @UseGuards(WsThrottlerGuard)
+  onPlaceableDrag(
+    @ConnectedSocket() client: GameSocket,
+    @MessageBody() dto: PlaceableDragDto,
+  ): void {
+    const { roomId, player } = client.data;
+    if (dto.roomId !== roomId) return;
+    client.to(this.roomChannel(roomId)).emit('placeable:dragging', {
+      id: dto.id,
+      x: dto.x,
+      y: dto.y,
+      z: dto.z,
+      rotation: dto.rotation,
+      by: player.id,
+    });
   }
 
   @SubscribeMessage('chat:send')

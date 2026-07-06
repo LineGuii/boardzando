@@ -1,0 +1,538 @@
+/* =========================================================
+ * "Nem a Pato" — tema pato: amarelo bico + laranja + lagoa teal.
+ * ========================================================= */
+
+.pato-root {
+  margin-top: 12px;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(255, 212, 59, 0.28) 0%, transparent 60%),
+    radial-gradient(ellipse at 85% 100%, rgba(12, 166, 120, 0.28) 0%, transparent 62%),
+    linear-gradient(180deg, #e8f6f2 0%, #d3ebe4 100%);
+  border-radius: 18px;
+  padding: 16px;
+  border: 3px solid #ffd43b;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.12);
+}
+
+/* ---- cabeçalho ---- */
+
+.pato-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.pato-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pato-duck {
+  font-size: 44px;
+  animation: pato-bob 2.6s ease-in-out infinite;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.2));
+}
+
+@keyframes pato-bob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-6px) rotate(3deg); }
+}
+
+.pato-eyebrow {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #b7791f;
+}
+
+.pato-round {
+  font-size: 20px;
+  font-weight: 900;
+  color: #1f3a3a;
+}
+
+.pato-meta { display: flex; align-items: center; gap: 8px; }
+
+.pato-mute {
+  background: white;
+  border: 2px solid #ffd43b;
+  border-radius: 999px;
+  width: 38px;
+  height: 38px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* ---- cartão de pergunta ---- */
+
+.pato-card {
+  background: white;
+  border: 3px solid #ffd43b;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 5px 0 rgba(255, 158, 11, 0.22);
+  animation: pato-card-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+@keyframes pato-card-in {
+  from { transform: translateY(-6px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.pato-question {
+  font-size: clamp(20px, 3.5vw, 28px);
+  font-weight: 900;
+  color: #1f2937;
+  line-height: 1.25;
+  margin-bottom: 6px;
+}
+
+.pato-unit-hint {
+  color: #6b5f4e;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.pato-guess-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.pato-input {
+  flex: 1;
+  min-width: 180px;
+  padding: 12px 15px;
+  border: 2px solid #ffd43b;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 800;
+  font-family: inherit;
+  background: #fffbe6;
+  color: #1f3a3a;
+}
+
+.pato-input:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.28);
+}
+
+.pato-submit {
+  padding: 12px 22px;
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffd43b 0%, #f59e0b 100%);
+  color: #4a2f00;
+  font-weight: 900;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.22);
+  transition: transform 0.08s, box-shadow 0.08s;
+  font-family: inherit;
+}
+
+.pato-submit:hover { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0, 0, 0, 0.22); }
+.pato-submit:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.22); }
+.pato-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.pato-answered-box {
+  flex: 1;
+  padding: 12px 15px;
+  background: #eaf6ea;
+  border: 2px solid #34a853;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #143a1c;
+}
+
+.pato-answered-hint {
+  font-size: 12px;
+  color: #556;
+  margin-top: 4px;
+}
+
+/* ---- reveal ---- */
+
+.pato-reveal {
+  margin-top: 10px;
+}
+
+.pato-answer {
+  background: linear-gradient(135deg, #fff8db 0%, #ffe58f 100%);
+  border: 3px solid #ffd43b;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 8px 0 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  animation: pato-answer-pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+@keyframes pato-answer-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.pato-answer-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: #7a4c00;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.pato-answer-value {
+  font-size: 26px;
+  font-weight: 900;
+  color: #1f3a3a;
+}
+
+.pato-answer-unit {
+  font-size: 15px;
+  font-weight: 700;
+  color: #6b5f4e;
+}
+
+.pato-explanation {
+  color: #2b4141;
+  font-size: 14px;
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.pato-guesses {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pato-guess {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f6f1e6;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.pato-guess.winner {
+  background: linear-gradient(135deg, #fff8db 0%, #ffe58f 100%);
+  border: 2px solid #ffd43b;
+}
+
+.pato-guess-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #cbd5e1;
+}
+
+.pato-guess-name {
+  font-weight: 700;
+  color: #2b4141;
+  flex: 1;
+}
+
+.pato-guess-value {
+  font-weight: 900;
+  color: #1f3a3a;
+  font-family: 'Consolas', 'Menlo', monospace;
+}
+
+.pato-guess-dist {
+  font-size: 11px;
+  color: #7a6b5b;
+  font-family: 'Consolas', 'Menlo', monospace;
+  min-width: 60px;
+  text-align: right;
+}
+
+.pato-guess-gain {
+  font-size: 12px;
+  font-weight: 900;
+  color: #148a2c;
+  background: #e6f6ea;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.pato-next {
+  display: block;
+  margin: 8px auto 0;
+  padding: 12px 22px;
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0ca678 0%, #14b8a6 100%);
+  color: white;
+  font-weight: 900;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.22);
+  font-family: inherit;
+}
+
+.pato-next:hover { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0, 0, 0, 0.22); }
+.pato-next:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.22); }
+
+/* ---- placar ---- */
+
+.pato-scoreboard {
+  margin-top: 14px;
+  background: white;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.pato-scoreboard-title {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6b5f4e;
+  margin-bottom: 8px;
+}
+
+.pato-scores {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pato-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.pato-score-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #cbd5e1;
+}
+
+.pato-score-name { flex: 1; font-weight: 700; color: #2b4141; }
+
+.pato-badge {
+  font-size: 11px;
+  color: #a7896b;
+  background: #f6f1e6;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.pato-badge.ok {
+  color: #14532d;
+  background: #e6f6ea;
+}
+
+.pato-score-points {
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-weight: 900;
+  color: #7a4c00;
+  min-width: 24px;
+  text-align: right;
+}
+
+/* ---------- Leilão em turnos: escada de lances ---------- */
+
+.pato-ladder {
+  margin-top: 16px;
+}
+
+.pato-ladder-empty {
+  text-align: center;
+  color: #8a7d65;
+  font-size: 14px;
+  font-style: italic;
+  padding: 14px;
+  background: #fdf8ec;
+  border: 2px dashed #f3d9a0;
+  border-radius: 12px;
+}
+
+.pato-bids {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pato-bid {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: #fdf8ec;
+  border: 2px solid #f3e3bb;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.pato-bid.latest {
+  border-color: #f59e0b;
+  background: #fff7e0;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+  animation: pato-bid-pop 0.3s ease;
+}
+
+@keyframes pato-bid-pop {
+  0% { transform: scale(0.92); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.pato-bid-name { flex: 1; font-weight: 700; color: #5a4322; }
+
+.pato-bid-value {
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-size: 20px;
+  font-weight: 900;
+  color: #7a4c00;
+}
+
+/* ---------- Vez do jogador ---------- */
+
+.pato-turn {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: #5a4322;
+  padding: 10px 14px;
+  background: #f6f1e6;
+  border-radius: 10px;
+}
+
+.pato-turn.mine {
+  background: #e6f6ea;
+  color: #14532d;
+  border: 2px solid #0ca678;
+  animation: pato-bid-pop 0.3s ease;
+}
+
+/* ---------- Botão NEM A PATO! ---------- */
+
+.pato-duck-zone {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.pato-duck-btn {
+  padding: 16px 34px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #e8590c 0%, #f59e0b 100%);
+  color: white;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #b34700, 0 10px 22px rgba(232, 89, 12, 0.4);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.pato-duck-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 #b34700, 0 14px 26px rgba(232, 89, 12, 0.45);
+}
+
+.pato-duck-btn:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #b34700;
+}
+
+.pato-duck-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: 0 4px 0 #b8b2a5;
+  background: #c9c2b2;
+}
+
+.pato-duck-hint {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #8a7d65;
+}
+
+.pato-int-warn {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #b45309;
+}
+
+/* ---------- Reveal do desafio ---------- */
+
+.pato-call-banner {
+  padding: 12px 16px;
+  background: #fff3cd;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #5a4322;
+  margin-bottom: 14px;
+  animation: pato-bid-pop 0.35s ease;
+}
+
+.pato-guess.over {
+  opacity: 0.75;
+  background: #fdeaea;
+  border-color: #e0a0a0;
+}
+
+.pato-guess.over .pato-guess-value {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  color: #b41818;
+}
+
+.pato-guess-over {
+  font-size: 12px;
+  font-weight: 800;
+  color: #b41818;
+}
+
+.pato-nobody {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #b45309;
+  margin-top: 10px;
+}
+
+.pato-or {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a7d65;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
