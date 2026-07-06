@@ -5,6 +5,7 @@ import { connectSocket } from './net/socket';
 import { useGame } from './net/store';
 import { UnoBoard } from './games/uno/UnoBoard';
 import { HuesBoard } from './games/hues/HuesBoard';
+import { PerchBoard } from './games/perch/PerchBoard';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
 import { GameOptionsPanel } from './shell/GameOptionsPanel';
@@ -320,7 +321,8 @@ function RoomPage(): JSX.Element {
   const playerCount = room?.players?.length ?? 0;
   const isHost = room?.hostId === session.playerId;
 
-  const wide = room?.status === 'playing' && room?.gameId === 'hues';
+  const wide =
+    room?.status === 'playing' && (room?.gameId === 'hues' || room?.gameId === 'perch');
 
   return (
     <div className="shell-bg">
@@ -363,6 +365,12 @@ function RoomPage(): JSX.Element {
         {room?.status === 'playing' && room?.gameId === 'uno' && (
           <TurnGate>
             <UnoBoard />
+          </TurnGate>
+        )}
+
+        {room?.status === 'playing' && room?.gameId === 'perch' && (
+          <TurnGate>
+            <PerchBoard />
           </TurnGate>
         )}
 
