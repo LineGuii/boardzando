@@ -106,3 +106,22 @@ export function playQuackWin(): void {
     tone(f * 0.75, t + 0.09, 0.14, 'sawtooth', 0.18);
   });
 }
+
+/**
+ * "Muuu" — mugido grave que desce (vaca). Duas camadas de sawtooth em oitavas
+ * baixas dão o timbre encorpado.
+ */
+export function playMoo(): void {
+  if (muted) return;
+  tone(196, 0, 0.34, 'sawtooth', 0.2);
+  tone(147, 0.14, 0.42, 'sawtooth', 0.18);
+}
+
+/** Muuu de vitória: três mugidos ascendentes e alegres. */
+export function playMooWin(): void {
+  if (muted) return;
+  [{ f: 147, t: 0 }, { f: 196, t: 0.2 }, { f: 262, t: 0.42 }].forEach(({ f, t }) => {
+    tone(f, t, 0.18, 'sawtooth', 0.2);
+    tone(f * 1.5, t + 0.02, 0.16, 'triangle', 0.12);
+  });
+}

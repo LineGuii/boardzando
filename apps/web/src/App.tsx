@@ -9,6 +9,7 @@ import { UnoBoard } from './games/uno/UnoBoard';
 import { HuesBoard } from './games/hues/HuesBoard';
 import { SandboxBoard } from './games/sandbox/SandboxBoard';
 import { ItoBoard } from './games/ito/ItoBoard';
+import { ManadaBoard } from './games/manada/ManadaBoard';
 import { PatoBoard } from './games/pato/PatoBoard';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
@@ -529,7 +530,10 @@ function RoomPage(): JSX.Element {
 
   const wide =
     room?.status === 'playing' &&
-    (room?.gameId === 'hues' || room?.gameId === 'monopoly' || room?.gameId === 'ito');
+    (room?.gameId === 'hues' ||
+      room?.gameId === 'monopoly' ||
+      room?.gameId === 'ito' ||
+      room?.gameId === 'manada');
 
   return (
     <div className="shell-bg">
@@ -574,6 +578,10 @@ function RoomPage(): JSX.Element {
         {room?.status === 'playing' && room?.gameId === 'ito' && <ItoBoard key={matchGen} />}
 
         {room?.status === 'playing' && room?.gameId === 'pato' && <PatoBoard key={matchGen} />}
+
+        {room?.status === 'playing' && room?.gameId === 'manada' && (
+          <ManadaBoard key={matchGen} />
+        )}
 
         {room?.status === 'playing' && room?.gameId === 'hues' && <HuesBoard key={matchGen} />}
 
