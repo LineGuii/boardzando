@@ -2,15 +2,35 @@ import { Injectable } from '@nestjs/common';
 import type { GameContext, GameDefinition, GameOverResult, PlayerId } from '@boardzando/contracts';
 import { INVALID_MOVE } from '@boardzando/contracts';
 import { GamePlugin } from '../../core/registry/game-plugin.decorator';
-import { activateCreature, endTurn, perchNextPlayer, placeBird, startRound } from './perch.moves';
-import type { ActivateCreaturePayload, EndTurnPayload, PlaceBirdPayload } from './perch.moves';
+import {
+  activateCreature,
+  buildBirdhouse,
+  endTurn,
+  perchNextPlayer,
+  placeBird,
+  startRound,
+  zapBird,
+} from './perch.moves';
+import type {
+  ActivateCreaturePayload,
+  BuildBirdhousePayload,
+  EndTurnPayload,
+  PlaceBirdPayload,
+  ZapBirdPayload,
+} from './perch.moves';
 import { computeAdjacency } from './perch.adjacency';
 import { CREATURE_BY_HOME, PERCH_CREATURES } from './perch.creatures';
+import { emptyFountain, FOUNTAIN_PTS } from './perch.fountain';
 import { PERCH_CREATURE_HOMES, PERCH_LAYOUT, PERCH_LOCATIONS } from './perch.locations';
 import { FLOCK_HEX, FLOCKS } from './perch.state';
 import type { CreatureRuntime, Flock, PerchLocation, PerchState } from './perch.state';
 
-type PerchMovePayload = PlaceBirdPayload | ActivateCreaturePayload | EndTurnPayload;
+type PerchMovePayload =
+  | PlaceBirdPayload
+  | ActivateCreaturePayload
+  | BuildBirdhousePayload
+  | ZapBirdPayload
+  | EndTurnPayload;
 
 const BIRDS_PER_FLOCK = 28;
 const MAX_ROUNDS = 5;
@@ -38,10 +58,14 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
     const flockOf: Record<PlayerId, Flock> = {};
     const supply: Record<PlayerId, number> = {};
     const scores: Record<PlayerId, number> = {};
+    const birdhouses: Record<PlayerId, number> = {};
+    const lightning: Record<PlayerId, number> = {};
     players.forEach((p, i) => {
       flockOf[p] = FLOCKS[i % FLOCKS.length]!;
       supply[p] = BIRDS_PER_FLOCK;
       scores[p] = 0;
+      birdhouses[p] = 0;
+      lightning[p] = 0;
     });
 
     // Monta a homestead: inclui K Locais-CASA de criatura (K = nº de jogadores)
@@ -96,6 +120,11 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
       hands: {},
       homestead,
       birdsAt,
+      fountain: emptyFountain(),
+      plaza: [],
+      birdhouses,
+      lightning,
+      birdhousesAt: {},
       scores,
     };
     // Migração + Recrutamento da 1ª rodada.
@@ -107,6 +136,8 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
   readonly moves = {
     placeBird,
     activateCreature,
+    buildBirdhouse,
+    zapBird,
     endTurn,
   } as Record<string, (state: PerchState, ctx: GameContext, payload: PerchMovePayload) => PerchState | typeof INVALID_MOVE>;
 
@@ -167,6 +198,12 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
       flockHex: FLOCK_HEX,
       homestead: state.homestead,
       birdsAt: state.birdsAt,
+      birdhousesAt: state.birdhousesAt,
+      fountain: state.fountain,
+      fountainPts: FOUNTAIN_PTS,
+      plaza: state.plaza,
+      birdhouses: state.birdhouses,
+      lightning: state.lightning,
       scores: state.scores,
       lastScored: state.lastScored,
       supply: state.supply,

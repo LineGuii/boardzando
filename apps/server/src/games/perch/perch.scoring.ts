@@ -38,6 +38,23 @@ export function scoreLocation(
 }
 
 /**
+ * Contagem EFETIVA de um Local para pontuação/controle: as aves reais + 1 por
+ * bando que tenha uma Casinha ali (a Casinha conta como +1 ave para o bando).
+ * (Ninhos, +1, entram na Fase D.)
+ */
+export function effectiveCounts(
+  counts: Record<Flock, number>,
+  housed: Record<Flock, boolean> | undefined,
+): Record<Flock, number> {
+  if (!housed) return counts;
+  const out: Record<Flock, number> = { ...counts };
+  for (const [flock, on] of Object.entries(housed)) {
+    if (on) out[flock] = (out[flock] ?? 0) + 1;
+  }
+  return out;
+}
+
+/**
  * "Controlador" de um Local = bando com a MAIORIA ISOLADA (sem empate no topo).
  * Empate para o mais numeroso → sem controlador. Usado por criaturas/objetivos
  * (fases futuras) e pela UI para destacar quem controla.

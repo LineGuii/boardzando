@@ -1,5 +1,6 @@
 import { reachable } from './perch.adjacency';
-import { controllerOf } from './perch.scoring';
+import { addToFountain } from './perch.fountain';
+import { controllerOf, effectiveCounts } from './perch.scoring';
 import type { Flock, PerchState } from './perch.state';
 
 /**
@@ -75,7 +76,9 @@ export function assignCreatureControl(state: PerchState): void {
     const homeId = homeLocationId(state, cid);
     cr.activatedThisRound = false;
     if (!homeId) continue;
-    const flock = controllerOf(state.birdsAt[homeId] ?? {});
+    const flock = controllerOf(
+      effectiveCounts(state.birdsAt[homeId] ?? {}, state.birdhousesAt[homeId]),
+    );
     const owner = flock
       ? Object.keys(state.flockOf).find((p) => state.flockOf[p] === flock)
       : undefined;
@@ -96,9 +99,9 @@ function removeOne(state: PerchState, locId: string, flock: Flock): boolean {
 function addOne(state: PerchState, locId: string, flock: Flock): void {
   (state.birdsAt[locId] ??= {})[flock] = countAt(state, locId, flock) + 1;
 }
-function toSupply(state: PerchState, flock: Flock): void {
-  const owner = Object.keys(state.flockOf).find((p) => state.flockOf[p] === flock);
-  if (owner) state.supply[owner] = (state.supply[owner] ?? 0) + 1;
+/** Uma pilha (Local, bando) está protegida por Casinha? Criaturas/Raios não a tocam. */
+function isHoused(state: PerchState, locId: string, flock: Flock): boolean {
+  return state.birdhousesAt[locId]?.[flock] === true;
 }
 
 export interface CreatureActionPayload {
@@ -135,11 +138,11 @@ export function applyCreatureEffect(
   const tf = payload.targetFlock;
   switch (def.effect) {
     case 'removeBirds': {
-      if (!tf) return false;
+      if (!tf || isHoused(state, dest, tf)) return false;
       let removed = 0;
       for (let i = 0; i < (def.n ?? 1); i++) {
         if (removeOne(state, dest, tf)) {
-          toSupply(state, tf);
+          addToFountain(state, tf); // aves removidas caem na Fonte
           removed += 1;
         }
       }
@@ -150,6 +153,7 @@ export function applyCreatureEffect(
       if (!tf || !payload.secondLocationId) return false;
       const to2 = payload.secondLocationId;
       if (!(adj[dest] ?? []).includes(to2)) return false; // vizinho do destino
+      if (isHoused(state, dest, tf) || isHoused(state, to2, tf)) return false;
       if (!removeOne(state, dest, tf)) return false;
       addOne(state, to2, tf);
       break;
@@ -157,19 +161,23 @@ export function applyCreatureEffect(
     case 'swapBirds': {
       if (!tf || !payload.secondLocationId || !payload.secondFlock) return false;
       const loc2 = payload.secondLocationId;
+      const sf = payload.secondFlock;
       if (loc2 === dest) return false;
-      if (countAt(state, dest, tf) <= 0 || countAt(state, loc2, payload.secondFlock) <= 0)
+      if (countAt(state, dest, tf) <= 0 || countAt(state, loc2, sf) <= 0) return false;
+      // nenhuma das pilhas envolvidas pode estar protegida
+      if (isHoused(state, dest, tf) || isHoused(state, loc2, sf) || isHoused(state, loc2, tf) || isHoused(state, dest, sf))
         return false;
       removeOne(state, dest, tf);
-      removeOne(state, loc2, payload.secondFlock);
+      removeOne(state, loc2, sf);
       addOne(state, loc2, tf);
-      addOne(state, dest, payload.secondFlock);
+      addOne(state, dest, sf);
       break;
     }
     case 'pullBird': {
       // Abelha: exige cor já presente no destino (color matching)
       if (!tf || !payload.secondLocationId) return false;
       if (countAt(state, dest, tf) <= 0) return false;
+      if (isHoused(state, dest, tf) || isHoused(state, payload.secondLocationId, tf)) return false;
       if (!removeOne(state, payload.secondLocationId, tf)) return false;
       addOne(state, dest, tf);
       break;
@@ -178,6 +186,7 @@ export function applyCreatureEffect(
       if (!tf || !payload.secondLocationId) return false;
       const from = payload.secondLocationId;
       if (!(adj[dest] ?? []).includes(from)) return false; // vizinho do destino
+      if (isHoused(state, from, tf) || isHoused(state, dest, tf)) return false;
       if (!removeOne(state, from, tf)) return false;
       addOne(state, dest, tf);
       break;

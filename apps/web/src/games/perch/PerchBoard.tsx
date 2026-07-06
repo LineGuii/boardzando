@@ -37,6 +37,12 @@ interface PerchView {
   flockHex: Record<string, string>;
   homestead: PerchLoc[];
   birdsAt: Record<string, Record<string, number>>;
+  birdhousesAt: Record<string, Record<string, boolean>>;
+  fountain: string[][];
+  fountainPts: number[];
+  plaza: string[];
+  birdhouses: Record<string, number>;
+  lightning: Record<string, number>;
   scores: Record<string, number>;
   lastScored?: Record<string, Record<string, number>>;
   supply: Record<string, number>;
@@ -46,6 +52,9 @@ interface PerchView {
   winnerId?: string;
   finished?: boolean;
 }
+
+/** Modo de mira de uma Ação Bônus de token (casinha/raio). */
+type BonusMode = null | 'birdhouse' | 'zap';
 
 function playChirp(): void {
   try {
@@ -127,6 +136,7 @@ export function PerchBoard(): JSX.Element {
 
   const [selected, setSelected] = useState<number | null>(null);
   const [act, setAct] = useState<ActivateState | null>(null);
+  const [bonusMode, setBonusMode] = useState<BonusMode>(null);
 
   if (!view || !session || !room) return <p>Aguardando estado...</p>;
   const me = session.playerId;
@@ -145,7 +155,14 @@ export function PerchBoard(): JSX.Element {
   const myCreatures = Object.values(view.creatures).filter(
     (c) => c.controller === me && !c.activatedThisRound && c.standeeLocId !== undefined,
   );
-  const canBonus = myTurn && !view.bonusThisTurn && myCreatures.length > 0;
+  const myHouses = view.birdhouses[me] ?? 0;
+  const myLightning = view.lightning[me] ?? 0;
+  const bonusAvail =
+    myTurn &&
+    !view.bonusThisTurn &&
+    (myCreatures.length > 0 ||
+      (view.round >= 4 && myHouses > 0) ||
+      (view.round === 5 && myLightning > 0));
 
   const activeCreature = act ? view.creatures[act.creatureId] : undefined;
   const reachSet =
@@ -156,6 +173,14 @@ export function PerchBoard(): JSX.Element {
   const resetActions = (): void => {
     setSelected(null);
     setAct(null);
+    setBonusMode(null);
+  };
+
+  const doTokenBonus = (locationId: string, flock: string): void => {
+    if (bonusMode === 'birdhouse') emit('buildBirdhouse', { locationId, flock });
+    else if (bonusMode === 'zap') emit('zapBird', { locationId, flock });
+    playChirp();
+    resetActions();
   };
 
   const placeBird = (locationId: string): void => {
@@ -252,9 +277,13 @@ export function PerchBoard(): JSX.Element {
           <div key={ci} className="perch-column">
             {col.map((loc) => {
               const counts = view.birdsAt[loc.id] ?? {};
-              const controller = controllerOf(counts);
+              const housed = view.birdhousesAt[loc.id] ?? {};
+              // contagem efetiva (casinha = +1) para a coroa do controlador
+              const eff: Record<string, number> = { ...counts };
+              for (const [f, on] of Object.entries(housed)) if (on) eff[f] = (eff[f] ?? 0) + 1;
+              const controller = controllerOf(eff);
               const scored = view.lastScored?.[loc.id];
-              const placeable = selected !== null && myTurn && !view.placedThisTurn && !act;
+              const placeable = selected !== null && myTurn && !view.placedThisTurn && !act && !bonusMode;
               const isReach = act !== null && reachSet.has(loc.id) && act.dest === undefined;
               const isDest = act?.dest === loc.id;
               const creatures = creatureAt(loc.id);
@@ -264,7 +293,7 @@ export function PerchBoard(): JSX.Element {
                   type="button"
                   className={`perch-loc ${placeable ? 'placeable' : ''} ${isReach ? 'reach' : ''} ${isDest ? 'dest' : ''}`}
                   onClick={() => onLocationClick(loc.id)}
-                  disabled={!placeable && !isReach && !(act && act.dest !== undefined)}
+                  disabled={!placeable && !isReach && !(act && act.dest !== undefined) && !bonusMode}
                 >
                   <div className="perch-loc-head">
                     <span className="perch-loc-emoji">{loc.emoji}</span>
@@ -274,6 +303,9 @@ export function PerchBoard(): JSX.Element {
                         {c.emoji}
                       </span>
                     ))}
+                    {Object.entries(housed).some(([, on]) => on) && (
+                      <span className="perch-standee" title="Casinha (pilha protegida)">🏠</span>
+                    )}
                   </div>
                   <div className="perch-loc-points" title="Pontos ao 1º / 2º / 3º">
                     {loc.points.map((p, i) => (
@@ -287,26 +319,36 @@ export function PerchBoard(): JSX.Element {
                       .filter(([, n]) => n > 0)
                       .sort((a, b) => b[1] - a[1])
                       .map(([flock, n]) => {
-                        const pickable =
+                        const isHoused = housed[flock] === true;
+                        const creaturePick =
                           act?.dest !== undefined &&
                           activeCreature !== undefined &&
                           birdPickTarget(act, activeCreature, loc.id);
+                        // casinha/raio: mira em pilhas não protegidas (raio) / qualquer pilha (casinha)
+                        const tokenPick =
+                          bonusMode === 'birdhouse'
+                            ? !isHoused
+                            : bonusMode === 'zap'
+                              ? !isHoused
+                              : false;
+                        const pickable = creaturePick || tokenPick;
                         return (
                           <span
                             key={flock}
                             className={`perch-birdchip ${controller === flock ? 'controls' : ''} ${pickable ? 'pickable' : ''}`}
                             style={{ background: hex(flock) }}
-                            title={`${n} ave(s)`}
+                            title={`${n} ave(s)${isHoused ? ' · protegida 🏠' : ''}`}
                             onClick={
                               pickable
                                 ? (e) => {
                                     e.stopPropagation();
-                                    pickBird(loc.id, flock);
+                                    if (tokenPick) doTokenBonus(loc.id, flock);
+                                    else pickBird(loc.id, flock);
                                   }
                                 : undefined
                             }
                           >
-                            {controller === flock ? '👑' : '🐦'} {n}
+                            {isHoused ? '🏠' : controller === flock ? '👑' : '🐦'} {n}
                             {scored && scored[flock] ? (
                               <span className="perch-award">+{scored[flock]}</span>
                             ) : null}
@@ -324,10 +366,49 @@ export function PerchBoard(): JSX.Element {
         ))}
       </div>
 
-      {/* suas criaturas */}
-      {Object.values(view.creatures).some((c) => c.controller === me) && (
+      {/* barra do modo de token (casinha / raio) */}
+      {bonusMode && (
+        <div className="perch-actbar">
+          <span>
+            {bonusMode === 'birdhouse' ? '🏠 Casinha' : '⚡ Raio'}: clique numa pilha de aves
+            {bonusMode === 'zap' ? ' (não protegida) para remover.' : ' para proteger (+1).'}
+          </span>
+          <button type="button" className="perch-act-cancel" onClick={resetActions}>
+            Cancelar
+          </button>
+        </div>
+      )}
+
+      {/* ações bônus: criaturas + casinha + raio */}
+      {(Object.values(view.creatures).some((c) => c.controller === me) ||
+        (view.round >= 4 && myHouses > 0) ||
+        (view.round === 5 && myLightning > 0)) && (
         <div className="perch-creatures">
-          <div className="perch-creatures-title">Suas criaturas 🐾</div>
+          <div className="perch-creatures-title">Ações bônus 🐾</div>
+          {(myHouses > 0 || myLightning > 0) && (
+            <div className="perch-tokens-row">
+              {view.round >= 4 && (
+                <button
+                  type="button"
+                  className="perch-token-btn"
+                  disabled={!bonusAvail || myHouses <= 0 || act !== null}
+                  onClick={() => setBonusMode(bonusMode === 'birdhouse' ? null : 'birdhouse')}
+                >
+                  🏠 Casinha ({myHouses})
+                </button>
+              )}
+              {view.round === 5 && (
+                <button
+                  type="button"
+                  className="perch-token-btn zap"
+                  disabled={!bonusAvail || myLightning <= 0 || act !== null}
+                  onClick={() => setBonusMode(bonusMode === 'zap' ? null : 'zap')}
+                >
+                  ⚡ Raio ({myLightning})
+                </button>
+              )}
+            </div>
+          )}
           <div className="perch-creatures-row">
             {Object.values(view.creatures)
               .filter((c) => c.controller === me)
@@ -341,7 +422,7 @@ export function PerchBoard(): JSX.Element {
                   <button
                     type="button"
                     className="perch-creature-btn"
-                    disabled={!canBonus || c.activatedThisRound || act !== null}
+                    disabled={!bonusAvail || c.activatedThisRound || act !== null || bonusMode !== null}
                     onClick={() => setAct({ creatureId: c.id })}
                   >
                     {c.activatedThisRound ? '✓ usada' : 'Ativar'}
@@ -351,6 +432,43 @@ export function PerchBoard(): JSX.Element {
           </div>
         </div>
       )}
+
+      {/* Fonte + Praça */}
+      <div className="perch-fountain">
+        <div className="perch-fountain-title">⛲ Fonte &amp; Praça (pontos no fim)</div>
+        <div className="perch-fountain-levels">
+          {[...view.fountain].map((birds, lvl) => (
+            <div key={lvl} className="perch-fountain-level">
+              <span className="perch-fountain-pts">{view.fountainPts[lvl]}pt</span>
+              <div className="perch-fountain-birds">
+                {birds.length === 0 ? (
+                  <span className="perch-loc-empty">—</span>
+                ) : (
+                  birds.map((f, i) => (
+                    <span key={i} className="perch-fountain-bird" style={{ background: hex(f) }}>
+                      🐦
+                    </span>
+                  ))
+                )}
+              </div>
+            </div>
+          ))}
+          <div className="perch-fountain-level plaza">
+            <span className="perch-fountain-pts">Praça 1pt</span>
+            <div className="perch-fountain-birds">
+              {view.plaza.length === 0 ? (
+                <span className="perch-loc-empty">—</span>
+              ) : (
+                view.plaza.map((f, i) => (
+                  <span key={i} className="perch-fountain-bird" style={{ background: hex(f) }}>
+                    🐦
+                  </span>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* minha mão + ações da vez */}
       <div className="perch-hand">

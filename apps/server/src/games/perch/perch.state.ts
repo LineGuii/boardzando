@@ -69,6 +69,20 @@ export interface PerchState {
   /** Aves em cada Local: locId -> bando -> contagem (persiste entre rodadas). */
   birdsAt: Record<string, Record<Flock, number>>;
 
+  /**
+   * FONTE: pirâmide de níveis (base→topo), preenchida de baixo para cima.
+   * Aves removidas/zapadas caem aqui e valem pontos por nível no fim.
+   */
+  fountain: Flock[][];
+  /** PRAÇA: aves que transbordaram da Fonte; valem 1 ponto cada no fim. */
+  plaza: Flock[];
+  /** Casinhas disponíveis por jogador (recebidas na rodada 4). */
+  birdhouses: Record<PlayerId, number>;
+  /** Raios disponíveis por jogador (recebidos na rodada 5). */
+  lightning: Record<PlayerId, number>;
+  /** Casinhas construídas: locId -> bando -> true (pilha protegida, +1). */
+  birdhousesAt: Record<string, Record<Flock, boolean>>;
+
   scores: Record<PlayerId, number>;
   /** Pontos concedidos por Local no último Upkeep (para a UI destacar). */
   lastScored?: Record<string, Record<Flock, number>>;

@@ -54,6 +54,11 @@ function baseState(over: Partial<PerchState> = {}): PerchState {
     hands: { a: [], b: [], c: [] },
     homestead,
     birdsAt: {},
+    fountain: [[], [], [], [], [], []],
+    plaza: [],
+    birdhouses: { a: 0, b: 0, c: 0 },
+    lightning: { a: 0, b: 0, c: 0 },
+    birdhousesAt: {},
     scores,
     ...over,
   };
@@ -108,12 +113,11 @@ describe('Perch — controle de criatura (Upkeep)', () => {
 });
 
 describe('Perch — efeitos das criaturas', () => {
-  it('Falcão (removeBirds 1): remove 1 ave do destino e devolve ao supply do dono', () => {
+  it('Falcão (removeBirds 1): remove 1 ave do destino e a envia à Fonte', () => {
     const s = baseState({
       birdsAt: { l3: { red: 2 } },
       creatures: { hawk: { defId: 'hawk', activatedThisRound: false, standeeLocId: 'l2' } },
     });
-    const before = s.supply['b'];
     const ok = applyCreatureEffect(s, s.adjacency, {
       creatureId: 'hawk',
       toLocationId: 'l3', // falcão vai a qualquer lugar
@@ -121,9 +125,24 @@ describe('Perch — efeitos das criaturas', () => {
     });
     expect(ok).toBe(true);
     expect(s.birdsAt['l3']!['red']).toBe(1);
-    expect(s.supply['b']).toBe(before! + 1); // devolveu ao bando vermelho (b)
+    expect(s.fountain[0]).toContain('red'); // ave removida caiu na Fonte (nível base)
     expect(s.creatures['hawk']!.standeeLocId).toBe('l3');
     expect(s.creatures['hawk']!.activatedThisRound).toBe(true);
+  });
+
+  it('pilha protegida por Casinha é imune à criatura', () => {
+    const s = baseState({
+      birdsAt: { l3: { red: 2 } },
+      birdhousesAt: { l3: { red: true } },
+      creatures: { hawk: { defId: 'hawk', activatedThisRound: false, standeeLocId: 'l2' } },
+    });
+    const ok = applyCreatureEffect(s, s.adjacency, {
+      creatureId: 'hawk',
+      toLocationId: 'l3',
+      targetFlock: 'red',
+    });
+    expect(ok).toBe(false);
+    expect(s.birdsAt['l3']!['red']).toBe(2); // intacta
   });
 
   it('Cão (moveBird): afasta 1 ave do destino para um Local ADJACENTE', () => {

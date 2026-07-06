@@ -478,3 +478,94 @@
   transform: translateY(2px);
   box-shadow: 0 2px 0 #256b2a;
 }
+
+/* ---------- Ações bônus de token + Fonte/Praça (Fase C) ---------- */
+
+.perch-tokens-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.perch-token-btn {
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 16px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  background: linear-gradient(135deg, #a9713e 0%, #c78a52 100%);
+  color: #fff;
+}
+
+.perch-token-btn.zap {
+  background: linear-gradient(135deg, #e8a800 0%, #f5c542 100%);
+  color: #5a4300;
+}
+
+.perch-token-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #b9b2a5;
+}
+
+.perch-fountain {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #e6f4ff 0%, #cfe9fb 100%);
+  border: 2px solid #7fb2d9;
+}
+
+.perch-fountain-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #1c5b7a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.perch-fountain-levels {
+  display: flex;
+  flex-direction: column-reverse; /* base embaixo, topo em cima */
+  gap: 4px;
+}
+
+.perch-fountain-level {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.perch-fountain-level.plaza {
+  background: rgba(255, 236, 179, 0.6);
+  margin-top: 6px;
+}
+
+.perch-fountain-pts {
+  font-size: 11px;
+  font-weight: 800;
+  color: #1c5b7a;
+  min-width: 54px;
+}
+
+.perch-fountain-birds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.perch-fountain-bird {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
