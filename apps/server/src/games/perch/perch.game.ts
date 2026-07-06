@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common';
 import type { GameContext, GameDefinition, GameOverResult, PlayerId } from '@boardzando/contracts';
 import { INVALID_MOVE } from '@boardzando/contracts';
 import { GamePlugin } from '../../core/registry/game-plugin.decorator';
-import { perchNextPlayer, placeBird, startRound } from './perch.moves';
-import type { PlaceBirdPayload } from './perch.moves';
-import { PERCH_LAYOUT, PERCH_LOCATIONS } from './perch.locations';
+import { activateCreature, endTurn, perchNextPlayer, placeBird, startRound } from './perch.moves';
+import type { ActivateCreaturePayload, EndTurnPayload, PlaceBirdPayload } from './perch.moves';
+import { computeAdjacency } from './perch.adjacency';
+import { CREATURE_BY_HOME, PERCH_CREATURES } from './perch.creatures';
+import { PERCH_CREATURE_HOMES, PERCH_LAYOUT, PERCH_LOCATIONS } from './perch.locations';
 import { FLOCK_HEX, FLOCKS } from './perch.state';
-import type { Flock, PerchLocation, PerchState } from './perch.state';
+import type { CreatureRuntime, Flock, PerchLocation, PerchState } from './perch.state';
 
-type PerchMovePayload = PlaceBirdPayload;
+type PerchMovePayload = PlaceBirdPayload | ActivateCreaturePayload | EndTurnPayload;
 
 const BIRDS_PER_FLOCK = 28;
 const MAX_ROUNDS = 5;
@@ -42,10 +44,15 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
       scores[p] = 0;
     });
 
-    // Monta a homestead em colunas conforme a contagem de jogadores.
+    // Monta a homestead: inclui K Locais-CASA de criatura (K = nº de jogadores)
+    // + Locais básicos, embaralhados nas colunas conforme a contagem.
     const layout = PERCH_LAYOUT[players.length] ?? PERCH_LAYOUT[3]!;
     const tileCount = layout.reduce((a, b) => a + b, 0);
-    const chosen = ctx.random.shuffle(PERCH_LOCATIONS).slice(0, tileCount);
+    const creatureHomes = ctx.random.shuffle(PERCH_CREATURE_HOMES).slice(0, players.length);
+    const basics = ctx.random
+      .shuffle(PERCH_LOCATIONS)
+      .slice(0, tileCount - creatureHomes.length);
+    const chosen = ctx.random.shuffle([...creatureHomes, ...basics]);
     const homestead: PerchLocation[] = [];
     let idx = 0;
     layout.forEach((height, col) => {
@@ -66,12 +73,23 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
     const birdsAt: Record<string, Record<Flock, number>> = {};
     for (const l of homestead) birdsAt[l.id] = {};
 
+    // Criaturas em jogo = as que têm o Local-casa presente na homestead.
+    const creatures: Record<string, CreatureRuntime> = {};
+    for (const l of homestead) {
+      const def = CREATURE_BY_HOME[l.defId];
+      if (def) creatures[def.id] = { defId: def.id, activatedThisRound: false };
+    }
+
     const state: PerchState = {
       round: 1,
       maxRounds: MAX_ROUNDS,
       step: 'perch',
       turnOrder: [...players],
       turnPtr: 0,
+      placedThisTurn: false,
+      bonusThisTurn: false,
+      adjacency: computeAdjacency(homestead),
+      creatures,
       flockOf,
       supply,
       bag: {},
@@ -88,6 +106,8 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
 
   readonly moves = {
     placeBird,
+    activateCreature,
+    endTurn,
   } as Record<string, (state: PerchState, ctx: GameContext, payload: PerchMovePayload) => PerchState | typeof INVALID_MOVE>;
 
   turn = {
@@ -112,11 +132,37 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
     const handCounts: Record<PlayerId, number> = {};
     for (const [pid, h] of Object.entries(state.hands)) handCounts[pid] = h.length;
     const bagCount = Object.values(state.bag).reduce((a, b) => a + b, 0);
+
+    // Criaturas com os metadados de catálogo para a UI.
+    const creatures: Record<string, unknown> = {};
+    for (const c of PERCH_CREATURES) {
+      const cr = state.creatures[c.id];
+      if (!cr) continue;
+      const home = state.homestead.find((l) => l.defId === c.homeDefId);
+      creatures[c.id] = {
+        id: c.id,
+        name: c.name,
+        emoji: c.emoji,
+        desc: c.desc,
+        move: c.move,
+        effect: c.effect,
+        n: c.n,
+        homeLocId: home?.id,
+        standeeLocId: cr.standeeLocId,
+        controller: cr.controller,
+        activatedThisRound: cr.activatedThisRound,
+      };
+    }
+
     return {
       round: state.round,
       maxRounds: state.maxRounds,
       step: state.step,
       turnOrder: state.turnOrder,
+      placedThisTurn: state.placedThisTurn,
+      bonusThisTurn: state.bonusThisTurn,
+      adjacency: state.adjacency,
+      creatures,
       flockOf: state.flockOf,
       flockHex: FLOCK_HEX,
       homestead: state.homestead,

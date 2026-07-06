@@ -115,10 +115,14 @@ describe('Perch — setup e ciclo de rodada', () => {
       const st = m.snapshot.state;
       // coloca sempre a 1ª ave da mão no 1º Local
       m.applyMove(cur, 'placeBird', { locationId: st.homestead[0]!.id, birdIndex: 0 });
+      // se a vez foi mantida (poderia ativar criatura), encerra dispensando o bônus
+      if (!m.isOver && m.snapshot.currentPlayer === cur && m.snapshot.state.placedThisTurn) {
+        m.applyMove(cur, 'endTurn', {});
+      }
       guard += 1;
     }
     expect(m.isOver).toBe(true);
-    // 3 jogadores × 4 aves × 5 rodadas = 60 jogadas
+    // 3 jogadores × 4 aves × 5 rodadas = 60 turnos (cada um com 1 placeBird)
     expect(guard).toBe(60);
     const go = m.snapshot.gameover!;
     expect(go).toBeDefined();
@@ -139,6 +143,9 @@ describe('Perch — setup e ciclo de rodada', () => {
       const hand = m.snapshot.state.hands[cur]!;
       // cada um joga suas aves no Local rico (empilha)
       m.applyMove(cur, 'placeBird', { locationId: rich.id, birdIndex: hand.length - 1 });
+      if (m.snapshot.currentPlayer === cur && m.snapshot.state.placedThisTurn) {
+        m.applyMove(cur, 'endTurn', {});
+      }
       guard += 1;
     }
     // após o upkeep da rodada 1, turnOrder reordenou por pontos (desc)

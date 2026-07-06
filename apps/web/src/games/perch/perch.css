@@ -338,3 +338,143 @@
   min-width: 28px;
   text-align: right;
 }
+
+/* ---------- Criaturas (Fase B) ---------- */
+
+.perch-standee {
+  font-size: 18px;
+  margin-left: 2px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
+}
+
+.perch-loc.reach {
+  cursor: pointer;
+  border-color: #2f6fb0;
+  box-shadow: 0 0 0 2px rgba(47, 111, 176, 0.35);
+}
+
+.perch-loc.dest {
+  border-color: #2f6fb0;
+  box-shadow: 0 0 0 3px #2f6fb0;
+}
+
+.perch-birdchip.pickable {
+  cursor: pointer;
+  outline: 2px dashed #fff;
+  outline-offset: 1px;
+}
+
+.perch-actbar {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #eaf2fb;
+  border: 2px solid #2f6fb0;
+  font-size: 14px;
+  color: #1c3d5e;
+}
+
+.perch-act-cancel {
+  border: 0;
+  background: #d64545;
+  color: #fff;
+  font-weight: 800;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.perch-creatures {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #fbf7ff;
+  border: 2px solid #d9c9ef;
+}
+
+.perch-creatures-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #5b3b8a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.perch-creatures-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.perch-creature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 2px solid #e2dccf;
+  max-width: 340px;
+}
+
+.perch-creature.done {
+  opacity: 0.55;
+}
+
+.perch-creature-emoji {
+  font-size: 28px;
+}
+
+.perch-creature-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: #4a3b1e;
+}
+
+.perch-creature-desc {
+  color: #8a7d65;
+  line-height: 1.15;
+}
+
+.perch-creature-btn {
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 14px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  background: linear-gradient(135deg, #7a4bc0 0%, #a06ce0 100%);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.perch-creature-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #b9b2a5;
+}
+
+.perch-endturn {
+  margin-top: 10px;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  background: linear-gradient(135deg, #3f8f3a 0%, #2f9e44 100%);
+  color: #fff;
+  box-shadow: 0 4px 0 #256b2a;
+}
+
+.perch-endturn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #256b2a;
+}

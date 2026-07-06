@@ -27,6 +27,17 @@ export interface PerchLocation {
   row: number;
 }
 
+/** Estado em jogo de uma criatura (Fase B). */
+export interface CreatureRuntime {
+  defId: string;
+  /** Local onde o standee está agora (undefined até ser controlada pela 1ª vez). */
+  standeeLocId?: string;
+  /** Jogador que controla a criatura nesta rodada (maioria no Local-casa). */
+  controller?: PlayerId;
+  /** Já ativada nesta rodada? (máx. 1×/rodada) */
+  activatedThisRound: boolean;
+}
+
 export interface PerchState {
   round: number; // 1..maxRounds
   maxRounds: number; // 5
@@ -36,6 +47,15 @@ export interface PerchState {
   turnOrder: PlayerId[];
   /** Índice em turnOrder de quem joga a próxima ave. */
   turnPtr: number;
+  /** Já colocou a ave da vez atual? (uma ave obrigatória por turno) */
+  placedThisTurn: boolean;
+  /** Já usou a Ação Bônus (ativar criatura) nesta vez? (máx. 1/turno) */
+  bonusThisTurn: boolean;
+
+  /** Adjacência da homestead (por colunas, sem wrap). */
+  adjacency: Record<string, string[]>;
+  /** Criaturas em jogo (chave = id da criatura). */
+  creatures: Record<string, CreatureRuntime>;
 
   flockOf: Record<PlayerId, Flock>;
   /** Aves restantes no bando (Roost) de cada jogador. */

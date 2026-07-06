@@ -30,6 +30,23 @@ export const PERCH_LOCATIONS: readonly PerchLocationDef[] = [
 ];
 
 /**
+ * Locais-CASA das criaturas (Fase B). Cada um controla uma criatura: quem tem
+ * a maioria isolada aqui assume o controle na próxima rodada. `defId` casa com
+ * `CreatureDef.homeDefId` em perch.creatures.ts.
+ */
+export const PERCH_CREATURE_HOMES: readonly PerchLocationDef[] = [
+  { id: 'doghouse', name: 'Casinha do Cão', emoji: '🐶', points: [3, 1, 0] },
+  { id: 'porch', name: 'Varanda do Gato', emoji: '🐱', points: [3, 2, 0] },
+  { id: 'hawksnest', name: 'Ninho do Falcão', emoji: '🦅', points: [4, 2, 0] },
+  { id: 'foxden', name: 'Toca da Raposa', emoji: '🦊', points: [3, 2, 1] },
+  { id: 'owlbarn', name: 'Celeiro da Coruja', emoji: '🦉', points: [4, 0, 2] },
+  { id: 'thornbush', name: 'Espinheiro', emoji: '🌵', points: [2, 2, 1] },
+  { id: 'beehive', name: 'Colmeia', emoji: '🐝', points: [3, 3, 0] },
+  { id: 'oaknut', name: 'Carvalho das Nozes', emoji: '🌰', points: [2, 1, 1] },
+  { id: 'cornfield', name: 'Milharal', emoji: '🌽', points: [3, 2, 1] },
+];
+
+/**
  * Nº de Locais e layout em colunas por contagem de jogadores (do rulebook):
  * 3p → 8 tiles (colunas 3,2,3); 4p → 10 (2,3,2,3); 5p → 13 (3,2,3,2,3).
  */
