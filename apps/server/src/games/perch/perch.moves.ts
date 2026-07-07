@@ -4,7 +4,40 @@ import { effectiveCounts, scoreLocation } from './perch.scoring';
 import { applyCreatureEffect, assignCreatureControl } from './perch.creatures';
 import type { CreatureActionPayload } from './perch.creatures';
 import { addToFountain, scoreFountainAndPlaza } from './perch.fountain';
+import { controllerAt, largestSingleFlockOwner } from './perch.board';
+import { OBJECTIVE_BY_ID } from './perch.objectives';
 import type { Flock, PerchState } from './perch.state';
+
+const LARGEST_FLOCK_BONUS = 10;
+
+/** Migração: Locais com `migrateAddBirds` deixam o controlador pôr +n na sacola. */
+function applyMigrateEffects(state: PerchState): void {
+  for (const loc of state.homestead) {
+    if (loc.effect?.kind !== 'migrateAddBirds') continue;
+    const flock = controllerAt(state, loc.id);
+    if (!flock) continue;
+    const owner = Object.keys(state.flockOf).find((p) => state.flockOf[p] === flock);
+    if (!owner) continue;
+    const add = Math.min(loc.effect.n, state.supply[owner] ?? 0);
+    state.supply[owner] = (state.supply[owner] ?? 0) - add;
+    state.bag[flock] = (state.bag[flock] ?? 0) + add;
+  }
+}
+
+/** Upkeep: Locais com `upkeepSendToFountain` mandam n aves do controlador à Fonte. */
+function applyUpkeepEffects(state: PerchState): void {
+  for (const loc of state.homestead) {
+    if (loc.effect?.kind !== 'upkeepSendToFountain') continue;
+    const flock = controllerAt(state, loc.id);
+    if (!flock || state.birdhousesAt[loc.id]?.[flock]) continue; // protegida não sai
+    let sent = 0;
+    while (sent < loc.effect.n && (state.birdsAt[loc.id]?.[flock] ?? 0) > 0) {
+      state.birdsAt[loc.id]![flock] = (state.birdsAt[loc.id]![flock] ?? 0) - 1;
+      addToFountain(state, flock);
+      sent += 1;
+    }
+  }
+}
 
 export interface PlaceBirdPayload {
   locationId: string;
@@ -50,6 +83,7 @@ export function startRound(state: PerchState, players: readonly PlayerId[], rng:
     const f = state.flockOf[p]!;
     state.bag[f] = (state.bag[f] ?? 0) + moved;
   }
+  applyMigrateEffects(state); // Locais que adicionam aves à sacola
   for (const p of state.turnOrder) {
     const drawn = drawFromBag(state.bag, rng, 2);
     const own = Math.min(2, state.supply[p] ?? 0);
@@ -63,7 +97,7 @@ export function startRound(state: PerchState, players: readonly PlayerId[], rng:
 export function runUpkeep(state: PerchState, players: readonly PlayerId[]): void {
   const lastScored: Record<string, Record<Flock, number>> = {};
   for (const loc of state.homestead) {
-    const counts = effectiveCounts(state.birdsAt[loc.id] ?? {}, state.birdhousesAt[loc.id]);
+    const counts = effectiveCounts(state.birdsAt[loc.id] ?? {}, state.birdhousesAt[loc.id], loc.nests ?? 0);
     const awards = scoreLocation(counts, loc.points);
     lastScored[loc.id] = awards;
     for (const [flock, pts] of Object.entries(awards)) {
@@ -72,6 +106,7 @@ export function runUpkeep(state: PerchState, players: readonly PlayerId[]): void
     }
   }
   state.lastScored = lastScored;
+  applyUpkeepEffects(state); // Locais que disparam no Upkeep (ex.: mandar à Fonte)
 
   const prevIndex = new Map(state.turnOrder.map((p, i) => [p, i]));
   state.turnOrder = [...players].sort((a, b) => {
@@ -81,6 +116,31 @@ export function runUpkeep(state: PerchState, players: readonly PlayerId[]): void
   });
 
   assignCreatureControl(state); // controle da próxima rodada + zera "ativada"
+}
+
+/**
+ * Bônus de fim de jogo (consolida a Fase D): +3 por criatura controlada, Fonte
+ * (por nível), Praça (1 cada), +10 do maior bando único (sem empate) e os
+ * objetivos ocultos cumpridos. Muta `state`.
+ */
+export function scoreEndGame(state: PerchState, players: readonly PlayerId[]): void {
+  for (const cr of Object.values(state.creatures)) {
+    if (cr.controller) state.scores[cr.controller] = (state.scores[cr.controller] ?? 0) + 3;
+  }
+  scoreFountainAndPlaza(state, players);
+
+  const bigFlock = largestSingleFlockOwner(state);
+  if (bigFlock) {
+    const owner = players.find((p) => state.flockOf[p] === bigFlock);
+    if (owner) state.scores[owner] = (state.scores[owner] ?? 0) + LARGEST_FLOCK_BONUS;
+  }
+
+  for (const p of players) {
+    const obj = OBJECTIVE_BY_ID[state.objectives[p] ?? ''];
+    if (obj && obj.check(state, p, state.flockOf[p]!)) {
+      state.scores[p] = (state.scores[p] ?? 0) + obj.reward;
+    }
+  }
 }
 
 function soleTopScorer(
@@ -128,11 +188,7 @@ function finalizeTurn(next: PerchState, ctx: GameContext): void {
   runUpkeep(next, ctx.players);
   next.round += 1;
   if (next.round > next.maxRounds) {
-    // bônus de fim: +3 por criatura controlada + Fonte (por nível) + Praça (1 cada)
-    for (const cr of Object.values(next.creatures)) {
-      if (cr.controller) next.scores[cr.controller] = (next.scores[cr.controller] ?? 0) + 3;
-    }
-    scoreFountainAndPlaza(next, ctx.players);
+    scoreEndGame(next, ctx.players);
     next.step = 'done';
     next.finished = true;
     next.winnerId = soleTopScorer(next.scores, ctx.players);

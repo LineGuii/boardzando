@@ -59,6 +59,7 @@ function baseState(over: Partial<PerchState> = {}): PerchState {
     birdhouses: { a: 0, b: 0, c: 0 },
     lightning: { a: 0, b: 0, c: 0 },
     birdhousesAt: {},
+    objectives: {},
     scores,
     ...over,
   };
@@ -240,8 +241,8 @@ describe('Perch — fluxo de turno com Ação Bônus (via engine)', () => {
     // coloca a última ave na própria casa (l2) → só l2 pontua (blue 2 = maioria)
     m.applyMove('a', 'placeBird', { locationId: 'l2', birdIndex: 0 });
     expect(m.isOver).toBe(true);
-    // 5 (inicial) + 3 (maioria em l2, pontos[0]) + 3 (controle do Falcão) = 11
-    expect(m.snapshot.state.scores['a']).toBe(11);
+    // 5 (inicial) + 3 (maioria em l2) + 3 (Falcão) + 10 (maior bando único blue 2) = 21
+    expect(m.snapshot.state.scores['a']).toBe(21);
     expect(m.snapshot.gameover?.winner).toBe('a');
   });
 });

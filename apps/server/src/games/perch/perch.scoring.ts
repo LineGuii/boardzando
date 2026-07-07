@@ -38,18 +38,25 @@ export function scoreLocation(
 }
 
 /**
- * Contagem EFETIVA de um Local para pontuação/controle: as aves reais + 1 por
- * bando que tenha uma Casinha ali (a Casinha conta como +1 ave para o bando).
- * (Ninhos, +1, entram na Fase D.)
+ * Contagem EFETIVA de um Local para pontuação/controle: aves reais + 1 por
+ * bando com Casinha + `nests` para o bando que tem a MAIORIA CRUA ali (o
+ * ninho conta +1 por ninho para quem o ocupa — modelado como o dono da
+ * maioria; simplificação documentada do mecanismo de ninhos).
  */
 export function effectiveCounts(
   counts: Record<Flock, number>,
   housed: Record<Flock, boolean> | undefined,
+  nests = 0,
 ): Record<Flock, number> {
-  if (!housed) return counts;
   const out: Record<Flock, number> = { ...counts };
-  for (const [flock, on] of Object.entries(housed)) {
-    if (on) out[flock] = (out[flock] ?? 0) + 1;
+  if (nests > 0) {
+    const rawLeader = controllerOf(counts);
+    if (rawLeader) out[rawLeader] = (out[rawLeader] ?? 0) + nests;
+  }
+  if (housed) {
+    for (const [flock, on] of Object.entries(housed)) {
+      if (on) out[flock] = (out[flock] ?? 0) + 1;
+    }
   }
   return out;
 }

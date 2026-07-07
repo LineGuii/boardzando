@@ -8,8 +8,16 @@ interface PerchLoc {
   name: string;
   emoji: string;
   points: [number, number, number];
+  nests?: number;
+  effect?: { kind: string; n: number };
   col: number;
   row: number;
+}
+interface ObjectiveView {
+  id: string;
+  title: string;
+  desc: string;
+  reward: number;
 }
 interface CreatureView {
   id: string;
@@ -31,6 +39,8 @@ interface PerchView {
   turnOrder: string[];
   placedThisTurn: boolean;
   bonusThisTurn: boolean;
+  myObjective?: ObjectiveView;
+  objectivesReveal?: Record<string, { obj?: ObjectiveView; achieved: boolean }>;
   adjacency: Record<string, string[]>;
   creatures: Record<string, CreatureView>;
   flockOf: Record<string, string>;
@@ -306,6 +316,23 @@ export function PerchBoard(): JSX.Element {
                     {Object.entries(housed).some(([, on]) => on) && (
                       <span className="perch-standee" title="Casinha (pilha protegida)">🏠</span>
                     )}
+                    {(loc.nests ?? 0) > 0 && (
+                      <span className="perch-nest" title={`${loc.nests} ninho(s): +1 ao dono`}>
+                        {'🪺'.repeat(loc.nests ?? 0)}
+                      </span>
+                    )}
+                    {loc.effect && (
+                      <span
+                        className="perch-effect"
+                        title={
+                          loc.effect.kind === 'migrateAddBirds'
+                            ? `Migração: o dono põe +${loc.effect.n} ave(s) na sacola`
+                            : `Upkeep: manda ${loc.effect.n} ave(s) do dono à Fonte`
+                        }
+                      >
+                        {loc.effect.kind === 'migrateAddBirds' ? '🌰' : '⛲'}
+                      </span>
+                    )}
                   </div>
                   <div className="perch-loc-points" title="Pontos ao 1º / 2º / 3º">
                     {loc.points.map((p, i) => (
@@ -365,6 +392,31 @@ export function PerchBoard(): JSX.Element {
           </div>
         ))}
       </div>
+
+      {/* objetivo oculto do jogador */}
+      {view.myObjective && !view.finished && (
+        <div className="perch-objective">
+          🎯 <b>Seu objetivo secreto:</b> {view.myObjective.title}{' '}
+          <span className="perch-obj-reward">+{view.myObjective.reward}</span>
+          <span className="perch-obj-desc">{view.myObjective.desc}</span>
+        </div>
+      )}
+
+      {/* reveal dos objetivos no fim */}
+      {view.finished && view.objectivesReveal && (
+        <div className="perch-objective reveal">
+          <b>🎯 Objetivos revelados:</b>
+          <ul className="perch-obj-list">
+            {Object.entries(view.objectivesReveal).map(([pid, r]) => (
+              <li key={pid} className={r.achieved ? 'ok' : 'miss'}>
+                <span className="perch-dot" style={{ background: hex(view.flockOf[pid]!) }} />
+                {nameOf(pid)}: {r.obj?.title ?? '—'}{' '}
+                {r.achieved ? `✓ +${r.obj?.reward ?? 0}` : '✗'}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* barra do modo de token (casinha / raio) */}
       {bonusMode && (

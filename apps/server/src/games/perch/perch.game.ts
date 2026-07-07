@@ -21,6 +21,7 @@ import type {
 import { computeAdjacency } from './perch.adjacency';
 import { CREATURE_BY_HOME, PERCH_CREATURES } from './perch.creatures';
 import { emptyFountain, FOUNTAIN_PTS } from './perch.fountain';
+import { OBJECTIVE_BY_ID, PERCH_OBJECTIVES } from './perch.objectives';
 import { PERCH_CREATURE_HOMES, PERCH_LAYOUT, PERCH_LOCATIONS } from './perch.locations';
 import { FLOCK_HEX, FLOCKS } from './perch.state';
 import type { CreatureRuntime, Flock, PerchLocation, PerchState } from './perch.state';
@@ -88,6 +89,8 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
           name: def.name,
           emoji: def.emoji,
           points: def.points,
+          nests: def.nests,
+          effect: def.effect,
           col,
           row,
         });
@@ -103,6 +106,13 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
       const def = CREATURE_BY_HOME[l.defId];
       if (def) creatures[def.id] = { defId: def.id, activatedThisRound: false };
     }
+
+    // Objetivo oculto: 1 por jogador (sorteados sem repetição).
+    const objectives: Record<PlayerId, string> = {};
+    const objPool = ctx.random.shuffle(PERCH_OBJECTIVES.map((o) => o.id));
+    players.forEach((p, i) => {
+      objectives[p] = objPool[i % objPool.length]!;
+    });
 
     const state: PerchState = {
       round: 1,
@@ -125,6 +135,7 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
       birdhouses,
       lightning,
       birdhousesAt: {},
+      objectives,
       scores,
     };
     // Migração + Recrutamento da 1ª rodada.
@@ -185,6 +196,25 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
       };
     }
 
+    // Objetivo: o viewer só vê o PRÓPRIO até o fim; no fim, todos são revelados
+    // (com o resultado). Info suficiente para a UI, sem vazar antes.
+    const objDef = (id: string | undefined): unknown => {
+      const o = id ? OBJECTIVE_BY_ID[id] : undefined;
+      return o ? { id: o.id, title: o.title, desc: o.desc, reward: o.reward } : undefined;
+    };
+    const myObjective = objDef(state.objectives[viewer]);
+    let objectivesReveal: Record<PlayerId, { obj: unknown; achieved: boolean }> | undefined;
+    if (state.finished) {
+      objectivesReveal = {};
+      for (const [pid, oid] of Object.entries(state.objectives)) {
+        const o = OBJECTIVE_BY_ID[oid];
+        objectivesReveal[pid] = {
+          obj: objDef(oid),
+          achieved: o ? o.check(state, pid, state.flockOf[pid]!) : false,
+        };
+      }
+    }
+
     return {
       round: state.round,
       maxRounds: state.maxRounds,
@@ -192,6 +222,8 @@ export class PerchGame implements GameDefinition<PerchState, PerchMovePayload> {
       turnOrder: state.turnOrder,
       placedThisTurn: state.placedThisTurn,
       bonusThisTurn: state.bonusThisTurn,
+      myObjective,
+      objectivesReveal,
       adjacency: state.adjacency,
       creatures,
       flockOf: state.flockOf,

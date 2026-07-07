@@ -15,7 +15,16 @@ export const FLOCK_HEX: Record<string, string> = {
   teal: '#14b8a6',
 };
 
-/** Instância de um Local na homestead (posição em coluna/linha p/ adjacência futura). */
+/**
+ * Efeito especial de um Local (Fase D). Union de primitivas interpretadas por
+ * um reducer — adicionar um Local "difícil" = adicionar uma primitiva, não um
+ * caminho novo no engine.
+ */
+export type LocationEffect =
+  | { kind: 'migrateAddBirds'; n: number } // controlador põe +n aves na sacola na Migração
+  | { kind: 'upkeepSendToFountain'; n: number }; // no Upkeep, n aves daqui vão à Fonte
+
+/** Instância de um Local na homestead (posição em coluna/linha p/ adjacência). */
 export interface PerchLocation {
   id: string; // id da instância (ex.: 'loc-0')
   defId: string; // id no catálogo
@@ -23,6 +32,10 @@ export interface PerchLocation {
   emoji: string;
   /** Pontos pagos ao 1º, 2º e 3º em nº de aves. */
   points: [number, number, number];
+  /** Nº de ninhos (cada um = +1 para o bando que ocupa). */
+  nests?: number;
+  /** Efeito especial, se houver. */
+  effect?: LocationEffect;
   col: number;
   row: number;
 }
@@ -82,6 +95,8 @@ export interface PerchState {
   lightning: Record<PlayerId, number>;
   /** Casinhas construídas: locId -> bando -> true (pilha protegida, +1). */
   birdhousesAt: Record<string, Record<Flock, boolean>>;
+  /** Objetivo oculto de cada jogador (id em PERCH_OBJECTIVES). */
+  objectives: Record<PlayerId, string>;
 
   scores: Record<PlayerId, number>;
   /** Pontos concedidos por Local no último Upkeep (para a UI destacar). */

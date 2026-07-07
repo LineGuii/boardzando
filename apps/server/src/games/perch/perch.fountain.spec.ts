@@ -39,6 +39,7 @@ function baseState(over: Partial<PerchState> = {}): PerchState {
     birdhouses: { a: 0, b: 0, c: 0 },
     lightning: { a: 0, b: 0, c: 0 },
     birdhousesAt: {},
+    objectives: {},
     scores: { a: 0, b: 0, c: 0 },
     ...over,
   };
@@ -124,8 +125,9 @@ describe('Perch — Casinha (Birdhouse)', () => {
     expect(m.isOver).toBe(true);
     // l0: blue efetivo 2 (1 ave + casinha) = maioria -> pontos[0]=3; red 2º -> pontos[1]=2
     // l3: blue 1 -> maioria -> pontos[0]=3
-    // a = 3 (l0) + 3 (l3) = 6 ; b = 2 (l0)
-    expect(m.snapshot.state.scores['a']).toBe(6);
+    // + maior bando único (blue efetivo 2 em l0) = +10
+    // a = 3 (l0) + 3 (l3) + 10 = 16 ; b = 2 (l0)
+    expect(m.snapshot.state.scores['a']).toBe(16);
     expect(m.snapshot.state.scores['b']).toBe(2);
   });
 

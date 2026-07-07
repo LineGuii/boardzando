@@ -76,8 +76,9 @@ export function assignCreatureControl(state: PerchState): void {
     const homeId = homeLocationId(state, cid);
     cr.activatedThisRound = false;
     if (!homeId) continue;
+    const homeLoc = state.homestead.find((l) => l.id === homeId);
     const flock = controllerOf(
-      effectiveCounts(state.birdsAt[homeId] ?? {}, state.birdhousesAt[homeId]),
+      effectiveCounts(state.birdsAt[homeId] ?? {}, state.birdhousesAt[homeId], homeLoc?.nests ?? 0),
     );
     const owner = flock
       ? Object.keys(state.flockOf).find((p) => state.flockOf[p] === flock)
