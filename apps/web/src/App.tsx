@@ -11,6 +11,7 @@ import { SandboxBoard } from './games/sandbox/SandboxBoard';
 import { ItoBoard } from './games/ito/ItoBoard';
 import { ManadaBoard } from './games/manada/ManadaBoard';
 import { PatoBoard } from './games/pato/PatoBoard';
+import { PerchBoard } from './games/perch/PerchBoard';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
 import { GameOptionsPanel } from './shell/GameOptionsPanel';
@@ -533,7 +534,8 @@ function RoomPage(): JSX.Element {
     (room?.gameId === 'hues' ||
       room?.gameId === 'monopoly' ||
       room?.gameId === 'ito' ||
-      room?.gameId === 'manada');
+      room?.gameId === 'manada' ||
+      room?.gameId === 'perch');
 
   return (
     <div className="shell-bg">
@@ -588,6 +590,12 @@ function RoomPage(): JSX.Element {
         {room?.status === 'playing' && room?.gameId === 'uno' && (
           <TurnGate key={matchGen}>
             <UnoBoard />
+          </TurnGate>
+        )}
+
+        {room?.status === 'playing' && room?.gameId === 'perch' && (
+          <TurnGate key={matchGen}>
+            <PerchBoard />
           </TurnGate>
         )}
 

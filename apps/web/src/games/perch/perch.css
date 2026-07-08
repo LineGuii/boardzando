@@ -1,0 +1,637 @@
+/* =========================================================
+ * Perch — batalha das aves. Homestead aconchegante em colunas,
+ * pilhas de aves coloridas por bando, valores [1º/2º/3º] por tile.
+ * ========================================================= */
+
+.perch-root {
+  margin-top: 12px;
+  --sky: #cdeafe;
+  --leaf: #2f9e44;
+  --wood: #a9713e;
+}
+
+/* ---------- Cabeçalho ---------- */
+
+.perch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #3f7d8f 0%, #2f9e6e 100%);
+  border-radius: 14px;
+  padding: 12px 18px;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.perch-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.perch-logo {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.perch-eyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #dff5ec;
+}
+
+.perch-round {
+  font-size: 17px;
+  font-weight: 900;
+  margin-top: 2px;
+}
+
+.perch-turnorder {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.perch-turn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.18);
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: #fff;
+}
+
+.perch-turn-chip.current {
+  background: #fff;
+  color: #1c5b46;
+  box-shadow: 0 0 0 2px #ffd43b;
+}
+
+.perch-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+  display: inline-block;
+}
+
+/* ---------- Homestead ---------- */
+
+.perch-homestead {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 20% 10%, #e9f7ff 0, transparent 40%),
+    linear-gradient(180deg, #d7f0d2 0%, #bfe6b6 100%);
+  border: 3px solid #7c4f27;
+}
+
+.perch-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+}
+
+.perch-loc {
+  text-align: left;
+  border: 2px solid #cbb994;
+  border-radius: 12px;
+  background: #fffdf5;
+  padding: 8px 10px;
+  font-family: inherit;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: box-shadow 0.12s, transform 0.12s, border-color 0.12s;
+}
+
+.perch-loc.placeable {
+  cursor: pointer;
+  border-color: var(--leaf);
+  box-shadow: 0 0 0 2px rgba(47, 158, 68, 0.25);
+}
+
+.perch-loc.placeable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
+}
+
+.perch-loc-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.perch-loc-emoji {
+  font-size: 20px;
+}
+
+.perch-loc-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #4a3b1e;
+  line-height: 1.1;
+}
+
+.perch-loc-points {
+  display: flex;
+  gap: 4px;
+}
+
+.perch-pts {
+  font-size: 10px;
+  font-weight: 700;
+  color: #8a7d65;
+  background: #f1ece1;
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+.perch-pts b {
+  color: #4a3b1e;
+  font-size: 12px;
+}
+
+.perch-pts-1 {
+  background: #fff2cc;
+}
+
+.perch-loc-birds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 24px;
+}
+
+.perch-birdchip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.perch-birdchip.controls {
+  box-shadow: 0 0 0 2px #ffd43b, 0 2px 5px rgba(0, 0, 0, 0.25);
+}
+
+.perch-award {
+  font-size: 10px;
+  background: #fff;
+  color: #1a8f3a;
+  border-radius: 6px;
+  padding: 0 4px;
+  margin-left: 2px;
+  animation: perch-pop 0.35s ease;
+}
+
+.perch-loc-empty {
+  font-size: 11px;
+  color: #a89e88;
+  font-style: italic;
+}
+
+@keyframes perch-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- Mão ---------- */
+
+.perch-hand {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #fffdf5;
+  border: 2px solid #e2dccf;
+}
+
+.perch-hand-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6b5f4e;
+  margin-bottom: 8px;
+}
+
+.perch-hand-birds {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.perch-handbird {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  border: 3px solid;
+  font-size: 26px;
+  cursor: pointer;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.perch-handbird:hover {
+  transform: translateY(-2px);
+}
+
+.perch-handbird.selected {
+  transform: translateY(-6px) scale(1.08);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 0 0 4px #ffd43b;
+}
+
+.perch-foreign {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #4a3b1e;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 999px;
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+/* ---------- Placar ---------- */
+
+.perch-scoreboard {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #fbfff7;
+  border: 2px solid #cbe3bf;
+}
+
+.perch-scoreboard-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #2f5f26;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.perch-scores {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perch-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e2dccf;
+}
+
+.perch-score-row.mine {
+  border-color: var(--leaf);
+  box-shadow: 0 0 0 2px rgba(47, 158, 68, 0.2);
+}
+
+.perch-score-name {
+  flex: 1;
+  font-weight: 700;
+  color: #3a3220;
+}
+
+.perch-score-hand {
+  font-size: 12px;
+  color: #8a7d65;
+}
+
+.perch-score-points {
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-weight: 900;
+  color: #1c5b46;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* ---------- Criaturas (Fase B) ---------- */
+
+.perch-standee {
+  font-size: 18px;
+  margin-left: 2px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
+}
+
+.perch-loc.reach {
+  cursor: pointer;
+  border-color: #2f6fb0;
+  box-shadow: 0 0 0 2px rgba(47, 111, 176, 0.35);
+}
+
+.perch-loc.dest {
+  border-color: #2f6fb0;
+  box-shadow: 0 0 0 3px #2f6fb0;
+}
+
+.perch-birdchip.pickable {
+  cursor: pointer;
+  outline: 2px dashed #fff;
+  outline-offset: 1px;
+}
+
+.perch-actbar {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #eaf2fb;
+  border: 2px solid #2f6fb0;
+  font-size: 14px;
+  color: #1c3d5e;
+}
+
+.perch-act-cancel {
+  border: 0;
+  background: #d64545;
+  color: #fff;
+  font-weight: 800;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.perch-creatures {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #fbf7ff;
+  border: 2px solid #d9c9ef;
+}
+
+.perch-creatures-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #5b3b8a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.perch-creatures-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.perch-creature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 2px solid #e2dccf;
+  max-width: 340px;
+}
+
+.perch-creature.done {
+  opacity: 0.55;
+}
+
+.perch-creature-emoji {
+  font-size: 28px;
+}
+
+.perch-creature-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: #4a3b1e;
+}
+
+.perch-creature-desc {
+  color: #8a7d65;
+  line-height: 1.15;
+}
+
+.perch-creature-btn {
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 14px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  background: linear-gradient(135deg, #7a4bc0 0%, #a06ce0 100%);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.perch-creature-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #b9b2a5;
+}
+
+.perch-endturn {
+  margin-top: 10px;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  background: linear-gradient(135deg, #3f8f3a 0%, #2f9e44 100%);
+  color: #fff;
+  box-shadow: 0 4px 0 #256b2a;
+}
+
+.perch-endturn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #256b2a;
+}
+
+/* ---------- Ações bônus de token + Fonte/Praça (Fase C) ---------- */
+
+.perch-tokens-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.perch-token-btn {
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 16px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  background: linear-gradient(135deg, #a9713e 0%, #c78a52 100%);
+  color: #fff;
+}
+
+.perch-token-btn.zap {
+  background: linear-gradient(135deg, #e8a800 0%, #f5c542 100%);
+  color: #5a4300;
+}
+
+.perch-token-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #b9b2a5;
+}
+
+.perch-fountain {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #e6f4ff 0%, #cfe9fb 100%);
+  border: 2px solid #7fb2d9;
+}
+
+.perch-fountain-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #1c5b7a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.perch-fountain-levels {
+  display: flex;
+  flex-direction: column-reverse; /* base embaixo, topo em cima */
+  gap: 4px;
+}
+
+.perch-fountain-level {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.perch-fountain-level.plaza {
+  background: rgba(255, 236, 179, 0.6);
+  margin-top: 6px;
+}
+
+.perch-fountain-pts {
+  font-size: 11px;
+  font-weight: 800;
+  color: #1c5b7a;
+  min-width: 54px;
+}
+
+.perch-fountain-birds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.perch-fountain-bird {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+/* ---------- Objetivos / ninhos / efeitos (Fase D) ---------- */
+
+.perch-nest,
+.perch-effect {
+  font-size: 14px;
+  margin-left: 2px;
+}
+
+.perch-objective {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff4e0;
+  border: 2px solid #e8a94b;
+  font-size: 14px;
+  color: #6b4a12;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.perch-obj-reward {
+  background: #e8a94b;
+  color: #fff;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: 12px;
+}
+
+.perch-obj-desc {
+  color: #9a7a3a;
+  font-size: 13px;
+  width: 100%;
+}
+
+.perch-objective.reveal {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.perch-obj-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  width: 100%;
+}
+
+.perch-obj-list li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  padding: 3px 0;
+}
+
+.perch-obj-list li.ok {
+  color: #1a7a3a;
+  font-weight: 700;
+}
+
+.perch-obj-list li.miss {
+  color: #9a7a3a;
+}

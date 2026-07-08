@@ -4,6 +4,7 @@ import { ItoModule } from './ito/ito.module';
 import { ManadaModule } from './manada/manada.module';
 import { MonopolyModule } from './monopoly/monopoly.module';
 import { PatoModule } from './pato/pato.module';
+import { PerchModule } from './perch/perch.module';
 import { UnoModule } from './uno/uno.module';
 
 /**
@@ -14,6 +15,6 @@ import { UnoModule } from './uno/uno.module';
  * (Ver skill `add-game-plugin`.)
  */
 @Module({
-  imports: [UnoModule, HuesModule, MonopolyModule, ItoModule, PatoModule, ManadaModule],
+  imports: [UnoModule, HuesModule, MonopolyModule, ItoModule, PatoModule, ManadaModule, PerchModule],
 })
 export class GamesModule {}
