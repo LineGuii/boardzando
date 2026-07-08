@@ -57,4 +57,34 @@ describe('RoomService — reinicio de partida', () => {
     });
     expect(() => svc.startGame(room.id, 'outro')).toThrow(/ONLY_HOST_CAN_START/);
   });
+
+  it('reiniciar reusa as opcoes do primeiro start (sem reenvio do cliente)', () => {
+    // def que registra o setupData recebido em cada partida
+    const seen: unknown[] = [];
+    const recordingDef: GameDefinition = {
+      ...fakeDef,
+      setup: (_ctx, setupData) => {
+        seen.push(setupData);
+        return {};
+      },
+    };
+    const registry = {
+      getOrThrow: () => recordingDef,
+      get: () => recordingDef,
+    } as unknown as GameRegistryService;
+    const svc = new RoomService(registry);
+    const room = svc.createRoom({
+      gameId: 'fake',
+      passwordHash: '',
+      host: { id: 'h', name: 'Host', connected: true },
+    });
+
+    svc.startGame(room.id, 'h', { lives: 5, uniqueThemes: true }); // opcoes do painel
+    room.status = 'finished'; // simula fim
+    svc.startGame(room.id, 'h'); // "Reiniciar jogo" — sem opcoes
+
+    expect(seen).toHaveLength(2);
+    expect(seen[0]).toEqual({ lives: 5, uniqueThemes: true });
+    expect(seen[1]).toEqual({ lives: 5, uniqueThemes: true }); // reusou as mesmas
+  });
 });

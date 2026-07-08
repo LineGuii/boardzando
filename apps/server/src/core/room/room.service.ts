@@ -109,8 +109,13 @@ export class RoomService {
     if (room.status === 'playing') throw new Error('ALREADY_STARTED');
     if (room.players.size < def.minPlayers) throw new Error('NOT_ENOUGH_PLAYERS');
 
+    // "Reiniciar jogo" nao reenvia as opcoes: reusa as ultimas usadas. O
+    // primeiro start (do lobby) manda as opcoes do painel do host e as guarda.
+    const options = gameOptions ?? room.lastGameOptions;
+    room.lastGameOptions = options;
+
     const seed = randomInt(0, 2 ** 31 - 1);
-    room.instance = GameInstance.create(def, room.playerIds, seed, gameOptions);
+    room.instance = GameInstance.create(def, room.playerIds, seed, options);
     room.status = 'playing';
     this.logger.log(`Partida iniciada na sala ${roomId} (seed ${seed})`);
     return room;
