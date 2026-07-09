@@ -52,6 +52,7 @@ export class Room {
         isHost: p.id === this.hostId,
         color: p.color,
       })),
+      lastGameOptions: this.lastGameOptions,
     };
   }
 }

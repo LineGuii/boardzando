@@ -1,6 +1,14 @@
 import type { HuesOptions } from '@boardzando/contracts';
 import { HUES_DEFAULT_OPTIONS } from '@boardzando/contracts';
 
+/** Games que expoem um painel de opcoes (para a UI decidir se oferece "trocar"). */
+const GAMES_WITH_OPTIONS = new Set(['hues', 'ito', 'pato', 'manada']);
+
+/** Este jogo tem opcoes configuraveis? (usado no reinicio com troca de setup) */
+export function gameHasOptions(gameId: string): boolean {
+  return GAMES_WITH_OPTIONS.has(gameId);
+}
+
 /**
  * Painel de opcoes do jogo, exibido na sala apos a criacao e antes do start.
  * Generico: cada gameId tem o seu sub-painel. O valor escolhido entra no
