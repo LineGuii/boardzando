@@ -91,6 +91,8 @@ export interface RoomSnapshot {
   status: 'lobby' | 'playing' | 'finished';
   players: PlayerSnapshot[];
   hostId: PlayerId;
+  /** Ultimas opcoes usadas para iniciar (pre-preenche o painel ao reiniciar). */
+  lastGameOptions?: unknown;
 }
 
 /** Resumo publico de uma sala aberta (sem senha) para a tela de lobby. */

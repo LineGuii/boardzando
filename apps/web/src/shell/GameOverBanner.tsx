@@ -1,15 +1,25 @@
+import { useState } from 'react';
 import { useGame } from '../net/store';
+import { GameOptionsPanel, gameHasOptions } from './GameOptionsPanel';
 
 /**
  * Fronteira da CASCA: exibe o resultado da partida quando ela termina.
  * Le `gameOver` do store (alimentado pelo evento `game:over`) e a snapshot da
  * sala para resolver nomes. Plugins NAO precisam renderizar nada de vitoria —
  * a casca cuida da regra "0 cartas / endIf -> vencedor".
+ *
+ * O host pode reiniciar reusando as mesmas opcoes, OU abrir o painel de setup
+ * para trocar as configuracoes e reiniciar com elas.
  */
 export function GameOverBanner(): JSX.Element | null {
   const gameOver = useGame((s) => s.gameOver);
   const room = useGame((s) => s.room);
   const session = useGame((s) => s.session);
+
+  const [showSetup, setShowSetup] = useState(false);
+  // opcoes em edicao ao "trocar setup" (inicia das ultimas usadas na sala).
+  const [opts, setOpts] = useState<unknown>(undefined);
+
   if (!gameOver) return null;
 
   const winnerId = gameOver.winner;
@@ -17,14 +27,22 @@ export function GameOverBanner(): JSX.Element | null {
     (winnerId && room?.players.find((p) => p.id === winnerId)?.name) || winnerId;
   const youWon = !!winnerId && winnerId === session?.playerId;
   const isHost = room?.hostId === session?.playerId;
+  const gameId = room?.gameId ?? '';
+  const canChangeSetup = isHost && gameHasOptions(gameId);
 
-  const restartGame = (): void => {
+  const start = (gameOptions?: unknown): void => {
     if (!session?.roomId) return;
     useGame.getState().socket?.emit(
       'room:start',
-      { roomId: session.roomId },
+      gameOptions === undefined
+        ? { roomId: session.roomId }
+        : { roomId: session.roomId, gameOptions },
       () => {},
     );
+  };
+  const openSetup = (): void => {
+    setOpts(room?.lastGameOptions); // pre-preenche com as ultimas opcoes
+    setShowSetup(true);
   };
 
   // Jogos cooperativos: a equipe inteira vence ou perde junta.
@@ -66,15 +84,59 @@ export function GameOverBanner(): JSX.Element | null {
           Vencedor: <b>{winnerName ?? '—'}</b>
         </h2>
       )}
-      {isHost && (
-        <button
-          type="button"
-          className="shell-button"
-          onClick={restartGame}
-          style={{ marginTop: 12 }}
+
+      {isHost && !showSetup && (
+        <div
+          style={{
+            marginTop: 12,
+            display: 'flex',
+            gap: 10,
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+          }}
         >
-          Reiniciar jogo
-        </button>
+          <button type="button" className="shell-button" onClick={() => start()}>
+            🔄 Reiniciar jogo
+          </button>
+          {canChangeSetup && (
+            <button
+              type="button"
+              className="shell-button"
+              style={{ background: '#8a5a2b' }}
+              onClick={openSetup}
+            >
+              ⚙️ Trocar configurações
+            </button>
+          )}
+        </div>
+      )}
+
+      {isHost && showSetup && (
+        <div style={{ marginTop: 12, textAlign: 'left' }}>
+          <GameOptionsPanel gameId={gameId} value={opts} onChange={setOpts} />
+          <div
+            style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 12 }}
+          >
+            <button
+              type="button"
+              className="shell-button"
+              onClick={() => {
+                start(opts);
+                setShowSetup(false);
+              }}
+            >
+              ▶ Reiniciar com estas opções
+            </button>
+            <button
+              type="button"
+              className="shell-button"
+              style={{ background: '#9aa39a' }}
+              onClick={() => setShowSetup(false)}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

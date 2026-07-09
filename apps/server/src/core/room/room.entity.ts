@@ -19,6 +19,12 @@ export class Room {
   hostId: PlayerId;
   readonly players = new Map<PlayerId, Player>();
   instance?: GameInstance;
+  /**
+   * Ultimas opcoes usadas para iniciar a partida (painel do host). Guardadas
+   * para que "Reiniciar jogo" reuse as mesmas configuracoes sem o cliente
+   * precisar reenvia-las.
+   */
+  lastGameOptions?: unknown;
   readonly createdAt = Date.now();
 
   constructor(params: { gameId: GameId; passwordHash: string; host: Player; id?: RoomId }) {
@@ -46,6 +52,7 @@ export class Room {
         isHost: p.id === this.hostId,
         color: p.color,
       })),
+      lastGameOptions: this.lastGameOptions,
     };
   }
 }
