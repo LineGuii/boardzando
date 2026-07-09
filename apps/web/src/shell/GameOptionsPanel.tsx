@@ -55,7 +55,52 @@ export function GameOptionsPanel({
       />
     );
   }
+  if (gameId === 'flip7') {
+    return (
+      <Flip7OptionsPanel
+        value={(value ?? FLIP7_DEFAULT_OPTIONS) as Flip7Options}
+        onChange={onChange as (v: Flip7Options) => void}
+      />
+    );
+  }
   return null;
+}
+
+interface Flip7Options {
+  targetScore: 100 | 200 | 300;
+}
+const FLIP7_DEFAULT_OPTIONS: Flip7Options = { targetScore: 200 };
+
+function Flip7OptionsPanel({
+  value,
+  onChange,
+}: {
+  value: Flip7Options;
+  onChange: (next: Flip7Options) => void;
+}): JSX.Element {
+  return (
+    <div className="shell-options-panel">
+      <h3>Opções da partida (Flip 7)</h3>
+      <div className="shell-options-field">
+        <label className="shell-label">Pontos para vencer</label>
+        <div className="shell-options-buttons">
+          {([100, 200, 300] as const).map((n) => (
+            <button
+              key={n}
+              type="button"
+              className={`shell-options-btn ${value.targetScore === n ? 'active' : ''}`}
+              onClick={() => onChange({ targetScore: n })}
+            >
+              {n} {n === 100 ? '(rápido)' : n === 200 ? '(padrão)' : '(longo)'}
+            </button>
+          ))}
+        </div>
+        <p className="shell-hint">
+          Vire cartas sem repetir número. 7 números únicos = Flip 7 (+15)!
+        </p>
+      </div>
+    </div>
+  );
 }
 
 interface ManadaOptions {

@@ -12,6 +12,7 @@ import { ItoBoard } from './games/ito/ItoBoard';
 import { ManadaBoard } from './games/manada/ManadaBoard';
 import { PatoBoard } from './games/pato/PatoBoard';
 import { PerchBoard } from './games/perch/PerchBoard';
+import { Flip7Board } from './games/flip7/Flip7Board';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
 import { GameOptionsPanel } from './shell/GameOptionsPanel';
@@ -544,7 +545,8 @@ function RoomPage(): JSX.Element {
       room?.gameId === 'monopoly' ||
       room?.gameId === 'ito' ||
       room?.gameId === 'manada' ||
-      room?.gameId === 'perch');
+      room?.gameId === 'perch' ||
+      room?.gameId === 'flip7');
 
   return (
     <div className="shell-bg">
@@ -605,6 +607,12 @@ function RoomPage(): JSX.Element {
         {room?.status === 'playing' && room?.gameId === 'perch' && (
           <TurnGate key={matchGen}>
             <PerchBoard />
+          </TurnGate>
+        )}
+
+        {room?.status === 'playing' && room?.gameId === 'flip7' && (
+          <TurnGate key={matchGen}>
+            <Flip7Board />
           </TurnGate>
         )}
 
