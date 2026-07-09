@@ -15,6 +15,7 @@ import { PerchBoard } from './games/perch/PerchBoard';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
 import { GameOptionsPanel } from './shell/GameOptionsPanel';
+import { ErrorAlert, friendlyError } from './shell/ErrorAlert';
 import './shell/shell.css';
 
 /**
@@ -108,6 +109,7 @@ function ResumeSplash(): JSX.Element {
 function Lobby({ initialError }: { initialError?: string | null } = {}): JSX.Element {
   const setSocket = useGame((s) => s.setSocket);
   const lastError = useGame((s) => s.lastError);
+  const clearError = useGame((s) => s.clearError);
 
   const [tab, setTab] = useState<'create' | 'join'>('create');
   const [name, setName] = useState('');
@@ -367,7 +369,13 @@ function Lobby({ initialError }: { initialError?: string | null } = {}): JSX.Ele
           )}
 
           {(errorMsg || lastError) && (
-            <p className="shell-error">{errorMsg ?? lastError?.message}</p>
+            <ErrorAlert
+              message={errorMsg ?? (lastError ? friendlyError(lastError) : '')}
+              onClose={() => {
+                setErrorMsg(null);
+                clearError();
+              }}
+            />
           )}
         </div>
       </div>
@@ -513,6 +521,7 @@ function RoomPage(): JSX.Element {
   const view = useGame((s) => s.view) as { kind?: string } | undefined;
   const matchGen = useGame((s) => s.matchGen);
   const lastError = useGame((s) => s.lastError);
+  const clearError = useGame((s) => s.clearError);
   const [gameOptions, setGameOptions] = useState<unknown>(undefined);
 
   // Sincroniza a URL com o roomId atual para que F5 / Compartilhar preservem a sala.
@@ -601,7 +610,9 @@ function RoomPage(): JSX.Element {
 
         <GameOverBanner />
 
-        {lastError && <p className="shell-error">{lastError.message}</p>}
+        {lastError && (
+          <ErrorAlert message={friendlyError(lastError)} onClose={clearError} />
+        )}
       </div>
     </div>
   );

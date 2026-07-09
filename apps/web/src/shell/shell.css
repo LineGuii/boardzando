@@ -462,13 +462,55 @@ body {
 /* ---- Mensagens ---- */
 
 .shell-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: #fff0ee;
   color: #b41818;
   border: 1px solid #ffcec9;
-  padding: 10px 14px;
+  padding: 10px 12px 10px 14px;
   border-radius: 10px;
   margin-top: 12px;
   font-size: 14px;
+  animation: shell-error-in 0.22s ease;
+}
+
+@keyframes shell-error-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.shell-error-icon {
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.shell-error-msg {
+  flex: 1;
+  line-height: 1.35;
+}
+
+.shell-error-close {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(180, 24, 24, 0.1);
+  color: #b41818;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s;
+  font-family: inherit;
+}
+
+.shell-error-close:hover {
+  background: rgba(180, 24, 24, 0.22);
 }
 
 /* ---- Cabecalho da sala ---- */

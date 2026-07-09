@@ -33,6 +33,8 @@ interface GameStore {
   dragOverrides: Record<string, DragOverride>;
   chat: ChatMessage[];
   lastError?: WsError;
+  /** Dispensa o alerta de erro atual (botao "X"). */
+  clearError: () => void;
   setSocket: (s: GameClientSocket, session: { roomId: string; playerId: string }) => void;
   reset: () => void;
 }
@@ -41,6 +43,7 @@ export const useGame = create<GameStore>((set) => ({
   chat: [],
   matchGen: 0,
   dragOverrides: {},
+  clearError: () => set({ lastError: undefined }),
   setSocket: (socket, session) => {
     socket.on('room:update', (room) =>
       set((st) => {
