@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import { useGame } from '../../net/store';
 import './flip7.css';
 
@@ -24,9 +25,29 @@ interface Flip7View {
   discardCount: number;
   lastEvent?: string;
   lastRound?: { gained: Record<string, number>; busted: string[]; flip7By?: string };
+  lastBust?: { playerId: string; value: number; seq: number };
+  roundEndSeq: number;
   targetScore: number;
   winnerId?: string;
   finished?: boolean;
+}
+
+/** Contador animado (conta de `from` até `to` com ease-out). */
+function CountUp({ from, to, duration = 1100 }: { from: number; to: number; duration?: number }): JSX.Element {
+  const [val, setVal] = useState(from);
+  useEffect(() => {
+    let raf = 0;
+    const start = performance.now();
+    const tick = (t: number): void => {
+      const p = Math.min(1, (t - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setVal(Math.round(from + (to - from) * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [from, to, duration]);
+  return <>{val}</>;
 }
 
 const NUM_WORDS = [
@@ -126,6 +147,57 @@ export function Flip7Board(): JSX.Element {
     prevEvent.current = ev;
   }, [view?.lastEvent]);
 
+  // ---- animação de ESTOURO (bombástica, com a carta virada) ----
+  // `null` = ainda não vimos nenhum estado (baseline no mount para não repetir
+  // um estouro antigo ao reconectar).
+  const [bustAnim, setBustAnim] = useState<{ playerId: string; value: number } | null>(null);
+  const seenBust = useRef<number | null>(null);
+  useEffect(() => {
+    const seq = view?.lastBust?.seq ?? 0;
+    if (seenBust.current === null) {
+      seenBust.current = seq; // baseline: não anima o que já aconteceu antes de entrar
+      return;
+    }
+    const b = view?.lastBust;
+    if (b && b.seq !== seenBust.current) {
+      seenBust.current = b.seq;
+      setBustAnim({ playerId: b.playerId, value: b.value });
+      const t = window.setTimeout(() => setBustAnim(null), 2800);
+      return () => window.clearTimeout(t);
+    }
+    // dispara uma vez por estouro (chave = seq)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view?.lastBust?.seq]);
+
+  // ---- animação de FIM DE RODADA (placar somando) ----
+  const [roundAnim, setRoundAnim] = useState<{
+    gained: Record<string, number>;
+    before: Record<string, number>;
+    after: Record<string, number>;
+  } | null>(null);
+  const seenRound = useRef<number | null>(null);
+  useEffect(() => {
+    if (!view) return;
+    const seq = view.roundEndSeq ?? 0;
+    if (seenRound.current === null) {
+      seenRound.current = seq; // baseline no mount
+      return;
+    }
+    if (seq !== seenRound.current && view.lastRound) {
+      const gained = view.lastRound.gained;
+      const after = view.totals;
+      const before: Record<string, number> = {};
+      for (const p of view.order) before[p] = (after[p] ?? 0) - (gained[p] ?? 0);
+      setRoundAnim({ gained, before, after });
+      const t = window.setTimeout(() => setRoundAnim(null), 3400);
+      seenRound.current = seq;
+      return () => window.clearTimeout(t);
+    }
+    seenRound.current = seq;
+    // dispara uma vez por fim de rodada (chave = roundEndSeq)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view?.roundEndSeq]);
+
   if (!view || !session || !room) return <p>Aguardando estado...</p>;
   const me = session.playerId;
   const myTurn = currentPlayer === me;
@@ -199,6 +271,16 @@ export function Flip7Board(): JSX.Element {
           const isMe = pid === me;
           return (
             <div key={pid} className={`f7-player status-${p.status} ${isTurn ? 'turn' : ''} ${isMe ? 'mine' : ''}`}>
+              {p.status === 'frozen' && (
+                <div className="f7-frost" aria-hidden>
+                  <span className="f7-frost-sheen" />
+                  <span className="f7-icicles" />
+                  <span className="f7-frost-stamp">❄️ CONGELADO</span>
+                  {['❄', '❅', '❆', '❄', '❅', '❆'].map((s, i) => (
+                    <span key={i} className={`f7-flake f${i}`}>{s}</span>
+                  ))}
+                </div>
+              )}
               <div className="f7-player-head">
                 <span className="f7-player-name">
                   {nameOf(pid)} {isMe ? '(você)' : ''} {pid === view.dealerId ? '🃏' : ''}
@@ -254,6 +336,59 @@ export function Flip7Board(): JSX.Element {
           <ActionCard action="second" />
         </div>
       </details>
+
+      {/* ---- OVERLAY: estouro (bombástico) — via portal p/ sair do TurnGate ---- */}
+      {bustAnim &&
+        createPortal(
+          <div className="f7-bust-overlay">
+            <div className="f7-bust-flash" />
+            {Array.from({ length: 16 }).map((_, i) => (
+              <span key={i} className={`f7-shard s${i % 8}`} style={{ '--i': i } as CSSProperties} />
+            ))}
+            <div className="f7-bust-inner">
+              <div className="f7-bust-boom">💥</div>
+              <div className="f7-bust-title">ESTOUROU!</div>
+              <div className="f7-bust-card">
+                <NumberCard value={bustAnim.value} />
+              </div>
+              <div className="f7-bust-name">
+                <b>{nameOf(bustAnim.playerId)}</b> virou outro <b>{bustAnim.value}</b> 😱
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {/* ---- OVERLAY: fim de rodada (placar somando) ---- */}
+      {roundAnim &&
+        createPortal(
+          <div className="f7-round-overlay">
+            <div className="f7-round-panel">
+              <div className="f7-round-title">📊 Fim da rodada!</div>
+              <ul className="f7-round-list">
+                {[...view.order]
+                  .sort((a, b) => (roundAnim.after[b] ?? 0) - (roundAnim.after[a] ?? 0))
+                  .map((pid) => {
+                    const g = roundAnim.gained[pid] ?? 0;
+                    return (
+                      <li key={pid} className="f7-round-row">
+                        <span className="f7-round-name">{nameOf(pid)}</span>
+                        <span className={`f7-round-gain ${g === 0 ? 'zero' : ''}`}>
+                          {g === 0 ? (view.lastRound?.busted.includes(pid) ? '💥 0' : '+0') : `+${g}`}
+                        </span>
+                        <span className="f7-round-total">
+                          <CountUp from={roundAnim.before[pid] ?? 0} to={roundAnim.after[pid] ?? 0} />
+                          <span className="f7-round-pts"> pts</span>
+                        </span>
+                      </li>
+                    );
+                  })}
+              </ul>
+              <div className="f7-round-goal">🎯 alvo: {view.targetScore}</div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

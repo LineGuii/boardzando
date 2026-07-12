@@ -62,6 +62,7 @@ export class Flip7Game implements GameDefinition<Flip7State, Flip7MovePayload> {
       round: 1,
       players,
       totals,
+      roundEndSeq: 0,
     };
   }
 
@@ -100,6 +101,8 @@ export class Flip7Game implements GameDefinition<Flip7State, Flip7MovePayload> {
       discardCount: state.discard.length,
       lastEvent: state.lastEvent,
       lastRound: state.lastRound,
+      lastBust: state.lastBust,
+      roundEndSeq: state.roundEndSeq,
       targetScore: state.options.targetScore,
       winnerId: state.winnerId,
       finished: state.finished,

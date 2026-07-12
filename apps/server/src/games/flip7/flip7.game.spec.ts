@@ -33,6 +33,7 @@ function baseState(over: Partial<Flip7State> = {}): Flip7State {
     round: 1,
     players: { a: ps(), b: ps(), c: ps() },
     totals: { a: 0, b: 0, c: 0 },
+    roundEndSeq: 0,
     ...over,
   };
 }

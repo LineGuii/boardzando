@@ -83,6 +83,7 @@ function endRound(state: Flip7State, flip7By?: PlayerId): void {
     state.totals[p] = (state.totals[p] ?? 0) + pts;
   }
   state.lastRound = { gained, busted, flip7By };
+  state.roundEndSeq = (state.roundEndSeq ?? 0) + 1;
 
   // Fim de jogo: ao fim de uma rodada em que alguém atingiu o alvo.
   const max = Math.max(...state.order.map((p) => state.totals[p] ?? 0));
@@ -135,6 +136,7 @@ function applyCard(state: Flip7State, pid: PlayerId, card: Flip7Card): 'done' | 
       } else {
         p.status = 'busted';
         state.lastEvent = `${pid} estourou no ${card.value}!`;
+        state.lastBust = { playerId: pid, value: card.value, seq: (state.lastBust?.seq ?? 0) + 1 };
       }
     } else {
       p.numbers.push(card.value);
