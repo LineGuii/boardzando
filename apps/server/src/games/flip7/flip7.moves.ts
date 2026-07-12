@@ -13,6 +13,28 @@ export interface GiveSecondPayload {
   targetId: PlayerId;
 }
 
+/** Resumo do monte de descarte (para o jogador "contar cartas" facilmente). */
+export interface DiscardSummary {
+  /** Índice = valor 0..12 → quantas cópias já estão no descarte. */
+  numbers: number[];
+  modifiers: Record<string, number>;
+  actions: Record<string, number>;
+  total: number;
+}
+
+/** Agrupa o descarte por carta (números 0..12, modificadores, ações). */
+export function summarizeDiscard(discard: readonly Flip7Card[]): DiscardSummary {
+  const numbers = Array<number>(13).fill(0);
+  const modifiers: Record<string, number> = {};
+  const actions: Record<string, number> = {};
+  for (const c of discard) {
+    if (c.kind === 'number') numbers[c.value] = (numbers[c.value] ?? 0) + 1;
+    else if (c.kind === 'modifier') modifiers[c.mod] = (modifiers[c.mod] ?? 0) + 1;
+    else actions[c.action] = (actions[c.action] ?? 0) + 1;
+  }
+  return { numbers, modifiers, actions, total: discard.length };
+}
+
 function clone(state: Flip7State): Flip7State {
   return structuredClone(state);
 }
@@ -59,11 +81,14 @@ function freshPlayer(): Flip7PlayerState {
 /** Zera as mãos, gira o dealer e começa uma nova rodada. Muta `state`. */
 function startRound(state: Flip7State): void {
   for (const p of state.order) {
-    // as cartas da rodada vão para o descarte (não reembaralha até o baralho zerar)
+    // Todas as cartas da rodada vão para o DESCARTE (conserva as 94 cartas:
+    // baralho + descarte + linhas ativas). O descarte só volta ao baralho
+    // quando este esvazia — e é o que o "monte de descarte" mostra.
     const ps = state.players[p]!;
-    // (não rastreamos cada objeto de carta na linha; o baralho tem folga de sobra)
+    for (const v of ps.numbers) state.discard.push({ kind: 'number', value: v });
+    for (const m of ps.modifiers) state.discard.push({ kind: 'modifier', mod: m } as Flip7Card);
+    if (ps.secondChance) state.discard.push({ kind: 'action', action: 'second' });
     state.players[p] = freshPlayer();
-    void ps;
   }
   state.round += 1;
   state.dealerIdx = (state.dealerIdx + 1) % state.order.length;

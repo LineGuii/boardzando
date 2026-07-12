@@ -23,6 +23,12 @@ interface Flip7View {
     | { kind: 'giveSecond'; chooser: string };
   deckCount: number;
   discardCount: number;
+  discard: {
+    numbers: number[];
+    modifiers: Record<string, number>;
+    actions: Record<string, number>;
+    total: number;
+  };
   lastEvent?: string;
   lastRound?: { gained: Record<string, number>; busted: string[]; flip7By?: string };
   lastBust?: { playerId: string; value: number; seq: number };
@@ -323,6 +329,50 @@ export function Flip7Board(): JSX.Element {
       {!myTurn && !view.finished && (
         <p className="f7-wait">Vez de <b>{nameOf(currentPlayer ?? '')}</b>…</p>
       )}
+
+      {/* monte de descarte (para "contar cartas") */}
+      <details className="f7-discard">
+        <summary>
+          🗑️ Monte de descarte — <b>{view.discard.total}</b> carta(s) já jogadas
+        </summary>
+        <p className="f7-discard-help">
+          Quantas de cada carta já saíram nesta leva (o monte volta ao baralho
+          quando ele acaba). Use para pesar suas chances antes de virar!
+        </p>
+        <div className="f7-discard-numbers">
+          {view.discard.numbers.map((count, value) => {
+            const total = value === 0 || value === 1 ? 1 : value;
+            return (
+              <div key={value} className={`f7-dtile ${count === 0 ? 'none' : ''}`}>
+                <span className="f7-dtile-num" style={{ color: NUM_COLORS[value] }}>{value}</span>
+                <span className="f7-dtile-count">
+                  <b>{count}</b>/{total}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="f7-discard-others">
+          <div className="f7-discard-group">
+            <span className="f7-discard-glabel">Modificadores:</span>
+            {(['+2', '+4', '+6', '+8', '+10', 'x2'] as const).map((mod) => (
+              <span key={mod} className={`f7-dchip mod ${(view.discard.modifiers[mod] ?? 0) === 0 ? 'none' : ''}`}>
+                {mod === 'x2' ? '×2' : mod} <b>{view.discard.modifiers[mod] ?? 0}</b>/1
+              </span>
+            ))}
+          </div>
+          <div className="f7-discard-group">
+            <span className="f7-discard-glabel">Ações:</span>
+            {([['freeze', '🔒 Congelar'], ['flip3', '🎴 Virar 3'], ['second', '❤️ 2ª Chance']] as const).map(
+              ([k, label]) => (
+                <span key={k} className={`f7-dchip act ${(view.discard.actions[k] ?? 0) === 0 ? 'none' : ''}`}>
+                  {label} <b>{view.discard.actions[k] ?? 0}</b>/3
+                </span>
+              ),
+            )}
+          </div>
+        </div>
+      </details>
 
       {/* legenda de cartas */}
       <details className="f7-legend">
