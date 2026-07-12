@@ -370,3 +370,286 @@
   flex-wrap: wrap;
   margin-top: 12px;
 }
+
+/* ======================================================
+ * Animações: estouro (bombástico), fim de rodada, congelado
+ * ====================================================== */
+
+/* ---------- Congelado: tabuleiro do jogador "congela" ---------- */
+
+.f7-player.status-frozen {
+  position: relative;
+  overflow: hidden;
+}
+.f7-frost {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.75) 0, transparent 22%),
+    radial-gradient(circle at 78% 30%, rgba(255, 255, 255, 0.6) 0, transparent 20%),
+    radial-gradient(circle at 45% 80%, rgba(255, 255, 255, 0.55) 0, transparent 24%),
+    linear-gradient(135deg, rgba(180, 224, 255, 0.55) 0%, rgba(120, 190, 245, 0.35) 100%);
+  border: 2px solid rgba(160, 214, 255, 0.9);
+  box-shadow: inset 0 0 24px rgba(120, 190, 245, 0.6);
+  backdrop-filter: blur(1.2px);
+  animation: f7-freeze-in 0.5s ease;
+}
+@keyframes f7-freeze-in {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; }
+}
+.f7-frost-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.65) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: f7-sheen 3.2s ease-in-out infinite;
+}
+@keyframes f7-sheen {
+  0%, 60% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.f7-icicles {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 15px;
+  background: linear-gradient(180deg, #eaf6ff 0%, rgba(190, 228, 255, 0.6) 100%);
+  clip-path: polygon(0 0, 6% 100%, 12% 0, 18% 70%, 24% 0, 32% 100%, 40% 0, 48% 60%, 56% 0, 64% 100%, 72% 0, 80% 80%, 88% 0, 94% 100%, 100% 0);
+}
+.f7-frost-stamp {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #1c6fb0;
+  background: rgba(255, 255, 255, 0.85);
+  border: 3px solid #6cc2ff;
+  border-radius: 10px;
+  padding: 6px 14px;
+  box-shadow: 0 4px 14px rgba(28, 111, 176, 0.35);
+  animation: f7-stamp 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+@keyframes f7-stamp {
+  0% { transform: translate(-50%, -50%) rotate(-8deg) scale(2); opacity: 0; }
+  100% { transform: translate(-50%, -50%) rotate(-8deg) scale(1); opacity: 1; }
+}
+.f7-flake {
+  position: absolute;
+  top: -10px;
+  color: #fff;
+  font-size: 14px;
+  text-shadow: 0 0 4px #6cc2ff;
+  animation: f7-fall 4s linear infinite;
+}
+.f7-flake.f0 { left: 8%; animation-duration: 3.6s; }
+.f7-flake.f1 { left: 24%; animation-duration: 4.4s; animation-delay: 0.6s; }
+.f7-flake.f2 { left: 42%; animation-duration: 3.2s; animation-delay: 1.1s; }
+.f7-flake.f3 { left: 60%; animation-duration: 4.8s; animation-delay: 0.3s; }
+.f7-flake.f4 { left: 76%; animation-duration: 3.8s; animation-delay: 1.4s; }
+.f7-flake.f5 { left: 90%; animation-duration: 4.2s; animation-delay: 0.9s; }
+@keyframes f7-fall {
+  0% { transform: translateY(0) rotate(0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(140px) rotate(240deg); opacity: 0.2; }
+}
+
+/* ---------- Estouro: overlay bombástico ---------- */
+
+.f7-bust-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: f7-bust-fade 2.8s ease forwards;
+}
+@keyframes f7-bust-fade {
+  0% { opacity: 0; }
+  6% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.f7-bust-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 90, 40, 0.5) 0%, rgba(120, 10, 10, 0.75) 70%);
+  animation: f7-flash 0.5s ease;
+}
+@keyframes f7-flash {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0.85; }
+}
+.f7-bust-inner {
+  position: relative;
+  text-align: center;
+  color: #fff;
+  animation: f7-bust-shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@keyframes f7-bust-shake {
+  0% { transform: scale(0.4) rotate(-6deg); }
+  40% { transform: scale(1.25) rotate(4deg); }
+  55% { transform: scale(1.1) rotate(-4deg); }
+  70% { transform: scale(1.18) rotate(3deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.f7-bust-boom {
+  font-size: 96px;
+  line-height: 1;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
+  animation: f7-boom-pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.6);
+}
+@keyframes f7-boom-pop {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+.f7-bust-title {
+  font-family: 'Arial Black', sans-serif;
+  font-weight: 900;
+  font-size: 64px;
+  letter-spacing: 3px;
+  color: #ffe14d;
+  text-shadow: 0 3px 0 #b02000, 0 6px 18px rgba(0, 0, 0, 0.5);
+  margin-top: -8px;
+}
+.f7-bust-card {
+  display: inline-block;
+  margin: 14px 0 8px;
+  transform: rotate(-6deg);
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.5));
+  animation: f7-card-drop 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+@keyframes f7-card-drop {
+  0% { transform: translateY(-120px) rotate(30deg) scale(0.6); opacity: 0; }
+  100% { transform: translateY(0) rotate(-6deg) scale(1); opacity: 1; }
+}
+.f7-bust-name {
+  font-size: 20px;
+  font-weight: 700;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+.f7-shard {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  background: #ffcc33;
+  animation: f7-shard-fly 0.9s ease-out forwards;
+}
+.f7-shard.s0 { background: #ff7043; }
+.f7-shard.s1 { background: #ffca28; }
+.f7-shard.s2 { background: #ff5252; }
+.f7-shard.s3 { background: #fff176; }
+.f7-shard.s4 { background: #ff8a65; }
+.f7-shard.s5 { background: #ffd54f; }
+.f7-shard.s6 { background: #ef5350; }
+.f7-shard.s7 { background: #ffb300; }
+@keyframes f7-shard-fly {
+  0% { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; }
+  100% {
+    transform: translate(calc((var(--i) - 8) * 42px), -120px) rotate(540deg) scale(0.4);
+    opacity: 0;
+  }
+}
+
+/* ---------- Fim de rodada: placar somando ---------- */
+
+.f7-round-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 20, 45, 0.55);
+  animation: f7-round-fade 3.4s ease forwards;
+  pointer-events: none;
+}
+@keyframes f7-round-fade {
+  0% { opacity: 0; }
+  8% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.f7-round-panel {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px 26px;
+  min-width: 300px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  border: 3px solid #2a7de1;
+  animation: f7-round-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+@keyframes f7-round-in {
+  0% { transform: scale(0.7) translateY(20px); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+.f7-round-title {
+  text-align: center;
+  font-weight: 900;
+  font-size: 22px;
+  color: #1b3b8f;
+  margin-bottom: 14px;
+}
+.f7-round-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.f7-round-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f4f8ff;
+}
+.f7-round-name {
+  flex: 1;
+  font-weight: 700;
+  color: #2b2b2b;
+}
+.f7-round-gain {
+  font-weight: 900;
+  color: #1a8f3a;
+  background: #e6f6ea;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+  animation: f7-gain-pop 0.5s ease 0.2s both;
+}
+.f7-round-gain.zero { color: #c92a2a; background: #fdeaea; }
+@keyframes f7-gain-pop {
+  0% { transform: scale(0) translateY(-6px); }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+.f7-round-total {
+  font-family: 'Consolas', monospace;
+  font-weight: 900;
+  font-size: 20px;
+  color: #1b3b8f;
+  min-width: 78px;
+  text-align: right;
+}
+.f7-round-pts { font-size: 12px; font-weight: 700; color: #8a7d65; }
+.f7-round-goal {
+  text-align: center;
+  margin-top: 14px;
+  font-weight: 800;
+  color: #6b5f4e;
+  font-size: 13px;
+}

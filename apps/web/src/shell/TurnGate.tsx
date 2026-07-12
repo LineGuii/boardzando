@@ -20,31 +20,33 @@ export function TurnGate({ children }: { children: ReactNode }): JSX.Element {
     return <p style={{ color: '#6b5f4e' }}>Aguardando estado...</p>;
   }
 
-  if (isMyTurn) {
-    return (
-      <>
-        <div className="shell-turn-pill mine">Sua vez</div>
-        {children}
-      </>
-    );
-  }
-
   const currentName =
     room?.players.find((p) => p.id === currentPlayer)?.name ?? 'o oponente';
 
+  // IMPORTANTE: os `children` ficam SEMPRE dentro do MESMO <fieldset>, apenas
+  // alternando `disabled`. Se trocássemos a estrutura (direto vs. dentro do
+  // fieldset) conforme a vez, o React DESMONTARIA/REMONTARIA o tabuleiro a cada
+  // mudança de turno — perdendo o estado local dele (ex.: animações do Flip 7).
   return (
     <>
-      <div className="shell-turn-pill theirs">
-        Aguardando jogada de <b style={{ marginLeft: 4 }}>{currentName}</b>...
+      <div className={`shell-turn-pill ${isMyTurn ? 'mine' : 'theirs'}`}>
+        {isMyTurn ? (
+          'Sua vez'
+        ) : (
+          <>
+            Aguardando jogada de <b style={{ marginLeft: 4 }}>{currentName}</b>...
+          </>
+        )}
       </div>
       <fieldset
-        disabled
+        disabled={!isMyTurn}
         style={{
           border: 'none',
           padding: 0,
           margin: 0,
-          opacity: 0.5,
-          pointerEvents: 'none',
+          minInlineSize: 'auto', // evita o min-width padrão do fieldset
+          opacity: isMyTurn ? 1 : 0.5,
+          pointerEvents: isMyTurn ? 'auto' : 'none',
         }}
       >
         {children}

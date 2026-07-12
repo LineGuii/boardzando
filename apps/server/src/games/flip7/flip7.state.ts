@@ -44,6 +44,13 @@ export interface Flip7State {
   /** Log curto do último evento, para a UI narrar. */
   lastEvent?: string;
   lastRound?: Flip7RoundResult;
+  /**
+   * Último estouro, para a animação "bombástica" (mostra a carta virada). `seq`
+   * é único por estouro — a UI só anima quando ele muda (dispara para todos).
+   */
+  lastBust?: { playerId: PlayerId; value: number; seq: number };
+  /** Contador que sobe a cada fim de rodada (dispara a animação de placar). */
+  roundEndSeq: number;
   winnerId?: PlayerId;
   finished?: boolean;
 }
