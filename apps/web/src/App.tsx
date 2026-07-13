@@ -13,6 +13,7 @@ import { ManadaBoard } from './games/manada/ManadaBoard';
 import { PatoBoard } from './games/pato/PatoBoard';
 import { PerchBoard } from './games/perch/PerchBoard';
 import { Flip7Board } from './games/flip7/Flip7Board';
+import { StopConnectBoard } from './games/stopconnect/StopConnectBoard';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
 import { GameOptionsPanel } from './shell/GameOptionsPanel';
@@ -546,7 +547,8 @@ function RoomPage(): JSX.Element {
       room?.gameId === 'ito' ||
       room?.gameId === 'manada' ||
       room?.gameId === 'perch' ||
-      room?.gameId === 'flip7');
+      room?.gameId === 'flip7' ||
+      room?.gameId === 'stopconnect');
 
   return (
     <div className="shell-bg">
@@ -614,6 +616,10 @@ function RoomPage(): JSX.Element {
           <TurnGate key={matchGen}>
             <Flip7Board />
           </TurnGate>
+        )}
+
+        {room?.status === 'playing' && room?.gameId === 'stopconnect' && (
+          <StopConnectBoard key={matchGen} />
         )}
 
         <GameOverBanner />

@@ -6,6 +6,7 @@ import { ManadaModule } from './manada/manada.module';
 import { MonopolyModule } from './monopoly/monopoly.module';
 import { PatoModule } from './pato/pato.module';
 import { PerchModule } from './perch/perch.module';
+import { StopConnectModule } from './stopconnect/stopconnect.module';
 import { UnoModule } from './uno/uno.module';
 
 /**
@@ -25,6 +26,7 @@ import { UnoModule } from './uno/uno.module';
     ManadaModule,
     PerchModule,
     Flip7Module,
+    StopConnectModule,
   ],
 })
 export class GamesModule {}
