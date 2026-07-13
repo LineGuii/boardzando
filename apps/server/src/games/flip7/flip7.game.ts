@@ -9,6 +9,7 @@ import {
   resolveAction,
   shuffledDeck,
   stay,
+  summarizeDiscard,
 } from './flip7.moves';
 import type {
   GiveSecondPayload,
@@ -99,6 +100,7 @@ export class Flip7Game implements GameDefinition<Flip7State, Flip7MovePayload> {
       pending: state.pending,
       deckCount: state.deck.length,
       discardCount: state.discard.length,
+      discard: summarizeDiscard(state.discard),
       lastEvent: state.lastEvent,
       lastRound: state.lastRound,
       lastBust: state.lastBust,

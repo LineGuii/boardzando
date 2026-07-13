@@ -2,7 +2,7 @@ import type { PlayerId } from '@boardzando/contracts';
 import { GameInstance, InvalidMoveError, NotYourTurnError } from '../../core/engine/game-instance';
 import { Flip7Game } from './flip7.game';
 import { buildDeck } from './flip7.cards';
-import { scorePlayer } from './flip7.moves';
+import { scorePlayer, summarizeDiscard } from './flip7.moves';
 import type { Flip7PlayerState, Flip7State } from './flip7.state';
 
 const P: PlayerId[] = ['a', 'b', 'c'];
@@ -195,5 +195,49 @@ describe('Flip 7 — fim de jogo', () => {
     expect(m.isOver).toBe(true);
     expect(m.snapshot.gameover?.winner).toBe('a');
     expect(m.snapshot.state.totals['a']).toBe(90 + 23);
+  });
+});
+
+describe('Flip 7 — monte de descarte', () => {
+  it('summarizeDiscard agrupa por número, modificador e ação', () => {
+    const s = summarizeDiscard([
+      { kind: 'number', value: 7 },
+      { kind: 'number', value: 7 },
+      { kind: 'number', value: 12 },
+      { kind: 'modifier', mod: 'x2' },
+      { kind: 'action', action: 'freeze' },
+      { kind: 'action', action: 'freeze' },
+    ]);
+    expect(s.numbers[7]).toBe(2);
+    expect(s.numbers[12]).toBe(1);
+    expect(s.numbers[3]).toBe(0);
+    expect(s.modifiers['x2']).toBe(1);
+    expect(s.actions['freeze']).toBe(2);
+    expect(s.total).toBe(6);
+  });
+
+  it('ao fim da rodada, as cartas das linhas vão para o descarte (conserva as 94)', () => {
+    const m = seed(
+      baseState({
+        deck: [],
+        players: {
+          a: ps({ numbers: [9, 4], modifiers: ['x2'] }),
+          b: ps({ numbers: [4], status: 'stayed' }), // 4 é duplicado só entre jogadores (ok)
+          c: ps({ numbers: [3], status: 'busted', secondChance: true }),
+        },
+      }),
+    );
+    m.applyMove('a', 'stay', {}); // último ativo para → fim de rodada
+    const disc = m.snapshot.state.discard;
+    const sum = summarizeDiscard(disc);
+    // a: 9,4,x2 ; b: 4 ; c: 3 + segunda chance
+    expect(sum.numbers[9]).toBe(1);
+    expect(sum.numbers[4]).toBe(2);
+    expect(sum.numbers[3]).toBe(1);
+    expect(sum.modifiers['x2']).toBe(1);
+    expect(sum.actions['second']).toBe(1);
+    // a view do plugin também expõe o resumo
+    const view = m.viewFor('a') as { discard: { total: number } };
+    expect(view.discard.total).toBe(disc.length);
   });
 });

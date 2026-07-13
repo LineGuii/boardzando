@@ -653,3 +653,106 @@
   color: #6b5f4e;
   font-size: 13px;
 }
+
+/* ---------- Monte de descarte (consulta) ---------- */
+
+.f7-discard {
+  margin-top: 14px;
+  background: #f4f6fb;
+  border: 1px solid #d6e0f0;
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+.f7-discard > summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: #1b3b8f;
+  font-size: 14px;
+  list-style: none;
+}
+.f7-discard > summary::-webkit-details-marker { display: none; }
+.f7-discard > summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 6px;
+  transition: transform 0.15s;
+}
+.f7-discard[open] > summary::before { transform: rotate(90deg); }
+
+.f7-discard-help {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 8px 0 10px;
+}
+
+.f7-discard-numbers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 6px;
+}
+.f7-dtile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 6px 4px;
+}
+.f7-dtile.none {
+  opacity: 0.4;
+}
+.f7-dtile-num {
+  font-family: 'Arial Black', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1;
+}
+.f7-dtile-count {
+  font-size: 12px;
+  color: #64748b;
+  font-family: 'Consolas', monospace;
+}
+.f7-dtile-count b {
+  color: #1b3b8f;
+  font-size: 14px;
+}
+.f7-dtile:not(.none) {
+  border-color: #b9cdf0;
+  box-shadow: 0 1px 3px rgba(27, 59, 143, 0.12);
+}
+
+.f7-discard-others {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.f7-discard-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.f7-discard-glabel {
+  font-size: 12px;
+  font-weight: 800;
+  color: #6b5f4e;
+  min-width: 92px;
+}
+.f7-dchip {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+.f7-dchip b {
+  color: #1b3b8f;
+}
+.f7-dchip.mod:not(.none) { background: #fff3e0; border-color: #ffcc80; }
+.f7-dchip.act:not(.none) { background: #eef4ff; border-color: #b9cdf0; }
+.f7-dchip.none { opacity: 0.45; }
