@@ -2,7 +2,7 @@ import type { HuesOptions } from '@boardzando/contracts';
 import { HUES_DEFAULT_OPTIONS } from '@boardzando/contracts';
 
 /** Games que expoem um painel de opcoes (para a UI decidir se oferece "trocar"). */
-const GAMES_WITH_OPTIONS = new Set(['hues', 'ito', 'pato', 'manada']);
+const GAMES_WITH_OPTIONS = new Set(['hues', 'ito', 'pato', 'manada', 'flip7', 'stopconnect']);
 
 /** Este jogo tem opcoes configuraveis? (usado no reinicio com troca de setup) */
 export function gameHasOptions(gameId: string): boolean {
@@ -63,7 +63,53 @@ export function GameOptionsPanel({
       />
     );
   }
+  if (gameId === 'stopconnect') {
+    return (
+      <StopConnectOptionsPanel
+        value={(value ?? STOPCONNECT_DEFAULT_OPTIONS) as StopConnectOptions}
+        onChange={onChange as (v: StopConnectOptions) => void}
+      />
+    );
+  }
   return null;
+}
+
+interface StopConnectOptions {
+  targetScore: 50 | 75 | 100;
+}
+const STOPCONNECT_DEFAULT_OPTIONS: StopConnectOptions = { targetScore: 50 };
+
+function StopConnectOptionsPanel({
+  value,
+  onChange,
+}: {
+  value: StopConnectOptions;
+  onChange: (next: StopConnectOptions) => void;
+}): JSX.Element {
+  return (
+    <div className="shell-options-panel">
+      <h3>Opções da partida (StopConnect) 🔤</h3>
+      <div className="shell-options-field">
+        <label className="shell-label">Pontos para disparar o último turno</label>
+        <div className="shell-options-buttons">
+          {([50, 75, 100] as const).map((n) => (
+            <button
+              key={n}
+              type="button"
+              className={`shell-options-btn ${value.targetScore === n ? 'active' : ''}`}
+              onClick={() => onChange({ targetScore: n })}
+            >
+              {n} {n === 50 ? '(padrão)' : n === 75 ? '(médio)' : '(longo)'}
+            </button>
+          ))}
+        </div>
+        <p className="shell-hint">
+          Coloque Letras ao lado de Temas (e vice-versa) e diga uma resposta para
+          cada peça vizinha. Quem atinge o alvo dispara o último turno.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 interface Flip7Options {

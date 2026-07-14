@@ -1,0 +1,519 @@
+/* =========================================================
+ * StopConnect — palavras-cruzadas + Stop + Scrabble.
+ * Peça de Letra: fundo branco, letra grande + valor.
+ * Peça de Tema: fundo rosa claro, tema no centro.
+ * ========================================================= */
+
+.sc-root {
+  margin-top: 12px;
+  --letter-bg: #ffffff;
+  --theme-bg: #ffd6e7;
+  --ink: #2b2b3a;
+  --accent: #6d3bd6;
+}
+
+/* ---------- Cabeçalho ---------- */
+
+.sc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: linear-gradient(135deg, #6d3bd6 0%, #a44bd6 55%, #e0559b 100%);
+  border-radius: 14px;
+  padding: 12px 18px;
+}
+.sc-logo {
+  font-family: 'Arial Black', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 30px;
+  letter-spacing: 0.5px;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.22);
+}
+.sc-logo span {
+  color: #ffd43b;
+}
+.sc-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sc-chip {
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.sc-mute {
+  border: 0;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  border-radius: 999px;
+  width: 34px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.sc-lastturn {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #8a4b00;
+  background: #fff6df;
+  border: 1px solid #ffd98a;
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.sc-turnline {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--ink);
+  background: #f3eefc;
+  border: 1px solid #e0d3f7;
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+/* ---------- Tabuleiro ---------- */
+
+.sc-board-wrap {
+  margin-top: 14px;
+  overflow: auto;
+  padding: 14px;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 20% 10%, #f6f0ff 0, transparent 45%),
+    linear-gradient(180deg, #efe8fb 0%, #e6dcf7 100%);
+  border: 2px solid #d8c9f2;
+}
+.sc-board {
+  display: grid;
+  gap: 6px;
+  margin: 0 auto;
+  width: max-content;
+}
+
+.sc-btile {
+  position: relative;
+  border-radius: 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+  user-select: none;
+}
+.sc-btile.letter {
+  background: var(--letter-bg);
+  border: 2px solid #cfd0dc;
+  color: var(--ink);
+}
+.sc-btile.theme {
+  background: var(--theme-bg);
+  border: 2px solid #f2a8c8;
+  color: #7a2748;
+}
+.sc-btile.connected {
+  box-shadow: 0 0 0 3px #ffd43b, 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+.sc-btile.placed {
+  box-shadow: 0 0 0 3px var(--accent), 0 2px 6px rgba(0, 0, 0, 0.25);
+  animation: sc-pop 0.28s ease;
+}
+@keyframes sc-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.sc-btile-letter {
+  font-family: 'Arial Black', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 30px;
+  line-height: 1;
+}
+.sc-btile-value {
+  position: absolute;
+  right: 5px;
+  bottom: 3px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #6b6b7a;
+}
+.sc-btile-theme {
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.1;
+  padding: 0 4px;
+}
+
+.sc-ghost {
+  border: 2px dashed #b79af0;
+  background: rgba(255, 255, 255, 0.45);
+  color: #8b6fd0;
+  border-radius: 9px;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.12s;
+}
+.sc-ghost:hover {
+  background: #ede3ff;
+  transform: translateY(-2px);
+}
+
+/* ---------- Mão ---------- */
+
+.sc-hand {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #fbf8ff;
+  border: 2px solid #e2dced;
+}
+.sc-hand-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6b5f7e;
+  margin-bottom: 8px;
+}
+.sc-hand-tiles {
+  display: flex;
+  gap: 12px;
+}
+.sc-tile {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.sc-tile:hover {
+  transform: translateY(-2px);
+}
+.sc-tile.sel {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.28), 0 0 0 4px #ffd43b;
+}
+.sc-tile.letter {
+  background: var(--letter-bg);
+  border: 2px solid #cfd0dc;
+  color: var(--ink);
+}
+.sc-tile.theme {
+  background: var(--theme-bg);
+  border: 2px solid #f2a8c8;
+  color: #7a2748;
+}
+.sc-tile-letter {
+  font-family: 'Arial Black', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 38px;
+  line-height: 1;
+}
+.sc-tile-value {
+  position: absolute;
+  right: 7px;
+  bottom: 5px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #6b6b7a;
+}
+.sc-tile-theme {
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.15;
+  padding: 0 6px;
+}
+.sc-hand-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #8a7fa0;
+}
+
+/* ---------- Respostas ---------- */
+
+.sc-answer,
+.sc-judge,
+.sc-reveal {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px solid #e0d3f7;
+  background: #faf7ff;
+}
+.sc-answer-head {
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.sc-answer-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sc-answer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sc-answer-prompt {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6d3bd6;
+  min-width: 220px;
+}
+.sc-answer-input {
+  flex: 1;
+  min-width: 160px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  border: 2px solid #d8c9f2;
+  font-size: 15px;
+  font-family: inherit;
+}
+.sc-answer-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.sc-primary {
+  margin-top: 12px;
+  border: 0;
+  border-radius: 11px;
+  padding: 11px 22px;
+  font-weight: 800;
+  font-family: inherit;
+  font-size: 15px;
+  color: #fff;
+  background: linear-gradient(160deg, #7a4be0 0%, #6d3bd6 100%);
+  cursor: pointer;
+}
+.sc-primary:hover {
+  filter: brightness(1.06);
+}
+.sc-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Julgamento ---------- */
+
+.sc-judge-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.sc-judge-answer {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid #e6ddf5;
+  border-radius: 9px;
+  padding: 6px 10px;
+}
+.sc-judge-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: #6d3bd6;
+}
+.sc-judge-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.sc-judge-q {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.sc-judge-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.sc-approve,
+.sc-reject {
+  border: 0;
+  border-radius: 11px;
+  padding: 11px 26px;
+  font-weight: 800;
+  font-family: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  color: #fff;
+}
+.sc-approve {
+  background: linear-gradient(160deg, #34c759 0%, #1a9f3a 100%);
+}
+.sc-reject {
+  background: linear-gradient(160deg, #ff6b6b 0%, #e0393a 100%);
+}
+.sc-approve:hover,
+.sc-reject:hover {
+  filter: brightness(1.06);
+}
+.sc-judge-wait {
+  text-align: center;
+  font-size: 14px;
+  color: #6b5f7e;
+  padding: 6px 0;
+}
+.sc-judge-votes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}
+.sc-vote {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #f1ecf9;
+  color: #4a3b6b;
+}
+.sc-vote.approve { background: #e6f6ea; color: #1a8f3a; }
+.sc-vote.reject { background: #fdeaea; color: #c92a2a; }
+
+/* ---------- Revelação ---------- */
+
+.sc-reveal.ok { border-color: #9fe0b0; background: #f1fbf4; }
+.sc-reveal.no { border-color: #f2b6b6; background: #fdf2f2; }
+.sc-reveal-verdict {
+  font-size: 17px;
+  text-align: center;
+  color: var(--ink);
+}
+
+/* pontuação subindo: número grande que salta, brilha e sobe flutuando */
+.sc-scorepop {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-family: 'Arial Black', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 54px;
+  line-height: 1;
+  color: #1a9f3a;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+  animation: sc-scorepop 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.sc-scorepop-label {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1a9f3a;
+  letter-spacing: 0.5px;
+}
+@keyframes sc-scorepop {
+  0% { transform: translateY(14px) scale(0.4); opacity: 0; }
+  45% { transform: translateY(-6px) scale(1.18); opacity: 1; }
+  70% { transform: translateY(-2px) scale(1); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* realce do placar de quem está pontuando */
+.sc-score-row.scoring {
+  border-color: #34c759;
+  box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.35);
+  animation: sc-scoreflash 0.9s ease;
+}
+.sc-score-row.scoring .sc-score-points {
+  color: #1a9f3a;
+  transform: scale(1.15);
+  transition: transform 0.2s;
+}
+@keyframes sc-scoreflash {
+  0% { background: #eafaef; }
+  100% { background: #fff; }
+}
+
+/* ---------- Placar ---------- */
+
+.sc-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.sc-scoreboard {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #fbf8ff;
+  border: 2px solid #e2dced;
+}
+.sc-scoreboard-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #5a3ba0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.sc-scores {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sc-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e6ddf5;
+}
+.sc-score-row.mine {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(109, 59, 214, 0.15);
+}
+.sc-score-row.turn {
+  background: #f3eefc;
+}
+.sc-score-name {
+  flex: 1;
+  font-weight: 700;
+  color: #3a3250;
+}
+.sc-score-points {
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-weight: 900;
+  color: #5a3ba0;
+  min-width: 32px;
+  text-align: right;
+}

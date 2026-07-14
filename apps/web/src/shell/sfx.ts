@@ -107,6 +107,13 @@ export function playQuackWin(): void {
   });
 }
 
+/** "Toc" — batida seca e curta ao encaixar uma peça na mesa. */
+export function playPlace(): void {
+  if (muted) return;
+  tone(320, 0, 0.06, 'square', 0.14);
+  tone(180, 0.03, 0.09, 'sine', 0.12);
+}
+
 /**
  * "Muuu" — mugido grave que desce (vaca). Duas camadas de sawtooth em oitavas
  * baixas dão o timbre encorpado.
