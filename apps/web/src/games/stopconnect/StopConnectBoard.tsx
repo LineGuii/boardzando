@@ -92,6 +92,25 @@ export function StopConnectBoard(): JSX.Element {
     }
   }, [view?.finished]);
 
+  // auto-avança a vez após a revelação (sem botão): dá tempo da animação de
+  // pontos tocar; só o jogador da vez emite o endTurn.
+  const advancedRef = useRef(false);
+  useEffect(() => {
+    if (!view || !session || !socket) return;
+    if (view.step !== 'reveal') {
+      advancedRef.current = false;
+      return;
+    }
+    const mine = view.turnPlayerId === session.playerId;
+    if (!mine || advancedRef.current || view.finished) return;
+    advancedRef.current = true;
+    const delay = view.pending?.approved ? 2300 : 1500;
+    const t = setTimeout(() => {
+      socket.emit('game:move', { roomId: session.roomId, type: 'endTurn', data: {} }, () => {});
+    }, delay);
+    return () => clearTimeout(t);
+  }, [view, session, socket]);
+
   // reinicia os campos de resposta quando entra no passo 'answer'
   const needAnswers = view?.pending?.connectedTileIds.length ?? 0;
   useEffect(() => {
@@ -138,7 +157,6 @@ export function StopConnectBoard(): JSX.Element {
     emit('submitAnswers', { answers: clean });
   };
   const judge = (verdict: Verdict): void => emit('judge', { verdict });
-  const endTurn = (): void => emit('endTurn', {});
 
   const p = view.pending;
   const iVoted = p ? p.votes[me] : undefined;
@@ -254,9 +272,7 @@ export function StopConnectBoard(): JSX.Element {
       )}
 
       {/* passo de revelação */}
-      {view.step === 'reveal' && p && (
-        <RevealPanel view={view} pending={p} isPlacer={isMyTurn} onContinue={endTurn} nameOf={nameOf} />
-      )}
+      {view.step === 'reveal' && p && <RevealPanel view={view} pending={p} nameOf={nameOf} />}
 
       {/* placar */}
       <Scoreboard view={view} me={me} nameOf={nameOf} colorOf={colorOf} />
@@ -473,34 +489,67 @@ function JudgePanel({
 
 // ---------------- Revelação ----------------
 
+/** Número que anima subindo de `from` até `to` (ease-out cúbico). */
+function CountUp({ from, to, duration = 900 }: { from: number; to: number; duration?: number }): JSX.Element {
+  const [val, setVal] = useState(from);
+  useEffect(() => {
+    if (from === to) {
+      setVal(to);
+      return;
+    }
+    let raf = 0;
+    let done = false;
+    const start = performance.now();
+    const finish = (): void => {
+      if (!done) {
+        done = true;
+        setVal(to);
+      }
+    };
+    const tick = (now: number): void => {
+      const t = Math.min(1, (now - start) / duration);
+      const e = 1 - Math.pow(1 - t, 3);
+      setVal(Math.round(from + (to - from) * e));
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else finish();
+    };
+    raf = requestAnimationFrame(tick);
+    // fallback: garante o valor final mesmo se o requestAnimationFrame for
+    // pausado (aba em segundo plano), sem travar em "+0".
+    const fallback = setTimeout(finish, duration + 150);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(fallback);
+    };
+  }, [from, to, duration]);
+  return <>{val}</>;
+}
+
 function RevealPanel({
   view,
   pending,
-  isPlacer,
-  onContinue,
   nameOf,
 }: {
   view: StopConnectView;
   pending: PendingV;
-  isPlacer: boolean;
-  onContinue: () => void;
   nameOf: (pid: string) => string;
 }): JSX.Element {
+  const approved = pending.approved;
+  const pts = pending.points ?? 0;
   return (
-    <div className={`sc-reveal ${pending.approved ? 'ok' : 'no'}`}>
+    <div className={`sc-reveal ${approved ? 'ok' : 'no'}`}>
       <div className="sc-reveal-verdict">
-        {pending.approved ? (
-          <>✅ Aprovado! <b>{nameOf(view.turnPlayerId)}</b> fez <b>+{pending.points}</b> ponto(s).</>
+        {approved ? (
+          <>✅ <b>{nameOf(view.turnPlayerId)}</b> acertou!</>
         ) : (
-          <>❌ Rejeitado! <b>{nameOf(view.turnPlayerId)}</b> não pontuou.</>
+          <>❌ <b>{nameOf(view.turnPlayerId)}</b> não pontuou desta vez.</>
         )}
       </div>
-      {isPlacer ? (
-        <button type="button" className="sc-primary" onClick={onContinue}>
-          ▶ Continuar
-        </button>
-      ) : (
-        <div className="sc-reveal-wait">Aguardando {nameOf(view.turnPlayerId)} continuar…</div>
+      {approved && pts > 0 && (
+        <div className="sc-scorepop" key={pending.placedTileId}>
+          +<CountUp from={0} to={pts} duration={700} />
+          <span className="sc-scorepop-label">pontos!</span>
+        </div>
       )}
     </div>
   );
@@ -520,6 +569,10 @@ function Scoreboard({
   colorOf: (pid: string) => string;
 }): JSX.Element {
   const ranked = [...view.order].sort((a, b) => (view.scores[b] ?? 0) - (view.scores[a] ?? 0));
+  const p = view.pending;
+  // durante a revelação de uma jogada aprovada, o placar de quem jogou sobe
+  const scoringPid =
+    view.step === 'reveal' && p?.approved && (p.points ?? 0) > 0 ? view.turnPlayerId : undefined;
   return (
     <div className="sc-scoreboard">
       <div className="sc-scoreboard-title">🏆 Placar · alvo {view.targetScore}</div>
@@ -528,13 +581,26 @@ function Scoreboard({
           const isMe = pid === me;
           const isTurn = pid === view.turnPlayerId;
           const won = view.winnerId === pid;
+          const total = view.scores[pid] ?? 0;
+          const animating = pid === scoringPid;
           return (
-            <li key={pid} className={`sc-score-row ${isMe ? 'mine' : ''} ${isTurn ? 'turn' : ''}`}>
+            <li
+              key={pid}
+              className={`sc-score-row ${isMe ? 'mine' : ''} ${isTurn ? 'turn' : ''} ${
+                animating ? 'scoring' : ''
+              }`}
+            >
               <span className="sc-dot" style={{ background: colorOf(pid) }} />
               <span className="sc-score-name">
                 {nameOf(pid)} {isMe ? '(você)' : ''} {won ? '🏆' : ''}
               </span>
-              <span className="sc-score-points">{view.scores[pid] ?? 0}</span>
+              <span className="sc-score-points">
+                {animating ? (
+                  <CountUp key={p!.placedTileId} from={total - (p!.points ?? 0)} to={total} />
+                ) : (
+                  total
+                )}
+              </span>
             </li>
           );
         })}

@@ -84,14 +84,16 @@ export class StopConnectGame
       cells[cellKey(col, row)] = id;
     };
 
-    // escada diagonal alternada (Letra em paridade par, Tema em ímpar):
-    // L(0,0) T(0,1) L(1,1) T(1,2) L(2,2) T(2,3)
+    // Como na imagem inicial: 3 Letras na diagonal; o 1º Tema encosta (lado a
+    // lado) na última Letra e os outros dois seguem a diagonal. Nenhuma Letra
+    // toca Letra e nenhum Tema toca Tema (só o 1º Tema conecta com a Letra).
+    // L(0,0) L(1,1) L(2,2)  ·  T(3,2) T(4,3) T(5,4)
     seedLetter(0, 0);
-    seedTheme(0, 1);
     seedLetter(1, 1);
-    seedTheme(1, 2);
     seedLetter(2, 2);
-    seedTheme(2, 3);
+    seedTheme(3, 2);
+    seedTheme(4, 3);
+    seedTheme(5, 4);
 
     const hands: Record<PlayerId, Hand> = {};
     const scores: Record<PlayerId, number> = {};

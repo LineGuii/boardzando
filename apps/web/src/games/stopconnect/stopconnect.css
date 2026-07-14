@@ -407,19 +407,53 @@
 .sc-reveal.ok { border-color: #9fe0b0; background: #f1fbf4; }
 .sc-reveal.no { border-color: #f2b6b6; background: #fdf2f2; }
 .sc-reveal-verdict {
-  font-size: 16px;
+  font-size: 17px;
   text-align: center;
   color: var(--ink);
 }
-.sc-reveal .sc-primary {
-  display: block;
-  margin: 12px auto 0;
+
+/* pontuação subindo: número grande que salta, brilha e sobe flutuando */
+.sc-scorepop {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-family: 'Arial Black', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 54px;
+  line-height: 1;
+  color: #1a9f3a;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+  animation: sc-scorepop 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.sc-reveal-wait {
-  text-align: center;
-  font-size: 13px;
-  color: #6b5f7e;
-  margin-top: 8px;
+.sc-scorepop-label {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1a9f3a;
+  letter-spacing: 0.5px;
+}
+@keyframes sc-scorepop {
+  0% { transform: translateY(14px) scale(0.4); opacity: 0; }
+  45% { transform: translateY(-6px) scale(1.18); opacity: 1; }
+  70% { transform: translateY(-2px) scale(1); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* realce do placar de quem está pontuando */
+.sc-score-row.scoring {
+  border-color: #34c759;
+  box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.35);
+  animation: sc-scoreflash 0.9s ease;
+}
+.sc-score-row.scoring .sc-score-points {
+  color: #1a9f3a;
+  transform: scale(1.15);
+  transition: transform 0.2s;
+}
+@keyframes sc-scoreflash {
+  0% { background: #eafaef; }
+  100% { background: #fff; }
 }
 
 /* ---------- Placar ---------- */
