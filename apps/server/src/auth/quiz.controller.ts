@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Post,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -18,11 +19,11 @@ import {
 import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { RoomService } from '../core/room/room.service';
 import { AuthService } from './auth.service';
+import { AdminGuard } from './admin.guard';
 
 /**
  * DTO dedicado ao quiz: NAO aceita `gameId` do cliente. Toda sala criada por
- * este endpoint e forcada a `gameId = 'musicquiz'`. Reduz a superficie e
- * garante que ninguem consegue criar outros jogos por engano ou de proposito.
+ * este endpoint e forcada a `gameId = 'musicquiz'`.
  */
 class CreateQuizRoomDto {
   @IsString() @MinLength(2) @MaxLength(24)
@@ -35,17 +36,23 @@ class CreateQuizRoomDto {
   color?: string;
 }
 
+class AdminLoginDto {
+  @IsString() @MinLength(4) @MaxLength(128)
+  password!: string;
+}
+
 const QUIZ_GAME_ID = 'musicquiz';
 
 /**
- * Rotas HTTP privadas do Music Quiz — separadas de `/rooms` para nao aparecer
- * na porta principal do Boardzando. As rotas em si nao sao autenticadas
- * (nao ha login global), so mais dificeis de descobrir: um bot que raspa
- * `/rooms` nao encontra nada de quiz.
+ * Rotas HTTP privadas do Music Quiz. Modelo de acesso:
+ *   - `GET /quiz/rooms`         — publico (lista salas em lobby)
+ *   - `POST /quiz/rooms/join`   — publico (jogadores entram)
+ *   - `POST /quiz/rooms`        — ADMIN (so quem tem o token de admin cria)
+ *   - `POST /quiz/admin/login`  — verifica senha e emite JWT admin
  *
- * O /quiz/rooms (GET) lista SOMENTE salas de musicquiz; POST cria musicquiz
- * fixo; /quiz/rooms/join reusa o JoinRoomDto padrao mas valida que a sala e
- * de fato do quiz antes de aceitar.
+ * Convidados nao precisam de conta: entrar em sala continua sem login. Criar
+ * sala virou operacao de admin (o host tipicamente e quem tambem monta os
+ * quizzes).
  */
 @Controller('quiz')
 export class QuizController {
@@ -54,14 +61,14 @@ export class QuizController {
     private readonly auth: AuthService,
   ) {}
 
-  /** Lista salas publicas de MusicQuiz apenas. */
   @Get('rooms')
   listRooms(): RoomSummary[] {
     return this.rooms.listPublic().filter((r) => r.gameId === QUIZ_GAME_ID);
   }
 
   @Post('rooms')
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @UseGuards(AdminGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   async create(@Body() dto: CreateQuizRoomDto) {
     const passwordHash = dto.roomPassword
       ? await this.auth.hashRoomPassword(dto.roomPassword)
@@ -82,8 +89,6 @@ export class QuizController {
   async join(@Body() dto: JoinRoomDto) {
     const room = this.rooms.get(dto.roomId);
     if (!room) throw new NotFoundException('Sala nao encontrada.');
-    // A sala existe, mas nao e de quiz — respondemos como se nao existisse
-    // para nao vazar a presenca de salas de outros jogos.
     if (room.gameId !== QUIZ_GAME_ID) throw new NotFoundException('Sala nao encontrada.');
 
     if (room.passwordHash) {
@@ -105,5 +110,17 @@ export class QuizController {
     }
     const token = this.auth.signSession({ sub: playerId, roomId: room.id, name: dto.playerName });
     return { roomId: room.id, playerId, token, snapshot: room.toSnapshot() };
+  }
+
+  /**
+   * Login admin. Throttle agressivo — brute-force da senha unica e o ataque
+   * obvio. Argon2id ja e slow-hash, mas 5/min por IP fecha a porta.
+   */
+  @Post('admin/login')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  async adminLogin(@Body() dto: AdminLoginDto): Promise<{ token: string }> {
+    const ok = await this.auth.verifyAdminPassword(dto.password);
+    if (!ok) throw new UnauthorizedException('Senha incorreta.');
+    return { token: this.auth.signAdmin() };
   }
 }

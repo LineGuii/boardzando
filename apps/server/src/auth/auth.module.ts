@@ -5,6 +5,7 @@ import { CoreModule } from '../core/core.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { QuizController } from './quiz.controller';
+import { AdminGuard } from './admin.guard';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { QuizController } from './quiz.controller';
     }),
   ],
   controllers: [AuthController, QuizController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [AuthService, AdminGuard],
+  exports: [AuthService, AdminGuard],
 })
 export class AuthModule {}

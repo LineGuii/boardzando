@@ -10,9 +10,18 @@ import { ErrorAlert } from './shell/ErrorAlert';
 import { QuestionScreen } from './game/QuestionScreen';
 import { RankingBoard } from './game/RankingBoard';
 import { FinalReveal } from './game/FinalReveal';
+import { AdminPanel } from './admin/AdminPanel';
 import { isMuted, setMuted } from './audio/quizAudio';
 import './shell/shell.css';
 import './game/quiz.css';
+
+/** Roteamento simples baseado em URL: `?admin` ativa o painel de host. */
+function isAdminRoute(): boolean {
+  try {
+    const u = new URL(window.location.href);
+    return u.searchParams.has('admin') || u.pathname.startsWith('/admin');
+  } catch { return false; }
+}
 
 export function App(): JSX.Element {
   const session = useQuiz((s) => s.session);
@@ -62,11 +71,19 @@ export function App(): JSX.Element {
 
   if (resuming) return <div className="q-splash">Reconectando...</div>;
 
+  // Se ja tem sessao de sala aberta, sempre renderiza a sala — mesmo que a
+  // URL tenha ?admin (evita perder uma partida em andamento por acidente).
+  const showAdmin = isAdminRoute() && !session;
+
   return (
     <div className="q-bg">
       <MusicDoodles />
       <MuteButton />
-      {session ? <RoomPage /> : <Lobby initialError={resumeError} />}
+      {session
+        ? <RoomPage />
+        : showAdmin
+          ? <AdminPanel />
+          : <Lobby initialError={resumeError} />}
     </div>
   );
 }
@@ -88,64 +105,42 @@ function MuteButton(): JSX.Element {
 // LOBBY (criar / entrar)
 // ==========================================================
 
+/**
+ * Lobby publico — SO permite entrar em uma sala. Criar sala virou operacao
+ * de host autorizado e vive em /?admin (AdminPanel).
+ */
 function Lobby(props: { initialError?: string }): JSX.Element {
   const url = new URL(window.location.href);
   const wantRoom = url.searchParams.get('room') ?? '';
-  const [tab, setTab] = useState<'create' | 'join'>(wantRoom ? 'join' : 'create');
   const [name, setName] = useState<string>(() => localStorage.getItem('quiz:name') ?? '');
   const [color, setColor] = useState<string>(randomAvatarColor());
   const [password, setPassword] = useState('');
-  const [rounds, setRounds] = useState(10);
-  const [audioMode, setAudioMode] = useState<'remote' | 'presenter'>('remote');
-  const [hostIsPlayer, setHostIsPlayer] = useState(true);
   const [roomId, setRoomId] = useState(wantRoom);
   const [error, setError] = useState<string | undefined>(props.initialError);
   const [busy, setBusy] = useState(false);
   const [rooms, setRooms] = useState<RoomSummary[]>([]);
 
-  useEffect(() => {
-    localStorage.setItem('quiz:name', name);
-  }, [name]);
+  useEffect(() => { localStorage.setItem('quiz:name', name); }, [name]);
 
   useEffect(() => {
-    if (tab !== 'join') return;
     void api.listRooms().then(setRooms).catch(() => setRooms([]));
     const id = window.setInterval(() => {
       void api.listRooms().then(setRooms).catch(() => { /* ignore */ });
     }, 4000);
     return () => window.clearInterval(id);
-  }, [tab]);
+  }, []);
 
   const submit = async (): Promise<void> => {
     setError(undefined);
-    if (name.trim().length < 2) {
-      setError('Escolha um nome (2+ caracteres).');
-      return;
-    }
+    if (name.trim().length < 2) { setError('Escolha um nome (2+ caracteres).'); return; }
+    if (roomId.trim().length < 4) { setError('Cole o codigo da sala ou clique numa da lista.'); return; }
     setBusy(true);
     try {
-      let res;
-      if (tab === 'create') {
-        res = await api.createRoom(name.trim(), password || undefined, color);
-        // Envia opcoes do quiz no start (nao na criacao) — o servidor le no start_room.
-        // Salvamos as opcoes localmente e mandamos no primeiro `room:start`.
-        localStorage.setItem(
-          'quiz:pending-options',
-          JSON.stringify({ rounds, audioMode, hostIsPlayer }),
-        );
-      } else {
-        if (roomId.trim().length < 4) {
-          setError('Cole o codigo da sala.');
-          setBusy(false);
-          return;
-        }
-        res = await api.joinRoom(roomId.trim(), name.trim(), password || undefined, color);
-      }
+      const res = await api.joinRoom(roomId.trim(), name.trim(), password || undefined, color);
       saveSession({ roomId: res.roomId, playerId: res.playerId, token: res.token });
       const sock = connectSocket(res.token);
       sock.once('connect', () => {
         useQuiz.getState().setSocket(sock, { roomId: res.roomId, playerId: res.playerId });
-        // Snapshot inicial vem via room:update; roomId na URL para copiar/compartilhar
         try {
           const u = new URL(window.location.href);
           u.searchParams.set('room', res.roomId);
@@ -168,14 +163,7 @@ function Lobby(props: { initialError?: string }): JSX.Element {
       </div>
 
       <div className="q-card">
-        <div className="q-tabs">
-          <button className={`q-tab ${tab === 'create' ? 'active' : ''}`} onClick={() => setTab('create')}>
-            Criar sala
-          </button>
-          <button className={`q-tab ${tab === 'join' ? 'active' : ''}`} onClick={() => setTab('join')}>
-            Entrar
-          </button>
-        </div>
+        <h2>Entrar em sala</h2>
 
         {error && <ErrorAlert error={{ code: 'INVALID_MOVE', message: error }} onClose={() => setError(undefined)} />}
 
@@ -191,101 +179,52 @@ function Lobby(props: { initialError?: string }): JSX.Element {
           />
         </div>
 
-        {tab === 'create' && (
-          <>
-            <div className="q-row">
-              <div style={{ flex: 1 }}>
-                <label className="q-label">Rodadas</label>
-                <input
-                  className="q-input"
-                  type="number"
-                  min={1}
-                  max={50}
-                  value={rounds}
-                  onChange={(e) => setRounds(Math.max(1, Math.min(50, Number(e.target.value) || 10)))}
-                />
+        <label className="q-label">Salas abertas</label>
+        <div className="q-room-list">
+          {rooms.length === 0 ? (
+            <div className="q-room-empty">Nenhuma sala aberta. Aguarde um host criar.</div>
+          ) : rooms.map((r) => (
+            <div
+              key={r.roomId}
+              className="q-room-item"
+              onClick={() => setRoomId(r.roomId)}
+            >
+              <div>
+                <div className="who">🎤 {r.hostName}</div>
+                <div className="meta">{r.playerCount} jogador(es)</div>
               </div>
-              <div style={{ flex: 2 }}>
-                <label className="q-label">Modo de audio</label>
-                <select
-                  className="q-select"
-                  value={audioMode}
-                  onChange={(e) => setAudioMode(e.target.value as 'remote' | 'presenter')}
-                >
-                  <option value="remote">🎧 Cada jogador ouve no proprio dispositivo</option>
-                  <option value="presenter">So o host toca (TV/compartilhado)</option>
-                </select>
-              </div>
+              <span className="q-btn small">Selecionar</span>
             </div>
+          ))}
+        </div>
 
-            <label className="q-switch" style={{ marginTop: 12 }}>
-              <input
-                type="checkbox"
-                checked={hostIsPlayer}
-                onChange={(e) => setHostIsPlayer(e.target.checked)}
-              />
-              O host tambem responde as perguntas
-            </label>
-            <p className="q-help">
-              Desmarque para o host ser apenas apresentador (ve o gabarito, nao pontua).
-            </p>
+        <label className="q-label">Codigo da sala</label>
+        <input
+          className="q-input"
+          placeholder="cole o codigo aqui"
+          value={roomId}
+          onChange={(e) => setRoomId(e.target.value)}
+          maxLength={64}
+        />
 
-            <label className="q-label">Senha da sala (opcional)</label>
-            <input
-              className="q-input"
-              type="password"
-              placeholder="deixe vazio p/ sala publica"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              maxLength={64}
-            />
-          </>
-        )}
-
-        {tab === 'join' && (
-          <>
-            <label className="q-label">Salas publicas abertas</label>
-            <div className="q-room-list">
-              {rooms.length === 0 ? (
-                <div className="q-room-empty">Nenhuma sala aberta.</div>
-              ) : rooms.map((r) => (
-                <div
-                  key={r.roomId}
-                  className="q-room-item"
-                  onClick={() => setRoomId(r.roomId)}
-                >
-                  <div>
-                    <div className="who">🎤 {r.hostName}</div>
-                    <div className="meta">{r.playerCount} jogador(es)</div>
-                  </div>
-                  <span className="q-btn small">Selecionar</span>
-                </div>
-              ))}
-            </div>
-
-            <label className="q-label">Codigo da sala</label>
-            <input
-              className="q-input"
-              placeholder="cole o codigo aqui"
-              value={roomId}
-              onChange={(e) => setRoomId(e.target.value)}
-              maxLength={64}
-            />
-
-            <label className="q-label">Senha (se houver)</label>
-            <input
-              className="q-input"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              maxLength={64}
-            />
-          </>
-        )}
+        <label className="q-label">Senha (se houver)</label>
+        <input
+          className="q-input"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          maxLength={64}
+        />
 
         <button className="q-btn" onClick={submit} disabled={busy}>
-          {busy ? 'Aguarde...' : tab === 'create' ? 'Criar sala' : 'Entrar'}
+          {busy ? 'Aguarde...' : 'Entrar'}
         </button>
+      </div>
+
+      <div style={{ textAlign: 'center', marginTop: 10 }}>
+        <a href="/?admin" style={{ color: '#7b88b8', fontSize: 12, textDecoration: 'none' }}>
+          Sou host →
+        </a>
       </div>
     </div>
   );

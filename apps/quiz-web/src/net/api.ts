@@ -23,13 +23,14 @@ async function get<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-/** Todas as salas criadas por este app sao musicquiz — o gameId e forcado no
- *  servidor por /quiz/rooms; o cliente nem precisa manda-lo. */
+/** gameId forcado pelo servidor em /quiz/rooms — cliente nunca envia. */
 export const QUIZ_GAME_ID = 'musicquiz';
 
+/**
+ * API publica do quiz-web — SO join e listagem. Criar sala e operacao de
+ * admin: use `adminApi.createRoom` de ./adminApi (envia `Authorization: Bearer`).
+ */
 export const api = {
-  createRoom: (playerName: string, roomPassword?: string, color?: string) =>
-    post<SessionResponse>('/quiz/rooms', { playerName, roomPassword, color }),
   joinRoom: (roomId: string, playerName: string, roomPassword?: string, color?: string) =>
     post<SessionResponse>('/quiz/rooms/join', { roomId, playerName, roomPassword, color }),
   listRooms: () => get<RoomSummary[]>('/quiz/rooms'),
