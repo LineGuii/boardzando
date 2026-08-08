@@ -4,6 +4,7 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -16,12 +17,17 @@ import {
   GameMoveDto,
   KickPlayerDto,
   PlaceableDragDto,
+  QuizAnswerDto,
+  QuizNextDto,
+  QuizPingDto,
+  QuizReadyDto,
   StartGameDto,
   type ClientToServerEvents,
   type ServerToClientEvents,
 } from '@boardzando/contracts';
 import { RoomService } from '../room/room.service';
 import { InvalidMoveError, NotYourTurnError } from '../engine/game-instance';
+import { MusicQuizService } from '../../games/musicquiz/musicquiz.service';
 import { WsAllExceptionsFilter } from './ws-exception.filter';
 import { WsThrottlerGuard } from './ws-throttler.guard';
 
@@ -54,13 +60,22 @@ type GameServer = Server<ClientToServerEvents, ServerToClientEvents, never, Sock
       new WsException({ code: 'VALIDATION', message: JSON.stringify(errors) }),
   }),
 )
-export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(GameGateway.name);
 
   @WebSocketServer()
   server!: GameServer;
 
-  constructor(private readonly rooms: RoomService) {}
+  constructor(
+    private readonly rooms: RoomService,
+    private readonly quiz: MusicQuizService,
+  ) {}
+
+  afterInit(server: GameServer): void {
+    // Passa o servidor Socket.IO para o MusicQuizService (que emite fora de
+    // handlers, dentro de setTimeout callbacks).
+    this.quiz.setServer(server);
+  }
 
   handleConnection(client: GameSocket): void {
     const { roomId, player } = client.data;
@@ -86,6 +101,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         currentPlayer,
       });
       if (gameover) client.emit('game:over', { roomId, result: gameover });
+    } else if (this.quiz.hasMatch(roomId)) {
+      // Music Quiz: nao usa GameInstance — snapshot proprio.
+      const snapshot = this.quiz.snapshotFor(roomId, player.id);
+      if (snapshot) client.emit('quiz:snapshot', { roomId, snapshot });
     }
     this.logger.log(`${player.name} conectou na sala ${roomId}`);
   }
@@ -129,10 +148,76 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (dto.roomId !== roomId) {
       throw new WsException({ code: 'VALIDATION', message: 'roomId divergente da sessao.' });
     }
+    const room = this.rooms.getOrThrow(roomId);
+    if (this.quiz.isQuiz(room.gameId)) {
+      try {
+        this.quiz.startMatch(roomId, player.id, dto.gameOptions);
+      } catch (e) {
+        throw new WsException({ code: 'INVALID_MOVE', message: (e as Error).message });
+      }
+      this.broadcastRoom(roomId);
+      return { ok: true };
+    }
     this.rooms.startGame(roomId, player.id, dto.gameOptions);
     this.broadcastRoom(roomId);
     this.broadcastState(roomId);
     return { ok: true };
+  }
+
+  // ---------- Music Quiz ----------
+
+  @SubscribeMessage('quiz:answer')
+  @Throttle({ default: { limit: 10, ttl: 1000 } })
+  @UseGuards(WsThrottlerGuard)
+  onQuizAnswer(
+    @ConnectedSocket() client: GameSocket,
+    @MessageBody() dto: QuizAnswerDto,
+  ): { ok: true; data: { acceptedAt: number } } {
+    const { roomId, player } = client.data;
+    if (dto.roomId !== roomId) {
+      throw new WsException({ code: 'VALIDATION', message: 'roomId divergente da sessao.' });
+    }
+    try {
+      const data = this.quiz.submitAnswer(roomId, player.id, dto.questionIndex, dto.optionIndex);
+      return { ok: true, data };
+    } catch (e) {
+      throw new WsException({ code: 'INVALID_MOVE', message: (e as Error).message });
+    }
+  }
+
+  @SubscribeMessage('quiz:next')
+  onQuizNext(
+    @ConnectedSocket() client: GameSocket,
+    @MessageBody() dto: QuizNextDto,
+  ): { ok: true } {
+    const { roomId, player } = client.data;
+    if (dto.roomId !== roomId) {
+      throw new WsException({ code: 'VALIDATION', message: 'roomId divergente da sessao.' });
+    }
+    try {
+      this.quiz.requestNext(roomId, player.id);
+      return { ok: true };
+    } catch (e) {
+      throw new WsException({ code: 'INVALID_MOVE', message: (e as Error).message });
+    }
+  }
+
+  @SubscribeMessage('quiz:ready')
+  onQuizReady(
+    @ConnectedSocket() client: GameSocket,
+    @MessageBody() dto: QuizReadyDto,
+  ): void {
+    const { roomId, player } = client.data;
+    if (dto.roomId !== roomId) return;
+    this.quiz.markReady(roomId, player.id, dto.questionIndex);
+  }
+
+  @SubscribeMessage('quiz:ping')
+  onQuizPing(
+    @ConnectedSocket() _client: GameSocket,
+    @MessageBody() dto: QuizPingDto,
+  ): { serverT: number; clientT: number } {
+    return { serverT: Date.now(), clientT: dto.clientT };
   }
 
   @SubscribeMessage('game:move')

@@ -14,6 +14,12 @@
       "port": 5173
     },
     {
+      "name": "Quiz Web (Vite)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@boardzando/quiz-web", "dev"],
+      "port": 5174
+    },
+    {
       "name": "Server (NestJS)",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@boardzando/server", "dev"],

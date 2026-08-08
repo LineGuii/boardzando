@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "_readme": "Edite este arquivo para adicionar/remover perguntas. O servidor recarrega automaticamente (fs.watch). Arquivos de audio ficam em ./assets/audio/, capas em ./assets/covers/. Cada track precisa: id, audioFile, questionText, options (array de 4), correctIndex (0..3). Opcionais: title, artist, coverFile, startSec, durationSec.",
+  "tracks": [
+    {
+      "id": "exemplo-1",
+      "title": "Exemplo 1",
+      "artist": "Artista X",
+      "audioFile": "audio/exemplo-1.mp3",
+      "coverFile": "covers/exemplo-1.jpg",
+      "questionText": "Qual e essa musica?",
+      "options": ["Opcao A", "Opcao B", "Opcao C", "Opcao D"],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "exemplo-2",
+      "audioFile": "audio/exemplo-2.mp3",
+      "questionText": "Qual e o artista?",
+      "options": ["Artista W", "Artista X", "Artista Y", "Artista Z"],
+      "correctIndex": 2,
+      "startSec": 12,
+      "durationSec": 20
+    }
+  ]
+}

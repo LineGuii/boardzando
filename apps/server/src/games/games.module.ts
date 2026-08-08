@@ -8,6 +8,7 @@ import { PatoModule } from './pato/pato.module';
 import { PerchModule } from './perch/perch.module';
 import { StopConnectModule } from './stopconnect/stopconnect.module';
 import { UnoModule } from './uno/uno.module';
+import { MusicQuizModule } from './musicquiz/musicquiz.module';
 
 /**
  * Agrega todos os jogos plugados. Para adicionar um jogo novo:
@@ -27,6 +28,7 @@ import { UnoModule } from './uno/uno.module';
     PerchModule,
     Flip7Module,
     StopConnectModule,
+    MusicQuizModule,
   ],
 })
 export class GamesModule {}

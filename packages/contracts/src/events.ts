@@ -1,4 +1,10 @@
 import type { GameId, GameOverResult, PlayerId, RoomId } from './types';
+import type {
+  QuizFinalPayload,
+  QuizQuestionPublic,
+  QuizRevealPayload,
+  QuizSnapshot,
+} from './musicquiz';
 
 /**
  * Contrato UNICO de eventos WebSocket usado por cliente E servidor.
@@ -44,6 +50,22 @@ export interface ClientToServerEvents {
     rotation?: number;
   }) => void;
   'chat:send': (payload: { roomId: RoomId; text: string }) => void;
+
+  // ---------- Music Quiz ----------
+  /** Cliente responde a pergunta corrente. `elapsedMs` e medido no servidor. */
+  'quiz:answer': (
+    payload: { roomId: RoomId; questionIndex: number; optionIndex: number },
+    ack: (res: AckResult<{ acceptedAt: number }>) => void,
+  ) => void;
+  /** Host pula o intervalo de reveal para a proxima pergunta. */
+  'quiz:next': (payload: { roomId: RoomId }, ack: (res: AckResult) => void) => void;
+  /** Cliente confirma que o audio da pergunta X esta pre-carregado (canplaythrough). */
+  'quiz:ready': (payload: { roomId: RoomId; questionIndex: number }) => void;
+  /** Sincronizacao de relogio: cliente manda seu t_now e recebe t_server. */
+  'quiz:ping': (
+    payload: { roomId: RoomId; clientT: number },
+    ack: (res: { serverT: number; clientT: number }) => void,
+  ) => void;
 }
 
 // ---------- server -> client ----------
@@ -73,6 +95,21 @@ export interface ServerToClientEvents {
   'chat:message': (msg: ChatMessage) => void;
   /** Erro nao-fatal (move invalido, rate limit etc.). */
   'error': (err: WsError) => void;
+
+  // ---------- Music Quiz ----------
+  /** Pre-carregue este audio (e a capa). `serverStartAt` = quando dar play. */
+  'quiz:preload': (payload: {
+    roomId: RoomId;
+    question: QuizQuestionPublic;
+  }) => void;
+  /** Dispare o audio no `serverStartAt` — a pergunta esta ativa. */
+  'quiz:question': (payload: { roomId: RoomId; question: QuizQuestionPublic }) => void;
+  /** Fim da pergunta: mostre resposta correta e ranking animado. */
+  'quiz:reveal': (payload: { roomId: RoomId; reveal: QuizRevealPayload }) => void;
+  /** Fim da partida: ranking definitivo com animacao especial. */
+  'quiz:final': (payload: { roomId: RoomId; final: QuizFinalPayload }) => void;
+  /** Reconexao: estado completo da partida corrente. */
+  'quiz:snapshot': (payload: { roomId: RoomId; snapshot: QuizSnapshot }) => void;
 }
 
 // ---------- payloads ----------

@@ -6,3 +6,4 @@ export * from './dtos';
 export * from './hues-board';
 export * from './sandbox';
 export * from './avatar';
+export * from './musicquiz';
