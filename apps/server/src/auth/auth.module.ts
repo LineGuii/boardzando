@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { CoreModule } from '../core/core.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { QuizController } from './quiz.controller';
+import { AdminGuard } from './admin.guard';
 
 @Module({
   imports: [
@@ -16,8 +18,8 @@ import { AuthController } from './auth.controller';
       }),
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  controllers: [AuthController, QuizController],
+  providers: [AuthService, AdminGuard],
+  exports: [AuthService, AdminGuard],
 })
 export class AuthModule {}

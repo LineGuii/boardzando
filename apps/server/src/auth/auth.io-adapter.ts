@@ -33,6 +33,8 @@ export class AuthIoAdapter extends IoAdapter {
       const token = socket.handshake.auth?.token as string | undefined;
       if (!token) return next(new Error('UNAUTHORIZED'));
       try {
+        // verifySession ja rejeita tokens `typ !== 'room'` — um token admin
+        // com o mesmo segredo NAO entra no gateway.
         const payload = this.auth.verifySession(token);
         socket.data.player = { id: payload.sub, name: payload.name };
         socket.data.roomId = payload.roomId;

@@ -7,66 +7,76 @@ import {
   NotFoundException,
   Post,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
-  CreateRoomDto,
   JoinRoomDto,
   isAvatarColor,
   randomAvatarColor,
-  type GameSummary,
   type RoomSummary,
 } from '@boardzando/contracts';
+import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { RoomService } from '../core/room/room.service';
-import { GameRegistryService } from '../core/registry/game-registry.service';
 import { AuthService } from './auth.service';
+import { AdminGuard } from './admin.guard';
 
 /**
- * Endpoints HTTP de entrada. O fluxo: criar/entrar via HTTP (Argon2 + emissao de
- * JWT), depois conectar o WebSocket usando esse JWT. O throttle por IP no /join
- * e a defesa principal contra brute-force da senha de sala.
+ * DTO dedicado ao quiz: NAO aceita `gameId` do cliente. Toda sala criada por
+ * este endpoint e forcada a `gameId = 'musicquiz'`.
  */
-@Controller()
-export class AuthController {
+class CreateQuizRoomDto {
+  @IsString() @MinLength(2) @MaxLength(24)
+  playerName!: string;
+
+  @IsOptional() @IsString() @MaxLength(128)
+  roomPassword?: string;
+
+  @IsOptional() @IsString() @MaxLength(16)
+  color?: string;
+}
+
+class AdminLoginDto {
+  @IsString() @MinLength(4) @MaxLength(128)
+  password!: string;
+}
+
+const QUIZ_GAME_ID = 'musicquiz';
+
+/**
+ * Rotas HTTP privadas do Music Quiz. Modelo de acesso:
+ *   - `GET /quiz/rooms`         — publico (lista salas em lobby)
+ *   - `POST /quiz/rooms/join`   — publico (jogadores entram)
+ *   - `POST /quiz/rooms`        — ADMIN (so quem tem o token de admin cria)
+ *   - `POST /quiz/admin/login`  — verifica senha e emite JWT admin
+ *
+ * Convidados nao precisam de conta: entrar em sala continua sem login. Criar
+ * sala virou operacao de admin (o host tipicamente e quem tambem monta os
+ * quizzes).
+ */
+@Controller('quiz')
+export class QuizController {
   constructor(
     private readonly rooms: RoomService,
-    private readonly registry: GameRegistryService,
     private readonly auth: AuthService,
   ) {}
 
-  /** Lista jogos plugados disponiveis para escolha no lobby de criacao.
-   *  MusicQuiz e omitido daqui de proposito — ele vive numa porta de entrada
-   *  separada (`/quiz/*`) e nao deve aparecer no seletor do app principal. */
-  @Get('games')
-  listGames(): GameSummary[] {
-    return this.registry.list().filter((g) => g.id !== 'musicquiz');
-  }
-
-  /** Lista salas publicas (sem senha) em lobby. Salas de musicquiz ficam
-   *  escondidas — quem quer entrar usa `/quiz/rooms`. */
   @Get('rooms')
   listRooms(): RoomSummary[] {
-    return this.rooms.listPublic().filter((r) => r.gameId !== 'musicquiz');
+    return this.rooms.listPublic().filter((r) => r.gameId === QUIZ_GAME_ID);
   }
 
   @Post('rooms')
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  async create(@Body() dto: CreateRoomDto) {
-    if (!this.registry.get(dto.gameId)) {
-      throw new BadRequestException('Jogo desconhecido.');
-    }
-    // Music Quiz so pode ser criado pela porta dedicada em /quiz/rooms.
-    if (dto.gameId === 'musicquiz') {
-      throw new BadRequestException('Jogo desconhecido.');
-    }
-    // Sala publica: dto.roomPassword vazio/ausente => passwordHash = '' (skip).
+  @UseGuards(AdminGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  async create(@Body() dto: CreateQuizRoomDto) {
     const passwordHash = dto.roomPassword
       ? await this.auth.hashRoomPassword(dto.roomPassword)
       : '';
     const playerId = randomUUID();
     const color = isAvatarColor(dto.color) ? dto.color : randomAvatarColor();
     const room = this.rooms.createRoom({
-      gameId: dto.gameId,
+      gameId: QUIZ_GAME_ID,
       passwordHash,
       host: { id: playerId, name: dto.playerName, connected: false, color },
     });
@@ -75,12 +85,12 @@ export class AuthController {
   }
 
   @Post('rooms/join')
-  @Throttle({ default: { limit: 5, ttl: 60_000 } }) // anti brute-force
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async join(@Body() dto: JoinRoomDto) {
     const room = this.rooms.get(dto.roomId);
     if (!room) throw new NotFoundException('Sala nao encontrada.');
+    if (room.gameId !== QUIZ_GAME_ID) throw new NotFoundException('Sala nao encontrada.');
 
-    // Se a sala tem senha, valida. Sala publica (hash vazio) pula a verificacao.
     if (room.passwordHash) {
       const ok = await this.auth.verifyRoomPassword(room.passwordHash, dto.roomPassword ?? '');
       if (!ok) throw new UnauthorizedException('Senha incorreta.');
@@ -100,5 +110,17 @@ export class AuthController {
     }
     const token = this.auth.signSession({ sub: playerId, roomId: room.id, name: dto.playerName });
     return { roomId: room.id, playerId, token, snapshot: room.toSnapshot() };
+  }
+
+  /**
+   * Login admin. Throttle agressivo — brute-force da senha unica e o ataque
+   * obvio. Argon2id ja e slow-hash, mas 5/min por IP fecha a porta.
+   */
+  @Post('admin/login')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  async adminLogin(@Body() dto: AdminLoginDto): Promise<{ token: string }> {
+    const ok = await this.auth.verifyAdminPassword(dto.password);
+    if (!ok) throw new UnauthorizedException('Senha incorreta.');
+    return { token: this.auth.signAdmin() };
   }
 }
