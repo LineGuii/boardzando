@@ -181,6 +181,33 @@ export class MusicQuizService {
     this.nextQuestion(m);
   }
 
+  /**
+   * Host pausa/retoma o auto-advance do reveal. Enquanto pausado, o
+   * `revealTimeout` fica desarmado — proxima pergunta so vem via
+   * `quiz:next` (Continuar) ou nova chamada de pause(false) que reagenda.
+   */
+  pauseReveal(roomId: RoomId, requesterId: PlayerId, paused: boolean): void {
+    const m = this.matches.get(roomId);
+    if (!m) throw new Error('SEM_PARTIDA');
+    if (requesterId !== m.hostId) throw new Error('ONLY_HOST');
+    if (m.phase !== 'reveal' || !m.round || !m.lastReveal) return;
+    if (paused) {
+      if (m.round.revealTimeout) {
+        clearTimeout(m.round.revealTimeout);
+        m.round.revealTimeout = undefined;
+      }
+      m.lastReveal = { ...m.lastReveal, paused: true };
+    } else {
+      // Retoma com uma janela nova (mesma duracao do reveal).
+      const nextAt = Date.now() + REVEAL_MS;
+      m.round.revealTimeout = setTimeout(() => this.nextQuestion(m), REVEAL_MS);
+      m.lastReveal = { ...m.lastReveal, paused: false, nextAt };
+    }
+    m.seq += 1;
+    m.lastReveal = { ...m.lastReveal, seq: m.seq };
+    this.server?.to(`room:${m.roomId}`).emit('quiz:reveal', { roomId: m.roomId, reveal: m.lastReveal });
+  }
+
   /** Cliente respondeu. */
   submitAnswer(
     roomId: RoomId,

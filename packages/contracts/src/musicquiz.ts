@@ -9,6 +9,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsIn,
   IsInt,
   IsNotEmpty,
@@ -141,6 +142,8 @@ export interface QuizRevealPayload {
   seq: number;
   /** Timestamp servidor em que a proxima pergunta comecara (host pode antecipar). */
   nextAt: number;
+  /** Se `true`, o auto-advance esta pausado e `nextAt` deve ser ignorado. */
+  paused?: boolean;
 }
 
 /** Payload de `quiz:final`: ranking definitivo + estatisticas. */
@@ -200,6 +203,15 @@ export class QuizAnswerDto {
 export class QuizNextDto {
   @IsString() @IsNotEmpty() @MaxLength(64)
   roomId!: string;
+}
+
+export class QuizPauseDto {
+  @IsString() @IsNotEmpty() @MaxLength(64)
+  roomId!: string;
+
+  /** true = pausar, false = retomar auto-advance. */
+  @IsBoolean()
+  paused!: boolean;
 }
 
 export class QuizPingDto {

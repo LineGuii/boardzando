@@ -3,70 +3,317 @@
   "_readme": "Edite este arquivo para adicionar/remover perguntas. O servidor recarrega automaticamente (fs.watch). Arquivos de audio ficam em ./assets/audio/, capas em ./assets/covers/. Cada track precisa: id, audioFile, questionText, options (array de 4), correctIndex (0..3). Opcionais: title, artist, coverFile, startSec, durationSec.",
   "tracks": [
     {
-      "id": "exemplo-1",
-      "title": "Exemplo 1",
-      "artist": "Artista X",
+      "id": "counter-strike",
+      "title": "Counter Strike",
       "source": {
         "kind": "local",
-        "audioFile": "audio/exemplo-1.mp3"
+        "audioFile": "audio/CounterStrike.mp3"
       },
-      "coverUrl": "covers/exemplo-1.jpg",
-      "questionText": "Qual e essa musica?",
+      "questionText": "De que jogo é essa música?",
       "options": [
-        "Opcao A",
-        "Opcao B",
-        "Opcao C",
-        "Opcao D"
+        "Counter Strike",
+        "Half-Life",
+        "Quake",
+        "Team Fortress"
       ],
       "correctIndex": 0,
       "startSec": 0,
       "durationSec": 20
     },
     {
-      "id": "exemplo-2",
+      "id": "crash-bandicoot",
+      "title": "Crash Bandicoot",
       "source": {
         "kind": "local",
-        "audioFile": "audio/exemplo-2.mp3"
+        "audioFile": "audio/CrashBandicoot.mp3"
       },
-      "questionText": "Qual e o artista?",
+      "questionText": "De que jogo é essa música?",
       "options": [
-        "Artista W",
-        "Artista X",
-        "Artista Y",
-        "Artista Z"
+        "Spyro the Dragon",
+        "Crash Bandicoot",
+        "Donkey Kong Country",
+        "Super Mario 64"
+
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "donkey-kong-country",
+      "title": "Donkey Kong Country",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/DonkeyKongCountry.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Crash Bandicoot",
+        "Super Mario 64",
+        "Donkey Kong Country",
+        "Banjo-Kazooie"
       ],
       "correctIndex": 2,
-      "startSec": 12,
+      "startSec": 0,
       "durationSec": 20
     },
     {
-      "title": "Imagine",
-      "artist": "John Lennon",
+      "id": "final-fantasy-7",
+      "title": "Final Fantasy 7",
       "source": {
         "kind": "local",
-        "audioFile": "audio/imagine.mp3"
+        "audioFile": "audio/FinalFantasy7.mp3"
       },
-      "questionText": "Qual e essa musica?",
+      "questionText": "De que jogo é essa música?",
       "options": [
-        "Imagine",
-        "Yesterday",
-        "Hey Jude",
-        "Let It Be"
+        "Crono Trigger",
+        "Final Fantasy 7",
+        "Blue Dragon",
+        "Dragon Quest 8"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "god-of-war-2",
+      "title": "God of War 2",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/GodOfWar2.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "God of War 2",
+        "Ragnarok Online",
+        "Prince of Persia",
+        "Dante's Inferno"
       ],
       "correctIndex": 0,
       "startSec": 0,
-      "durationSec": 20,
-      "id": "imagine"
+      "durationSec": 20
+    },
+    {
+      "id": "goof-troop",
+      "title": "Goof Troop",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/GoofTroop.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Double Dragon",
+        "Sonic the Hedgehog",
+        "Kirby's Adventure",
+        "Goof Troop"
+      ],
+      "correctIndex": 3,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "gun-bound",
+      "title": "Gun Bound",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/GunBound.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Gun Bound",
+        "Ragnarok Online",
+        "Pokemon",
+        "League of Legends"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "gun-z-the-duel",
+      "title": "GunZ The Duel",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/GunZTheDuel.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Devil May Cry 3",
+        "GunZ The Duel",
+        "RF Online",
+        "Winning Eleven 11"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "hollow-knight",
+      "title": "Hollow Knight",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/HollowKnight.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Hollow Knight",
+        "Silksong",
+        "Pokemon Legends Arceus",
+        "Hades"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "kingdom-hearts",
+      "title": "Kingdom Hearts",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/KingdomHearts.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Kingdom Hearts",
+        "Final Fantasy X",
+        "Baldur's Gate Dark Alliance 2",
+        "Radiata Stories"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "league-of-legends",
+      "title": "League of Legends",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/LeagueofLegends.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "League of Legends",
+        "Ragnarok Online",
+        "Pokemon",
+        "Kingdom Hearts"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "pokemon-blue",
+      "title": "Pokemon",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/PokemonBlue.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Pokemon",
+        "Ragnarok Online",
+        "Kingdom Hearts",
+        "League of Legends"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "ragnarok-online",
+      "title": "Ragnarok Online",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/RagnarokOnline.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Pokemon",
+        "Kingdom Hearts",
+        "League of Legends",
+        "Ragnarok Online"
+      ],
+      "correctIndex": 3,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "starcraft",
+      "title": "Starcraft",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Starcraft.mp3"
+      },    
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Ragnarok Online",
+        "Pokemon",
+        "Starcraft",
+        "League of Legends"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "yugioh",
+      "title": "Yu-Gi-Oh! Forbidden Memories",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/yugioh.mp3"
+      },    
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Ragnarok Online",
+        "Pokemon",
+        "Yu-Gi-Oh! Forbidden Memories",
+        "League of Legends"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20
+    },
+    {
+      "id": "thelegendofzelda",
+      "title": "The Legend of Zelda",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/thelegendofzelda.mp3"
+      },    
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Ragnarok Online",
+        "Pokemon",
+        "The Legend of Zelda",
+        "League of Legends"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20
     }
   ],
   "quizzes": [
     {
       "id": "acervo-completo",
       "name": "Acervo completo",
-      "description": "Todas as faixas importadas da versao antiga.",
+      "description": "Todas as faixas em assets/audio.",
       "trackIds": [
-        "exemplo-1",
-        "exemplo-2"
+        "counter-strike",
+        "crash-bandicoot",
+        "donkey-kong-country",
+        "final-fantasy-7",
+        "god-of-war-2",
+        "goof-troop",
+        "gun-bound",
+        "gun-z-the-duel",
+        "hollow-knight",
+        "kingdom-hearts",
+        "league-of-legends",
+        "pokemon-blue",
+        "ragnarok-online",
+        "starcraft",
+        "thelegendofzelda",
+        "yugioh"
       ],
       "createdAt": 1786239053041,
       "updatedAt": 1786239112056
@@ -74,12 +321,8 @@
     {
       "id": "classic-rock",
       "name": "Classic Rock",
-      "description": "Musicas eternas",
-      "trackIds": [
-        "imagine",
-        "exemplo-1",
-        "exemplo-2"
-      ],
+      "description": "Músicas eternas",
+      "trackIds": [],
       "createdAt": 1786239332873,
       "updatedAt": 1786239378664
     }

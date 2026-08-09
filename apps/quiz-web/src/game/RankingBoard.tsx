@@ -9,6 +9,7 @@ interface Props {
   correctAnswerText: string;
   isHost: boolean;
   onSkip: () => void;
+  onTogglePause: (paused: boolean) => void;
   clockOffset: number;
 }
 
@@ -135,11 +136,19 @@ export function RankingBoard(props: Props): JSX.Element {
         })}
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: 18, color: '#a5b4fc', fontSize: 13 }}>
-        Proxima pergunta em {remain}s
+      <div style={{ textAlign: 'center', marginTop: 18, color: '#a5b4fc', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
+        {props.reveal.paused ? (
+          <strong style={{ color: '#fbbf24' }}>⏸ Pausado pelo host</strong>
+        ) : (
+          <span>Proxima pergunta em {remain}s</span>
+        )}
         {props.isHost && (
           <>
-            {' '}
+            {props.reveal.paused ? (
+              <button className="q-btn small" onClick={() => props.onTogglePause(false)}>Retomar</button>
+            ) : (
+              <button className="q-btn small secondary" onClick={() => props.onTogglePause(true)}>Pausar</button>
+            )}
             <button className="q-btn small secondary" onClick={props.onSkip}>Pular</button>
           </>
         )}
