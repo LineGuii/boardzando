@@ -1,4 +1,9 @@
-import type { RoomSnapshot } from '@boardzando/contracts';
+import type {
+  QuizDefinition,
+  QuizSummary,
+  QuizTrack,
+  RoomSnapshot,
+} from '@boardzando/contracts';
 import { clearAdmin, loadAdmin } from './adminSession';
 
 export interface CreateRoomResult {
@@ -26,9 +31,9 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.message ?? res.statusText);
+    const msg = Array.isArray(body.message) ? body.message.join('; ') : (body.message ?? res.statusText);
+    throw new Error(msg);
   }
-  // Alguns endpoints podem responder 204 no futuro
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
@@ -39,9 +44,44 @@ export const adminApi = {
       method: 'POST',
       body: JSON.stringify({ password }),
     }),
+
+  // Salas
   createRoom: (playerName: string, color?: string, roomPassword?: string) =>
     req<CreateRoomResult>('/quiz/rooms', {
       method: 'POST',
       body: JSON.stringify({ playerName, color, roomPassword }),
     }),
+
+  // Publico (usado pelo seletor de sala)
+  listPublicQuizzes: () => req<QuizSummary[]>('/quiz/quizzes'),
+
+  // Tracks
+  listTracks: () => req<QuizTrack[]>('/quiz/admin/tracks'),
+  createTrack: (input: Omit<QuizTrack, 'id'> & { id?: string }) =>
+    req<QuizTrack>('/quiz/admin/tracks', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+  updateTrack: (id: string, patch: Partial<Omit<QuizTrack, 'id'>>) =>
+    req<QuizTrack>(`/quiz/admin/tracks/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(patch),
+    }),
+  deleteTrack: (id: string) =>
+    req<void>(`/quiz/admin/tracks/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
+  // Quizzes
+  listQuizzes: () => req<QuizDefinition[]>('/quiz/admin/quizzes'),
+  createQuiz: (input: { name: string; description?: string; trackIds?: string[] }) =>
+    req<QuizDefinition>('/quiz/admin/quizzes', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+  updateQuiz: (id: string, patch: Partial<Pick<QuizDefinition, 'name' | 'description' | 'trackIds'>>) =>
+    req<QuizDefinition>(`/quiz/admin/quizzes/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(patch),
+    }),
+  deleteQuiz: (id: string) =>
+    req<void>(`/quiz/admin/quizzes/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 };

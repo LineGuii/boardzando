@@ -21,22 +21,49 @@ import {
 
 export type QuizAudioMode = 'remote' | 'presenter';
 
-/** Uma pergunta carregada do tracks.json. `correctIndex` NUNCA vai para jogadores. */
+/**
+ * Fonte do audio de uma faixa. Uniao discriminada por `kind`:
+ *   - `local`   : arquivo em data/musicquiz/assets/, servido em /media/musicquiz/
+ *   - `spotify` : id de faixa do Spotify (reproduzido via Web Playback SDK; fase 4)
+ * Formato explicito para permitir novas fontes no futuro sem quebrar quem le.
+ */
+export type QuizAudioSource =
+  | { kind: 'local'; audioFile: string }
+  | { kind: 'spotify'; trackId: string; trackName: string; artistName: string };
+
+/** Uma pergunta da biblioteca. `correctIndex` NUNCA vai para jogadores. */
 export interface QuizTrack {
   id: string;
   title?: string;
   artist?: string;
-  /** Caminho relativo dentro de data/musicquiz/assets/ (ex: "audio/bohemian.mp3"). */
-  audioFile: string;
-  /** Idem para a capa opcional. Ex: "covers/bohemian.jpg". */
-  coverFile?: string;
+  source: QuizAudioSource;
+  /** URL absoluta da capa (Spotify) OU caminho relativo em assets/ (local). */
+  coverUrl?: string;
   questionText: string;
   options: [string, string, string, string];
   correctIndex: 0 | 1 | 2 | 3;
-  /** Segundo inicial do arquivo de audio (default 0). */
+  /** Segundo inicial do trecho (default 0). */
   startSec?: number;
-  /** Duracao do trecho (default 30s). Nao poda a resposta; e so um hint. */
+  /** Duracao do trecho (default 30s). Apenas hint visual — timer real e 30s no server. */
   durationSec?: number;
+}
+
+/** Um quiz nomeado — colecao de faixas da biblioteca. */
+export interface QuizDefinition {
+  id: string;
+  name: string;
+  description?: string;
+  trackIds: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** Resumo de um quiz para o seletor no formulario de criar sala. */
+export interface QuizSummary {
+  id: string;
+  name: string;
+  description?: string;
+  trackCount: number;
 }
 
 /** Opcoes escolhidas pelo host ao iniciar a partida. */
@@ -48,6 +75,8 @@ export interface QuizOptions {
   audioMode: QuizAudioMode;
   /** Se true, o host tambem responde e pontua. Se false, so apresenta. */
   hostIsPlayer: boolean;
+  /** Qual quiz sortear as faixas. undefined = pool inteiro (compat v1). */
+  quizId?: string;
 }
 
 export const QUIZ_DEFAULTS: QuizOptions = {

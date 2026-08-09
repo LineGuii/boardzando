@@ -304,3 +304,54 @@ body {
   color: #cbd5ff; padding: 8px 12px; border-radius: 999px;
   cursor: pointer; font-size: 14px; font-weight: 700;
 }
+
+/* -------- Editor: lista de faixas/quizzes -------- */
+.q-track-list {
+  display: flex; flex-direction: column; gap: 8px;
+  margin: 12px 0;
+  max-height: 380px;
+  overflow-y: auto;
+}
+.q-track-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: rgba(11, 20, 50, 0.6);
+  border: 1px solid rgba(148, 163, 255, 0.18);
+  border-radius: 10px;
+}
+.q-track-item .who { font-weight: 700; color: #eef2ff; }
+.q-track-item .meta {
+  color: #7b88b8; font-size: 12px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.q-check-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 4px; cursor: pointer;
+  color: #eef2ff; font-size: 14px;
+  border-radius: 6px;
+}
+.q-check-row:hover { background: rgba(148, 163, 255, 0.06); }
+
+/* -------- Modal -------- */
+.q-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex; align-items: flex-start; justify-content: center;
+  z-index: 100;
+  padding: 32px 16px;
+  overflow-y: auto;
+}
+.q-modal {
+  background: rgba(20, 30, 70, 0.98);
+  border: 1px solid rgba(148, 163, 255, 0.35);
+  border-top: 4px solid #22d3ee;
+  border-radius: 18px;
+  padding: 22px 24px 20px;
+  max-width: 560px; width: 100%;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+.q-modal h2 {
+  margin: 0 0 12px;
+  color: #67e8f9;
+  font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px;
+}

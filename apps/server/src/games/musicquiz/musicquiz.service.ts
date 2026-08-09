@@ -19,6 +19,7 @@ import { RoomService } from '../../core/room/room.service';
 import { CoreModule } from '../../core/core.module';
 import { QUIZ_MEDIA_PREFIX, TracksRepository } from './tracks.repository';
 import { MusicQuizGame } from './musicquiz.game';
+import { QuizAdminController } from './quiz-admin.controller';
 
 const ANSWER_WINDOW_MS = 30_000;
 /** Tempo entre `quiz:preload` e `quiz:question` — janela para pre-carregar audio. */
@@ -130,15 +131,20 @@ export class MusicQuizService {
     if (room.status === 'playing') throw new Error('ALREADY_STARTED');
 
     const options = this.readOptions(rawOptions);
-    const trackPool = this.tracks.list();
-    if (trackPool.length === 0) {
-      throw new Error('SEM_MUSICAS_CADASTRADAS');
-    }
 
     // Cancela partida antiga (se reiniciando)
     this.disposeMatch(roomId);
 
-    const chosen = this.tracks.sample(options.rounds);
+    // Se o host escolheu um quiz especifico, sorteia dele; caso contrario
+    // usa a biblioteca inteira (fallback / compat com salas antigas).
+    const chosen = options.quizId
+      ? this.tracks.sampleFromQuiz(options.quizId, options.rounds)
+      : this.tracks.sampleFromLibrary(options.rounds);
+    if (chosen.length === 0) {
+      throw new Error(
+        options.quizId ? `QUIZ_VAZIO:${options.quizId}` : 'SEM_MUSICAS_CADASTRADAS',
+      );
+    }
     const match: QuizMatch = {
       roomId,
       hostId: room.hostId,
@@ -245,9 +251,23 @@ export class MusicQuizService {
     const track = m.tracks[nextIdx]!;
     const serverStartAt = Date.now() + PRELOAD_LEAD_MS;
 
-    // Base da URL: proxy do Vite mapeia /media/* -> :3000/media/*
-    const audioUrl = `${QUIZ_MEDIA_PREFIX}/${track.audioFile}`;
-    const coverUrl = track.coverFile ? `${QUIZ_MEDIA_PREFIX}/${track.coverFile}` : undefined;
+    // URL do audio depende da fonte:
+    //   - local:   /media/musicquiz/<audioFile>  (proxy do Vite passa)
+    //   - spotify: URI reproduzido pelo cliente via Web Playback SDK (fase 4);
+    //              por ora expomos o trackId como "spotify:track:<id>" e o
+    //              cliente ramifica em source.kind na hora de tocar.
+    let audioUrl: string;
+    if (track.source.kind === 'local') {
+      audioUrl = `${QUIZ_MEDIA_PREFIX}/${track.source.audioFile}`;
+    } else {
+      audioUrl = `spotify:track:${track.source.trackId}`;
+    }
+    // Capa: se vier absoluta (Spotify), usa direto; senao concatena o prefixo.
+    const coverUrl = track.coverUrl
+      ? (/^https?:/i.test(track.coverUrl)
+          ? track.coverUrl
+          : `${QUIZ_MEDIA_PREFIX}/${track.coverUrl}`)
+      : undefined;
 
     const publicQ: QuizQuestionPublic = {
       index: nextIdx,
@@ -431,7 +451,8 @@ export class MusicQuizService {
       : QUIZ_DEFAULTS.rounds;
     const audioMode = o.audioMode === 'presenter' ? 'presenter' : 'remote';
     const hostIsPlayer = typeof o.hostIsPlayer === 'boolean' ? o.hostIsPlayer : QUIZ_DEFAULTS.hostIsPlayer;
-    return { rounds, audioMode, hostIsPlayer };
+    const quizId = typeof o.quizId === 'string' && o.quizId ? o.quizId : undefined;
+    return { rounds, audioMode, hostIsPlayer, quizId };
   }
 }
 
@@ -446,6 +467,7 @@ export class MusicQuizService {
   // MusicQuizService -> MusicQuizModule -> CoreModule. Sem forwardRef, um dos
   // lados chega como `undefined` no tempo de leitura do modulo.
   imports: [forwardRef(() => CoreModule)],
+  controllers: [QuizAdminController],
   providers: [TracksRepository, MusicQuizGame, MusicQuizService],
   exports: [MusicQuizService, MusicQuizGame],
 })

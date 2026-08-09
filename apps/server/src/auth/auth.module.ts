@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { CoreModule } from '../core/core.module';
@@ -7,6 +7,12 @@ import { AuthController } from './auth.controller';
 import { QuizController } from './quiz.controller';
 import { AdminGuard } from './admin.guard';
 
+/**
+ * @Global() para que outros modulos (MusicQuizModule etc.) possam usar
+ * `AdminGuard` e `AuthService` sem precisar `imports: [AuthModule]` —
+ * essa importacao criava um ciclo ES via CoreModule.
+ */
+@Global()
 @Module({
   imports: [
     CoreModule,
