@@ -20,6 +20,7 @@ import { CoreModule } from '../../core/core.module';
 import { QUIZ_MEDIA_PREFIX, TracksRepository } from './tracks.repository';
 import { MusicQuizGame } from './musicquiz.game';
 import { QuizAdminController } from './quiz-admin.controller';
+import { SpotifyService } from './spotify.service';
 
 const ANSWER_WINDOW_MS = 30_000;
 /** Tempo entre `quiz:preload` e `quiz:question` — janela para pre-carregar audio. */
@@ -468,7 +469,7 @@ export class MusicQuizService {
   // lados chega como `undefined` no tempo de leitura do modulo.
   imports: [forwardRef(() => CoreModule)],
   controllers: [QuizAdminController],
-  providers: [TracksRepository, MusicQuizGame, MusicQuizService],
+  providers: [TracksRepository, MusicQuizGame, MusicQuizService, SpotifyService],
   exports: [MusicQuizService, MusicQuizGame],
 })
 export class MusicQuizModule {}

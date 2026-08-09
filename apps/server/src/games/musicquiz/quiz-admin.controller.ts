@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -15,6 +16,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -30,6 +32,11 @@ import type {
 } from '@boardzando/contracts';
 import { AdminGuard } from '../../auth/admin.guard';
 import { TracksRepository } from './tracks.repository';
+import {
+  SpotifyService,
+  type DistractorField,
+  type SpotifyTrackResult,
+} from './spotify.service';
 
 // ---------- DTOs ----------
 
@@ -83,6 +90,14 @@ class QuizPatchDto {
   @IsOptional() @IsArray() @IsString({ each: true }) trackIds?: string[];
 }
 
+class SpotifyDistractorsDto {
+  @IsString() @IsNotEmpty() @MaxLength(64) trackId!: string;
+  @IsString() @MaxLength(200) trackName!: string;
+  @IsString() @MaxLength(200) artistName!: string;
+  @IsOptional() @IsString() @MaxLength(64) artistId?: string;
+  @IsString() @IsIn(['title', 'artist']) field!: DistractorField;
+}
+
 /**
  * Rotas de administracao do editor de quizzes. Todas exigem
  * `Authorization: Bearer <admin-jwt>` (AdminGuard). Publicos apenas:
@@ -91,7 +106,10 @@ class QuizPatchDto {
  */
 @Controller('quiz')
 export class QuizAdminController {
-  constructor(private readonly repo: TracksRepository) {}
+  constructor(
+    private readonly repo: TracksRepository,
+    private readonly spotify: SpotifyService,
+  ) {}
 
   /** Publico — o formulario de criar sala precisa listar quizzes disponiveis. */
   @Get('quizzes')
@@ -156,5 +174,30 @@ export class QuizAdminController {
   deleteQuiz(@Param('id') id: string): void {
     try { this.repo.deleteQuiz(id); }
     catch (e) { throw new NotFoundException((e as Error).message); }
+  }
+
+  // ---------- Spotify (admin) ----------
+
+  /** Indica ao cliente se o server tem credenciais Spotify configuradas. */
+  @Get('admin/spotify/status')
+  @UseGuards(AdminGuard)
+  spotifyStatus(): { configured: boolean } {
+    return { configured: this.spotify.isConfigured };
+  }
+
+  @Get('admin/spotify/search')
+  @UseGuards(AdminGuard)
+  async spotifySearch(@Query('q') q: string): Promise<SpotifyTrackResult[]> {
+    return this.spotify.searchTracks(q ?? '', 12);
+  }
+
+  @Post('admin/spotify/distractors')
+  @UseGuards(AdminGuard)
+  async spotifyDistractors(@Body() dto: SpotifyDistractorsDto): Promise<{ options: string[] }> {
+    const options = await this.spotify.buildDistractors(
+      { trackId: dto.trackId, trackName: dto.trackName, artistName: dto.artistName, artistId: dto.artistId },
+      dto.field,
+    );
+    return { options };
   }
 }

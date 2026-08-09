@@ -4,6 +4,15 @@ import type {
   QuizTrack,
   RoomSnapshot,
 } from '@boardzando/contracts';
+
+export interface SpotifyTrackResult {
+  trackId: string;
+  name: string;
+  artist: string;
+  artistId?: string;
+  albumCover?: string;
+  durationMs: number;
+}
 import { clearAdmin, loadAdmin } from './adminSession';
 
 export interface CreateRoomResult {
@@ -84,4 +93,20 @@ export const adminApi = {
     }),
   deleteQuiz: (id: string) =>
     req<void>(`/quiz/admin/quizzes/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
+  // Spotify
+  spotifyStatus: () => req<{ configured: boolean }>('/quiz/admin/spotify/status'),
+  spotifySearch: (q: string) =>
+    req<SpotifyTrackResult[]>(`/quiz/admin/spotify/search?q=${encodeURIComponent(q)}`),
+  spotifyDistractors: (input: {
+    trackId: string;
+    trackName: string;
+    artistName: string;
+    artistId?: string;
+    field: 'title' | 'artist';
+  }) =>
+    req<{ options: string[] }>('/quiz/admin/spotify/distractors', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
 };

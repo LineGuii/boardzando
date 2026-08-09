@@ -1,6 +1,6 @@
 import { useEffect, useState, type JSX } from 'react';
-import type { QuizDefinition, QuizTrack } from '@boardzando/contracts';
-import { adminApi, AdminUnauthorizedError } from '../net/adminApi';
+import type { QuizAudioSource, QuizDefinition, QuizTrack } from '@boardzando/contracts';
+import { adminApi, AdminUnauthorizedError, type SpotifyTrackResult } from '../net/adminApi';
 
 /**
  * Editor de faixas (biblioteca) e quizzes. Duas abas: "Faixas" e "Quizzes".
@@ -117,10 +117,15 @@ function TrackFormModal(props: {
   onError: (msg: string) => void;
 }): JSX.Element {
   const isNew = props.initial === null;
+  const initialSourceKind = props.initial?.source.kind ?? 'local';
+  const [sourceKind, setSourceKind] = useState<'local' | 'spotify'>(initialSourceKind);
   const [title, setTitle] = useState(props.initial?.title ?? '');
   const [artist, setArtist] = useState(props.initial?.artist ?? '');
   const [audioFile, setAudioFile] = useState(
     props.initial?.source.kind === 'local' ? props.initial.source.audioFile : '',
+  );
+  const [spotifyId, setSpotifyId] = useState(
+    props.initial?.source.kind === 'spotify' ? props.initial.source.trackId : '',
   );
   const [coverUrl, setCoverUrl] = useState(props.initial?.coverUrl ?? '');
   const [questionText, setQuestionText] = useState(props.initial?.questionText ?? 'Qual e essa musica?');
@@ -132,16 +137,72 @@ function TrackFormModal(props: {
   const [startSec, setStartSec] = useState(props.initial?.startSec ?? 0);
   const [durationSec, setDurationSec] = useState(props.initial?.durationSec ?? 20);
   const [busy, setBusy] = useState(false);
+  const [distractorBusy, setDistractorBusy] = useState(false);
+  const [spotifyOpen, setSpotifyOpen] = useState(false);
+  const [spotifyConfigured, setSpotifyConfigured] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    void adminApi.spotifyStatus().then((s) => setSpotifyConfigured(s.configured)).catch(() => setSpotifyConfigured(false));
+  }, []);
+
+  const applySpotifyPick = (pick: SpotifyTrackResult): void => {
+    setSourceKind('spotify');
+    setSpotifyId(pick.trackId);
+    setTitle(pick.name);
+    setArtist(pick.artist);
+    if (pick.albumCover) setCoverUrl(pick.albumCover);
+    // Preenche a alternativa correta com o titulo (a "pergunta padrao" e "qual e a musica")
+    const setters = [setOpt0, setOpt1, setOpt2, setOpt3];
+    setters[correctIndex]!(pick.name);
+    setSpotifyOpen(false);
+  };
+
+  const autoDistractors = async (): Promise<void> => {
+    if (sourceKind !== 'spotify' || !spotifyId) {
+      props.onError('Escolha primeiro uma faixa do Spotify.');
+      return;
+    }
+    setDistractorBusy(true);
+    try {
+      // Detecta o campo pela pergunta — heuristica simples
+      const field: 'title' | 'artist' = /artist/i.test(questionText) ? 'artist' : 'title';
+      const { options: distractors } = await adminApi.spotifyDistractors({
+        trackId: spotifyId, trackName: title, artistName: artist, field,
+      });
+      // Coloca a correta no slot correctIndex, distratores nos outros 3
+      const correctText = field === 'title' ? title : artist;
+      const filled: string[] = [];
+      const distractorPool = [...distractors];
+      for (let i = 0; i < 4; i++) {
+        if (i === correctIndex) filled.push(correctText);
+        else filled.push(distractorPool.shift() ?? '');
+      }
+      const setters = [setOpt0, setOpt1, setOpt2, setOpt3];
+      filled.forEach((v, i) => setters[i]!(v));
+    } catch (e) {
+      props.onError((e as Error).message);
+    } finally {
+      setDistractorBusy(false);
+    }
+  };
 
   const save = async (): Promise<void> => {
     setBusy(true);
     const options: [string, string, string, string] = [opt0, opt1, opt2, opt3];
     if (options.some((o) => !o.trim())) { props.onError('Preencha as 4 alternativas.'); setBusy(false); return; }
-    if (!audioFile.trim()) { props.onError('Informe o arquivo de audio (ex: audio/nome.mp3).'); setBusy(false); return; }
+
+    let source: QuizAudioSource;
+    if (sourceKind === 'local') {
+      if (!audioFile.trim()) { props.onError('Informe o arquivo de audio (ex: audio/nome.mp3).'); setBusy(false); return; }
+      source = { kind: 'local', audioFile: audioFile.trim() };
+    } else {
+      if (!spotifyId.trim()) { props.onError('Escolha uma faixa do Spotify.'); setBusy(false); return; }
+      source = { kind: 'spotify', trackId: spotifyId.trim(), trackName: title.trim(), artistName: artist.trim() };
+    }
     const payload = {
       title: title.trim() || undefined,
       artist: artist.trim() || undefined,
-      source: { kind: 'local' as const, audioFile: audioFile.trim() },
+      source,
       coverUrl: coverUrl.trim() || undefined,
       questionText: questionText.trim(),
       options,
@@ -165,6 +226,22 @@ function TrackFormModal(props: {
       <div className="q-modal" onClick={(e) => e.stopPropagation()}>
         <h2>{isNew ? 'Nova faixa' : `Editar: ${props.initial!.id}`}</h2>
 
+        <label className="q-label">Fonte do audio</label>
+        <div className="q-tabs" style={{ marginBottom: 8 }}>
+          <button
+            className={`q-tab ${sourceKind === 'local' ? 'active' : ''}`}
+            onClick={() => setSourceKind('local')}
+          >
+            Arquivo local
+          </button>
+          <button
+            className={`q-tab ${sourceKind === 'spotify' ? 'active' : ''}`}
+            onClick={() => setSourceKind('spotify')}
+          >
+            Spotify
+          </button>
+        </div>
+
         <div className="q-row">
           <div>
             <label className="q-label">Titulo</label>
@@ -176,14 +253,47 @@ function TrackFormModal(props: {
           </div>
         </div>
 
-        <label className="q-label">Arquivo de audio (relativo a assets/)</label>
-        <input
-          className="q-input"
-          placeholder="audio/minha-musica.mp3"
-          value={audioFile}
-          onChange={(e) => setAudioFile(e.target.value)}
-          maxLength={256}
-        />
+        {sourceKind === 'local' && (
+          <>
+            <label className="q-label">Arquivo de audio (relativo a assets/)</label>
+            <input
+              className="q-input"
+              placeholder="audio/minha-musica.mp3"
+              value={audioFile}
+              onChange={(e) => setAudioFile(e.target.value)}
+              maxLength={256}
+            />
+          </>
+        )}
+
+        {sourceKind === 'spotify' && (
+          <>
+            <label className="q-label">Faixa Spotify</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                className="q-input"
+                placeholder="trackId (ou clique em Buscar)"
+                value={spotifyId}
+                onChange={(e) => setSpotifyId(e.target.value)}
+                maxLength={64}
+                style={{ flex: 1 }}
+              />
+              <button
+                className="q-btn small"
+                onClick={() => setSpotifyOpen(true)}
+                disabled={spotifyConfigured === false}
+                title={spotifyConfigured === false ? 'Spotify nao configurado no servidor' : ''}
+              >
+                Buscar
+              </button>
+            </div>
+            {spotifyConfigured === false && (
+              <p className="q-help" style={{ color: '#fda4af' }}>
+                SPOTIFY_CLIENT_ID/SECRET nao configurados no servidor.
+              </p>
+            )}
+          </>
+        )}
 
         <label className="q-label">Capa (opcional — URL ou covers/foo.jpg)</label>
         <input
@@ -201,7 +311,14 @@ function TrackFormModal(props: {
           maxLength={300}
         />
 
-        <label className="q-label">Alternativas (marque a correta)</label>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 12 }}>
+          <label className="q-label" style={{ margin: 0 }}>Alternativas (marque a correta)</label>
+          {sourceKind === 'spotify' && spotifyConfigured && spotifyId && (
+            <button className="q-btn small secondary" onClick={() => void autoDistractors()} disabled={distractorBusy}>
+              {distractorBusy ? 'Buscando...' : 'Auto-preencher'}
+            </button>
+          )}
+        </div>
         {[opt0, opt1, opt2, opt3].map((val, i) => (
           <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
             <input
@@ -253,6 +370,86 @@ function TrackFormModal(props: {
           <button className="q-btn" onClick={() => void save()} disabled={busy}>
             {busy ? 'Salvando...' : (isNew ? 'Criar faixa' : 'Salvar')}
           </button>
+        </div>
+
+        {spotifyOpen && (
+          <SpotifySearchModal
+            onClose={() => setSpotifyOpen(false)}
+            onPick={applySpotifyPick}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ==========================================================
+// SPOTIFY SEARCH
+// ==========================================================
+
+function SpotifySearchModal(props: {
+  onClose: () => void;
+  onPick: (t: SpotifyTrackResult) => void;
+}): JSX.Element {
+  const [q, setQ] = useState('');
+  const [results, setResults] = useState<SpotifyTrackResult[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+
+  const search = async (): Promise<void> => {
+    if (!q.trim()) return;
+    setBusy(true); setError(undefined);
+    try { setResults(await adminApi.spotifySearch(q.trim())); }
+    catch (e) { setError((e as Error).message); }
+    finally { setBusy(false); }
+  };
+
+  return (
+    <div
+      className="q-modal-backdrop"
+      onClick={props.onClose}
+      style={{ zIndex: 200 }}
+    >
+      <div className="q-modal" onClick={(e) => e.stopPropagation()}>
+        <h2>Buscar no Spotify</h2>
+        {error && (
+          <div className="q-alert"><span>⚠ {error}</span><button onClick={() => setError(undefined)}>×</button></div>
+        )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            className="q-input"
+            placeholder="ex: Bohemian Rhapsody Queen"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && void search()}
+            autoFocus
+            style={{ flex: 1 }}
+          />
+          <button className="q-btn small" onClick={() => void search()} disabled={busy}>
+            {busy ? '...' : 'Buscar'}
+          </button>
+        </div>
+
+        <div className="q-track-list" style={{ marginTop: 12, maxHeight: 340 }}>
+          {results.length === 0 && !busy && (
+            <div className="q-room-empty">Digite algo e pressione Enter.</div>
+          )}
+          {results.map((t) => (
+            <div key={t.trackId} className="q-track-item">
+              {t.albumCover && (
+                <img src={t.albumCover} alt="" style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }} />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="who">{t.name}</div>
+                <div className="meta">{t.artist}</div>
+              </div>
+              <button className="q-btn small" onClick={() => props.onPick(t)}>Usar</button>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+          <button className="q-btn secondary" onClick={props.onClose}>Fechar</button>
         </div>
       </div>
     </div>
