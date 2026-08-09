@@ -17,6 +17,7 @@ import {
   type RoomSummary,
 } from '@boardzando/contracts';
 import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { ConfigService } from '@nestjs/config';
 import { RoomService } from '../core/room/room.service';
 import { AuthService } from './auth.service';
 import { AdminGuard } from './admin.guard';
@@ -59,7 +60,20 @@ export class QuizController {
   constructor(
     private readonly rooms: RoomService,
     private readonly auth: AuthService,
+    private readonly config: ConfigService,
   ) {}
+
+  /**
+   * Config publica do cliente. Retorna o `SPOTIFY_CLIENT_ID` (que e publico
+   * por design) para o PKCE flow rodar no browser. Se ausente, o cliente
+   * sabe que Spotify nao esta disponivel e nao mostra o botao "Conectar".
+   */
+  @Get('config')
+  publicConfig(): { spotifyClientId: string | null } {
+    return {
+      spotifyClientId: this.config.get<string>('SPOTIFY_CLIENT_ID') || null,
+    };
+  }
 
   @Get('rooms')
   listRooms(): RoomSummary[] {

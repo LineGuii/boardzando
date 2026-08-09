@@ -7,6 +7,7 @@ import { saveSession } from '../net/session';
 import { syncClock } from '../net/clockSync';
 import { useQuiz } from '../net/store';
 import { QuizEditor } from './QuizEditor';
+import { beginLogin, clearToken, completeLoginIfCallback, isLoggedIn as isSpotifyLoggedIn } from '../audio/spotifyAuth';
 
 /**
  * Painel admin. Login primeiro; depois duas abas:
@@ -75,6 +76,21 @@ function AdminLogin(props: { onLoggedIn: () => void }): JSX.Element {
 
 function AdminHome(props: { onLogout: () => void }): JSX.Element {
   const [tab, setTab] = useState<'room' | 'editor'>('room');
+  const [spotifyLogged, setSpotifyLogged] = useState<boolean>(false);
+  const [spotifyBusy, setSpotifyBusy] = useState(false);
+
+  useEffect(() => {
+    // Se voltamos do consent Spotify, finalize; senao carrega estado atual.
+    void completeLoginIfCallback().then(() => setSpotifyLogged(isSpotifyLoggedIn()));
+  }, []);
+
+  const doSpotifyLogin = async (): Promise<void> => {
+    setSpotifyBusy(true);
+    try { await beginLogin(); }
+    catch (e) { alert((e as Error).message); setSpotifyBusy(false); }
+  };
+  const doSpotifyLogout = (): void => { clearToken(); setSpotifyLogged(false); };
+
   return (
     <div className="q-container">
       <div className="q-hero">
@@ -91,6 +107,23 @@ function AdminHome(props: { onLogout: () => void }): JSX.Element {
           </button>
         </div>
         {tab === 'room' ? <CreateRoomForm onUnauthorized={props.onLogout} /> : <QuizEditor onUnauthorized={props.onLogout} />}
+      </div>
+
+      <div className="q-card" style={{ marginTop: 12 }}>
+        <h2>Conta Spotify</h2>
+        <p className="q-help">
+          Necessario apenas para tocar faixas com fonte Spotify. Exige Premium.
+        </p>
+        {spotifyLogged ? (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+            <span style={{ color: '#86efac', fontWeight: 700 }}>Conectado</span>
+            <button className="q-btn small secondary" onClick={doSpotifyLogout}>Desconectar</button>
+          </div>
+        ) : (
+          <button className="q-btn" onClick={() => void doSpotifyLogin()} disabled={spotifyBusy}>
+            {spotifyBusy ? 'Redirecionando...' : 'Conectar Spotify'}
+          </button>
+        )}
       </div>
 
       <div style={{ textAlign: 'center', marginTop: 12 }}>
