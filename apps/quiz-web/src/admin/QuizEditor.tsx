@@ -1,5 +1,11 @@
 import { useEffect, useState, type JSX } from 'react';
-import type { QuizAudioSource, QuizDefinition, QuizTrack } from '@boardzando/contracts';
+import type { QuizAudioSource, QuizDefinition, QuizDifficulty, QuizTrack } from '@boardzando/contracts';
+
+const DIFFICULTY_LABEL: Record<QuizDifficulty, string> = {
+  easy: 'Fácil',
+  medium: 'Médio',
+  hard: 'Difícil',
+};
 import { adminApi, AdminUnauthorizedError, type SpotifyTrackResult } from '../net/adminApi';
 
 /**
@@ -86,7 +92,12 @@ function TracksTab(props: { onUnauthorized: () => void }): JSX.Element {
         {tracks.map((t) => (
           <div key={t.id} className="q-track-item">
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="who">{t.title || t.questionText}</div>
+              <div className="who">
+                {t.title || t.questionText}
+                {t.difficulty && (
+                  <span className={`q-diff q-diff-${t.difficulty}`}>{DIFFICULTY_LABEL[t.difficulty]}</span>
+                )}
+              </div>
               <div className="meta">
                 {t.artist ? `${t.artist} · ` : ''}
                 {t.source.kind === 'local' ? `local: ${t.source.audioFile}` : `spotify: ${t.source.trackName}`}
@@ -134,6 +145,7 @@ function TrackFormModal(props: {
   const [opt2, setOpt2] = useState(props.initial?.options[2] ?? '');
   const [opt3, setOpt3] = useState(props.initial?.options[3] ?? '');
   const [correctIndex, setCorrectIndex] = useState<0 | 1 | 2 | 3>(props.initial?.correctIndex ?? 0);
+  const [difficulty, setDifficulty] = useState<QuizDifficulty>(props.initial?.difficulty ?? 'medium');
   const [startSec, setStartSec] = useState(props.initial?.startSec ?? 0);
   const [durationSec, setDurationSec] = useState(props.initial?.durationSec ?? 20);
   const [busy, setBusy] = useState(false);
@@ -207,6 +219,7 @@ function TrackFormModal(props: {
       questionText: questionText.trim(),
       options,
       correctIndex,
+      difficulty,
       startSec,
       durationSec,
     };
@@ -340,6 +353,17 @@ function TrackFormModal(props: {
             />
           </div>
         ))}
+
+        <label className="q-label">Dificuldade</label>
+        <select
+          className="q-select"
+          value={difficulty}
+          onChange={(e) => setDifficulty(e.target.value as QuizDifficulty)}
+        >
+          <option value="easy">Fácil</option>
+          <option value="medium">Médio</option>
+          <option value="hard">Difícil</option>
+        </select>
 
         <div className="q-row">
           <div>

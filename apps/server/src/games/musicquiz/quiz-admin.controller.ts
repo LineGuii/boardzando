@@ -61,6 +61,9 @@ class TrackInputDto {
 
   @IsInt() @Min(0) @Max(3) correctIndex!: 0 | 1 | 2 | 3;
 
+  @IsOptional() @IsString() @IsIn(['easy', 'medium', 'hard'])
+  difficulty?: 'easy' | 'medium' | 'hard';
+
   @IsOptional() @IsInt() @Min(0) startSec?: number;
   @IsOptional() @IsInt() @Min(1) @Max(120) durationSec?: number;
 }
@@ -74,6 +77,8 @@ class TrackPatchDto {
   @IsOptional() @IsArray() @ArrayMinSize(4) @ArrayMaxSize(4) @IsString({ each: true })
   options?: [string, string, string, string];
   @IsOptional() @IsInt() @Min(0) @Max(3) correctIndex?: 0 | 1 | 2 | 3;
+  @IsOptional() @IsString() @IsIn(['easy', 'medium', 'hard'])
+  difficulty?: 'easy' | 'medium' | 'hard';
   @IsOptional() @IsInt() @Min(0) startSec?: number;
   @IsOptional() @IsInt() @Min(1) @Max(120) durationSec?: number;
 }

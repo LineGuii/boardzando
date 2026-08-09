@@ -292,6 +292,27 @@
   font-size: 26px; font-weight: 900;
   color: #67e8f9; text-transform: uppercase; letter-spacing: 2px;
   margin-bottom: 30px;
+  transition: font-size 300ms ease, letter-spacing 300ms ease;
+}
+.q-final-title.drumroll {
+  font-size: 34px;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f472b6 50%, #22d3ee 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: q-drumroll-shake 0.12s ease-in-out infinite alternate;
+  text-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+}
+@keyframes q-drumroll-shake {
+  from { transform: translateX(-2px) scale(1); }
+  to   { transform: translateX(2px)  scale(1.03); }
+}
+.q-final-wait {
+  color: #cbd5ff; font-size: 16px; font-weight: 700;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: rgba(11, 20, 50, 0.6);
+  border: 1px dashed rgba(148, 163, 255, 0.35);
+  text-align: center;
 }
 
 .q-final-list {

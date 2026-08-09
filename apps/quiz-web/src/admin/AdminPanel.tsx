@@ -1,5 +1,5 @@
 import { useEffect, useState, type JSX } from 'react';
-import { AVATAR_COLORS, randomAvatarColor, type QuizSummary } from '@boardzando/contracts';
+import { AVATAR_COLORS, randomAvatarColor, type QuizOrderMode, type QuizSummary } from '@boardzando/contracts';
 import { adminApi, AdminUnauthorizedError } from '../net/adminApi';
 import { clearAdmin, loadAdmin, saveAdmin } from '../net/adminSession';
 import { connectSocket } from '../net/socket';
@@ -140,6 +140,7 @@ function CreateRoomForm(props: { onUnauthorized: () => void }): JSX.Element {
   const [password, setPassword] = useState('');
   const [rounds, setRounds] = useState(10);
   const [audioMode, setAudioMode] = useState<'remote' | 'presenter'>('remote');
+  const [orderMode, setOrderMode] = useState<QuizOrderMode>('random');
   const [hostIsPlayer, setHostIsPlayer] = useState(true);
   const [quizzes, setQuizzes] = useState<QuizSummary[]>([]);
   const [quizId, setQuizId] = useState<string>('');
@@ -164,7 +165,7 @@ function CreateRoomForm(props: { onUnauthorized: () => void }): JSX.Element {
     try {
       localStorage.setItem(
         'quiz:pending-options',
-        JSON.stringify({ rounds, audioMode, hostIsPlayer, quizId }),
+        JSON.stringify({ rounds, audioMode, hostIsPlayer, quizId, orderMode }),
       );
       const res = await adminApi.createRoom(name.trim(), color, password || undefined);
       saveSession({ roomId: res.roomId, playerId: res.playerId, token: res.token });
@@ -263,6 +264,17 @@ function CreateRoomForm(props: { onUnauthorized: () => void }): JSX.Element {
           </select>
         </div>
       </div>
+
+      <label className="q-label">Ordem das perguntas</label>
+      <select
+        className="q-select"
+        value={orderMode}
+        onChange={(e) => setOrderMode(e.target.value as QuizOrderMode)}
+      >
+        <option value="random">🔀 Aleatória</option>
+        <option value="difficulty">📈 Por dificuldade (fácil → difícil)</option>
+        <option value="sequence">📄 Ordem do arquivo</option>
+      </select>
 
       <label className="q-switch" style={{ marginTop: 12 }}>
         <input

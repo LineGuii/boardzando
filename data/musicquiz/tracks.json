@@ -18,7 +18,8 @@
       ],
       "correctIndex": 0,
       "startSec": 0,
-      "durationSec": 20
+      "durationSec": 20,
+      "difficulty": "hard"
     },
     {
       "id": "crash-bandicoot",
@@ -33,7 +34,6 @@
         "Crash Bandicoot",
         "Donkey Kong Country",
         "Super Mario 64"
-
       ],
       "correctIndex": 1,
       "startSec": 0,
@@ -243,7 +243,7 @@
       "source": {
         "kind": "local",
         "audioFile": "audio/Starcraft.mp3"
-      },    
+      },
       "questionText": "De que jogo é essa música?",
       "options": [
         "Ragnarok Online",
@@ -261,7 +261,7 @@
       "source": {
         "kind": "local",
         "audioFile": "audio/yugioh.mp3"
-      },    
+      },
       "questionText": "De que jogo é essa música?",
       "options": [
         "Ragnarok Online",
@@ -279,7 +279,7 @@
       "source": {
         "kind": "local",
         "audioFile": "audio/thelegendofzelda.mp3"
-      },    
+      },
       "questionText": "De que jogo é essa música?",
       "options": [
         "Ragnarok Online",

@@ -138,9 +138,10 @@ export class MusicQuizService {
 
     // Se o host escolheu um quiz especifico, sorteia dele; caso contrario
     // usa a biblioteca inteira (fallback / compat com salas antigas).
+    const orderMode = options.orderMode ?? 'random';
     const chosen = options.quizId
-      ? this.tracks.sampleFromQuiz(options.quizId, options.rounds)
-      : this.tracks.sampleFromLibrary(options.rounds);
+      ? this.tracks.sampleFromQuiz(options.quizId, options.rounds, orderMode)
+      : this.tracks.sampleFromLibrary(options.rounds, orderMode);
     if (chosen.length === 0) {
       throw new Error(
         options.quizId ? `QUIZ_VAZIO:${options.quizId}` : 'SEM_MUSICAS_CADASTRADAS',
@@ -480,7 +481,10 @@ export class MusicQuizService {
     const audioMode = o.audioMode === 'presenter' ? 'presenter' : 'remote';
     const hostIsPlayer = typeof o.hostIsPlayer === 'boolean' ? o.hostIsPlayer : QUIZ_DEFAULTS.hostIsPlayer;
     const quizId = typeof o.quizId === 'string' && o.quizId ? o.quizId : undefined;
-    return { rounds, audioMode, hostIsPlayer, quizId };
+    const orderMode = (o.orderMode === 'difficulty' || o.orderMode === 'sequence')
+      ? o.orderMode
+      : 'random';
+    return { rounds, audioMode, hostIsPlayer, quizId, orderMode };
   }
 }
 

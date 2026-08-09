@@ -12,13 +12,21 @@ interface Props {
 
 const ROW_H = 74;
 const ROW_GAP = 10;
-const STEP_MS = 1400;
-const CROWN_DRAMA_MS = 2400;
+/** Delay antes do primeiro reveal — deixa o publico absorver a tela. */
+const INITIAL_DELAY_MS = 1500;
+/** Tempo entre revelacoes dos nao-vencedores (do ultimo pro segundo lugar). */
+const STEP_MS = 1800;
+/** Drum roll ANTES do #1 aparecer. Mais longo = mais suspense. */
+const CROWN_DRAMA_MS = 4500;
 
 /**
- * Reveal do fim de partida. Cada linha comeca no centro da tela (opacidade 0)
- * e e revelada do ULTIMO ao PRIMEIRO com um spring "strong" (mesmo perfil do
- * ranking entre rodadas, so mais lento). Drum roll + fanfare no #1.
+ * Reveal do fim de partida. Cada linha comeca invisivel (opacity 0) e some do
+ * layout final (translateY negativo). E revelada DO ULTIMO AO PRIMEIRO com
+ * spring. O #1 leva um drum roll mais longo + zoom rapido (scale 0.2 -> 1.4 ->
+ * 1) + fanfare + coroa dourada com brilho pulsante.
+ *
+ * A tela NAO some sozinha: nao ha auto-dismiss nem timer para reset. Ela fica
+ * ate o host decidir "Jogar de novo" ou o usuario clicar "Sair da sala".
  */
 export function FinalReveal(props: Props): JSX.Element {
   const sorted = useMemo(() => {
@@ -28,81 +36,94 @@ export function FinalReveal(props: Props): JSX.Element {
   }, [props.final.ranking]);
 
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const seenSeq = useRef<number>(-1);
   const [showWinnerGlow, setShowWinnerGlow] = useState<string | null>(null);
+  /** Fase visual: 'wait' -> 'revealing' -> 'drumroll' -> 'winner'. Controla o
+   *  destaque "..." piscando durante o drum roll para dar tensao. */
+  const [phase, setPhase] = useState<'wait' | 'revealing' | 'drumroll' | 'winner'>('wait');
 
+  // Effect executa a cada mount ou mudanca de `seq/sorted`. StrictMode em dev
+  // faz mount/unmount/mount — o cleanup abaixo cancela os timers do mount
+  // fantasma; o segundo mount reagenda tudo do zero. Sem dedupe por ref (que
+  // quebra exatamente por isso).
   useEffect(() => {
-    if (seenSeq.current === props.final.seq) return;
-    seenSeq.current = props.final.seq;
-
     const playersOnly = sorted.filter((r) => !r.presenter);
     const total = playersOnly.length;
 
-    // Todas as linhas comecam com opacidade 0 e a 40px acima do destino
+    // Todas as linhas comecam invisiveis.
     for (const r of sorted) {
       const el = rowRefs.current.get(r.playerId);
       if (!el) continue;
       el.style.opacity = '0';
       el.style.transform = `translateY(-40px)`;
     }
+    setPhase('wait');
+    setShowWinnerGlow(null);
 
     const timers: number[] = [];
+    const later = (ms: number, fn: () => void): void => {
+      timers.push(window.setTimeout(fn, ms));
+    };
 
-    // Reveal do ultimo ao primeiro (rank descendente do fim)
+    // Delay inicial para dar peso a "chegada" da tela.
+    later(INITIAL_DELAY_MS, () => setPhase('revealing'));
+
+    // Reveal do ultimo ao penultimo colocado (rank total, total-1, ..., 2).
     for (let i = 0; i < total - 1; i++) {
-      const revealAt = i * STEP_MS;
-      const t = window.setTimeout(() => {
+      const revealAt = INITIAL_DELAY_MS + i * STEP_MS;
+      later(revealAt, () => {
         const targetRow = playersOnly.find((r) => r.rank === total - i);
         if (!targetRow) return;
         const el = rowRefs.current.get(targetRow.playerId);
         if (!el) return;
-        // Indice DOM (posicao vertical final) — usa a ordem `sorted`
         const domIdx = sorted.indexOf(targetRow);
         animate(el, {
           translateY: [-40, domIdx * (ROW_H + ROW_GAP)],
           opacity: [0, 1],
           ease: createSpring({ mass: 1, stiffness: 200, damping: 18, velocity: 0 }),
         });
-      }, revealAt);
-      timers.push(t);
+      });
     }
 
-    // Presenters aparecem junto com o primeiro nao-vencedor
+    // Presenters entram junto com a fase de revelacao (nao interessam ao suspense).
     for (const r of sorted) {
       if (!r.presenter) continue;
       const el = rowRefs.current.get(r.playerId);
       if (!el) continue;
       const domIdx = sorted.indexOf(r);
-      const t = window.setTimeout(() => {
+      later(INITIAL_DELAY_MS + 200, () => {
         animate(el, {
           translateY: [-40, domIdx * (ROW_H + ROW_GAP)],
           opacity: [0, 0.7],
           ease: createSpring({ mass: 1, stiffness: 180, damping: 20 }),
         });
-      }, 200);
-      timers.push(t);
+      });
     }
 
     // Drum roll antes do #1
-    const drumAt = Math.max(0, (total - 1) * STEP_MS);
-    timers.push(window.setTimeout(() => playDrumRoll(CROWN_DRAMA_MS / 1000), drumAt));
+    const drumAt = INITIAL_DELAY_MS + Math.max(0, (total - 1) * STEP_MS);
+    later(drumAt, () => {
+      setPhase('drumroll');
+      playDrumRoll(CROWN_DRAMA_MS / 1000);
+    });
 
-    // #1 revela com spring MAIS forte + fanfare + destaque dourado
-    timers.push(window.setTimeout(() => {
+    // #1 revela com ZOOM rapido: overshoot grande e assenta via spring bouncy.
+    later(drumAt + CROWN_DRAMA_MS, () => {
       const winner = playersOnly.find((r) => r.rank === 1);
       if (!winner) return;
       const el = rowRefs.current.get(winner.playerId);
       if (!el) return;
       const domIdx = sorted.indexOf(winner);
+      // Zoom "punch": comeca minusculo, overshoot para 1.4 e assenta em 1.
       animate(el, {
-        translateY: [-80, domIdx * (ROW_H + ROW_GAP)],
+        translateY: [0, domIdx * (ROW_H + ROW_GAP)],
         opacity: [0, 1],
-        scale: [0.6, 1],
-        ease: createSpring({ mass: 1.2, stiffness: 300, damping: 14 }),
+        scale: [0.2, 1],
+        ease: createSpring({ mass: 1.2, stiffness: 380, damping: 12, velocity: 0 }),
       });
       playFanfare();
       setShowWinnerGlow(winner.playerId);
-    }, drumAt + CROWN_DRAMA_MS));
+      setPhase('winner');
+    });
 
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [sorted, props.final.seq]);
@@ -111,7 +132,9 @@ export function FinalReveal(props: Props): JSX.Element {
 
   return (
     <div className="q-final">
-      <div className="q-final-title">Fim da partida</div>
+      <div className={`q-final-title ${phase === 'drumroll' ? 'drumroll' : ''}`}>
+        {phase === 'drumroll' ? 'E O CAMPEÃO É...' : 'Fim da partida'}
+      </div>
 
       <div className="q-final-list" style={{ height: listHeight }}>
         {sorted.map((r) => {
@@ -143,16 +166,59 @@ export function FinalReveal(props: Props): JSX.Element {
         })}
       </div>
 
+      {phase === 'winner' && <Confetti />}
+
       <div className="q-final-actions">
-        {props.isHost && (
-          <button className="q-btn" style={{ maxWidth: 260 }} onClick={props.onRestart}>
-            Jogar de novo
-          </button>
+        {props.isHost ? (
+          <>
+            <button className="q-btn" style={{ maxWidth: 260 }} onClick={props.onRestart}>
+              Jogar de novo
+            </button>
+            <button className="q-btn secondary" style={{ maxWidth: 260 }} onClick={props.onLeave}>
+              Sair da sala
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="q-final-wait">Aguardando o host decidir o próximo passo…</div>
+            <button
+              className="q-btn small secondary"
+              style={{ marginTop: 12, opacity: 0.7 }}
+              onClick={props.onLeave}
+            >
+              Sair mesmo assim
+            </button>
+          </>
         )}
-        <button className="q-btn secondary" style={{ maxWidth: 260 }} onClick={props.onLeave}>
-          Sair da sala
-        </button>
       </div>
+    </div>
+  );
+}
+
+function Confetti(): JSX.Element {
+  const pieces = useMemo(() => {
+    const colors = ['#22d3ee', '#a78bfa', '#f472b6', '#fbbf24', '#86efac', '#f87171', '#fde047'];
+    return Array.from({ length: 80 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 1.2,
+      duration: 3 + Math.random() * 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    }));
+  }, []);
+  return (
+    <div className="q-confetti">
+      {pieces.map((p) => (
+        <span
+          key={p.id}
+          style={{
+            left: `${p.left}%`,
+            background: p.color,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+          }}
+        />
+      ))}
     </div>
   );
 }

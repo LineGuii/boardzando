@@ -32,6 +32,9 @@ export type QuizAudioSource =
   | { kind: 'local'; audioFile: string }
   | { kind: 'spotify'; trackId: string; trackName: string; artistName: string };
 
+/** Dificuldade da pergunta. Usada como filtro/ordenacao no seletor de rodadas. */
+export type QuizDifficulty = 'easy' | 'medium' | 'hard';
+
 /** Uma pergunta da biblioteca. `correctIndex` NUNCA vai para jogadores. */
 export interface QuizTrack {
   id: string;
@@ -43,6 +46,8 @@ export interface QuizTrack {
   questionText: string;
   options: [string, string, string, string];
   correctIndex: 0 | 1 | 2 | 3;
+  /** Dificuldade da pergunta (default 'medium'). */
+  difficulty?: QuizDifficulty;
   /** Segundo inicial do trecho (default 0). */
   startSec?: number;
   /** Duracao do trecho (default 30s). Apenas hint visual — timer real e 30s no server. */
@@ -67,6 +72,14 @@ export interface QuizSummary {
   trackCount: number;
 }
 
+/**
+ * Ordem em que as perguntas do quiz sao apresentadas.
+ * - `random`     : embaralhada (default)
+ * - `difficulty` : easy -> medium -> hard
+ * - `sequence`   : ordem definida no quiz (trackIds do arquivo)
+ */
+export type QuizOrderMode = 'random' | 'difficulty' | 'sequence';
+
 /** Opcoes escolhidas pelo host ao iniciar a partida. */
 export interface QuizOptions {
   /** Numero de perguntas. Default 10, minimo 1, maximo 50. */
@@ -78,12 +91,15 @@ export interface QuizOptions {
   hostIsPlayer: boolean;
   /** Qual quiz sortear as faixas. undefined = pool inteiro (compat v1). */
   quizId?: string;
+  /** Ordem de apresentacao das perguntas. Default 'random'. */
+  orderMode?: QuizOrderMode;
 }
 
 export const QUIZ_DEFAULTS: QuizOptions = {
   rounds: 10,
   audioMode: 'remote',
   hostIsPlayer: true,
+  orderMode: 'random',
 };
 
 export type QuizPhase =

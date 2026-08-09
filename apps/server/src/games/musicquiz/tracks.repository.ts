@@ -13,9 +13,12 @@ import { join, resolve } from 'node:path';
 import type {
   QuizAudioSource,
   QuizDefinition,
+  QuizOrderMode,
   QuizSummary,
   QuizTrack,
 } from '@boardzando/contracts';
+
+const DIFFICULTY_RANK: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
 
 /** Diretorio base dos assets do quiz (audios + capas + tracks.json).
  *  Default: `<repo-root>/data/musicquiz`. Em dev, `process.cwd()` do nest e
@@ -112,32 +115,54 @@ export class TracksRepository implements OnModuleInit {
     return this.data.quizzes.find((q) => q.id === id);
   }
 
-  /** Amostra `n` faixas de um quiz especifico (sem repeticao se possivel). */
-  sampleFromQuiz(quizId: string, n: number): QuizTrack[] {
+  /**
+   * Amostra `n` faixas de um quiz especifico segundo `orderMode`:
+   *   - 'random'     : sorteio sem repeticao (recicla se n > pool)
+   *   - 'sequence'   : ordem do arquivo (trackIds do quiz)
+   *   - 'difficulty' : easy -> medium -> hard, aleatorizando dentro do mesmo nivel
+   */
+  sampleFromQuiz(quizId: string, n: number, orderMode: QuizOrderMode = 'random'): QuizTrack[] {
     const quiz = this.getQuiz(quizId);
     if (!quiz || quiz.trackIds.length === 0) return [];
     const trackMap = new Map(this.data.tracks.map((t) => [t.id, t]));
     const pool = quiz.trackIds.map((id) => trackMap.get(id)).filter((t): t is QuizTrack => !!t);
     if (pool.length === 0) return [];
+    return this.pickOrdered(pool, n, orderMode);
+  }
+
+  /** Fallback quando ninguem passa quizId — usa a biblioteca inteira. */
+  sampleFromLibrary(n: number, orderMode: QuizOrderMode = 'random'): QuizTrack[] {
+    if (this.data.tracks.length === 0) return [];
+    return this.pickOrdered(this.data.tracks, n, orderMode);
+  }
+
+  private pickOrdered(pool: QuizTrack[], n: number, orderMode: QuizOrderMode): QuizTrack[] {
+    if (orderMode === 'sequence') {
+      // Ordem exata do arquivo; recicla do inicio se n > pool.length.
+      const out: QuizTrack[] = [];
+      for (let i = 0; i < n; i++) out.push(pool[i % pool.length]!);
+      return out;
+    }
+    if (orderMode === 'difficulty') {
+      // Bucketiza por dificuldade e depois embaralha dentro de cada bucket
+      // (evita repetir a mesma sequencia toda partida com difficulty=easy).
+      const sorted = [...pool].sort((a, b) => {
+        const da = DIFFICULTY_RANK[a.difficulty ?? 'medium'] ?? 1;
+        const db = DIFFICULTY_RANK[b.difficulty ?? 'medium'] ?? 1;
+        if (da !== db) return da - db;
+        return Math.random() - 0.5;
+      });
+      const out: QuizTrack[] = [];
+      for (let i = 0; i < n; i++) out.push(sorted[i % sorted.length]!);
+      return out;
+    }
+    // random (default): sorteio sem repeticao, recicla se pedido n > pool
     const out: QuizTrack[] = [];
     let remaining = [...pool];
     while (out.length < n) {
       if (remaining.length === 0) remaining = [...pool];
       const idx = Math.floor(Math.random() * remaining.length);
       out.push(remaining.splice(idx, 1)[0]!);
-    }
-    return out;
-  }
-
-  /** Fallback quando ninguem passa quizId — sorteia da biblioteca inteira. */
-  sampleFromLibrary(n: number): QuizTrack[] {
-    if (this.data.tracks.length === 0) return [];
-    const out: QuizTrack[] = [];
-    let pool = [...this.data.tracks];
-    while (out.length < n) {
-      if (pool.length === 0) pool = [...this.data.tracks];
-      const idx = Math.floor(Math.random() * pool.length);
-      out.push(pool.splice(idx, 1)[0]!);
     }
     return out;
   }
@@ -371,6 +396,9 @@ export class TracksRepository implements OnModuleInit {
     if (!t.options.every((o) => typeof o === 'string' && o.length > 0)) return 'alguma option esta vazia';
     if (typeof t.correctIndex !== 'number' || t.correctIndex < 0 || t.correctIndex > 3) return 'correctIndex fora de 0..3';
     if (!this.validateSource(t.source)) return 'source invalida';
+    if (t.difficulty !== undefined && !['easy', 'medium', 'hard'].includes(t.difficulty)) {
+      return 'difficulty deve ser easy | medium | hard';
+    }
     return null;
   }
 
