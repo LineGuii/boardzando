@@ -40,6 +40,9 @@ export function FinalReveal(props: Props): JSX.Element {
   /** Fase visual: 'wait' -> 'revealing' -> 'drumroll' -> 'winner'. Controla o
    *  destaque "..." piscando durante o drum roll para dar tensao. */
   const [phase, setPhase] = useState<'wait' | 'revealing' | 'drumroll' | 'winner'>('wait');
+  /** Botoes de acao aparecem so 2s DEPOIS do reveal do #1 — evita que o
+   *  usuario clique "Jogar de novo" antes de curtir a coroa/confete. */
+  const [showActions, setShowActions] = useState(false);
 
   // Effect executa a cada mount ou mudanca de `seq/sorted`. StrictMode em dev
   // faz mount/unmount/mount — o cleanup abaixo cancela os timers do mount
@@ -58,6 +61,7 @@ export function FinalReveal(props: Props): JSX.Element {
     }
     setPhase('wait');
     setShowWinnerGlow(null);
+    setShowActions(false);
 
     const timers: number[] = [];
     const later = (ms: number, fn: () => void): void => {
@@ -125,6 +129,9 @@ export function FinalReveal(props: Props): JSX.Element {
       setPhase('winner');
     });
 
+    // Botoes aparecem 2s depois do #1 pra dar tempo de curtir coroa + confete.
+    later(drumAt + CROWN_DRAMA_MS + 2000, () => setShowActions(true));
+
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [sorted, props.final.seq]);
 
@@ -168,7 +175,7 @@ export function FinalReveal(props: Props): JSX.Element {
 
       {phase === 'winner' && <Confetti />}
 
-      <div className="q-final-actions">
+      <div className={`q-final-actions ${showActions ? 'visible' : ''}`}>
         {props.isHost ? (
           <>
             <button className="q-btn" style={{ maxWidth: 260 }} onClick={props.onRestart}>
@@ -195,30 +202,123 @@ export function FinalReveal(props: Props): JSX.Element {
   );
 }
 
+/**
+ * Confete festivo com fisica real: multiplos "canhoes" disparam particulas em
+ * cone; cada uma tem velocidade inicial + gravidade + rotacao + fade. Muito
+ * mais parecido com confete de festa do que "chove pra baixo".
+ *
+ * 3 bursts ao longo de 1.5s (bottom-left, bottom-right, top-center) para dar
+ * cobertura de tela sem parecer scripted.
+ */
+const CONFETTI_COLORS = [
+  '#22d3ee', '#a78bfa', '#f472b6', '#fbbf24', '#86efac', '#f87171',
+  '#fde047', '#ec4899', '#38bdf8', '#c084fc',
+];
+
+interface BurstOrigin {
+  /** 0..1 relativo ao viewport. */
+  x: number;
+  y: number;
+  /** Angulo do centro do cone em graus (0 = direita, -90 = pra cima). */
+  angle: number;
+  /** Abertura total do cone em graus. */
+  spread: number;
+  /** Quantidade de particulas. */
+  count: number;
+  /** Delay para disparo. */
+  delayMs: number;
+}
+
+const BURSTS: BurstOrigin[] = [
+  { x: 0.10, y: 1.00, angle: -75, spread: 60, count: 60, delayMs: 0    }, // canhao esq -> pra cima e direita
+  { x: 0.90, y: 1.00, angle: -105, spread: 60, count: 60, delayMs: 250 }, // canhao dir -> pra cima e esquerda
+  { x: 0.50, y: 0.15, angle: 90, spread: 120, count: 50, delayMs: 700 }, // canhao topo -> chuva ampla pra baixo
+];
+
 function Confetti(): JSX.Element {
-  const pieces = useMemo(() => {
-    const colors = ['#22d3ee', '#a78bfa', '#f472b6', '#fbbf24', '#86efac', '#f87171', '#fde047'];
-    return Array.from({ length: 80 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      delay: Math.random() * 1.2,
-      duration: 3 + Math.random() * 3,
-      color: colors[Math.floor(Math.random() * colors.length)],
-    }));
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const spawned: HTMLElement[] = [];
+    const rafs = new Set<number>();
+
+    const spawnBurst = (b: BurstOrigin): void => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const angleCenter = (b.angle * Math.PI) / 180;
+      const angleSpread = (b.spread * Math.PI) / 180;
+
+      for (let i = 0; i < b.count; i++) {
+        const el = document.createElement('span');
+        el.className = 'q-confetti-piece';
+        const isCircle = Math.random() < 0.35;
+        const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)]!;
+        el.style.background = color;
+        if (isCircle) {
+          el.style.borderRadius = '50%';
+          el.style.width = `${7 + Math.random() * 5}px`;
+          el.style.height = el.style.width;
+        } else {
+          el.style.width = `${6 + Math.random() * 5}px`;
+          el.style.height = `${10 + Math.random() * 8}px`;
+        }
+        const startX = b.x * w;
+        const startY = b.y * h;
+        el.style.left = `${startX}px`;
+        el.style.top = `${startY}px`;
+        container.appendChild(el);
+        spawned.push(el);
+
+        // Vetor inicial em cone
+        const angle = angleCenter + (Math.random() - 0.5) * angleSpread;
+        const speed = 600 + Math.random() * 500; // 600..1100 px/s
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        const gravity = 1300 + Math.random() * 400; // px/s^2
+        const drag = 0.4;                            // desacelera horizontal
+        const rot0 = Math.random() * 360;
+        const rotRate = (Math.random() - 0.5) * 900; // deg/s
+        const duration = 3200 + Math.random() * 1800;
+        const totalT = duration / 1000;
+
+        const t0 = performance.now();
+        const tick = (now: number): void => {
+          const t = (now - t0) / 1000;
+          if (t >= totalT) {
+            el.remove();
+            return;
+          }
+          // Integracao simples: x = vx*t*(1 - drag*t/totalT), y = vy*t + 0.5*g*t^2
+          const damp = Math.max(0, 1 - (drag * t) / totalT);
+          const px = vx * t * damp;
+          const py = vy * t + 0.5 * gravity * t * t;
+          const rot = rot0 + rotRate * t;
+          // Wobble horizontal leve (papel voando)
+          const wobble = Math.sin(t * 8 + rot0) * 6;
+          const opacity = t > totalT - 0.6 ? Math.max(0, (totalT - t) / 0.6) : 1;
+          el.style.transform = `translate(${px + wobble}px, ${py}px) rotate(${rot}deg)`;
+          el.style.opacity = String(opacity);
+          const r = requestAnimationFrame(tick);
+          rafs.add(r);
+        };
+        const first = requestAnimationFrame(tick);
+        rafs.add(first);
+      }
+    };
+
+    const timers: number[] = [];
+    for (const b of BURSTS) {
+      timers.push(window.setTimeout(() => spawnBurst(b), b.delayMs));
+    }
+
+    return () => {
+      timers.forEach((t) => window.clearTimeout(t));
+      rafs.forEach((r) => cancelAnimationFrame(r));
+      spawned.forEach((el) => el.remove());
+    };
   }, []);
-  return (
-    <div className="q-confetti">
-      {pieces.map((p) => (
-        <span
-          key={p.id}
-          style={{
-            left: `${p.left}%`,
-            background: p.color,
-            animationDelay: `${p.delay}s`,
-            animationDuration: `${p.duration}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
+
+  return <div ref={containerRef} className="q-confetti-container" />;
 }

@@ -16,8 +16,15 @@ tunnel: boardzando
 credentials-file: /root/.cloudflared/SEU-UUID-AQUI.json
 
 ingress:
-  - hostname: jogos.seudominio.com
-    service: http://localhost:3000        # NestJS (REST + Socket.IO no mesmo host)
+  # App principal (Boardzando) — Vite dev server
+  - hostname: boardzando.rpgzando.com
+    service: http://localhost:5173
+    originRequest:
+      connectTimeout: 30s
+      noTLSVerify: false
+  # Music Quiz — Vite dev server dedicado (porta separada)
+  - hostname: quiz.rpgzando.com
+    service: http://localhost:5174
     originRequest:
       connectTimeout: 30s
       noTLSVerify: false

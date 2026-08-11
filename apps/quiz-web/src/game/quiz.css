@@ -388,19 +388,37 @@
   100% { transform: translateX(-50%) translateY(0) rotate(0); opacity: 1; }
 }
 
-.q-confetti { position: fixed; top: -20px; pointer-events: none; z-index: 100; }
-.q-confetti span {
-  position: absolute; width: 10px; height: 14px;
-  animation: q-confetti-fall linear forwards;
+/* Confete fisico: JS anima cada .q-confetti-piece via transform + gravidade. */
+.q-confetti-container {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  overflow: hidden;
 }
-@keyframes q-confetti-fall {
-  from { transform: translateY(0) rotate(0); opacity: 1; }
-  to { transform: translateY(110vh) rotate(720deg); opacity: 0.5; }
+.q-confetti-piece {
+  position: absolute;
+  will-change: transform, opacity;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+  /* estado inicial neutro — o JS aplica transform/opacity a cada frame */
+  transform: translate(0, 0) rotate(0);
+  opacity: 1;
 }
 
 .q-final-actions {
-  display: flex; justify-content: center; gap: 12px;
+  display: flex; justify-content: center; align-items: center;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 40px;
   flex-wrap: wrap;
+  /* Comeca invisivel; ganha .visible 2s apos o reveal do #1. */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+.q-final-actions.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 .q-final-actions .q-btn { max-width: 260px; }

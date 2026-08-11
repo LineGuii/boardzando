@@ -336,13 +336,22 @@ export class MusicQuizService {
 
   private revealQuestion(m: QuizMatch): void {
     if (!m.round || m.phase === 'reveal') return;
-    m.phase = 'reveal';
 
-    // Consolida pontos
+    // Consolida pontos ANTES de decidir o fluxo (ranking final precisa).
     for (const [pid, rec] of m.round.answers) {
       const cur = m.scores.get(pid) ?? 0;
       m.scores.set(pid, cur + rec.gain);
     }
+
+    // Na ULTIMA pergunta pula o placar da rodada e vai direto pro reveal
+    // final (a tela "Fim da Partida" ja faz o suspense com drum roll).
+    const isLastRound = m.currentIndex >= m.options.rounds - 1;
+    if (isLastRound) {
+      this.finishMatch(m);
+      return;
+    }
+
+    m.phase = 'reveal';
 
     // Monta ranking com rankBefore e lastGain/lastCorrect/lastElapsedMs
     const nowRanking = this.rankingSnapshot(m).map<QuizPlayerScore>((r) => {

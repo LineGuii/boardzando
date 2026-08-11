@@ -14,12 +14,16 @@ import { AuthService } from './auth.service';
 export class AuthIoAdapter extends IoAdapter {
   private readonly logger = new Logger(AuthIoAdapter.name);
   private readonly auth: AuthService;
-  private readonly origin: string;
+  private readonly origin: string | string[];
 
   constructor(app: INestApplicationContext) {
     super(app);
     this.auth = app.get(AuthService);
-    this.origin = app.get(ConfigService).get<string>('WEB_ORIGIN', 'http://localhost:5173');
+    // Suporta lista separada por virgula em WEB_ORIGIN (varios frontends:
+    // boardzando.rpgzando.com, quiz.rpgzando.com, localhost:5173, 5174...).
+    const raw = app.get(ConfigService).get<string>('WEB_ORIGIN', 'http://localhost:5173,http://localhost:5174');
+    const list = raw.split(',').map((s) => s.trim()).filter(Boolean);
+    this.origin = list.length === 1 ? list[0]! : list;
   }
 
   override createIOServer(port: number, options?: ServerOptions): Server {
