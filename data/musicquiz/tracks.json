@@ -562,10 +562,10 @@
       },
       "questionText": "De que jogo é essa música?",
       "options": [
-        "Final Fantasy VII",
+        "Final Fantasy X",
         "Final Fantasy VI",
         "Final Fantasy V",
-        "Final Fantasy VIII"
+        "Final Fantasy IX"
       ],
       "correctIndex": 1,
       "startSec": 0,

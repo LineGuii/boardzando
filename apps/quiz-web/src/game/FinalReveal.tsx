@@ -30,9 +30,13 @@ const CROWN_DRAMA_MS = 4500;
  */
 export function FinalReveal(props: Props): JSX.Element {
   const sorted = useMemo(() => {
-    const players = props.final.ranking.filter((r) => !r.presenter).sort((a, b) => a.rank - b.rank);
-    const presenters = props.final.ranking.filter((r) => r.presenter);
-    return [...players, ...presenters];
+    // Presenters (host que nao joga) nao aparecem no ranking final — sao
+    // apresentadores da partida e mostrar uma linha "—" tira o foco do
+    // vencedor real.
+    return props.final.ranking
+      .filter((r) => !r.presenter)
+      .slice()
+      .sort((a, b) => a.rank - b.rank);
   }, [props.final.ranking]);
 
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -49,8 +53,7 @@ export function FinalReveal(props: Props): JSX.Element {
   // fantasma; o segundo mount reagenda tudo do zero. Sem dedupe por ref (que
   // quebra exatamente por isso).
   useEffect(() => {
-    const playersOnly = sorted.filter((r) => !r.presenter);
-    const total = playersOnly.length;
+    const total = sorted.length;
 
     // Todas as linhas comecam invisiveis.
     for (const r of sorted) {
@@ -75,7 +78,7 @@ export function FinalReveal(props: Props): JSX.Element {
     for (let i = 0; i < total - 1; i++) {
       const revealAt = INITIAL_DELAY_MS + i * STEP_MS;
       later(revealAt, () => {
-        const targetRow = playersOnly.find((r) => r.rank === total - i);
+        const targetRow = sorted.find((r) => r.rank === total - i);
         if (!targetRow) return;
         const el = rowRefs.current.get(targetRow.playerId);
         if (!el) return;
@@ -84,21 +87,6 @@ export function FinalReveal(props: Props): JSX.Element {
           translateY: [-40, domIdx * (ROW_H + ROW_GAP)],
           opacity: [0, 1],
           ease: createSpring({ mass: 1, stiffness: 200, damping: 18, velocity: 0 }),
-        });
-      });
-    }
-
-    // Presenters entram junto com a fase de revelacao (nao interessam ao suspense).
-    for (const r of sorted) {
-      if (!r.presenter) continue;
-      const el = rowRefs.current.get(r.playerId);
-      if (!el) continue;
-      const domIdx = sorted.indexOf(r);
-      later(INITIAL_DELAY_MS + 200, () => {
-        animate(el, {
-          translateY: [-40, domIdx * (ROW_H + ROW_GAP)],
-          opacity: [0, 0.7],
-          ease: createSpring({ mass: 1, stiffness: 180, damping: 20 }),
         });
       });
     }
@@ -112,7 +100,7 @@ export function FinalReveal(props: Props): JSX.Element {
 
     // #1 revela com ZOOM rapido: overshoot grande e assenta via spring bouncy.
     later(drumAt + CROWN_DRAMA_MS, () => {
-      const winner = playersOnly.find((r) => r.rank === 1);
+      const winner = sorted.find((r) => r.rank === 1);
       if (!winner) return;
       const el = rowRefs.current.get(winner.playerId);
       if (!el) return;
@@ -145,7 +133,7 @@ export function FinalReveal(props: Props): JSX.Element {
 
       <div className="q-final-list" style={{ height: listHeight }}>
         {sorted.map((r) => {
-          const isWinner = r.rank === 1 && !r.presenter;
+          const isWinner = r.rank === 1;
           const glowing = showWinnerGlow === r.playerId;
           return (
             <div
@@ -154,20 +142,16 @@ export function FinalReveal(props: Props): JSX.Element {
                 if (el) rowRefs.current.set(r.playerId, el);
                 else rowRefs.current.delete(r.playerId);
               }}
-              className={[
-                'q-final-row',
-                isWinner && glowing ? 'first' : '',
-                r.presenter ? 'presenter' : '',
-              ].filter(Boolean).join(' ')}
+              className={['q-final-row', isWinner && glowing ? 'first' : ''].filter(Boolean).join(' ')}
               style={{ opacity: 0, transform: 'translateY(-40px)' }}
             >
               {isWinner && glowing && <div className="q-winner-crown">👑</div>}
-              <div className="q-final-pos">{r.presenter ? '🎤' : r.rank}</div>
+              <div className="q-final-pos">{r.rank}</div>
               <div className="q-final-avatar" style={{ background: r.color ?? '#334155' }}>
                 {r.name[0]?.toUpperCase() ?? '?'}
               </div>
               <div className="q-final-name">{r.name}</div>
-              <div className="q-final-score">{r.presenter ? '—' : r.score}</div>
+              <div className="q-final-score">{r.score}</div>
             </div>
           );
         })}

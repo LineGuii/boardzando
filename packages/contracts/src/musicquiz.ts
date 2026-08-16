@@ -97,8 +97,10 @@ export interface QuizOptions {
 
 export const QUIZ_DEFAULTS: QuizOptions = {
   rounds: 10,
-  audioMode: 'remote',
-  hostIsPlayer: true,
+  // Modo "TV": host apresenta na tela grande, jogadores respondem no celular.
+  audioMode: 'presenter',
+  // Host apresentador nao pontua por default.
+  hostIsPlayer: false,
   orderMode: 'random',
 };
 

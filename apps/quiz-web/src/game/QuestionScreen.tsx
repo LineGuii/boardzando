@@ -24,7 +24,8 @@ const LETTERS = ['A', 'B', 'C', 'D'];
  * - Emitir `quiz:answer` no clique. Bloqueia apos responder.
  * - No `presenter` (audioMode='presenter'), so o host toca audio; os demais so
  *   veem UI silenciosa.
- * - Host que nao joga (`isPresenter`) recebe correctIndex e ve o gabarito.
+ * - Host que nao joga (`isPresenter`) NAO recebe correctIndex — a tela dele
+ *   costuma ir para uma TV e nao pode entregar a resposta antes do reveal.
  */
 export function QuestionScreen(props: Props): JSX.Element {
   const socket = useQuiz((s) => s.socket);
@@ -153,7 +154,10 @@ export function QuestionScreen(props: Props): JSX.Element {
   const pct = useMemo(() => (remainingMs / totalMs) * 100, [remainingMs, totalMs]);
   const remSec = Math.ceil(remainingMs / 1000);
 
-  const showCorrect = props.isPresenter && props.question.correctIndex !== undefined;
+  // Durante playing, NUNCA destacamos a resposta correta — nem para o host
+  // apresentador. O server tambem nao envia correctIndex nessa fase; esta
+  // constante fica false para reforcar o contrato na UI.
+  const showCorrect = false;
 
   const answeredCount = props.totalPlayers - props.waitingCount;
 
@@ -219,7 +223,7 @@ export function QuestionScreen(props: Props): JSX.Element {
       )}
       {props.isPresenter && (
         <div className="q-presenter-note">
-          🎤 Modo apresentador — voce ve a resposta correta destacada
+          🎤 Modo apresentador — projete esta tela; os jogadores respondem no celular
         </div>
       )}
     </div>

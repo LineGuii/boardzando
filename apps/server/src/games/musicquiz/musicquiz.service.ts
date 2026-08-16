@@ -107,9 +107,11 @@ export class MusicQuizService {
   snapshotFor(roomId: RoomId, _playerId: PlayerId): QuizSnapshot | undefined {
     const m = this.matches.get(roomId);
     if (!m) return undefined;
-    const question = m.round
-      ? this.stripCorrect(m.round.question, m.hostId === _playerId && !m.options.hostIsPlayer)
-      : undefined;
+    // NUNCA vaza correctIndex durante playing/preloading — nem para o host
+    // apresentador. O host projeta a tela na TV e nao deve saber a resposta
+    // (surpresa vale para todo mundo). No reveal, o correctIndex vai no
+    // proprio payload de quiz:reveal.
+    const question = m.round ? this.stripCorrect(m.round.question, false) : undefined;
     return {
       phase: m.phase,
       options: m.options,
@@ -408,11 +410,10 @@ export class MusicQuizService {
     if (!m.round || !this.server) return;
     const room = this.rooms.get(m.roomId);
     if (!room) return;
-    const hostPresenter = Boolean(m.hostId) && !m.options.hostIsPlayer;
-    for (const [pid, player] of room.players) {
+    // Ver comentario em emitQuestion — correctIndex nunca vai antes do reveal.
+    const q = this.stripCorrect(m.round.question, false);
+    for (const [, player] of room.players) {
       if (!player.connected || !player.socketId) continue;
-      const showsCorrect = hostPresenter && pid === m.hostId;
-      const q = this.stripCorrect(m.round.question, showsCorrect);
       this.server.to(player.socketId).emit('quiz:preload', { roomId: m.roomId, question: q });
     }
   }
@@ -421,11 +422,12 @@ export class MusicQuizService {
     if (!m.round || !this.server) return;
     const room = this.rooms.get(m.roomId);
     if (!room) return;
-    const hostPresenter = Boolean(m.hostId) && !m.options.hostIsPlayer;
-    for (const [pid, player] of room.players) {
+    // Ninguem recebe correctIndex durante playing — nem o host. A tela do
+    // host tende a ser projetada e nao pode revelar o gabarito antes do
+    // reveal para nao entregar a resposta a todo mundo na sala.
+    const q = this.stripCorrect(m.round.question, false);
+    for (const [, player] of room.players) {
       if (!player.connected || !player.socketId) continue;
-      const showsCorrect = hostPresenter && pid === m.hostId;
-      const q = this.stripCorrect(m.round.question, showsCorrect);
       this.server.to(player.socketId).emit('quiz:question', { roomId: m.roomId, question: q });
     }
   }

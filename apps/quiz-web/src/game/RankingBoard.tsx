@@ -41,7 +41,12 @@ export function RankingBoard(props: Props): JSX.Element {
     // Ordena por playerId — a posicao visual e SEMPRE controlada pelo
     // transform, nunca pela ordem do DOM. Isso mantem a key estavel entre
     // rodadas e permite o spring animar `from` -> `to`.
-    return [...props.reveal.ranking].sort((a, b) => a.playerId.localeCompare(b.playerId));
+    // Presenters (host que nao joga) somem do ranking — sao apenas
+    // apresentadores e uma linha "—" atrapalha a leitura do placar.
+    return props.reveal.ranking
+      .filter((r) => !r.presenter)
+      .slice()
+      .sort((a, b) => a.playerId.localeCompare(b.playerId));
   }, [props.reveal.ranking]);
 
   // Animacao spring a cada `seq` novo
@@ -107,30 +112,21 @@ export function RankingBoard(props: Props): JSX.Element {
                 if (el) rowRefs.current.set(r.playerId, el);
                 else rowRefs.current.delete(r.playerId);
               }}
-              className={[
-                'q-rank-row',
-                r.rank === 1 && !r.presenter ? 'first' : '',
-                r.presenter ? 'presenter' : '',
-              ].filter(Boolean).join(' ')}
+              className={['q-rank-row', r.rank === 1 ? 'first' : ''].filter(Boolean).join(' ')}
               style={{ transform: `translateY(${initialIdx * (ROW_H + ROW_GAP)}px)` }}
             >
-              <span className="q-rank-pos">{r.presenter ? '🎤' : r.rank}</span>
+              <span className="q-rank-pos">{r.rank}</span>
               <span className="q-rank-avatar" style={{ background: r.color ?? '#334155' }}>
                 {r.name[0]?.toUpperCase() ?? '?'}
               </span>
               <span className="q-rank-name">
                 {r.name}{r.playerId === props.myPlayerId ? ' (voce)' : ''}
               </span>
-              {!r.presenter && (
-                <>
-                  <span className={`q-rank-move ${moveClass}`}>{moveIcon}</span>
-                  <span className={`q-rank-gain ${(r.lastGain ?? 0) > 0 ? 'pos' : 'zero'}`}>
-                    {(r.lastGain ?? 0) > 0 ? `+${r.lastGain}` : '0'}
-                  </span>
-                  <span className="q-rank-score">{r.score}</span>
-                </>
-              )}
-              {r.presenter && <span className="q-rank-score">—</span>}
+              <span className={`q-rank-move ${moveClass}`}>{moveIcon}</span>
+              <span className={`q-rank-gain ${(r.lastGain ?? 0) > 0 ? 'pos' : 'zero'}`}>
+                {(r.lastGain ?? 0) > 0 ? `+${r.lastGain}` : '0'}
+              </span>
+              <span className="q-rank-score">{r.score}</span>
             </div>
           );
         })}

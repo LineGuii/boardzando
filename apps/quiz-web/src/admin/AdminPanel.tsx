@@ -139,9 +139,10 @@ function CreateRoomForm(props: { onUnauthorized: () => void }): JSX.Element {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [rounds, setRounds] = useState(10);
-  const [audioMode, setAudioMode] = useState<'remote' | 'presenter'>('remote');
+  // Modo TV default: audio so no host, host nao joga.
+  const [audioMode, setAudioMode] = useState<'remote' | 'presenter'>('presenter');
   const [orderMode, setOrderMode] = useState<QuizOrderMode>('random');
-  const [hostIsPlayer, setHostIsPlayer] = useState(true);
+  const [hostIsPlayer, setHostIsPlayer] = useState(false);
   const [quizzes, setQuizzes] = useState<QuizSummary[]>([]);
   const [quizId, setQuizId] = useState<string>('');
   const [error, setError] = useState<string | undefined>();
@@ -259,8 +260,8 @@ function CreateRoomForm(props: { onUnauthorized: () => void }): JSX.Element {
             value={audioMode}
             onChange={(e) => setAudioMode(e.target.value as 'remote' | 'presenter')}
           >
+            <option value="presenter">📺 So o host toca (TV/apresentacao)</option>
             <option value="remote">🎧 Cada jogador ouve no proprio dispositivo</option>
-            <option value="presenter">So o host toca (TV/compartilhado)</option>
           </select>
         </div>
       </div>
