@@ -167,6 +167,11 @@ em.term { font-style: normal; font-weight: 700; color: var(--emperium); }
 .gcard .kw { padding: var(--s2) var(--s3); display: flex; flex-wrap: wrap; gap: var(--s1); }
 .gcard .foot { padding: 0 var(--s3) var(--s3); font-family: var(--display);
   font-style: italic; font-size: .82rem; color: var(--muted); margin-top: auto; }
+/* Carta transcendida: a evolucao empilhada sobre a base. */
+.gcard.asc { border-color: var(--garnet); }
+.gcard .forma { font-family: var(--bitmap); font-size: .58rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--garnet); margin-bottom: 3px; }
+.gcard .stat .v i { font-style: normal; color: var(--garnet); font-size: .95rem; }
 
 .chip {
   font-family: var(--bitmap); font-size: .58rem; letter-spacing: .06em;
@@ -340,45 +345,65 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3); color: var(-
     <article class="gcard" data-role="vanguarda">
       <div class="band"></div>
       <div class="head">
-        <div class="nm">Mestre — Punho de Asura</div>
+        <div class="nm">Monge Combo</div>
         <div class="cls">Monge · Vanguarda</div>
       </div>
       <div class="stats">
-        <div class="stat"><span class="k">Custo</span><span class="v">12z</span></div>
-        <div class="stat pow"><span class="k">Poder</span><span class="v">10</span></div>
+        <div class="stat"><span class="k">Custo</span><span class="v">6z</span></div>
+        <div class="stat pow"><span class="k">Poder</span><span class="v">4</span></div>
         <div class="slots">◇</div>
       </div>
-      <div class="kw"><span class="chip">Solo 2</span><span class="chip warn">Esgotar</span>
-        <span class="chip deck">Deck II</span></div>
-      <div class="foot">Asura Strike — um golpe, e ele acaba</div>
+      <div class="kw"><span class="chip deck">Base</span></div>
+      <div class="foot">Chain Combo — barato e sem firula</div>
     </article>
 
-    <article class="gcard" data-role="suporte">
+    <article class="gcard asc" data-role="vanguarda">
       <div class="band"></div>
       <div class="head">
-        <div class="nm">Sumo Sacerdote — Assumptio</div>
-        <div class="cls">Sacerdote · Suporte</div>
+        <div class="forma">Mestre</div>
+        <div class="nm">Monge Combo</div>
+        <div class="cls">Monge · transcendido</div>
       </div>
       <div class="stats">
-        <div class="stat"><span class="k">Custo</span><span class="v">12z</span></div>
-        <div class="stat pow"><span class="k">Poder</span><span class="v">3</span></div>
-        <div class="slots">◇◇</div>
+        <div class="stat"><span class="k">Altar</span><span class="v">14z</span></div>
+        <div class="stat pow"><span class="k">Poder</span><span class="v">4<i>+7</i></span></div>
+        <div class="slots">◇</div>
       </div>
-      <div class="kw"><span class="chip">Devoção</span><span class="chip">Elo 2</span>
-        <span class="chip deck">Deck II</span></div>
-      <div class="foot">Assumptio — o grupo aguenta mais um round</div>
+      <div class="kw"><span class="chip warn">Esgotar</span></div>
+      <div class="foot">Punho de Asura — um golpe, e ele acaba</div>
     </article>
   </div>
 
   <div class="col stack" style="margin-top: var(--s4)">
-    <h3>Deck I e Deck II — a Transcendência</h3>
-    <p>Cada classe tem <strong>quatro</strong> variações: duas <em class="term">Clássicas</em> e
-       duas <em class="term">Transcendentes</em>. As Clássicas estão no mercado desde a primeira
-       rodada. As Transcendentes — Lorde dos Cavaleiros, Arquimago, Algoz, Criador — só são
-       embaralhadas no mercado <strong>a partir da rodada 3</strong>.</p>
-    <p>É por isso que a partida muda de textura no meio: até a rodada 2 você briga com o que dá,
-       e da rodada 3 em diante alguém sempre aparece com uma carta que custa doze zeny e resolve
-       uma sala sozinha.</p>
+    <h3>A Transcendência — seu veterano evolui</h3>
+    <p>Cada classe tem <strong>duas variações base</strong>, contratadas no mercado, e
+       <strong>três caminhos de Transcendência</strong>, comprados no <em class="term">Altar</em> a
+       partir da rodada 3. As duas cartas acima são <strong>o mesmo personagem</strong>: o Monge
+       Combo antes e depois de evoluir.</p>
+    <p><strong>A Transcendência não é um personagem novo.</strong> É uma carta empilhada sobre
+       alguém que já é seu. Poder e palavras-chave <strong>somam</strong>; o equipamento, o refino
+       e as cartas de monstro continuam com ele. O Bruxo que você contratou na rodada 1, equipou
+       na 2 e viu sobreviver ao Corredor na 3 é <em>o mesmo cara</em> que vira Arquimago na 4.</p>
+    <div class="note">
+      <span class="lbl">Por que isso muda como você joga</span>
+      <p>Primeiro, <strong>qual base evoluiu continua importando</strong>: um Bruxo Tempestade que
+      virou Arquimago Nevasca fica com Muralha 4; um Bruxo Jupitel pelo mesmo caminho fica com mais
+      Poder bruto e Muralha 2. Mesmo caminho, personagens diferentes — são <strong>seis desfechos
+      por classe</strong>.</p>
+      <p style="margin-top:var(--s2)">Segundo, <strong>perder um transcendido dói</strong>. Ele
+      custou o recrutamento mais a evolução, às vezes mais de vinte zeny. Você vai pensar duas
+      vezes antes de mandá-lo para o Corredor Estreito — e é exatamente aí que o jogo fica bom.</p>
+    </div>
+    <p>Um detalhe que vale ouro: <strong>dá para transcender alguém que está na Enfermaria</strong>,
+       e ele volta para a Reserva na hora. É o Rebirth do Ragnarok — quem caiu levanta mais forte.
+       Custa a evolução inteira num resgate em vez de num upgrade, mas às vezes salva a rodada.</p>
+
+    <h3>Os dois mercados funcionam ao contrário um do outro</h3>
+    <p>O <strong>recrutamento</strong> é uma fileira sorteada e disputada: você compra o que
+       apareceu, e o que você não levar o vizinho leva. É oportunismo.</p>
+    <p>O <strong>Altar</strong> é uma tabela de preços fixa. Os três caminhos de cada classe estão
+       sempre lá, sempre pelo mesmo preço, e ninguém tira nada de ninguém. É plano: dá para decidir
+       na rodada 3 que você vai juntar 11 zeny para o Arquimago Nevasca — e cumprir.</p>
   </div>
 </section>
 
@@ -729,7 +754,7 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3); color: var(-
       <h3>B. Solitário de economia</h3>
       <p class="what">Jogue <strong>só a fase de mercado</strong>, seis rodadas seguidas, sem
          combate nenhum. Renda 6 por rodada, três ações, mercado repondo normalmente. Faça duas
-         vezes: uma comprando barato e largo, outra economizando para as cartas de Deck II.</p>
+         vezes: uma recrutando barato e largo, outra economizando para transcender no Altar.</p>
       <p class="rec"><b>Anote:</b> quantos personagens e quanto Poder total cada estratégia tem na
          rodada 6. Se a diferença for maior que 30%, um dos dois caminhos é dominante e os custos
          precisam mexer.</p>

@@ -67,7 +67,8 @@ push-your-luck é a graça.
 
 | Qtd | Componente |
 |---|---|
-| 52 | Cartas de Personagem (26 Deck I "Clássico", 26 Deck II "Transcendente") |
+| 52 | Cartas de Personagem base (26 variações × 2 cópias) |
+| 39 | Cartas de Transcendência (13 classes × 3 caminhos) |
 | 30 | Cartas de Equipamento (12 armas, 10 armaduras, 8 acessórios) |
 | 20 | Cartas de Monstro (10 tipos × 2) |
 | 24 | Cartas de Consumível (8 tipos × 3) |
@@ -88,13 +89,13 @@ push-your-luck é a graça.
 
 ```
 ┌──────────────────────────────┐
-│  ARQUIMAGO — NEVASCA         │   Nome da variação
-│  Bruxo · Deck II             │   Classe e baralho
+│  BRUXO TEMPESTADE            │   Nome da variação
+│  Bruxo                       │   Classe
 │                              │
-│  Custo  12z      Poder  4    │
+│  Custo   7z      Poder  3    │
 │  Papel: ARCANO      Slots ◇◇ │   Papel define que equipamento aceita
 │  ─────────────────────────── │
-│  ▸ MURALHA 4                 │   Palavras-chave, no máximo 2 por carta
+│  ▸ MURALHA 2                 │   Palavras-chave, no máximo 2 por carta
 │  ▸ ALCANCE                   │
 └──────────────────────────────┘
 ```
@@ -107,7 +108,7 @@ mecânico próprio.
 
 ## 5. A gramática — 14 palavras-chave
 
-Todas as 52 variações são compostas a partir desta lista. Nada de texto livre.
+Bases e Transcendências são compostas a partir desta lista. Nada de texto livre.
 
 | Palavra-chave | Efeito |
 |---|---|
@@ -152,7 +153,9 @@ defensor: ele é um contra quatro, mas compra quase o dobro por rodada.
 
 ### Mercado — **3 ações por rodada, e só 3**
 
-Na sua vez (ordem de jogo abaixo), escolha três, podendo repetir:
+Na sua vez (ordem de jogo abaixo), escolha três, podendo repetir. **Transcender é uma
+delas** — evoluir um veterano custa a mesma ação que recrutar um novato, e é aí que a
+decisão dói.
 
 1. **Recrutar** — pague o custo de uma carta da fileira de recrutamento; ela vai para
    sua Reserva. Reponha a fileira.
@@ -161,16 +164,26 @@ Na sua vez (ordem de jogo abaixo), escolha três, podendo repetir:
    em ação, mas gasta a ação).
 3. **Refinar** — 3 zeny, role o d6 (tabela abaixo).
 4. **Comprar consumível** — 4 zeny, compre a carta do topo do baralho de consumíveis.
+5. **Transcender** — 7–14 zeny, evolua um personagem seu no Altar (a partir da rodada 3).
+6. **Mover um Guardião** — só o dono do castelo, de uma sala para outra.
 
 O limite de 3 ações é o que impede a camada de itens de virar um jogo paralelo. Numa
 rodada em que você refina duas vezes, você recruta uma vez só. Essa é a decisão.
 
-### Fileiras de mercado
+### Os dois mercados
 
-- **Recrutamento:** 5 cartas viradas. Rodadas 1–2 usam só o **Deck I**. **A partir da
-  rodada 3 o Deck II é embaralhado dentro** — é a Transcendência chegando à guerra, e
-  é o pico de poder do jogo.
-- **Equipamento:** 4 cartas viradas.
+O jogo tem **dois mercados que funcionam de maneiras opostas**, e isso é o ponto.
+
+**Recrutamento — sorteado e disputado.** 5 cartas viradas de um baralho de 52 (duas
+cópias de cada uma das 26 variações base). Você compra o que apareceu, e o que você
+não levar o vizinho leva. É oportunismo.
+
+**Altar da Transcendência — tabela de preços fixa.** Não é uma fileira. Os três
+caminhos de cada classe estão **sempre disponíveis**, sempre pelo mesmo preço, a partir
+da rodada 3. Ninguém tira nada de ninguém. É plano: você pode dizer na rodada 3 "vou
+juntar 11 zeny para transformar meu Bruxo em Arquimago Nevasca" e cumprir isso.
+
+**Equipamento:** 4 cartas viradas.
 
 ### Ordem de jogo
 
@@ -536,15 +549,25 @@ Jogados de bruços junto do comprometimento; revelados na resolução da sala.
 
 ---
 
-## 12. As 52 variações
+## 12. As variações — 26 bases × 3 caminhos
 
-**Deck I (Clássico)** — 26 cartas, disponíveis desde a rodada 1.
-**Deck II (Transcendente)** — 26 cartas, embaralhadas na fileira **a partir da rodada 3**.
+**26 variações base** (13 classes × 2), o baralho de recrutamento, com duas cópias de
+cada. **39 Transcendências** (13 classes × 3), compradas no Altar a partir da rodada 3.
 
-A Transcendência do Ragnarok vira aqui a camada tardia do mercado: a partida começa
-com os clássicos e escala quando os Lordes, Arquimagos e Algozes entram na guerra.
+Uma base pode tomar qualquer um dos três caminhos da sua classe: **6 desfechos por
+classe, 78 no total.** E como a evolução *soma* à base em vez de substituí-la, um Bruxo
+Tempestade que virou Arquimago Nevasca (Poder 5, MURALHA 4) é um personagem diferente
+de um Bruxo Jupitel que tomou o mesmo caminho (Poder 6, MURALHA 2). **Qual base você
+evoluiu importa até a última rodada.**
 
-### Deck I — Clássico
+> **Por que mudou.** Na primeira versão a Transcendência era um segundo baralho de
+> personagens, embaralhado na mesma fileira a partir da rodada 3. O efeito era o oposto
+> do pretendido: você comprava um Arquimago pronto e o seu Bruxo — aquele que sobreviveu
+> a quatro rodadas, com a espada refinada e a Carta Hydra encaixada — virava enchimento.
+> Ninguém se apegava a ninguém. Agora o veterano é *o próprio* que evolui, mantém o
+> equipamento, e perdê-lo custa o recrutamento mais a evolução.
+
+### As 26 variações base
 
 | Variação | Classe | Custo | Poder | Papel | Slots | Palavras-chave | Build de origem |
 |---|---|---|---|---|---|---|---|
@@ -577,46 +600,65 @@ com os clássicos e escala quando os Lordes, Arquimagos e Algozes entram na guer
 
 **Nota sobre Monge Corpo de Aço:** Poder 0 com ESCUDAR e ESGOTAR. Ele não vence nada —
 ele absorve um round inteiro de baixas por 5 zeny e sai de cena. É a unidade mais barata
-e mais especializada do Deck I.
+e mais especializada do baralho.
 
-### Deck II — Transcendente
+### As 39 Transcendências
 
-| Variação | Classe | Custo | Poder | Papel | Slots | Palavras-chave | Build de origem |
-|---|---|---|---|---|---|---|---|
-| Lorde dos Cavaleiros — Espiral | Cavaleiro | 11z | 6 | VANGUARDA | ◇◇ | PERFURAR 4 | Spiral Pierce |
-| Lorde dos Cavaleiros — Berserk | Cavaleiro | 10z | 8 | VANGUARDA | ◇ | ESGOTAR | Two-Hand Quicken |
-| Paladino — Devoção | Templário | 12z | 4 | VANGUARDA | ◇◇ | DEVOÇÃO, ESCUDAR | Devotion |
-| Paladino — Grande Cruz | Templário | 11z | 6 | VANGUARDA | ◇ | RAJADA 3, ESGOTAR | Grand Cross/Sacrifice |
-| Arquimago — Chuva de Meteoros | Bruxo | 13z | 7 | ARCANO | ◇ | ALCANCE, RAJADA 3 | Meteor Storm |
-| Arquimago — Nevasca | Bruxo | 12z | 4 | ARCANO | ◇◇ | MURALHA 4, ALCANCE | Storm Gust precast |
-| Professor — Dissonância | Sábio | 11z | 4 | ARCANO | ◇ | ANULAR ×2 | Dispell/Ganbantein |
-| Professor — Duplo Cast | Sábio | 10z | 6 | ARCANO | ◇ | ALCANCE, PERFURAR 2 | Double Casting |
-| Algoz — Rompe-Alma | Mercenário | 12z | 7 | ÁGIL | ◇ | ALCANCE, RAJADA 4 | Soul Breaker |
-| Algoz — Presa Sombria | Mercenário | 11z | 4 | ÁGIL | ◇◇ | OCULTO, SOLO 4 | Grimtooth |
-| Desordeiro — Despojar | Arruaceiro | 10z | 4 | ÁGIL | ◇ | ANULAR, PILHAR 3 | Full Strip / Gank |
-| Desordeiro — Plágio | Arruaceiro | 11z | 3 | ÁGIL | ◇◇ | IMITAR | Plagiarism |
-| Mestre-Ferreiro — Carrocerada | Ferreiro | 11z | 5 | VANGUARDA | ◇◇ | — (pague 3z: +4 Poder) | Cart Termination |
-| Mestre-Ferreiro — Adrenalina | Ferreiro | 10z | 3 | VANGUARDA | ◇ | ELO 2 | Adrenaline Rush |
-| Criador — Demonstração Ácida | Alquimista | 12z | 6 | SUPORTE | ◇ | PERFURAR 6 | Acid Demonstration |
-| Criador — Esfera Marinha | Alquimista | 10z | 2 | SUPORTE | ◇◇ | MURALHA 3 | Sphere Mine |
-| Sumo Sacerdote — Ressurreição | Sacerdote | 11z | 3 | SUPORTE | ◇ | RESTAURAR 2 | Resurrection |
-| Sumo Sacerdote — Assumptio | Sacerdote | 12z | 3 | SUPORTE | ◇◇ | DEVOÇÃO, ELO 2 | Assumptio |
-| Mestre — Punho de Asura | Monge | 12z | 10 | VANGUARDA | ◇ | ESGOTAR, SOLO 2 | Asura Strike |
-| Mestre — Salto | Monge | 10z | 5 | VANGUARDA | ◇ | — (ignora posicionamento) | Body Relocation |
-| Atirador de Elite — Chuva de Flechas | Caçador | 12z | 7 | ÁGIL | ◇ | ALCANCE, PERFURAR 2 | Arrow Storm |
-| Atirador de Elite — Falcão | Caçador | 10z | 3 | ÁGIL | ◇◇ | ALCANCE, ANULAR | Blitz Beat / Detecting |
-| Menestrel/Cigana — Ensemble | Bardo/Odalisca | 9z | 2 | SUPORTE | ◇ | — (com outro Bardo seu aqui, ambos +5) | Ensemble |
-| Menestrel/Cigana — Marionete | Bardo/Odalisca | 11z | 0 | SUPORTE | ◇◇ | — (dobre o Poder base de outro seu, máx. +6) | Marionette Control |
-| Superaprendiz Anjo da Guarda | Superaprendiz | 9z | 4 | ÁGIL | ◇◇ | — (baixas vão para a Reserva) | Guardian Angel |
-| Superaprendiz Sobrecarga | Superaprendiz | 10z | 3 | ÁGIL | ◇ | IMITAR, ESGOTAR | O improvável |
+Comprada no Altar (ação de mercado) para **um personagem que já é seu**, uma vez por
+personagem. A carta é empilhada sobre a base: **Poder e palavras-chave somam**, o
+equipamento e as cartas de monstro continuam com ele.
 
-**Nota sobre o Superaprendiz:** ele é a única classe da lista que não tem forma
-transcendente no Ragnarok, e o jogo não finge que tem. Suas duas cartas de Deck II
-são o mesmo garoto que simplesmente se recusou a morrer — mais baratas que qualquer
-outra carta do Deck II e sem nenhum poder proporcional. O IMITAR do Sobrecarga copia
-**qualquer** personagem revelado na sala, inimigos inclusos.
+| Caminho | Classe | Custo | +Poder | Ganha | Origem |
+|---|---|---|---|---|---|
+| Lorde dos Cavaleiros — Espiral | Cavaleiro | 11z | +3 | PERFURAR 4 | Spiral Pierce |
+| Lorde dos Cavaleiros — Fúria Berserk | Cavaleiro | 12z | +5 | ESGOTAR | Berserk |
+| Lorde dos Cavaleiros — Aura Lâmina | Cavaleiro | 10z | +2 | ELO 2 | Aura Blade |
+| Paladino — Devoção | Templário | 11z | +2 | DEVOÇÃO | Devotion |
+| Paladino — Corrente de Escudo | Templário | 11z | +4 | ESCUDAR | Shield Chain |
+| Paladino — Sacrifício | Templário | 10z | +3 | RAJADA 3, ESGOTAR | Sacrifice |
+| Arquimago — Nevasca | Bruxo | 11z | +2 | MURALHA 2 | Storm Gust ampliado |
+| Arquimago — Chuva de Meteoros | Bruxo | 13z | +5 | RAJADA 3 | Meteor Storm |
+| Arquimago — Ganbantein | Bruxo | 9z | +1 | ANULAR | Ganbantein |
+| Professor — Dissonância | Sábio | 10z | +2 | ANULAR | Dispell |
+| Professor — Duplo Cast | Sábio | 11z | +4 | — | Double Casting |
+| Professor — Memorizar | Sábio | 10z | +2 | IMITAR | Memorize |
+| Algoz — Rompe-Alma | Mercenário | 12z | +5 | RAJADA 2 | Soul Breaker |
+| Algoz — Presa Sombria | Mercenário | 10z | +2 | OCULTO | Grimtooth |
+| Algoz — Veneno Mortal | Mercenário | 11z | +3 | PERFURAR 3 | Enchant Deadly Poison |
+| Desordeiro — Despojar Total | Arruaceiro | 10z | +2 | ANULAR, PILHAR 3 | Full Strip |
+| Desordeiro — Plágio | Arruaceiro | 10z | +2 | IMITAR | Plagiarism |
+| Desordeiro — Marcha Silenciosa | Arruaceiro | 12z | +2 | OCULTO · *anula a Marcha Forçada da facção* | Chase Walk |
+| Mestre-Ferreiro — Carrocerada | Ferreiro | 11z | +4 | — | Cart Termination |
+| Mestre-Ferreiro — Fundição Suprema | Ferreiro | 9z | +1 | *refino sem quebra + 1 grátis por rodada* | Forja lendária |
+| Mestre-Ferreiro — Adrenalina Suprema | Ferreiro | 10z | +2 | ELO 2 | Adrenaline Rush |
+| Criador — Demonstração Ácida | Alquimista | 12z | +4 | PERFURAR 4 | Acid Demonstration |
+| Criador — Homúnculo Superior | Alquimista | 11z | +3 | ELO 2 | Homunculus S |
+| Criador — Bomba de Esferas | Alquimista | 10z | +1 | MURALHA 3 | Sphere Mine |
+| Sumo Sacerdote — Assumptio | Sacerdote | 11z | +2 | DEVOÇÃO | Assumptio |
+| Sumo Sacerdote — Ressurreição | Sacerdote | 10z | +1 | RESTAURAR 2 | Resurrection |
+| Sumo Sacerdote — Julgamento | Sacerdote | 12z | +5 | — | Magnus Exorcismus |
+| Mestre — Punho de Asura | Monge | 14z | +7 | ESGOTAR | Asura Strike |
+| Mestre — Salto | Monge | 11z | +3 | *anula a Marcha Forçada da facção* | Body Relocation |
+| Mestre — Corpo de Aço Supremo | Monge | 10z | +1 | ESCUDAR · *não pode sofrer baixa* | Steel Body |
+| Atirador de Elite — Chuva de Flechas | Caçador | 12z | +5 | ALCANCE | Arrow Storm |
+| Atirador de Elite — Armadilha Suprema | Caçador | 10z | +2 | MURALHA 3 | Trap Research |
+| Atirador de Elite — Olho de Falcão | Caçador | 10z | +2 | ANULAR · *revela OCULTO* | Falcon Assault |
+| Menestrel/Cigana — Ensemble | Bardo/Odalisca | 9z | +2 | *com outro Bardo seu na sala, ambos +5* | Ensemble |
+| Menestrel/Cigana — Marionete | Bardo/Odalisca | 11z | +0 | *dobra o Poder base de outro seu, máx. +6* | Marionette Control |
+| Menestrel/Cigana — Canção Longa | Bardo/Odalisca | 10z | +2 | ELO 2 | Longing for Freedom |
+| Superaprendiz — Teimosia Absurda | Superaprendiz | 7z | +2 | *não pode sofrer baixa* | Guardian Angel |
+| Superaprendiz — Sorte de Principiante | Superaprendiz | 8z | +3 | SOLO 3 | Sorte pura |
+| Superaprendiz — Imitação Descarada | Superaprendiz | 7z | +2 | IMITAR | Cópia de tudo |
 
----
+**Nota sobre o Superaprendiz:** ele é a única classe que não tem forma transcendente no
+Ragnarok, e o jogo não finge que tem. Os três caminhos dele mantêm o nome
+"Superaprendiz", custam 7–8 zeny contra os 9–14 de todo mundo, e não dão poder
+proporcional. Ele não transcende — ele só insiste.
+
+**Nota sobre Salto e Marcha Silenciosa:** as duas anulam a penalidade de Marcha Forçada
+da **facção inteira**, não só do portador. Um só deles guia o grupo, e é isso que
+transforma essas evoluções numa jogada estratégica em vez de mais um bônus de Poder:
+com um Mestre-Salto, mandar o clã direto para o Salão do Trono deixa de custar −6.
 
 ## 13. Os três modos
 
@@ -759,7 +801,7 @@ prato.
 impressa e só **quatro** estão em jogo por partida, sorteadas de doze. Você lê durante
 o setup e a regra fica debaixo das peças o jogo inteiro.
 
-**9. O relógio.** Seis rodadas fixas. O Deck II entra na rodada 3 e o escudo do
+**9. O relógio.** Seis rodadas fixas. O Altar abre na rodada 3 e o escudo do
 Emperium cai de 8 para 6, 4 e 2 nas rodadas 4, 5 e 6. A partida não termina — ela
 acelera até estourar. A rodada 6 vale 8 de Glória, quatro vezes uma rodada normal.
 

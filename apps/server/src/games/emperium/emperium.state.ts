@@ -20,6 +20,12 @@ export interface CharInstance {
   readonly instId: string;
   /** CharacterDef.id em emperium.cards.ts */
   readonly defId: string;
+  /**
+   * TranscendenceDef.id, se este personagem ja evoluiu. A carta base continua
+   * sendo `defId` — a Transcendencia e empilhada por cima e SOMA Poder e
+   * palavras-chave. Uma vez so, e nunca substitui a identidade do personagem.
+   */
+  transcendencia?: string;
   /** instIds de EquipInstance anexados. */
   equips: string[];
   local: CharLocation;
@@ -62,8 +68,6 @@ export interface Commitment {
   ordem: OrderId;
   /** ConsumableDef.id jogado de brucos nesta sala. */
   consumivel?: string;
-  /** Mestre-Ferreiro Carrocerada: pagar 3 zeny por +4 de Poder nesta sala. */
-  pagarCarrocerada?: boolean;
   /**
    * Salas de Marcha Forcada, gravadas na confirmacao. Fica no comprometimento
    * (e nao e recalculado na resolucao) porque o controle das salas muda
@@ -148,7 +152,7 @@ export interface EmperiumState {
   mercadoOrdem: PlayerId[];
   mercadoIndex: number;
   /** true quando o Deck II ja foi embaralhado (rodada 3). */
-  deckIILiberado: boolean;
+  altarAberto: boolean;
 
   // ── Comprometimento ────────────────────────────────────────────────────
   commitments: Record<PlayerId, Commitment[]>;

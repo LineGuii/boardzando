@@ -5,6 +5,7 @@ import { GamePlugin } from '../../core/registry/game-plugin.decorator';
 import {
   DECK_I,
   buildConsumableDeck,
+  buildRecruitDeck,
   buildEquipmentDeck,
   buildMonsterDeck,
 } from './emperium.cards';
@@ -31,6 +32,7 @@ import {
   recrutar,
   refinar,
   reposicionarGuardiao,
+  transcender,
   type EmperiumMovePayload,
 } from './emperium.moves';
 import {
@@ -104,7 +106,7 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
       if (slot && rooms[slot]) rooms[slot]!.guardioesDefensor += 1;
     }
 
-    const deckRecrutamento = rng.shuffle(DECK_I.map((c) => c.id));
+    const deckRecrutamento = rng.shuffle(buildRecruitDeck());
     const clans: Record<PlayerId, Clan> = {};
     let nextInstId = 1;
 
@@ -150,7 +152,7 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
       deckConsumiveis: rng.shuffle(buildConsumableDeck()),
       mercadoOrdem: [...order],
       mercadoIndex: 0,
-      deckIILiberado: false,
+      altarAberto: false,
       commitments: {},
       confirmados: [],
       emperiumCubos: {},
@@ -172,6 +174,7 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
     comprarConsumivel,
     comprarCartaMonstro,
     reposicionarGuardiao,
+    transcender,
     passarMercado,
     confirmarComprometimento,
   } as Record<
@@ -204,6 +207,7 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
     'comprarConsumivel',
     'comprarCartaMonstro',
     'reposicionarGuardiao',
+    'transcender',
     'passarMercado',
     'confirmarComprometimento',
   ] as const;
@@ -265,7 +269,7 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
       deckEquipCount: state.deckEquip.length,
       deckMonstrosCount: state.deckMonstros.length,
       deckConsumiveisCount: state.deckConsumiveis.length,
-      deckIILiberado: state.deckIILiberado,
+      altarAberto: state.altarAberto,
       mercadoOrdem: state.mercadoOrdem,
       jogadorDoMercado: jogadorDoMercado(state),
       // O comprometimento so e publico depois da revelacao.

@@ -7,18 +7,22 @@
  */
 export {
   ALL_CHARACTERS,
+  ALTAR_RODADA,
   CHARACTER_BY_ID,
   CONSUMABLES,
   CONSUMABLE_BY_ID,
   DECK_I,
-  DECK_II,
   EQUIPMENT,
   EQUIP_BY_ID,
   MONSTER_BY_ID,
   MONSTER_CARDS,
+  TRANSCENDENCIAS,
+  TRANSCENDENCIA_BY_ID,
   buildConsumableDeck,
   buildEquipmentDeck,
   buildMonsterDeck,
+  buildRecruitDeck,
+  caminhosDaClasse,
 } from '@boardzando/contracts';
 
 export type {
@@ -32,4 +36,5 @@ export type {
   KeywordName,
   MonsterCardDef,
   Papel,
+  TranscendenceDef,
 } from '@boardzando/contracts';

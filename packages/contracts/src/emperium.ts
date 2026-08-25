@@ -1,16 +1,24 @@
 /**
- * Catalogo estatico de Guerra do Emperium: 52 personagens (13 classes x 4
- * variacoes), equipamentos, cartas de monstro e consumiveis.
+ * Catalogo estatico de Guerra do Emperium.
  *
- * Ver `docs/emperium/01-design-v0.1.md` secoes 11 e 12. Este arquivo e a fonte
+ * - 26 variacoes base (13 classes x 2), o baralho de recrutamento;
+ * - 39 Transcendencias (13 classes x 3), evolucoes compradas no Altar para um
+ *   personagem que voce ja tem — nao sao personagens novos;
+ * - equipamentos, cartas de monstro e consumiveis.
+ *
+ * Base x caminho da 6 desfechos por classe, 78 no total. Ver
+ * `docs/emperium/01-design-v0.1.md` secoes 11 e 12. Este arquivo e a fonte
  * unica desses numeros — nada aqui e calculado em runtime.
  */
 
 /** Define que equipamento a carta aceita. Nao tem efeito mecanico proprio. */
 export type Papel = 'vanguarda' | 'arcano' | 'agil' | 'suporte';
 
-/** Deck I = Classico (rodada 1+). Deck II = Transcendente (rodada 3+). */
-export type Deck = 1 | 2;
+/**
+ * Mantido em 1 para todas as cartas base. A antiga distincao Deck I/Deck II
+ * morreu quando a Transcendencia virou evolucao em vez de segundo baralho.
+ */
+export type Deck = 1;
 
 /** As 14 palavras-chave. Toda carta compoe a partir desta lista. */
 export type KeywordName =
@@ -51,7 +59,7 @@ export interface CharacterDef {
    * Efeitos que nao entram no calculo de combate (economia/posicionamento).
    * Mantidos fora das keywords para nao inflar a gramatica. Ver design 17.6.
    */
-  readonly special?: 'forja' | 'carrocerada' | 'salto' | 'ensemble' | 'marionete' | 'teimoso';
+  readonly special?: 'forja' | 'teimoso';
 }
 
 const kw = (name: KeywordName, x?: number): Keyword => (x === undefined ? { kw: name } : { kw: name, x });
@@ -102,51 +110,138 @@ export const DECK_I: readonly CharacterDef[] = [
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────
- * Deck II — Transcendente (entra no mercado a partir da rodada 3)
+ * ALTAR DA TRANSCENDENCIA
+ *
+ * Transcendencia NAO e um personagem que voce contrata: e uma evolucao que
+ * voce compra PARA UM PERSONAGEM QUE JA E SEU. A carta e empilhada sobre a
+ * carta base, que continua na mesa com seu equipamento e sua historia — o
+ * Poder e as palavras-chave SOMAM.
+ *
+ * Por que assim: na v0.1 a Transcendencia era um segundo baralho de
+ * personagens, entao comprar um Arquimago aposentava o seu Bruxo em vez de
+ * faze-lo crescer. Voce nao se apegava a ninguem. Aqui o veterano que sobreviveu
+ * a quatro rodadas e o que vira Arquimago, e perde-lo custa os 7z do recrutamento
+ * mais os 10z da evolucao.
+ *
+ * O Altar tambem e um mercado DIFERENTE do recrutamento: nao e uma fileira
+ * sorteada e disputada, e uma tabela de precos fixa, sempre visivel e sempre
+ * disponivel a partir da rodada 3. Recrutar e oportunismo; transcender e plano.
  * ───────────────────────────────────────────────────────────────────────── */
 
-export const DECK_II: readonly CharacterDef[] = [
-  { id: 'lor-espiral', nome: 'Lorde dos Cavaleiros — Espiral', classe: 'Cavaleiro', deck: 2, custo: 11, poder: 6, papel: 'vanguarda', slots: 2, keywords: [kw('perfurar', 4)], build: 'Spiral Pierce' },
-  { id: 'lor-berserk', nome: 'Lorde dos Cavaleiros — Berserk', classe: 'Cavaleiro', deck: 2, custo: 10, poder: 8, papel: 'vanguarda', slots: 1, keywords: [kw('esgotar')], build: 'Two-Hand Quicken' },
+export interface TranscendenceDef {
+  readonly id: string;
+  /** Nome completo, ex.: "Lorde dos Cavaleiros — Espiral". */
+  readonly nome: string;
+  /** Precisa bater com CharacterDef.classe: so transcende quem e da classe. */
+  readonly classe: string;
+  /** A forma transcendente, ex.: "Lorde dos Cavaleiros". */
+  readonly forma: string;
+  readonly custo: number;
+  /** Somado ao Poder da carta base. */
+  readonly poderBonus: number;
+  /** Somadas as palavras-chave da carta base. */
+  readonly keywords: readonly Keyword[];
+  readonly build: string;
+  readonly special?:
+    | 'marcha-livre'
+    | 'forja-suprema'
+    | 'ensemble'
+    | 'marionete'
+    | 'imortal'
+    | 'revela-oculto';
+}
 
-  { id: 'pal-devocao', nome: 'Paladino — Devocao', classe: 'Templario', deck: 2, custo: 12, poder: 4, papel: 'vanguarda', slots: 2, keywords: [kw('devocao'), kw('escudar')], build: 'Devotion' },
-  { id: 'pal-grandecruz', nome: 'Paladino — Grande Cruz', classe: 'Templario', deck: 2, custo: 11, poder: 6, papel: 'vanguarda', slots: 1, keywords: [kw('rajada', 3), kw('esgotar')], build: 'Grand Cross / Sacrifice' },
+/** 13 classes x 3 caminhos = 39 evolucoes. */
+export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
+  // Cavaleiro
+  { id: 'tr-cav-espiral', nome: 'Lorde dos Cavaleiros — Espiral', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 11, poderBonus: 3, keywords: [kw('perfurar', 4)], build: 'Spiral Pierce' },
+  { id: 'tr-cav-berserk', nome: 'Lorde dos Cavaleiros — Furia Berserk', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 12, poderBonus: 5, keywords: [kw('esgotar')], build: 'Berserk' },
+  { id: 'tr-cav-aura', nome: 'Lorde dos Cavaleiros — Aura Lamina', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 10, poderBonus: 2, keywords: [kw('elo', 2)], build: 'Aura Blade' },
 
-  { id: 'arq-meteoros', nome: 'Arquimago — Chuva de Meteoros', classe: 'Bruxo', deck: 2, custo: 13, poder: 7, papel: 'arcano', slots: 1, keywords: [kw('alcance'), kw('rajada', 3)], build: 'Meteor Storm' },
-  { id: 'arq-nevasca', nome: 'Arquimago — Nevasca', classe: 'Bruxo', deck: 2, custo: 12, poder: 4, papel: 'arcano', slots: 2, keywords: [kw('muralha', 4), kw('alcance')], build: 'Storm Gust precast' },
+  // Templario
+  { id: 'tr-tem-devocao', nome: 'Paladino — Devocao', classe: 'Templario', forma: 'Paladino', custo: 11, poderBonus: 2, keywords: [kw('devocao')], build: 'Devotion' },
+  { id: 'tr-tem-corrente', nome: 'Paladino — Corrente de Escudo', classe: 'Templario', forma: 'Paladino', custo: 11, poderBonus: 4, keywords: [kw('escudar')], build: 'Shield Chain' },
+  { id: 'tr-tem-sacrificio', nome: 'Paladino — Sacrificio', classe: 'Templario', forma: 'Paladino', custo: 10, poderBonus: 3, keywords: [kw('rajada', 3), kw('esgotar')], build: 'Sacrifice' },
 
-  { id: 'pro-dissonancia', nome: 'Professor — Dissonancia', classe: 'Sabio', deck: 2, custo: 11, poder: 4, papel: 'arcano', slots: 1, keywords: [kw('anular', 2)], build: 'Dispell / Ganbantein' },
-  { id: 'pro-duplocast', nome: 'Professor — Duplo Cast', classe: 'Sabio', deck: 2, custo: 10, poder: 6, papel: 'arcano', slots: 1, keywords: [kw('alcance'), kw('perfurar', 2)], build: 'Double Casting' },
+  // Bruxo
+  { id: 'tr-bru-nevasca', nome: 'Arquimago — Nevasca', classe: 'Bruxo', forma: 'Arquimago', custo: 11, poderBonus: 2, keywords: [kw('muralha', 2)], build: 'Storm Gust ampliado' },
+  { id: 'tr-bru-meteoros', nome: 'Arquimago — Chuva de Meteoros', classe: 'Bruxo', forma: 'Arquimago', custo: 13, poderBonus: 5, keywords: [kw('rajada', 3)], build: 'Meteor Storm' },
+  { id: 'tr-bru-ganbantein', nome: 'Arquimago — Ganbantein', classe: 'Bruxo', forma: 'Arquimago', custo: 9, poderBonus: 1, keywords: [kw('anular')], build: 'Ganbantein' },
 
-  { id: 'alg-rompealma', nome: 'Algoz — Rompe-Alma', classe: 'Mercenario', deck: 2, custo: 12, poder: 7, papel: 'agil', slots: 1, keywords: [kw('alcance'), kw('rajada', 4)], build: 'Soul Breaker' },
-  { id: 'alg-presa', nome: 'Algoz — Presa Sombria', classe: 'Mercenario', deck: 2, custo: 11, poder: 4, papel: 'agil', slots: 2, keywords: [kw('oculto'), kw('solo', 4)], build: 'Grimtooth' },
+  // Sabio
+  { id: 'tr-sab-dissonancia', nome: 'Professor — Dissonancia', classe: 'Sabio', forma: 'Professor', custo: 10, poderBonus: 2, keywords: [kw('anular')], build: 'Dispell' },
+  { id: 'tr-sab-duplocast', nome: 'Professor — Duplo Cast', classe: 'Sabio', forma: 'Professor', custo: 11, poderBonus: 4, keywords: [], build: 'Double Casting' },
+  { id: 'tr-sab-memorizar', nome: 'Professor — Memorizar', classe: 'Sabio', forma: 'Professor', custo: 10, poderBonus: 2, keywords: [kw('imitar')], build: 'Memorize' },
 
-  { id: 'des-despojar', nome: 'Desordeiro — Despojar', classe: 'Arruaceiro', deck: 2, custo: 10, poder: 4, papel: 'agil', slots: 1, keywords: [kw('anular'), kw('pilhar', 3)], build: 'Full Strip / Gank' },
-  { id: 'des-plagio', nome: 'Desordeiro — Plagio', classe: 'Arruaceiro', deck: 2, custo: 11, poder: 3, papel: 'agil', slots: 2, keywords: [kw('imitar')], build: 'Plagiarism' },
+  // Mercenario
+  { id: 'tr-mer-rompealma', nome: 'Algoz — Rompe-Alma', classe: 'Mercenario', forma: 'Algoz', custo: 12, poderBonus: 5, keywords: [kw('rajada', 2)], build: 'Soul Breaker' },
+  { id: 'tr-mer-presa', nome: 'Algoz — Presa Sombria', classe: 'Mercenario', forma: 'Algoz', custo: 10, poderBonus: 2, keywords: [kw('oculto')], build: 'Grimtooth' },
+  { id: 'tr-mer-veneno', nome: 'Algoz — Veneno Mortal', classe: 'Mercenario', forma: 'Algoz', custo: 11, poderBonus: 3, keywords: [kw('perfurar', 3)], build: 'Enchant Deadly Poison' },
 
-  { id: 'mes-carrocerada', nome: 'Mestre-Ferreiro — Carrocerada', classe: 'Ferreiro', deck: 2, custo: 11, poder: 5, papel: 'vanguarda', slots: 2, keywords: [], build: 'Cart Termination', special: 'carrocerada' },
-  { id: 'mes-adrenalina', nome: 'Mestre-Ferreiro — Adrenalina', classe: 'Ferreiro', deck: 2, custo: 10, poder: 3, papel: 'vanguarda', slots: 1, keywords: [kw('elo', 2)], build: 'Adrenaline Rush' },
+  // Arruaceiro
+  { id: 'tr-arr-despojar', nome: 'Desordeiro — Despojar Total', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 10, poderBonus: 2, keywords: [kw('anular'), kw('pilhar', 3)], build: 'Full Strip' },
+  { id: 'tr-arr-plagio', nome: 'Desordeiro — Plagio', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 10, poderBonus: 2, keywords: [kw('imitar')], build: 'Plagiarism' },
+  { id: 'tr-arr-silenciosa', nome: 'Desordeiro — Marcha Silenciosa', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 12, poderBonus: 2, keywords: [kw('oculto')], build: 'Chase Walk', special: 'marcha-livre' },
 
-  { id: 'cri-acida', nome: 'Criador — Demonstracao Acida', classe: 'Alquimista', deck: 2, custo: 12, poder: 6, papel: 'suporte', slots: 1, keywords: [kw('perfurar', 6)], build: 'Acid Demonstration' },
-  { id: 'cri-esfera', nome: 'Criador — Esfera Marinha', classe: 'Alquimista', deck: 2, custo: 10, poder: 2, papel: 'suporte', slots: 2, keywords: [kw('muralha', 3)], build: 'Sphere Mine' },
+  // Ferreiro
+  { id: 'tr-fer-carrocerada', nome: 'Mestre-Ferreiro — Carrocerada', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 11, poderBonus: 4, keywords: [], build: 'Cart Termination' },
+  { id: 'tr-fer-fundicao', nome: 'Mestre-Ferreiro — Fundicao Suprema', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 9, poderBonus: 1, keywords: [], build: 'Forja lendaria', special: 'forja-suprema' },
+  { id: 'tr-fer-adrenalina', nome: 'Mestre-Ferreiro — Adrenalina Suprema', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 10, poderBonus: 2, keywords: [kw('elo', 2)], build: 'Adrenaline Rush' },
 
-  { id: 'sum-ressurreicao', nome: 'Sumo Sacerdote — Ressurreicao', classe: 'Sacerdote', deck: 2, custo: 11, poder: 3, papel: 'suporte', slots: 1, keywords: [kw('restaurar', 2)], build: 'Resurrection' },
-  { id: 'sum-assumptio', nome: 'Sumo Sacerdote — Assumptio', classe: 'Sacerdote', deck: 2, custo: 12, poder: 3, papel: 'suporte', slots: 2, keywords: [kw('devocao'), kw('elo', 2)], build: 'Assumptio' },
+  // Alquimista
+  { id: 'tr-alq-acida', nome: 'Criador — Demonstracao Acida', classe: 'Alquimista', forma: 'Criador', custo: 12, poderBonus: 4, keywords: [kw('perfurar', 4)], build: 'Acid Demonstration' },
+  { id: 'tr-alq-homunculo', nome: 'Criador — Homunculo Superior', classe: 'Alquimista', forma: 'Criador', custo: 11, poderBonus: 3, keywords: [kw('elo', 2)], build: 'Homunculus S' },
+  { id: 'tr-alq-esferas', nome: 'Criador — Bomba de Esferas', classe: 'Alquimista', forma: 'Criador', custo: 10, poderBonus: 1, keywords: [kw('muralha', 3)], build: 'Sphere Mine' },
 
-  { id: 'mesq-asura', nome: 'Mestre — Punho de Asura', classe: 'Monge', deck: 2, custo: 12, poder: 10, papel: 'vanguarda', slots: 1, keywords: [kw('esgotar'), kw('solo', 2)], build: 'Asura Strike' },
-  { id: 'mesq-salto', nome: 'Mestre — Salto', classe: 'Monge', deck: 2, custo: 10, poder: 5, papel: 'vanguarda', slots: 1, keywords: [], build: 'Body Relocation', special: 'salto' },
+  // Sacerdote
+  { id: 'tr-sac-assumptio', nome: 'Sumo Sacerdote — Assumptio', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 11, poderBonus: 2, keywords: [kw('devocao')], build: 'Assumptio' },
+  { id: 'tr-sac-ressurreicao', nome: 'Sumo Sacerdote — Ressurreicao', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 10, poderBonus: 1, keywords: [kw('restaurar', 2)], build: 'Resurrection' },
+  { id: 'tr-sac-julgamento', nome: 'Sumo Sacerdote — Julgamento', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 12, poderBonus: 5, keywords: [], build: 'Magnus Exorcismus' },
 
-  { id: 'ati-flechas', nome: 'Atirador de Elite — Chuva de Flechas', classe: 'Cacador', deck: 2, custo: 12, poder: 7, papel: 'agil', slots: 1, keywords: [kw('alcance'), kw('perfurar', 2)], build: 'Arrow Storm' },
-  { id: 'ati-falcao', nome: 'Atirador de Elite — Falcao', classe: 'Cacador', deck: 2, custo: 10, poder: 3, papel: 'agil', slots: 2, keywords: [kw('alcance'), kw('anular')], build: 'Blitz Beat / Detecting' },
+  // Monge
+  { id: 'tr-mon-asura', nome: 'Mestre — Punho de Asura', classe: 'Monge', forma: 'Mestre', custo: 14, poderBonus: 7, keywords: [kw('esgotar')], build: 'Asura Strike' },
+  { id: 'tr-mon-salto', nome: 'Mestre — Salto', classe: 'Monge', forma: 'Mestre', custo: 11, poderBonus: 3, keywords: [], build: 'Body Relocation', special: 'marcha-livre' },
+  { id: 'tr-mon-aco', nome: 'Mestre — Corpo de Aco Supremo', classe: 'Monge', forma: 'Mestre', custo: 10, poderBonus: 1, keywords: [kw('escudar')], build: 'Steel Body', special: 'imortal' },
 
-  { id: 'men-ensemble', nome: 'Menestrel/Cigana — Ensemble', classe: 'Bardo/Odalisca', deck: 2, custo: 9, poder: 2, papel: 'suporte', slots: 1, keywords: [], build: 'Ensemble', special: 'ensemble' },
-  { id: 'men-marionete', nome: 'Menestrel/Cigana — Marionete', classe: 'Bardo/Odalisca', deck: 2, custo: 11, poder: 0, papel: 'suporte', slots: 2, keywords: [], build: 'Marionette Control', special: 'marionete' },
+  // Cacador
+  { id: 'tr-cac-flechas', nome: 'Atirador de Elite — Chuva de Flechas', classe: 'Cacador', forma: 'Atirador de Elite', custo: 12, poderBonus: 5, keywords: [kw('alcance')], build: 'Arrow Storm' },
+  { id: 'tr-cac-armadilha', nome: 'Atirador de Elite — Armadilha Suprema', classe: 'Cacador', forma: 'Atirador de Elite', custo: 10, poderBonus: 2, keywords: [kw('muralha', 3)], build: 'Trap Research' },
+  { id: 'tr-cac-falcao', nome: 'Atirador de Elite — Olho de Falcao', classe: 'Cacador', forma: 'Atirador de Elite', custo: 10, poderBonus: 2, keywords: [kw('anular')], build: 'Falcon Assault', special: 'revela-oculto' },
 
-  { id: 'sup-anjo', nome: 'Superaprendiz Anjo da Guarda', classe: 'Superaprendiz', deck: 2, custo: 9, poder: 4, papel: 'agil', slots: 2, keywords: [], build: 'Guardian Angel' },
-  { id: 'sup-sobrecarga', nome: 'Superaprendiz Sobrecarga', classe: 'Superaprendiz', deck: 2, custo: 10, poder: 3, papel: 'agil', slots: 1, keywords: [kw('imitar'), kw('esgotar')], build: 'O improvavel' },
+  // Bardo/Odalisca
+  { id: 'tr-bar-ensemble', nome: 'Menestrel/Cigana — Ensemble', classe: 'Bardo/Odalisca', forma: 'Menestrel/Cigana', custo: 9, poderBonus: 2, keywords: [], build: 'Ensemble', special: 'ensemble' },
+  { id: 'tr-bar-marionete', nome: 'Menestrel/Cigana — Marionete', classe: 'Bardo/Odalisca', forma: 'Menestrel/Cigana', custo: 11, poderBonus: 0, keywords: [], build: 'Marionette Control', special: 'marionete' },
+  { id: 'tr-bar-cancao', nome: 'Menestrel/Cigana — Cancao Longa', classe: 'Bardo/Odalisca', forma: 'Menestrel/Cigana', custo: 10, poderBonus: 2, keywords: [kw('elo', 2)], build: 'Longing for Freedom' },
+
+  // Superaprendiz — nao transcende. So insiste, e fica barato.
+  { id: 'tr-sup-teimosia', nome: 'Superaprendiz — Teimosia Absurda', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 7, poderBonus: 2, keywords: [], build: 'Guardian Angel', special: 'imortal' },
+  { id: 'tr-sup-sorte', nome: 'Superaprendiz — Sorte de Principiante', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 8, poderBonus: 3, keywords: [kw('solo', 3)], build: 'Sorte pura' },
+  { id: 'tr-sup-imitacao', nome: 'Superaprendiz — Imitacao Descarada', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 7, poderBonus: 2, keywords: [kw('imitar')], build: 'Copia de tudo' },
 ];
 
-export const ALL_CHARACTERS: readonly CharacterDef[] = [...DECK_I, ...DECK_II];
+export const TRANSCENDENCIA_BY_ID: ReadonlyMap<string, TranscendenceDef> = new Map(
+  TRANSCENDENCIAS.map((t) => [t.id, t]),
+);
+
+/** Os 3 caminhos abertos a um personagem desta classe. */
+export function caminhosDaClasse(classe: string): readonly TranscendenceDef[] {
+  return TRANSCENDENCIAS.filter((t) => t.classe === classe);
+}
+
+/** Rodada em que o Altar abre. */
+export const ALTAR_RODADA = 3;
+
+
+export const ALL_CHARACTERS: readonly CharacterDef[] = DECK_I;
+
+/**
+ * Baralho de recrutamento: duas copias de cada variacao base. Com um baralho
+ * unico de 26 a fileira secava antes da rodada 6, e dois cla poderem contratar
+ * o mesmo build e normal — o que os diferencia e o equipamento e a evolucao.
+ */
+export function buildRecruitDeck(): string[] {
+  return DECK_I.flatMap((c) => [c.id, c.id]);
+}
 
 export const CHARACTER_BY_ID: ReadonlyMap<string, CharacterDef> = new Map(
   ALL_CHARACTERS.map((c) => [c.id, c]),

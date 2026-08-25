@@ -3,6 +3,8 @@ import {
   CHARACTER_BY_ID,
   CONSUMABLE_BY_ID,
   EQUIP_BY_ID,
+  TRANSCENDENCIA_BY_ID,
+  caminhosDaClasse,
   type CharacterDef,
   type Keyword,
 } from '@boardzando/contracts';
@@ -19,6 +21,8 @@ type OrderId = 'investida' | 'cerco' | 'emboscada' | 'resguardo';
 interface CharInstanceV {
   instId: string;
   defId: string;
+  /** TranscendenceDef.id, se o personagem ja evoluiu no Altar. */
+  transcendencia?: string;
   equips: string[];
   local: 'reserva' | 'enfermaria' | 'comprometido';
   voltaNaRodada?: number;
@@ -54,7 +58,6 @@ interface CommitmentV {
   charInstIds: string[];
   ordem: OrderId;
   consumivel?: string;
-  pagarCarrocerada?: boolean;
 }
 interface FactionResultV {
   playerId: string | null;
@@ -90,7 +93,7 @@ interface EmperiumView {
   clans: Record<string, ClanV>;
   fileiraRecrutamento: string[];
   fileiraEquip: string[];
-  deckIILiberado: boolean;
+  altarAberto: boolean;
   jogadorDoMercado: string | null;
   meusComprometimentos: CommitmentV[];
   confirmados: string[];
@@ -162,19 +165,22 @@ function CharCard({
         }, 0)
       : 0;
 
+  const trans = inst?.transcendencia ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia) : undefined;
+
   return (
     <button
       type="button"
-      className={`emp-card ${selecionado ? 'sel' : ''} ${compacto ? 'compacto' : ''}`}
+      className={`emp-card ${selecionado ? 'sel' : ''} ${compacto ? 'compacto' : ''} ${
+        trans ? 'transcendido' : ''
+      }`}
       data-papel={def.papel}
       onClick={onClick}
       disabled={!onClick}
     >
       <span className="emp-card-band" />
+      {trans && <span className="emp-card-forma">{trans.forma}</span>}
       <span className="emp-card-nome">{def.nome}</span>
-      <span className="emp-card-cls">
-        {def.classe} · Deck {def.deck === 1 ? 'I' : 'II'}
-      </span>
+      <span className="emp-card-cls">{def.classe}</span>
       <span className="emp-card-stats">
         <span className="emp-stat">
           <em>Custo</em>
@@ -184,15 +190,21 @@ function CharCard({
           <em>Poder</em>
           <b>
             {def.poder}
+            {trans && trans.poderBonus > 0 && <i className="asc">+{trans.poderBonus}</i>}
             {equipsPoder > 0 && <i className="plus">+{equipsPoder}</i>}
           </b>
         </span>
         <span className="emp-slots">{'◇'.repeat(def.slots)}</span>
       </span>
-      {def.keywords.length > 0 && (
+      {(def.keywords.length > 0 || (trans?.keywords.length ?? 0) > 0) && (
         <span className="emp-kws">
           {def.keywords.map((k) => (
             <span key={k.kw} className="emp-chip">
+              {kwLabel(k)}
+            </span>
+          ))}
+          {trans?.keywords.map((k) => (
+            <span key={`tr-${k.kw}`} className="emp-chip asc" title="Ganha na Transcendência">
               {kwLabel(k)}
             </span>
           ))}
@@ -214,7 +226,7 @@ function CharCard({
           })}
         </span>
       )}
-      {!compacto && <span className="emp-card-build">{def.build}</span>}
+      {!compacto && <span className="emp-card-build">{trans ? trans.build : def.build}</span>}
     </button>
   );
 }
@@ -341,6 +353,7 @@ export function EmperiumBoard() {
   const [replay, setReplay] = useState(0);
   const [guardiaoDe, setGuardiaoDe] = useState<string>('');
   const [guardiaoPara, setGuardiaoPara] = useState<string>('');
+  const [altarAlvo, setAltarAlvo] = useState<string>('');
 
   const nomeDe = useMemo(() => {
     const mapa = new Map<string, string>();
@@ -431,7 +444,7 @@ export function EmperiumBoard() {
           <em>Escudo base</em>
           <b>{view.escudoBase}</b>
         </div>
-        {view.deckIILiberado && <span className="emp-trans">Transcendência liberada</span>}
+        {view.altarAberto && <span className="emp-trans">Altar aberto</span>}
       </header>
 
       {/* ── Clãs ── */}
@@ -638,6 +651,80 @@ export function EmperiumBoard() {
               );
             })}
           </div>
+
+          {/* ── O Altar: mercado de preço fixo, sempre visível ── */}
+          {view.altarAberto && (
+            <>
+              <h4>Altar da Transcendência</h4>
+              <p className="emp-dica">
+                Aqui você não contrata ninguém: você <b>evolui quem já é seu</b>. A carta é
+                empilhada sobre o personagem — Poder e palavras-chave <b>somam</b>, e o equipamento
+                continua com ele. Uma vez por personagem. Evoluir alguém que caiu o traz de volta
+                da Enfermaria na hora.
+              </p>
+              <div className="emp-altar">
+                <select
+                  className="emp-altar-alvo"
+                  value={altarAlvo}
+                  onChange={(e) => setAltarAlvo(e.target.value)}
+                >
+                  <option value="">escolha um personagem seu...</option>
+                  {Object.values(meuClan?.chars ?? {})
+                    .filter((c) => !c.transcendencia && c.local !== 'comprometido')
+                    .map((c) => {
+                      const d = CHARACTER_BY_ID.get(c.defId);
+                      return (
+                        <option key={c.instId} value={c.instId}>
+                          {d?.nome}
+                          {c.local === 'enfermaria' ? ' (na Enfermaria)' : ''}
+                        </option>
+                      );
+                    })}
+                </select>
+
+                {altarAlvo &&
+                  (() => {
+                    const alvo = meuClan?.chars[altarAlvo];
+                    const alvoDef = alvo ? CHARACTER_BY_ID.get(alvo.defId) : undefined;
+                    if (!alvoDef) return null;
+                    return (
+                      <div className="emp-caminhos">
+                        {caminhosDaClasse(alvoDef.classe).map((t) => {
+                          const podePagar = (meuClan?.zeny ?? 0) >= t.custo;
+                          return (
+                            <button
+                              key={t.id}
+                              type="button"
+                              className="emp-caminho"
+                              disabled={!minhaVezMercado || !podePagar}
+                              onClick={() =>
+                                emit('transcender', {
+                                  type: 'transcender',
+                                  charInstId: altarAlvo,
+                                  transId: t.id,
+                                })
+                              }
+                            >
+                              <span className="emp-caminho-nome">{t.nome}</span>
+                              <span className="emp-caminho-ganho">
+                                {t.poderBonus > 0 && <b>+{t.poderBonus} Poder</b>}
+                                {t.keywords.map((k) => (
+                                  <span key={k.kw} className="emp-chip asc">
+                                    {kwLabel(k)}
+                                  </span>
+                                ))}
+                              </span>
+                              <span className="emp-caminho-custo">{t.custo}z</span>
+                              <span className="emp-caminho-build">{t.build}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+              </div>
+            </>
+          )}
 
           {minhaVezMercado && (
             <div className="emp-mercado-acoes">

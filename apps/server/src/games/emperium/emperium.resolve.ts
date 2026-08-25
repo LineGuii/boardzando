@@ -3,8 +3,10 @@ import {
   CHARACTER_BY_ID,
   EQUIP_BY_ID,
   MONSTER_BY_ID,
+  TRANSCENDENCIA_BY_ID,
   type CharacterDef,
   type KeywordName,
+  type TranscendenceDef,
 } from './emperium.cards';
 import {
   SHIELD_BY_ROUND,
@@ -39,14 +41,19 @@ const ORDER_POWER: Record<OrderId, number> = {
 interface CharCompute {
   instId: string;
   def: CharacterDef;
-  /** Poder do personagem + equipamento + refino, antes de sala e keywords. */
+  /** A evolucao comprada no Altar, se houver. */
+  trans?: TranscendenceDef;
+  /** Poder do personagem + evolucao + equipamento + refino, antes das keywords. */
   poderBase: number;
   keywords: Map<KeywordName, number>;
   monsterSpecials: Set<string>;
   equipSpecials: Set<string>;
+  transSpecials: Set<string>;
   imuneAnular: boolean;
   ghostring: boolean;
-  /** Poder base da carta pura — usado para calcular baixas. */
+  /** Nao pode sofrer baixa (Corpo de Aco Supremo / Teimosia Absurda). */
+  imortal: boolean;
+  /** Poder de carta + evolucao — usado para calcular baixas. */
   poderCarta: number;
 }
 
@@ -66,6 +73,16 @@ function computeChar(state: EmperiumState, clan: Clan, instId: string): CharComp
   let poder = def.poder;
   const monsterSpecials = new Set<string>();
   const equipSpecials = new Set<string>();
+  const transSpecials = new Set<string>();
+
+  // Transcendencia: evolucao empilhada sobre a carta base. Soma, nao substitui —
+  // e por isso que qual base virou Arquimago continua importando na rodada 6.
+  const trans = inst.transcendencia ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia) : undefined;
+  if (trans) {
+    poder += trans.poderBonus;
+    for (const k of trans.keywords) addKw(k.kw, k.x);
+    if (trans.special) transSpecials.add(trans.special);
+  }
 
   for (const eqId of inst.equips) {
     const eq = clan.equips[eqId];
@@ -92,13 +109,17 @@ function computeChar(state: EmperiumState, clan: Clan, instId: string): CharComp
   return {
     instId,
     def,
+    trans,
     poderBase: poder,
-    poderCarta: def.poder,
+    // Baixas contam o investimento total: a carta base mais a evolucao.
+    poderCarta: def.poder + (trans?.poderBonus ?? 0),
     keywords,
     monsterSpecials,
     equipSpecials,
+    transSpecials,
     imuneAnular: monsterSpecials.has('imune-anular') || equipSpecials.has('imune-anular'),
     ghostring,
+    imortal: transSpecials.has('imortal'),
   };
 }
 
@@ -107,7 +128,6 @@ interface Faction {
   chars: CharCompute[];
   ordem: OrderId | null;
   consumivel?: string;
-  pagouCarrocerada: boolean;
   /** Poder antes de Muralha. */
   poderBruto: number;
   muralha: number;
@@ -132,7 +152,6 @@ function factionPower(
   ordem: OrderId | null,
   emboscadaExclusiva: boolean,
   consumivel: string | undefined,
-  pagouCarrocerada: boolean,
   marcha: number,
 ): Faction {
   const room = state.rooms[slot];
@@ -181,9 +200,6 @@ function factionPower(
     // Selo do Emperium.
     if (c.equipSpecials.has('poder-emperium') && slot === 'emperium') p += 2;
 
-    // Carrocerada: o Mestre-Ferreiro paga 3z por +4 de Poder.
-    if (c.def.special === 'carrocerada' && pagouCarrocerada) p += 4;
-
     muralha += val('muralha');
     perfurar += val('perfurar');
     if (c.keywords.has('anular')) temAnular += val('anular');
@@ -193,13 +209,13 @@ function factionPower(
 
   // Ensemble: com outro Bardo/Odalisca seu na sala, ambos +5.
   const bardos = chars.filter((c) => c.def.classe === 'Bardo/Odalisca');
-  if (chars.some((c) => c.def.special === 'ensemble') && bardos.length >= 2) {
+  if (chars.some((c) => c.transSpecials.has('ensemble')) && bardos.length >= 2) {
     total += 5 * bardos.length;
   }
 
   // Marionete: dobra o Poder base de outro personagem seu na sala, max +6.
-  if (chars.some((c) => c.def.special === 'marionete')) {
-    const alvos = chars.filter((c) => c.def.special !== 'marionete');
+  if (chars.some((c) => c.transSpecials.has('marionete'))) {
+    const alvos = chars.filter((c) => !c.transSpecials.has('marionete'));
     if (alvos.length > 0) {
       const melhor = Math.max(...alvos.map((c) => c.poderBase));
       total += Math.min(6, melhor);
@@ -225,15 +241,18 @@ function factionPower(
     else total += ORDER_POWER[ordem];
   }
 
-  // Marcha Forcada: quem pulou salas chega disperso.
-  total -= MARCHA_PENALIDADE * marcha;
+  // Marcha Forcada: quem pulou salas chega disperso. Salto (Mestre) e Marcha
+  // Silenciosa (Desordeiro) guiam o grupo: um so deles anula a penalidade da
+  // faccao inteira — e o que faz dessas duas evolucoes uma jogada estrategica
+  // e nao so mais um bonus de Poder.
+  const guia = chars.some((c) => c.transSpecials.has('marcha-livre'));
+  if (!guia) total -= MARCHA_PENALIDADE * marcha;
 
   return {
     playerId,
     chars,
     ordem,
     consumivel,
-    pagouCarrocerada,
     poderBruto: total,
     muralha,
     perfurar,
@@ -299,6 +318,7 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
 
   const elegiveis = f.chars.filter((c) => {
     if (c.ghostring) return false; // Ghostring nao pode sofrer baixa.
+    if (c.imortal) return false; // Corpo de Aco Supremo / Teimosia Absurda.
     if (c.def.special === 'teimoso' && round === 1) return false;
     return true;
   });
@@ -372,7 +392,6 @@ export function resolveRoom(
         input.commitment.ordem,
         emboscadores === 1,
         input.commitment.consumivel,
-        input.commitment.pagarCarrocerada === true,
         input.commitment.marcha ?? 0,
       ),
     );
@@ -385,7 +404,6 @@ export function resolveRoom(
       playerId: null,
       chars: [],
       ordem: null,
-      pagouCarrocerada: false,
       poderBruto: guarnicao,
       muralha: 0,
       perfurar: 0,
@@ -513,7 +531,6 @@ export function resolveEmperium(
       input.commitment.ordem,
       emboscadores === 1,
       input.commitment.consumivel,
-      input.commitment.pagarCarrocerada === true,
       input.commitment.marcha ?? 0,
     );
     todas.push(f);

@@ -378,6 +378,108 @@
   margin-top: auto;
 }
 
+/* ── Transcendencia: a evolucao empilhada sobre a carta ── */
+
+.emp-card.transcendido {
+  border-color: var(--ouro);
+  box-shadow: inset 0 0 0 1px rgba(216, 180, 95, 0.16);
+}
+.emp-card-forma {
+  font-family: inherit;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 700;
+  color: var(--ouro);
+}
+.emp-stat .asc {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--ouro);
+}
+.emp-chip.asc {
+  background: rgba(216, 180, 95, 0.16);
+  color: var(--ouro);
+}
+
+/* O Altar nao e uma fileira sorteada: e uma tabela de precos fixa. */
+.emp-altar {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 11px;
+  border: 1px solid var(--ouro);
+  border-radius: 5px;
+  background: rgba(216, 180, 95, 0.05);
+}
+.emp-altar-alvo {
+  background: var(--pedra);
+  color: var(--tinta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 3px;
+  padding: 5px 7px;
+  font-size: 0.8rem;
+  max-width: 22rem;
+}
+.emp-caminhos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 8px;
+}
+.emp-caminho {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 9px 11px;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 4px;
+  color: var(--tinta);
+  font: inherit;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+.emp-caminho:not(:disabled):hover {
+  border-color: var(--ouro);
+}
+.emp-caminho:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.emp-caminho-nome {
+  font-weight: 700;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  padding-right: 2.6rem;
+}
+.emp-caminho-ganho {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 0.7rem;
+}
+.emp-caminho-ganho b {
+  color: var(--ouro);
+}
+.emp-caminho-custo {
+  position: absolute;
+  top: 9px;
+  right: 11px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--ouro);
+  font-variant-numeric: tabular-nums;
+}
+.emp-caminho-build {
+  font-size: 0.63rem;
+  font-style: italic;
+  color: var(--tinta-fraca);
+}
+
 /* ── Equipamento no mercado ────────────────────────────── */
 
 .emp-equip-row {

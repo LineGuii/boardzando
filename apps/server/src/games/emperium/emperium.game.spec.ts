@@ -1,6 +1,14 @@
 import type { PlayerId } from '@boardzando/contracts';
 import { GameInstance, InvalidMoveError } from '../../core/engine/game-instance';
-import { CHARACTER_BY_ID, DECK_I, DECK_II, ALL_CHARACTERS, EQUIPMENT } from './emperium.cards';
+import {
+  ALL_CHARACTERS,
+  CHARACTER_BY_ID,
+  DECK_I,
+  EQUIPMENT,
+  TRANSCENDENCIAS,
+  TRANSCENDENCIA_BY_ID,
+  caminhosDaClasse,
+} from './emperium.cards';
 import { EmperiumGame } from './emperium.game';
 import { jogadorDoMercado } from './emperium.moves';
 import { resolveEmperium, resolveRoom, type RoomInput } from './emperium.resolve';
@@ -77,7 +85,7 @@ function makeState(
     deckConsumiveis: [],
     mercadoOrdem: order,
     mercadoIndex: 0,
-    deckIILiberado: true,
+    altarAberto: true,
     commitments: {},
     confirmados: [],
     emperiumCubos: {},
@@ -90,6 +98,18 @@ function makeState(
 }
 
 const ids = (clan: Clan) => Object.keys(clan.chars);
+
+/** Empilha uma evolucao do Altar sobre um personagem ja existente. */
+function transcenderTeste(clan: Clan, charInstId: string, transId: string): void {
+  clan.chars[charInstId]!.transcendencia = transId;
+}
+
+/** Um cla com um unico personagem, ja transcendido. */
+function makeClanTr(playerId: PlayerId, defId: string, transId: string): Clan {
+  const clan = makeClan(playerId, [defId]);
+  transcenderTeste(clan, ids(clan)[0]!, transId);
+  return clan;
+}
 
 /** Anexa um equipamento (com refino e cartas encaixadas) ao personagem. */
 function equiparTeste(
@@ -109,31 +129,82 @@ function equiparTeste(
   clan.chars[charInstId]!.equips.push(instId);
 }
 
+/** Todos passam o mercado e comprometem no portao com o que tiverem. */
+function jogarRodada(match: GameInstance<EmperiumState>): void {
+  for (let guard = 0; guard < 60; guard++) {
+    const s = match.snapshot.state;
+    if (s.step !== 'mercado') break;
+    const p = jogadorDoMercado(s);
+    if (!p) break;
+    match.applyMove(p, 'passarMercado', { type: 'passarMercado' });
+  }
+  const s = match.snapshot.state;
+  if (s.step !== 'comprometimento') return;
+  for (const p of s.order) {
+    const disponiveis = Object.values(s.clans[p]!.chars)
+      .filter((c) => c.local === 'reserva')
+      .map((c) => c.instId);
+    const commitments =
+      disponiveis.length > 0
+        ? [{ slot: 'portao' as const, charInstIds: disponiveis, ordem: 'investida' as const }]
+        : [];
+    match.applyMove(p, 'confirmarComprometimento', {
+      type: 'confirmarComprometimento',
+      commitments,
+    });
+  }
+}
+
 /* ═════════════════════════════════════════════════════════════════════════ */
 
 describe('EmperiumGame — catalogo', () => {
-  it('tem 13 classes com exatamente 4 variacoes cada (52 no total)', () => {
-    expect(ALL_CHARACTERS).toHaveLength(52);
+  it('tem 13 classes com 2 variacoes base cada (26 no total)', () => {
+    expect(DECK_I).toHaveLength(26);
+    expect(ALL_CHARACTERS).toHaveLength(26);
     const porClasse = new Map<string, number>();
     for (const c of ALL_CHARACTERS) porClasse.set(c.classe, (porClasse.get(c.classe) ?? 0) + 1);
     expect(porClasse.size).toBe(13);
-    for (const [classe, n] of porClasse) expect([classe, n]).toEqual([classe, 4]);
+    for (const [classe, n] of porClasse) expect([classe, n]).toEqual([classe, 2]);
   });
 
-  it('divide as variacoes em 26 Classicas e 26 Transcendentes', () => {
-    expect(DECK_I).toHaveLength(26);
-    expect(DECK_II).toHaveLength(26);
-  });
-
-  it('nenhuma carta tem mais de 2 palavras-chave (limite da gramatica)', () => {
-    for (const c of ALL_CHARACTERS) {
-      expect(c.keywords.length).toBeLessThanOrEqual(2);
+  it('tem 3 caminhos de Transcendencia por classe (39 no total)', () => {
+    expect(TRANSCENDENCIAS).toHaveLength(39);
+    for (const c of DECK_I) {
+      expect(caminhosDaClasse(c.classe)).toHaveLength(3);
     }
   });
 
-  it('ids de personagem e equipamento sao unicos', () => {
-    expect(new Set(ALL_CHARACTERS.map((c) => c.id)).size).toBe(52);
+  it('base x caminho da 6 desfechos por classe, 78 no total', () => {
+    const desfechos = DECK_I.reduce((n, c) => n + caminhosDaClasse(c.classe).length, 0);
+    expect(desfechos).toBe(78);
+  });
+
+  it('toda Transcendencia aponta para uma classe que existe', () => {
+    const classes = new Set(DECK_I.map((c) => c.classe));
+    for (const t of TRANSCENDENCIAS) expect(classes.has(t.classe)).toBe(true);
+  });
+
+  it('nenhuma carta tem mais de 2 palavras-chave (limite da gramatica)', () => {
+    for (const c of ALL_CHARACTERS) expect(c.keywords.length).toBeLessThanOrEqual(2);
+    for (const t of TRANSCENDENCIAS) expect(t.keywords.length).toBeLessThanOrEqual(2);
+  });
+
+  it('ids sao unicos em personagens, evolucoes e equipamentos', () => {
+    expect(new Set(ALL_CHARACTERS.map((c) => c.id)).size).toBe(26);
+    expect(new Set(TRANSCENDENCIAS.map((t) => t.id)).size).toBe(39);
     expect(new Set(EQUIPMENT.map((e) => e.id)).size).toBe(EQUIPMENT.length);
+  });
+
+  it('a Transcendencia nunca sai mais barata que o recrutamento mais caro', () => {
+    // Evoluir e investimento, nao atalho: o personagem transcendido custa o
+    // recrutamento MAIS a evolucao, e por isso perde-lo doi.
+    const maiorBase = Math.max(...DECK_I.map((c) => c.custo));
+    for (const t of TRANSCENDENCIAS) expect(t.custo).toBeGreaterThanOrEqual(maiorBase);
+  });
+
+  it('so o Superaprendiz evolui barato — ele nao transcende, so insiste', () => {
+    const baratas = TRANSCENDENCIAS.filter((t) => t.custo < 9);
+    expect(baratas.every((t) => t.classe === 'Superaprendiz')).toBe(true);
   });
 });
 
@@ -163,7 +234,7 @@ describe('EmperiumGame — setup', () => {
     const s = newMatch().snapshot.state;
     expect(s.round).toBe(1);
     expect(s.step).toBe('mercado');
-    expect(s.deckIILiberado).toBe(false);
+    expect(s.altarAberto).toBe(false);
     for (const defId of s.fileiraRecrutamento) {
       expect(CHARACTER_BY_ID.get(defId)!.deck).toBe(1);
     }
@@ -241,6 +312,172 @@ describe('EmperiumGame — mercado', () => {
   });
 });
 
+describe('EmperiumGame — Transcendencia', () => {
+  it('SOMA Poder e palavras-chave a carta base em vez de substitui-la', () => {
+    // Bruxo Tempestade: Poder 3, MURALHA 2, ALCANCE.
+    // + Arquimago Nevasca: +2 Poder, +MURALHA 2  =>  Poder 5, MURALHA 4.
+    const ana = makeClan('ana', ['bru-tempestade']);
+    ana.chars[ids(ana)[0]!]!.transcendencia = 'tr-bru-nevasca';
+    // Bruno com tropa suficiente para a reducao inteira aparecer: a Muralha
+    // nunca empurra o Poder abaixo de zero.
+    const bruno = makeClan('bruno', ['mon-combo', 'mon-combo']);
+    const state = makeState({ ana, bruno }, { castleOwnerId: 'bruno' });
+
+    const res = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco', marcha: 0 } },
+      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'cerco', marcha: 0 } },
+    ]);
+    const anaRes = res.faccoes.find((f) => f.playerId === 'ana')!;
+    const brunoRes = res.faccoes.find((f) => f.playerId === 'bruno')!;
+
+    // base 3 + evolucao 2 + 1 (Patio Aberto premia ALCANCE) - 1 (cerco).
+    expect(anaRes.poderBruto).toBe(3 + 2 + 1 - 1);
+    // Muralha 2 (base) + 2 (evolucao) = 4, aplicada em Bruno.
+    expect(brunoRes.poderBruto - brunoRes.poderFinal).toBe(4);
+  });
+
+  it('qual base transcendeu continua importando', () => {
+    // O mesmo caminho sobre bases diferentes produz personagens diferentes.
+    const comTempestade = makeClan('ana', ['bru-tempestade']); // 3, MURALHA 2
+    comTempestade.chars[ids(comTempestade)[0]!]!.transcendencia = 'tr-bru-nevasca';
+    const comJupitel = makeClan('bruno', ['bru-jupitel']); // 4, sem muralha
+    comJupitel.chars[ids(comJupitel)[0]!]!.transcendencia = 'tr-bru-nevasca';
+    const state = makeState({ ana: comTempestade, bruno: comJupitel }, { castleOwnerId: 'carla' });
+
+    const res = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(comTempestade), ordem: 'cerco', marcha: 0 } },
+      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(comJupitel), ordem: 'cerco', marcha: 0 } },
+    ]);
+    const a = res.faccoes.find((f) => f.playerId === 'ana')!;
+    const b = res.faccoes.find((f) => f.playerId === 'bruno')!;
+    // Jupitel tem mais Poder bruto, Tempestade tem mais Muralha: sao builds
+    // distintos mesmo com a MESMA evolucao comprada.
+    expect(b.poderBruto).toBeGreaterThan(a.poderBruto);
+    expect(a.poderFinal).toBeGreaterThan(b.poderFinal);
+  });
+
+  it('o move cobra o custo, marca o personagem e gasta uma acao', () => {
+    const match = newMatch();
+    // Forca o Altar aberto e da dinheiro, sem mexer no resto do fluxo.
+    const p = jogadorDoMercado(match.snapshot.state)!;
+    const st = match.snapshot.state;
+    st.altarAberto = true;
+    st.clans[p]!.zeny = 40;
+    const alvoId = Object.keys(st.clans[p]!.chars)[0]!;
+    const classe = CHARACTER_BY_ID.get(st.clans[p]!.chars[alvoId]!.defId)!.classe;
+    const caminho = caminhosDaClasse(classe)[0]!;
+
+    match.applyMove(p, 'transcender', {
+      type: 'transcender',
+      charInstId: alvoId,
+      transId: caminho.id,
+    });
+
+    const depois = match.snapshot.state.clans[p]!;
+    expect(depois.chars[alvoId]!.transcendencia).toBe(caminho.id);
+    expect(depois.zeny).toBe(40 - caminho.custo);
+    expect(depois.acoesRestantes).toBe(2);
+  });
+
+  it('rejeita caminho de outra classe, e transcender duas vezes', () => {
+    const match = newMatch();
+    const p = jogadorDoMercado(match.snapshot.state)!;
+    const st = match.snapshot.state;
+    st.altarAberto = true;
+    st.clans[p]!.zeny = 60;
+    const alvoId = Object.keys(st.clans[p]!.chars)[0]!;
+    const classe = CHARACTER_BY_ID.get(st.clans[p]!.chars[alvoId]!.defId)!.classe;
+    const outraClasse = TRANSCENDENCIAS.find((t) => t.classe !== classe)!;
+
+    expect(() =>
+      match.applyMove(p, 'transcender', {
+        type: 'transcender',
+        charInstId: alvoId,
+        transId: outraClasse.id,
+      }),
+    ).toThrow(InvalidMoveError);
+
+    const caminho = caminhosDaClasse(classe)[0]!;
+    match.applyMove(p, 'transcender', { type: 'transcender', charInstId: alvoId, transId: caminho.id });
+    expect(() =>
+      match.applyMove(p, 'transcender', {
+        type: 'transcender',
+        charInstId: alvoId,
+        transId: caminhosDaClasse(classe)[1]!.id,
+      }),
+    ).toThrow(InvalidMoveError);
+  });
+
+  it('rejeita transcender antes do Altar abrir', () => {
+    const match = newMatch();
+    const p = jogadorDoMercado(match.snapshot.state)!;
+    const st = match.snapshot.state;
+    expect(st.altarAberto).toBe(false);
+    st.clans[p]!.zeny = 40;
+    const alvoId = Object.keys(st.clans[p]!.chars)[0]!;
+    const classe = CHARACTER_BY_ID.get(st.clans[p]!.chars[alvoId]!.defId)!.classe;
+    expect(() =>
+      match.applyMove(p, 'transcender', {
+        type: 'transcender',
+        charInstId: alvoId,
+        transId: caminhosDaClasse(classe)[0]!.id,
+      }),
+    ).toThrow(InvalidMoveError);
+  });
+
+  it('transcender um caido na Enfermaria o traz de volta na hora (Rebirth)', () => {
+    const match = newMatch();
+    const p = jogadorDoMercado(match.snapshot.state)!;
+    const st = match.snapshot.state;
+    st.altarAberto = true;
+    st.clans[p]!.zeny = 40;
+    const alvoId = Object.keys(st.clans[p]!.chars)[0]!;
+    st.clans[p]!.chars[alvoId]!.local = 'enfermaria';
+    st.clans[p]!.chars[alvoId]!.voltaNaRodada = 99;
+    const classe = CHARACTER_BY_ID.get(st.clans[p]!.chars[alvoId]!.defId)!.classe;
+
+    match.applyMove(p, 'transcender', {
+      type: 'transcender',
+      charInstId: alvoId,
+      transId: caminhosDaClasse(classe)[0]!.id,
+    });
+
+    const depois = match.snapshot.state.clans[p]!.chars[alvoId]!;
+    expect(depois.local).toBe('reserva');
+    expect(depois.voltaNaRodada).toBeUndefined();
+  });
+
+  it('Salto e Marcha Silenciosa anulam a penalidade de Marcha Forcada', () => {
+    const semGuia = makeClan('ana', ['mon-combo']);
+    const comGuia = makeClan('bruno', ['mon-combo']);
+    comGuia.chars[ids(comGuia)[0]!]!.transcendencia = 'tr-mon-salto';
+    const state = makeState({ ana: semGuia, bruno: comGuia }, { castleOwnerId: 'carla' });
+
+    const res = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(semGuia), ordem: 'cerco', marcha: 3 } },
+      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(comGuia), ordem: 'cerco', marcha: 3 } },
+    ]);
+    const a = res.faccoes.find((f) => f.playerId === 'ana')!;
+    const b = res.faccoes.find((f) => f.playerId === 'bruno')!;
+    expect(a.poderBruto).toBe(4 - 1 - MARCHA_PENALIDADE * 3);
+    // Salto: +3 de Poder e nenhuma penalidade, apesar de marcha 3.
+    expect(b.poderBruto).toBe(4 + 3 - 1);
+  });
+
+  it('o Altar abre na rodada 3 sem mexer no baralho de recrutamento', () => {
+    const match = newMatch();
+    jogarRodada(match);
+    expect(match.snapshot.state.altarAberto).toBe(false);
+    jogarRodada(match);
+    const s = match.snapshot.state;
+    expect(s.round).toBe(3);
+    expect(s.altarAberto).toBe(true);
+    // A fileira continua sendo so de cartas base.
+    for (const defId of s.fileiraRecrutamento) expect(CHARACTER_BY_ID.get(defId)).toBeDefined();
+    expect(TRANSCENDENCIA_BY_ID.get(s.fileiraRecrutamento[0] ?? '')).toBeUndefined();
+  });
+});
+
 describe('EmperiumGame — Marcha Forcada', () => {
   it('na rodada 1 o atacante alcanca TODAS as salas, nao so o portao', () => {
     const s = newMatch().snapshot.state;
@@ -295,15 +532,17 @@ describe('EmperiumGame — Marcha Forcada', () => {
 
 describe('EmperiumGame — resolucao de sala', () => {
   it('reproduz o exemplo trabalhado do design (Corredor Estreito, rodada 4)', () => {
-    // Ana: Arquimago Nevasca (P4, MURALHA 4, ALCANCE) + Templario Escudeiro (P2)
-    // Bruno: Mestre Punho de Asura (P10, SOLO 2) sozinho
-    // Carla (defensora): Cacador Armadilheiro (P2, MURALHA 2)
-    //                    + Sumo Sacerdote Assumptio (P3, ELO 2)
-    const ana = makeClan('ana', ['arq-nevasca', 'tem-escudeiro']);
+    // Ana: Bruxo Tempestade transcendido em Arquimago Nevasca + Templario Escudeiro
+    // Bruno: Monge Combo transcendido em Punho de Asura, sozinho
+    // Carla (defensora): Cacador Armadilheiro + Sacerdote Suporte em Assumptio
+    const ana = makeClan('ana', ['bru-tempestade', 'tem-escudeiro']);
+    transcenderTeste(ana, ids(ana)[0]!, 'tr-bru-nevasca');
     // Cajado da Tempestade +2 com uma Carta Hydra encaixada (+2 atacando).
     equiparTeste(ana, ids(ana)[0]!, 'eq-cajado', { refino: 2, cartas: ['mc-hydra'] });
-    const bruno = makeClan('bruno', ['mesq-asura']);
-    const carla = makeClan('carla', ['cac-armadilheiro', 'sum-assumptio']);
+    const bruno = makeClan('bruno', ['mon-combo']);
+    transcenderTeste(bruno, ids(bruno)[0]!, 'tr-mon-asura');
+    const carla = makeClan('carla', ['cac-armadilheiro', 'sac-suporte']);
+    transcenderTeste(carla, ids(carla)[1]!, 'tr-sac-assumptio');
     const state = makeState({ ana, bruno, carla }, {
       tileId: 'sala-corredor',
       castleOwnerId: 'carla',
@@ -311,25 +550,26 @@ describe('EmperiumGame — resolucao de sala', () => {
     });
 
     const inputs: RoomInput[] = [
-      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'investida' } },
-      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'emboscada' } },
-      { playerId: 'carla', commitment: { slot: 'b1', charInstIds: ids(carla), ordem: 'resguardo' } },
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'investida', marcha: 0 } },
+      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'emboscada', marcha: 0 } },
+      { playerId: 'carla', commitment: { slot: 'b1', charInstIds: ids(carla), ordem: 'resguardo', marcha: 0 } },
     ];
 
     const res = resolveRoom(state, 'b1', inputs);
     const de = (p: PlayerId) => res.faccoes.find((f) => f.playerId === p)!;
 
-    // Ana: Nevasca 4 + cajado 3 + refino 2 + Hydra 2 + Escudeiro 2 + investida 3 = 16.
-    // Bruno: Asura 10 + SOLO 2 + emboscada 2 = 14.
-    // Carla: 2 + 3 + ELO 2 - resguardo 2 = 5.
-    expect(de('ana').poderBruto).toBe(16);
-    expect(de('bruno').poderBruto).toBe(14);
+    // Ana: Tempestade 3 + Nevasca 2 + cajado 3 + refino 2 + Hydra 2
+    //      + Escudeiro 2 + investida 3 = 17.
+    // Bruno: Combo 4 + Asura 7 + emboscada 2 = 13.
+    // Carla: Armadilheiro 2 + Suporte 1 + Assumptio 2 + ELO 2 - resguardo 2 = 5.
+    expect(de('ana').poderBruto).toBe(17);
+    expect(de('bruno').poderBruto).toBe(13);
     expect(de('carla').poderBruto).toBe(5);
 
-    // Muralha: Carla tem 2, Ana tem 4.
-    // Ana: 16-2=14. Bruno: 14-2-4=8. Carla: 5-4=1.
-    expect(de('ana').poderFinal).toBe(14);
-    expect(de('bruno').poderFinal).toBe(8);
+    // Muralha: Carla tem 2; Ana tem 2 (base) + 2 (evolucao) = 4.
+    // Ana: 17-2=15. Bruno: 13-2-4=7. Carla: 5-4=1.
+    expect(de('ana').poderFinal).toBe(15);
+    expect(de('bruno').poderFinal).toBe(7);
     expect(de('carla').poderFinal).toBe(1);
     expect(res.controlador).toBe('ana');
 
@@ -342,8 +582,10 @@ describe('EmperiumGame — resolucao de sala', () => {
 
   it('PERFURAR devolve o Poder que a MURALHA tirou', () => {
     // Lorde Espiral (P6, PERFURAR 4) contra Arquimago Nevasca (P4, MURALHA 4).
-    const ana = makeClan('ana', ['lor-espiral']);
-    const bruno = makeClan('bruno', ['arq-nevasca']);
+    const ana = makeClan('ana', ['cav-lanca']);
+    transcenderTeste(ana, ids(ana)[0]!, 'tr-cav-espiral');
+    const bruno = makeClan('bruno', ['bru-tempestade']);
+    transcenderTeste(bruno, ids(bruno)[0]!, 'tr-bru-nevasca');
     const state = makeState({ ana, bruno }, { castleOwnerId: 'bruno' });
     const res = resolveRoom(state, 'b1', [
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco' } },
@@ -379,7 +621,7 @@ describe('EmperiumGame — resolucao de sala', () => {
   });
 
   it('dois atacantes na mesma sala sao faccoes inimigas — o perdedor sangra', () => {
-    const ana = makeClan('ana', ['lor-berserk']); // P8
+    const ana = makeClanTr('ana', 'cav-bb', 'tr-cav-berserk'); // P8
     const bruno = makeClan('bruno', ['cav-lanca']); // P3
     const carla = makeClan('carla', ['sup-teimoso']); // defensora fraca, P2
     const state = makeState({ ana, bruno, carla }, { castleOwnerId: 'carla', round: 4 });
@@ -395,7 +637,7 @@ describe('EmperiumGame — resolucao de sala', () => {
 
   it('ESCUDAR cai antes dos outros personagens da faccao', () => {
     const ana = makeClan('ana', ['tem-escudeiro', 'bru-jupitel']);
-    const bruno = makeClan('bruno', ['arq-meteoros']);
+    const bruno = makeClanTr('bruno', 'bru-jupitel', 'tr-bru-meteoros');
     const state = makeState({ ana, bruno }, { castleOwnerId: 'bruno' });
     const res = resolveRoom(state, 'b1', [
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco' } },
@@ -407,7 +649,7 @@ describe('EmperiumGame — resolucao de sala', () => {
 
   it('as baixas nunca passam de metade dos personagens da faccao', () => {
     const ana = makeClan('ana', ['sup-teimoso', 'sup-teimoso', 'sup-teimoso', 'sup-teimoso']);
-    const bruno = makeClan('bruno', ['mesq-asura']);
+    const bruno = makeClanTr('bruno', 'mon-combo', 'tr-mon-asura');
     const state = makeState({ ana, bruno }, { castleOwnerId: 'bruno', round: 4 });
     const res = resolveRoom(state, 'b1', [
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco' } },
@@ -421,38 +663,38 @@ describe('EmperiumGame — Sala do Emperium', () => {
   it('o escudo absorve em ordem CRESCENTE: mandar pouco e dano zero', () => {
     // Escudo base rodada 4 = 6. Defensora carla sem ninguem la: escudo 6.
     const ana = makeClan('ana', ['cav-lanca']); // P3
-    const bruno = makeClan('bruno', ['lor-berserk']); // P8
+    const bruno = makeClanTr('bruno', 'cav-bb', 'tr-cav-berserk'); // 4 + 5 = P9
     const carla = makeClan('carla', []);
     const state = makeState({ ana, bruno, carla }, { castleOwnerId: 'carla', round: 4 });
 
     const res = resolveEmperium(state, [
-      { playerId: 'ana', commitment: { slot: 'emperium', charInstIds: ids(ana), ordem: 'cerco' } },
-      { playerId: 'bruno', commitment: { slot: 'emperium', charInstIds: ids(bruno), ordem: 'cerco' } },
+      { playerId: 'ana', commitment: { slot: 'emperium', charInstIds: ids(ana), ordem: 'cerco', marcha: 0 } },
+      { playerId: 'bruno', commitment: { slot: 'emperium', charInstIds: ids(bruno), ordem: 'cerco', marcha: 0 } },
     ]);
 
-    // Ana 3-1=2 é absorvida inteira (escudo 6 -> 4). Bruno 8-1=7 passa 3.
+    // Ana 3-1=2 e absorvida inteira (escudo 6 -> 4). Bruno 9-1=8 passa 4.
     expect(res.danoPorJogador!['ana']).toBe(0);
-    expect(res.danoPorJogador!['bruno']).toBe(3);
+    expect(res.danoPorJogador!['bruno']).toBe(4);
     // Ana foi totalmente absorvida: sofre 1 baixa.
     expect(res.faccoes.find((f) => f.playerId === 'ana')!.baixas.length).toBe(1);
   });
 
   it('o escudo decai com a rodada, deixando o fim de jogo explosivo', () => {
-    const ana = makeClan('ana', ['lor-berserk']); // P8
+    const ana = makeClanTr('ana', 'cav-bb', 'tr-cav-berserk'); // 4 + 5 = P9
     const carla = makeClan('carla', []);
     const dano = (round: number) => {
       const state = makeState({ ana, carla }, { castleOwnerId: 'carla', round });
       const res = resolveEmperium(state, [
-        { playerId: 'ana', commitment: { slot: 'emperium', charInstIds: ids(ana), ordem: 'cerco' } },
+        { playerId: 'ana', commitment: { slot: 'emperium', charInstIds: ids(ana), ordem: 'cerco', marcha: 0 } },
       ]);
       return res.danoPorJogador!['ana'] ?? 0;
     };
-    expect(dano(1)).toBe(0); // escudo 8 vs poder 7
-    expect(dano(6)).toBe(5); // escudo 2 vs poder 7
+    expect(dano(1)).toBe(0); // escudo 8 vs poder 8
+    expect(dano(6)).toBe(6); // escudo 2 vs poder 8
   });
 
   it('quebra o Emperium e entrega o castelo a quem colocou mais cubos', () => {
-    const ana = makeClan('ana', ['mesq-asura']); // P10 + SOLO 2 = 12
+    const ana = makeClanTr('ana', 'mon-combo', 'tr-mon-asura'); // P10 + SOLO 2 = 12
     const carla = makeClan('carla', []);
     const state = makeState({ ana, carla }, { castleOwnerId: 'carla', round: 6 });
     state.emperiumDurabilidade = 8;
@@ -491,33 +733,6 @@ describe('EmperiumGame — informacao oculta', () => {
 });
 
 describe('EmperiumGame — partida completa', () => {
-  /** Todos passam o mercado e comprometem no portao com o que tiverem. */
-  function jogarRodada(match: GameInstance<EmperiumState>): void {
-    for (let guard = 0; guard < 60; guard++) {
-      const s = match.snapshot.state;
-      if (s.step !== 'mercado') break;
-      const p = jogadorDoMercado(s);
-      if (!p) break;
-      match.applyMove(p, 'passarMercado', { type: 'passarMercado' });
-    }
-    const s = match.snapshot.state;
-    if (s.step !== 'comprometimento') return;
-    for (const p of s.order) {
-      const clan = s.clans[p]!;
-      const disponiveis = Object.values(clan.chars)
-        .filter((c) => c.local === 'reserva')
-        .map((c) => c.instId);
-      const commitments =
-        disponiveis.length > 0
-          ? [{ slot: 'portao' as const, charInstIds: disponiveis, ordem: 'investida' as const }]
-          : [];
-      match.applyMove(p, 'confirmarComprometimento', {
-        type: 'confirmarComprometimento',
-        commitments,
-      });
-    }
-  }
-
   it('avanca as rodadas e termina na 6 com um vencedor por Gloria', () => {
     const match = newMatch();
     for (let r = 0; r < TOTAL_ROUNDS + 2; r++) {
@@ -575,10 +790,10 @@ describe('EmperiumGame — partida completa', () => {
   it('libera o Deck II a partir da rodada 3', () => {
     const match = newMatch();
     jogarRodada(match);
-    expect(match.snapshot.state.deckIILiberado).toBe(false);
+    expect(match.snapshot.state.altarAberto).toBe(false);
     jogarRodada(match);
     expect(match.snapshot.state.round).toBe(3);
-    expect(match.snapshot.state.deckIILiberado).toBe(true);
+    expect(match.snapshot.state.altarAberto).toBe(true);
   });
 });
 

@@ -1,6 +1,11 @@
 import type { GameContext, PlayerId } from '@boardzando/contracts';
 import { INVALID_MOVE } from '@boardzando/contracts';
-import { CHARACTER_BY_ID, DECK_II, EQUIP_BY_ID } from './emperium.cards';
+import {
+  ALTAR_RODADA,
+  CHARACTER_BY_ID,
+  EQUIP_BY_ID,
+  TRANSCENDENCIA_BY_ID,
+} from './emperium.cards';
 import {
   ACOES_MERCADO,
   GLORIA_BREAK_BONUS,
@@ -68,14 +73,12 @@ function temFerreiro(state: EmperiumState, p: PlayerId): boolean {
  * rodada. Ordem de mercado e INVERSA a Gloria: quem perde compra primeiro.
  */
 export function iniciarRodada(state: EmperiumState, ctx: GameContext): void {
-  // Deck II entra no mercado a partir da rodada 3.
-  if (state.round >= 3 && !state.deckIILiberado) {
-    state.deckIILiberado = true;
-    state.deckRecrutamento = ctx.random.shuffle([
-      ...state.deckRecrutamento,
-      ...DECK_II.map((c) => c.id),
-    ]);
-    state.log.push('Rodada 3: a Transcendencia chega a guerra — Deck II liberado.');
+  // O Altar da Transcendencia abre na rodada 3. Nao entra nada no baralho de
+  // recrutamento: a evolucao e comprada de uma tabela de precos fixa, para os
+  // personagens que voce ja tem.
+  if (state.round >= ALTAR_RODADA && !state.altarAberto) {
+    state.altarAberto = true;
+    state.log.push('Rodada 3: o Altar da Transcendencia se abre. Seus veteranos podem evoluir.');
   }
 
   for (const p of state.order) {
@@ -303,6 +306,65 @@ export const comprarCartaMonstro = (
   return next;
 };
 
+export interface TranscenderPayload {
+  type: 'transcender';
+  charInstId: string;
+  /** TranscendenceDef.id — precisa ser da classe do personagem. */
+  transId: string;
+}
+
+/**
+ * Compra uma evolucao no Altar para um personagem que ja e seu.
+ *
+ * Um personagem transcende uma unica vez, e a carta base continua sendo dele:
+ * equipamento, cartas de monstro e salas visitadas ficam. O veterano que voce
+ * carregou por quatro rodadas e o que vira Arquimago — e por isso perde-lo
+ * passa a doer de verdade.
+ *
+ * Transcender um personagem na Enfermaria o traz de volta a Reserva na hora. E
+ * o Rebirth do Ragnarok: quem caiu levanta mais forte, e o preco disso e a
+ * evolucao inteira gasta num resgate em vez de num upgrade.
+ */
+export const transcender = (state: EmperiumState, ctx: GameContext, payload: TranscenderPayload) => {
+  if (state.step !== 'mercado') return INVALID_MOVE;
+  const p = ctx.actor;
+  if (jogadorDoMercado(state) !== p) return INVALID_MOVE;
+  if (!state.altarAberto) return INVALID_MOVE;
+
+  const clan = state.clans[p];
+  if (!clan || clan.acoesRestantes <= 0) return INVALID_MOVE;
+
+  const inst = clan.chars[payload.charInstId];
+  if (!inst || inst.transcendencia) return INVALID_MOVE;
+  // Nao pode transcender quem esta comprometido no meio de uma investida.
+  if (inst.local === 'comprometido') return INVALID_MOVE;
+
+  const charDef = CHARACTER_BY_ID.get(inst.defId);
+  const trans = TRANSCENDENCIA_BY_ID.get(payload.transId);
+  if (!charDef || !trans) return INVALID_MOVE;
+  if (trans.classe !== charDef.classe) return INVALID_MOVE;
+  if (clan.zeny < trans.custo) return INVALID_MOVE;
+
+  const next = clone(state);
+  const c = next.clans[p]!;
+  const alvo = c.chars[payload.charInstId]!;
+  c.zeny -= trans.custo;
+  alvo.transcendencia = trans.id;
+
+  const ressuscitou = alvo.local === 'enfermaria';
+  if (ressuscitou) {
+    alvo.local = 'reserva';
+    alvo.voltaNaRodada = undefined;
+  }
+
+  next.log.push(
+    `${p} transcendeu ${charDef.nome} em ${trans.nome} por ${trans.custo}z` +
+      (ressuscitou ? ' — e o trouxe de volta da Enfermaria.' : '.'),
+  );
+  gastarAcao(next, p);
+  return next;
+};
+
 export interface ReposicionarGuardiaoPayload {
   type: 'reposicionarGuardiao';
   de: RoomSlot;
@@ -439,7 +501,6 @@ export const confirmarComprometimento = (
       const i = clan.consumiveis.indexOf(c.consumivel);
       if (i >= 0) clan.consumiveis.splice(i, 1);
     }
-    if (c.pagarCarrocerada) clan.zeny = Math.max(0, clan.zeny - 3);
     for (const id of c.charInstIds) {
       const inst = clan.chars[id];
       if (inst) inst.local = 'comprometido';
@@ -749,6 +810,7 @@ export type EmperiumMovePayload =
   | RefinarPayload
   | ComprarConsumivelPayload
   | ComprarCartaMonstroPayload
+  | TranscenderPayload
   | ReposicionarGuardiaoPayload
   | PassarMercadoPayload
   | ConfirmarPayload;
