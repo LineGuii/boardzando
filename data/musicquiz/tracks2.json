@@ -19,7 +19,7 @@
       "correctIndex": 0,
       "startSec": 10,
       "durationSec": 20,
-      "difficulty": "easy"
+      "difficulty": "medium"
     },
     {
       "id": "crash-bandicoot",
@@ -144,7 +144,7 @@
       },
       "questionText": "De que jogo é essa música?",
       "options": [
-        "Jump Ultimate Stars",
+        "Devil May Cry 3",
         "GunZ The Duel",
         "RF Online",
         "Winning Eleven 11"
@@ -216,7 +216,7 @@
       "title": "Pokemon",
       "source": {
         "kind": "local",
-        "audioFile": "audio/Pokemon RedBlue Opening.mp3"
+        "audioFile": "audio/Pokemon Red/Blue Opening.mp3"
       },
       "questionText": "De que jogo é essa música?",
       "options": [
@@ -228,7 +228,7 @@
       "correctIndex": 0,
       "startSec": 0,
       "durationSec": 20,
-      "difficulty": "easy"
+      "difficulty": "medium"
     },
     {
       "id": "radiata-stories",
@@ -261,7 +261,7 @@
         "Command & Conquer",
         "Star Wars Knights of the Old Republic",
         "Starcraft",
-        "Heroes of the Storm"
+        "Pikmin"
       ],
       "correctIndex": 2,
       "startSec": 0,
@@ -285,7 +285,7 @@
       "correctIndex": 1,
       "startSec": 0,
       "durationSec": 20,
-      "difficulty": "hard"
+      "difficulty": "medium"
     },
     {
       "id": "zelda-ocarina-title",
@@ -412,7 +412,7 @@
       "options": [
         "Soul Calibur II",
         "Tekken 3",
-        "Virtua Fighter 2",
+        "Virtua Fighter 5",
         "Street Fighter II"
       ],
       "correctIndex": 1,
@@ -532,7 +532,7 @@
       "correctIndex": 1,
       "startSec": 0,
       "durationSec": 20,
-      "difficulty": "medium"
+      "difficulty": "hard"
     },
     {
       "id": "clair-obscur",
@@ -723,63 +723,6 @@
       "startSec": 0,
       "durationSec": 20,
       "difficulty": "hard"
-    },
-    {
-      "id": "ori-main",
-      "title": "Ori and the Blind Forest",
-      "source": {
-        "kind": "local",
-        "audioFile": "audio/Ori and the Blind Forest - Ori, Lost In the Storm (feat. Aeralie Brighton) - OST.mp3"
-      },
-      "questionText": "De que jogo é essa música?",
-      "options": [
-        "Hades",
-        "Celeste",
-        "Hollow Knight",
-        "Ori and the Blind Forest"
-      ],
-      "correctIndex": 3,
-      "startSec": 0,
-      "durationSec": 20,
-      "difficulty": "medium"
-    },
-    {
-      "id": "ori-escape",
-      "title": "Ori and the Blind Forest",
-      "source": {
-        "kind": "local",
-        "audioFile": "audio/Ori and the Blind Forest - Restoring the Light, Facing the Dark - OST.mp3"
-      },
-      "questionText": "De que jogo é essa música?",
-      "options": [
-        "Ori and the Blind Forest",
-        "Hades",
-        "Celeste",
-        "Hollow Knight"
-      ],
-      "correctIndex": 0,
-      "startSec": 20,
-      "durationSec": 30,
-      "difficulty": "hard"
-    },
-    {
-      "id": "overcooked2-menu",
-      "title": "Overcooked 2",
-      "source": {
-        "kind": "local",
-        "audioFile": "audio/Overcooked 2 Soundtrack - Menu.mp3"
-      },
-      "questionText": "De que jogo é essa música?",
-      "options": [
-        "Overcooked 2",
-        "Hades",
-        "Celeste",
-        "Hollow Knight"
-      ],
-      "correctIndex": 0,
-      "startSec": 0,
-      "durationSec": 30,
-      "difficulty": "easy"
     }
   ],
   "quizzes": [
@@ -825,9 +768,7 @@
         "mario-slider",
         "maplestory",
         "yugioh-forbidden-memories",
-        "ori-main",
-        "ori-escape",
-        "overcooked2-menu"
+        "sekiro"
       ],
       "createdAt": 1786239053041,
       "updatedAt": 1786239112056
@@ -835,9 +776,7 @@
     {
       "id": "test",
       "name": "Teste",
-      "trackIds": [
-        "overcooked2-menu"
-      ],
+      "trackIds": [],
       "createdAt": 1786239332873,
       "updatedAt": 1786239378664
     },
@@ -862,11 +801,7 @@
         "final-fantasy-tactics",
         "hades",
         "league-of-legends",
-        "diablo-tristram",
-        "super-mario-world",
-        "pokemon-blue",
-        "ori-escape",
-        "overcooked2-menu"
+        "elden-ring"
       ],
       "createdAt": 1786307794066,
       "updatedAt": 1786307794066
