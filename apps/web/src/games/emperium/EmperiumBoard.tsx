@@ -69,6 +69,10 @@ interface RoomResolutionV {
   tileId: string;
   faccoes: FactionResultV[];
   controlador: string | null;
+  controladorAnterior: string | null;
+  semDisputa: boolean;
+  semResistencia: boolean;
+  resumo: string;
   escudo?: number;
   danoPorJogador?: Record<string, number>;
   emperiumQuebrado?: boolean;
@@ -212,6 +216,106 @@ function CharCard({
   );
 }
 
+/* ── Confronto de sala ───────────────────────────────────────────────────── */
+
+/**
+ * Desenha uma sala resolvida como um enfrentamento: os lados avancam para o
+ * centro, batem, e o resultado fica de pe (vencedor brilhando, derrotados
+ * recuados). Quem jogou Resguardo nao entra na linha do choque — fica de fora,
+ * apagado, que e exatamente o que a Ordem faz na regra.
+ */
+function Confronto({
+  res,
+  indice,
+  nomeDe,
+  tileNome,
+}: {
+  res: RoomResolutionV;
+  indice: number;
+  nomeDe: (id: string | null) => string;
+  tileNome: string;
+}) {
+  const fora = res.faccoes.filter((f) => f.ordem === 'resguardo');
+  const lutando = res.faccoes.filter((f) => f.ordem !== 'resguardo');
+  const ehEmperium = res.slot === 'emperium';
+
+  return (
+    <div className="emp-confronto" style={{ '--i': indice } as React.CSSProperties}>
+      <div className="emp-conf-cab">
+        <span className="emp-conf-sala">{tileNome}</span>
+        {res.escudo !== undefined && <span className="emp-conf-escudo">escudo {res.escudo}</span>}
+      </div>
+
+      {res.semDisputa ? (
+        <div className="emp-conf-vazia">
+          Ninguém veio.
+          {res.controlador && <> Controle segue com <b>{nomeDe(res.controlador)}</b>.</>}
+        </div>
+      ) : (
+        <div className={`emp-clash ${lutando.length > 1 ? 'duelo' : 'solo'}`}>
+          {lutando.map((f, i) => {
+            const dano = f.playerId ? (res.danoPorJogador?.[f.playerId] ?? 0) : 0;
+            const bloqueado = ehEmperium && f.playerId !== null && dano === 0 && !f.venceu;
+            return (
+              <div
+                key={f.playerId ?? `guarnicao-${i}`}
+                className={`emp-lutador ${f.venceu ? 'venceu' : ''} ${
+                  lutando.length > 1 && !f.venceu ? 'perdeu' : ''
+                }`}
+                style={{ '--dir': i % 2 === 0 ? -1 : 1 } as React.CSSProperties}
+              >
+                <span className="emp-lut-nome">
+                  {f.playerId === null ? 'Guarnição' : nomeDe(f.playerId)}
+                </span>
+                <span className="emp-lut-poder">
+                  {f.poderFinal !== f.poderBruto ? (
+                    <>
+                      <s>{f.poderBruto}</s> {f.poderFinal}
+                    </>
+                  ) : (
+                    f.poderFinal
+                  )}
+                </span>
+                <span className="emp-lut-tags">
+                  {f.ordem && <span className="emp-lut-ordem">{ORDEM_INFO[f.ordem].nome}</span>}
+                  {f.baixas.length > 0 && (
+                    <span className="emp-lut-baixa">
+                      {f.baixas.length} {f.baixas.length === 1 ? 'baixa' : 'baixas'}
+                    </span>
+                  )}
+                  {ehEmperium && dano > 0 && <span className="emp-lut-dano">{dano} de dano</span>}
+                  {bloqueado && <span className="emp-lut-bloq">absorvido</span>}
+                </span>
+              </div>
+            );
+          })}
+          {lutando.length > 1 && <span className="emp-impacto" aria-hidden="true" />}
+        </div>
+      )}
+
+      {fora.length > 0 && (
+        <div className="emp-fora">
+          <span className="emp-fora-rot">fora do combate</span>
+          {fora.map((f) => (
+            <span key={f.playerId ?? 'g'} className="emp-fora-clan">
+              {nomeDe(f.playerId)} resguardou-se
+            </span>
+          ))}
+        </div>
+      )}
+
+      {res.semResistencia && !res.semDisputa && (
+        <div className="emp-conf-nota">Tomada sem resistência.</div>
+      )}
+      {res.emperiumQuebrado && (
+        <div className="emp-quebrou">
+          Emperium quebrado — {nomeDe(res.novoDono ?? null)} tomou o castelo
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Tabuleiro ───────────────────────────────────────────────────────────── */
 
 export function EmperiumBoard() {
@@ -225,6 +329,8 @@ export function EmperiumBoard() {
   const [ordemAlvo, setOrdemAlvo] = useState<OrderId | ''>('');
   const [rascunho, setRascunho] = useState<CommitmentV[]>([]);
   const [charParaEquipar, setCharParaEquipar] = useState<string>('');
+  /** Trocar esta chave remonta os confrontos e roda a animacao de novo. */
+  const [replay, setReplay] = useState(0);
 
   const nomeDe = useMemo(() => {
     const mapa = new Map<string, string>();
@@ -662,38 +768,26 @@ export function EmperiumBoard() {
       {/* ── Última resolução ── */}
       {view.ultimaResolucao && view.ultimaResolucao.length > 0 && (
         <section className="emp-painel">
-          <h3>Última resolução</h3>
-          <div className="emp-resolucoes">
-            {view.ultimaResolucao.map((r) => (
-              <div key={r.slot} className="emp-resolucao">
-                <div className="emp-res-sala">
-                  {TILE_NOMES[r.tileId] ?? r.slot}
-                  {r.escudo !== undefined && <span> · escudo {r.escudo}</span>}
-                </div>
-                {r.faccoes.map((f, i) => (
-                  <div key={i} className={`emp-res-fac ${f.venceu ? 'venceu' : ''}`}>
-                    <span className="emp-res-nome">{nomeDe(f.playerId)}</span>
-                    <span className="emp-res-poder">
-                      {f.poderBruto}
-                      {f.poderFinal !== f.poderBruto && <b> → {f.poderFinal}</b>}
-                    </span>
-                    {f.ordem && <span className="emp-res-ordem">{ORDEM_INFO[f.ordem].nome}</span>}
-                    {f.baixas.length > 0 && (
-                      <span className="emp-res-baixas">{f.baixas.length} baixa(s)</span>
-                    )}
-                    {r.danoPorJogador && f.playerId && (
-                      <span className="emp-res-dano">
-                        {r.danoPorJogador[f.playerId] ?? 0} de dano
-                      </span>
-                    )}
-                  </div>
-                ))}
-                {r.emperiumQuebrado && (
-                  <div className="emp-quebrou">
-                    EMPERIUM QUEBRADO — {nomeDe(r.novoDono ?? null)} tomou o castelo
-                  </div>
-                )}
-              </div>
+          <h3>
+            O portão se abriu
+            <button
+              type="button"
+              className="emp-mini"
+              onClick={() => setReplay((n) => n + 1)}
+              title="Rever a resolução desta rodada"
+            >
+              ↻ rever
+            </button>
+          </h3>
+          <div className="emp-confrontos" key={replay}>
+            {view.ultimaResolucao.map((r, i) => (
+              <Confronto
+                key={`${r.slot}-${replay}`}
+                res={r}
+                indice={i}
+                nomeDe={nomeDe}
+                tileNome={TILE_NOMES[r.tileId] ?? r.slot}
+              />
             ))}
           </div>
         </section>
@@ -717,8 +811,10 @@ export function EmperiumBoard() {
       )}
 
       <section className="emp-log">
-        {view.log.slice(-8).map((l, i) => (
-          <div key={i}>{humanizar(l)}</div>
+        {view.log.slice(-14).map((l, i) => (
+          <div key={i} className={l.startsWith('—') ? 'marco' : undefined}>
+            {humanizar(l)}
+          </div>
         ))}
       </section>
 

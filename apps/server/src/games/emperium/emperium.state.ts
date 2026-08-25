@@ -92,6 +92,14 @@ export interface RoomResolution {
   tileId: string;
   faccoes: FactionResult[];
   controlador: PlayerId | null;
+  /** Quem controlava a sala ANTES desta resolucao. */
+  controladorAnterior: PlayerId | null;
+  /** Nenhuma faccao comprometeu aqui: a sala e reportada, mas nada aconteceu. */
+  semDisputa: boolean;
+  /** Uma unica faccao entrou: tomada sem resistencia. */
+  semResistencia: boolean;
+  /** Frase pronta para o log e para a legenda do confronto. */
+  resumo: string;
   /** So na Sala do Emperium. */
   escudo?: number;
   danoPorJogador?: Record<PlayerId, number>;

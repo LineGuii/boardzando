@@ -272,7 +272,9 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
       emperiumDurabilidade: state.emperiumDurabilidade,
       escudoBase: SHIELD_BY_ROUND[state.round - 1] ?? 2,
       ultimaResolucao: state.ultimaResolucao,
-      log: state.log.slice(-30),
+      // O log virou o relatorio da rodada (uma linha por sala), entao precisa
+      // de folga para caber uma rodada inteira mais o mercado.
+      log: state.log.slice(-60),
       finished: state.finished,
       winnerId: state.winnerId,
     };

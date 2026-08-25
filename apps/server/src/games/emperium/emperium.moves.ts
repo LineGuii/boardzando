@@ -445,6 +445,7 @@ function aplicarBaixa(state: EmperiumState, slot: RoomSlot, p: PlayerId, instId:
 export function resolverRodada(state: EmperiumState, ctx: GameContext): void {
   state.step = 'resolucao';
   const resolucoes: RoomResolution[] = [];
+  state.log.push(`— Rodada ${state.round}: o portao se abre —`);
 
   // Emboscada resolve antes de tudo, depois do portao para dentro.
   const ordem: RoomSlot[] = [];
@@ -466,10 +467,29 @@ export function resolverRodada(state: EmperiumState, ctx: GameContext): void {
       const c = (state.commitments[p] ?? []).find((x) => x.slot === slot);
       if (c) inputs.push({ playerId: p, commitment: c });
     }
-    if (inputs.length === 0) continue;
+    // Salas sem ninguem tambem entram no relatorio: "nada aconteceu" e
+    // informacao — diz onde a mesa nao foi, e o controle segue de pe.
+    if (inputs.length === 0) {
+      const room = state.rooms[slot];
+      const tile = room ? TILE_BY_ID.get(room.tileId) : undefined;
+      const dono = room?.controlador ?? null;
+      resolucoes.push({
+        slot,
+        tileId: room?.tileId ?? '',
+        faccoes: [],
+        controlador: dono,
+        controladorAnterior: dono,
+        semDisputa: true,
+        semResistencia: false,
+        resumo: dono ? `ninguem veio — controle segue com ${dono}` : 'ninguem veio — sem controle',
+      });
+      state.log.push(`${tile?.nome ?? slot}: ninguem veio.`);
+      continue;
+    }
 
     const res = slot === 'emperium' ? resolveEmperium(state, inputs) : resolveRoom(state, slot, inputs);
     resolucoes.push(res);
+    state.log.push(`${TILE_BY_ID.get(res.tileId)?.nome ?? slot}: ${res.resumo}`);
 
     // Marca as salas visitadas (para RAJADA) antes de mover ninguem.
     for (const input of inputs) {

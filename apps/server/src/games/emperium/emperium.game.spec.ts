@@ -473,6 +473,46 @@ describe('EmperiumGame — partida completa', () => {
     expect(s.clans[s.castleOwnerId]!.gloria).toBeGreaterThanOrEqual(GLORIA_MINIMA_DONO);
   });
 
+  it('relata TODAS as salas, inclusive onde ninguem foi', () => {
+    const match = newMatch();
+    jogarRodada(match);
+    const res = match.snapshot.state.ultimaResolucao!;
+    // Uma entrada por sala do castelo, nao so pelas disputadas.
+    expect(res).toHaveLength(match.snapshot.state.slots.length);
+    const vazias = res.filter((r) => r.semDisputa);
+    expect(vazias.length).toBeGreaterThan(0);
+    for (const v of vazias) {
+      expect(v.faccoes).toEqual([]);
+      expect(v.resumo).toContain('ninguem veio');
+    }
+    // E o log tambem cobre cada sala.
+    const log = match.snapshot.state.log.join('\n');
+    expect(log).toContain('o portao se abre');
+    expect(log).toContain('ninguem veio');
+  });
+
+  it('marca quem se resguardou no resumo da sala', () => {
+    const ana = makeClan('ana', ['mon-combo']);
+    const bruno = makeClan('bruno', ['cav-lanca']);
+    const state = makeState({ ana, bruno }, { castleOwnerId: 'bruno' });
+    const res = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'investida' } },
+      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'resguardo' } },
+    ]);
+    expect(res.resumo).toContain('bruno resguardou-se');
+    expect(res.faccoes.find((f) => f.playerId === 'bruno')!.ordem).toBe('resguardo');
+  });
+
+  it('uma faccao sozinha na sala toma sem resistencia', () => {
+    const ana = makeClan('ana', ['mon-combo']);
+    const state = makeState({ ana }, { castleOwnerId: 'ana' });
+    const res = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco' } },
+    ]);
+    expect(res.semResistencia).toBe(true);
+    expect(res.resumo).toContain('sem resistencia');
+  });
+
   it('libera o Deck II a partir da rodada 3', () => {
     const match = newMatch();
     jogarRodada(match);

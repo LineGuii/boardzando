@@ -435,12 +435,39 @@ export function resolveRoom(
       ? null
       : (vencedora?.playerId ?? null);
 
+  const jogadoras = resultados.filter((f) => f.playerId !== null);
+  const semResistencia = jogadoras.length === 1 && guarnicao === 0;
+
   return {
     slot,
     tileId: room?.tileId ?? '',
     faccoes: resultados,
     controlador,
+    controladorAnterior: room?.controlador ?? null,
+    semDisputa: false,
+    semResistencia,
+    resumo: resumoDeSala(resultados, controlador, empate, semResistencia),
   };
+}
+
+/** Monta a frase que vai para o log e para a legenda do confronto. */
+function resumoDeSala(
+  resultados: readonly FactionResult[],
+  controlador: PlayerId | null,
+  empate: boolean,
+  semResistencia: boolean,
+): string {
+  const partes = resultados.map((f) => {
+    const quem = f.playerId ?? 'a guarnicao';
+    if (f.ordem === 'resguardo') return `${quem} resguardou-se`;
+    const baixas = f.baixas.length > 0 ? ` (${f.baixas.length} baixa${f.baixas.length > 1 ? 's' : ''})` : '';
+    return `${quem} ${f.poderFinal}${baixas}`;
+  });
+  const corpo = partes.join(' · ');
+  if (empate) return `${corpo} — empate no topo, ninguem controla`;
+  if (semResistencia) return `${corpo} — tomada sem resistencia`;
+  if (controlador) return `${corpo} — ${controlador} controla`;
+  return corpo;
 }
 
 /**
@@ -549,11 +576,26 @@ export function resolveEmperium(
     novoDono = melhor?.pid;
   }
 
+  const partes = resultados.map((f) => {
+    const quem = f.playerId ?? 'a guarnicao';
+    if (f.playerId === defensor) return `${quem} escuda com ${f.poderBruto}`;
+    if (f.ordem === 'resguardo') return `${quem} resguardou-se`;
+    const d = f.playerId ? (dano[f.playerId] ?? 0) : 0;
+    return d > 0 ? `${quem} crava ${d}` : `${quem} foi absorvido`;
+  });
+  const resumo =
+    `escudo ${escudoDefensor + escudoBase} · ${partes.join(' · ')}` +
+    (quebrou && novoDono ? ` — EMPERIUM QUEBRADO, ${novoDono} toma o castelo` : '');
+
   return {
     slot: 'emperium',
     tileId: 'sala-emperium',
     faccoes: resultados,
     controlador: null,
+    controladorAnterior: null,
+    semDisputa: false,
+    semResistencia: false,
+    resumo,
     escudo: escudoDefensor + escudoBase,
     danoPorJogador: dano,
     emperiumQuebrado: quebrou,
