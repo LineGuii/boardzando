@@ -7,3 +7,4 @@ export * from './hues-board';
 export * from './sandbox';
 export * from './avatar';
 export * from './musicquiz';
+export * from './emperium';
