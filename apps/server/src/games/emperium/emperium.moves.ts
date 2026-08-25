@@ -17,6 +17,7 @@ import { resolveEmperium, resolveRoom, type RoomInput } from './emperium.resolve
 import {
   ALL_ORDERS,
   allowedSlots,
+  slotDistances,
   type Commitment,
   type EmperiumState,
   type RoomResolution,
@@ -302,6 +303,45 @@ export const comprarCartaMonstro = (
   return next;
 };
 
+export interface ReposicionarGuardiaoPayload {
+  type: 'reposicionarGuardiao';
+  de: RoomSlot;
+  para: RoomSlot;
+}
+
+/**
+ * Acao de mercado exclusiva do dono do castelo: mover um Guardiao de uma sala
+ * para outra. E o que da ao defensor uma decisao propria na fase de mercado —
+ * o dinheiro dele compra defesa, nao so mais tropa.
+ */
+export const reposicionarGuardiao = (
+  state: EmperiumState,
+  ctx: GameContext,
+  payload: ReposicionarGuardiaoPayload,
+) => {
+  if (state.step !== 'mercado') return INVALID_MOVE;
+  const p = ctx.actor;
+  if (jogadorDoMercado(state) !== p) return INVALID_MOVE;
+  if (state.castleOwnerId !== p) return INVALID_MOVE;
+  const clan = state.clans[p];
+  if (!clan || clan.acoesRestantes <= 0) return INVALID_MOVE;
+
+  const de = state.rooms[payload.de];
+  const para = state.rooms[payload.para];
+  if (!de || !para || payload.de === payload.para) return INVALID_MOVE;
+  if (de.guardioesDefensor <= 0) return INVALID_MOVE;
+
+  const next = clone(state);
+  next.rooms[payload.de]!.guardioesDefensor -= 1;
+  next.rooms[payload.para]!.guardioesDefensor += 1;
+  next.log.push(
+    `${p} moveu um Guardiao de ${TILE_BY_ID.get(de.tileId)?.nome ?? payload.de} ` +
+      `para ${TILE_BY_ID.get(para.tileId)?.nome ?? payload.para}.`,
+  );
+  gastarAcao(next, p);
+  return next;
+};
+
 export interface PassarMercadoPayload {
   type: 'passarMercado';
 }
@@ -380,7 +420,10 @@ export const confirmarComprometimento = (
   if (!validarComprometimento(state, p, commitments)) return INVALID_MOVE;
 
   const next = clone(state);
-  next.commitments[p] = commitments;
+  // A distancia de Marcha Forcada e congelada aqui: durante a resolucao o
+  // controle das salas muda, e o que vale e a distancia de quando voce declarou.
+  const distancias = slotDistances(next, p);
+  next.commitments[p] = commitments.map((c) => ({ ...c, marcha: distancias[c.slot] ?? 0 }));
   next.confirmados.push(p);
 
   // Labirinto cobra 1 zeny por personagem comprometido.
@@ -706,5 +749,6 @@ export type EmperiumMovePayload =
   | RefinarPayload
   | ComprarConsumivelPayload
   | ComprarCartaMonstroPayload
+  | ReposicionarGuardiaoPayload
   | PassarMercadoPayload
   | ConfirmarPayload;

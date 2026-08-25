@@ -64,6 +64,13 @@ export interface Commitment {
   consumivel?: string;
   /** Mestre-Ferreiro Carrocerada: pagar 3 zeny por +4 de Poder nesta sala. */
   pagarCarrocerada?: boolean;
+  /**
+   * Salas de Marcha Forcada, gravadas na confirmacao. Fica no comprometimento
+   * (e nao e recalculado na resolucao) porque o controle das salas muda
+   * conforme elas resolvem — a distancia que vale e a do momento em que voce
+   * declarou a investida.
+   */
+  marcha?: number;
 }
 
 export interface RoomState {
@@ -85,6 +92,8 @@ export interface FactionResult {
   ordem: OrderId | null;
   baixas: string[];
   venceu: boolean;
+  /** Salas de Marcha Forcada percorridas; 0 = entrou pela linha de frente. */
+  marcha: number;
 }
 
 export interface RoomResolution {
@@ -169,25 +178,63 @@ export function isDefender(state: EmperiumState, p: PlayerId): boolean {
   return state.castleOwnerId === p;
 }
 
-/** Salas onde `p` pode comprometer: portao sempre + adjacentes ao que controla. */
-export function allowedSlots(state: EmperiumState, p: PlayerId): RoomSlot[] {
-  // O dono do castelo ignora a regra de posicionamento (design secao 7).
-  if (isDefender(state, p)) return [...state.slots];
+/** Penalidade de Poder por sala de distancia numa Marcha Forcada. */
+export const MARCHA_PENALIDADE = 2;
 
-  const allowed = new Set<RoomSlot>(['portao']);
+/**
+ * Distancia de infiltracao de cada sala para `p`, em salas.
+ *
+ * 0 = a sala esta na sua linha de frente (o Portao, o que voce controla e o
+ * que faz fronteira com isso): entrada normal, sem custo.
+ *
+ * >0 = **Marcha Forcada**. Voce pode comprometer em QUALQUER sala do castelo a
+ * qualquer momento, mas chega disperso e sem folego: -2 de Poder por sala de
+ * distancia. E o que impede a rodada 1 de ter um destino legal so — sem isso o
+ * Portao e a unica opcao de todo mundo, o defensor nao tem nada para adivinhar
+ * e o jogo demora tres rodadas para comecar.
+ */
+export function slotDistances(state: EmperiumState, p: PlayerId): Record<string, number> {
+  const dist: Record<string, number> = {};
+
+  // O dono do castelo se move livremente dentro do proprio castelo.
+  if (isDefender(state, p)) {
+    for (const s of state.slots) dist[s] = 0;
+    return dist;
+  }
+
+  const fronteira = new Set<RoomSlot>(['portao']);
   for (const slot of state.slots) {
     const room = state.rooms[slot];
     if (!room) continue;
     if (room.controlador === p) {
-      allowed.add(slot);
-      for (const adj of state.adjacency[slot] ?? []) allowed.add(adj);
+      fronteira.add(slot);
+      for (const adj of state.adjacency[slot] ?? []) fronteira.add(adj);
     }
-    // Portal Runico ignora a regra de posicionamento.
-    if (room.tileId === 'sala-portal') allowed.add(slot);
+    // Portal Runico e uma entrada franca por definicao.
+    if (room.tileId === 'sala-portal') fronteira.add(slot);
   }
-  // Sala do Emperium exige ter controlado o Salao do Trono.
-  if (state.rooms['trono']?.controlador !== p) allowed.delete('emperium');
-  return [...allowed].filter((s) => state.slots.includes(s));
+
+  const fila: RoomSlot[] = [];
+  for (const s of fronteira) {
+    if (!state.slots.includes(s)) continue;
+    dist[s] = 0;
+    fila.push(s);
+  }
+  while (fila.length > 0) {
+    const atual = fila.shift()!;
+    for (const adj of state.adjacency[atual] ?? []) {
+      if (!state.slots.includes(adj) || dist[adj] !== undefined) continue;
+      dist[adj] = (dist[atual] ?? 0) + 1;
+      fila.push(adj);
+    }
+  }
+  return dist;
+}
+
+/** Toda sala do castelo e alcancavel; o que varia e o preco em Poder. */
+export function allowedSlots(state: EmperiumState, p: PlayerId): RoomSlot[] {
+  const dist = slotDistances(state, p);
+  return state.slots.filter((s) => dist[s] !== undefined);
 }
 
 export function totalCommittedChars(commitments: readonly Commitment[]): number {

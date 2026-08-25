@@ -5,7 +5,14 @@ import { EmperiumGame } from './emperium.game';
 import { jogadorDoMercado } from './emperium.moves';
 import { resolveEmperium, resolveRoom, type RoomInput } from './emperium.resolve';
 import { ADJACENCY, ROOM_SLOTS, TOTAL_ROUNDS } from './emperium.rooms';
-import type { Clan, EmperiumState, RoomState } from './emperium.state';
+import {
+  MARCHA_PENALIDADE,
+  allowedSlots,
+  slotDistances,
+  type Clan,
+  type EmperiumState,
+  type RoomState,
+} from './emperium.state';
 
 const PLAYERS: PlayerId[] = ['ana', 'bruno', 'carla', 'dora'];
 
@@ -231,6 +238,58 @@ describe('EmperiumGame — mercado', () => {
       match.applyMove(p, 'passarMercado', { type: 'passarMercado' });
     }
     expect(match.snapshot.state.step).toBe('comprometimento');
+  });
+});
+
+describe('EmperiumGame — Marcha Forcada', () => {
+  it('na rodada 1 o atacante alcanca TODAS as salas, nao so o portao', () => {
+    const s = newMatch().snapshot.state;
+    const atacante = s.order.find((p) => p !== s.defenderId)!;
+    const permitidas = allowedSlots(s, atacante);
+    // Sem Marcha Forcada isso seria ['portao'] e a rodada 1 nao teria decisao.
+    expect(permitidas.sort()).toEqual([...s.slots].sort());
+  });
+
+  it('a distancia e 0 na linha de frente e cresce para dentro do castelo', () => {
+    const s = newMatch().snapshot.state;
+    const atacante = s.order.find((p) => p !== s.defenderId)!;
+    const d = slotDistances(s, atacante);
+    expect(d['portao']).toBe(0);
+    expect(d['b1']).toBe(1);
+    expect(d['b2']).toBe(2);
+    expect(d['trono']).toBe(3);
+    expect(d['emperium']).toBe(4);
+  });
+
+  it('o dono do castelo se move de graca dentro do proprio castelo', () => {
+    const s = newMatch().snapshot.state;
+    const d = slotDistances(s, s.defenderId);
+    for (const slot of s.slots) expect(d[slot]).toBe(0);
+  });
+
+  it('cobra -2 de Poder por sala marchada', () => {
+    const ana = makeClan('ana', ['mon-combo']); // Poder 4
+    const state = makeState({ ana }, { castleOwnerId: 'ana' });
+    const semMarcha = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco', marcha: 0 } },
+    ]);
+    const comMarcha = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco', marcha: 3 } },
+    ]);
+    expect(semMarcha.faccoes[0]!.poderBruto).toBe(3); // 4 - 1 (cerco)
+    expect(comMarcha.faccoes[0]!.poderBruto).toBe(3 - MARCHA_PENALIDADE * 3);
+    expect(comMarcha.faccoes[0]!.marcha).toBe(3);
+    expect(comMarcha.resumo).toContain('marcha -6');
+  });
+
+  it('conquistar uma sala aproxima a linha de frente na rodada seguinte', () => {
+    const s = structuredClone(newMatch().snapshot.state) as EmperiumState;
+    const atacante = s.order.find((p) => p !== s.defenderId)!;
+    expect(slotDistances(s, atacante)['b2']).toBe(2);
+    s.rooms['b1']!.controlador = atacante;
+    // Com b1 na mao, b2 passa a ser fronteira: entrada normal.
+    expect(slotDistances(s, atacante)['b2']).toBe(0);
+    expect(slotDistances(s, atacante)['trono']).toBe(1);
   });
 });
 

@@ -30,11 +30,14 @@ import {
   passarMercado,
   recrutar,
   refinar,
+  reposicionarGuardiao,
   type EmperiumMovePayload,
 } from './emperium.moves';
 import {
   ALL_ORDERS,
+  MARCHA_PENALIDADE,
   allowedSlots,
+  slotDistances,
   type Clan,
   type EmperiumState,
   type RoomState,
@@ -168,6 +171,7 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
     refinar,
     comprarConsumivel,
     comprarCartaMonstro,
+    reposicionarGuardiao,
     passarMercado,
     confirmarComprometimento,
   } as Record<
@@ -199,6 +203,7 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
     'refinar',
     'comprarConsumivel',
     'comprarCartaMonstro',
+    'reposicionarGuardiao',
     'passarMercado',
     'confirmarComprometimento',
   ] as const;
@@ -268,6 +273,9 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
       confirmados: state.confirmados,
       todosComprometimentos: emComprometimento ? undefined : state.commitments,
       salasPermitidas: allowedSlots(state, viewer),
+      // Marcha Forcada: 0 = entrada normal, >0 = -2 de Poder por sala.
+      distanciaMarcha: slotDistances(state, viewer),
+      marchaPenalidade: MARCHA_PENALIDADE,
       emperiumCubos: state.emperiumCubos,
       emperiumDurabilidade: state.emperiumDurabilidade,
       escudoBase: SHIELD_BY_ROUND[state.round - 1] ?? 2,

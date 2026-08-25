@@ -11,6 +11,7 @@ import {
   TILE_BY_ID,
   type RoomSlot,
 } from './emperium.rooms';
+import { MARCHA_PENALIDADE } from './emperium.state';
 import type {
   Clan,
   Commitment,
@@ -115,6 +116,8 @@ interface Faction {
   temAnular: number;
   /** Poder que ignora Muralha por Marc / Frasco de Acido. */
   imuneMuralha: number;
+  /** Salas de Marcha Forcada percorridas. */
+  marcha: number;
 }
 
 /**
@@ -130,6 +133,7 @@ function factionPower(
   emboscadaExclusiva: boolean,
   consumivel: string | undefined,
   pagouCarrocerada: boolean,
+  marcha: number,
 ): Faction {
   const room = state.rooms[slot];
   const tile = room ? TILE_BY_ID.get(room.tileId) : undefined;
@@ -221,6 +225,9 @@ function factionPower(
     else total += ORDER_POWER[ordem];
   }
 
+  // Marcha Forcada: quem pulou salas chega disperso.
+  total -= MARCHA_PENALIDADE * marcha;
+
   return {
     playerId,
     chars,
@@ -233,6 +240,7 @@ function factionPower(
     poderFinal: total,
     temAnular,
     imuneMuralha,
+    marcha,
   };
 }
 
@@ -365,6 +373,7 @@ export function resolveRoom(
         emboscadores === 1,
         input.commitment.consumivel,
         input.commitment.pagarCarrocerada === true,
+        input.commitment.marcha ?? 0,
       ),
     );
   }
@@ -383,6 +392,7 @@ export function resolveRoom(
       poderFinal: guarnicao,
       temAnular: 0,
       imuneMuralha: 0,
+      marcha: 0,
     });
   }
 
@@ -415,6 +425,7 @@ export function resolveRoom(
       ordem: f.ordem,
       baixas,
       venceu: vencedora === f,
+      marcha: f.marcha,
     };
   });
 
@@ -461,7 +472,8 @@ function resumoDeSala(
     const quem = f.playerId ?? 'a guarnicao';
     if (f.ordem === 'resguardo') return `${quem} resguardou-se`;
     const baixas = f.baixas.length > 0 ? ` (${f.baixas.length} baixa${f.baixas.length > 1 ? 's' : ''})` : '';
-    return `${quem} ${f.poderFinal}${baixas}`;
+    const marcha = f.marcha > 0 ? ` [marcha -${MARCHA_PENALIDADE * f.marcha}]` : '';
+    return `${quem} ${f.poderFinal}${marcha}${baixas}`;
   });
   const corpo = partes.join(' · ');
   if (empate) return `${corpo} — empate no topo, ninguem controla`;
@@ -502,6 +514,7 @@ export function resolveEmperium(
       emboscadores === 1,
       input.commitment.consumivel,
       input.commitment.pagarCarrocerada === true,
+      input.commitment.marcha ?? 0,
     );
     todas.push(f);
     if (input.playerId === defensor) escudoDefensor += Math.max(0, f.poderBruto);
@@ -551,6 +564,7 @@ export function resolveEmperium(
       ordem: f.ordem,
       baixas,
       venceu: false,
+      marcha: f.marcha,
     };
   });
 

@@ -220,6 +220,21 @@
   color: var(--tinta-fraca);
   margin-top: 3px;
 }
+/* Marcha Forcada: o preco em Poder de entrar alem da sua linha de frente. */
+.emp-sala-marcha {
+  font-size: 0.63rem;
+  font-weight: 700;
+  color: var(--sangue);
+  margin-top: 2px;
+}
+.emp-sala-frente {
+  font-size: 0.63rem;
+  color: var(--cristal);
+  margin-top: 2px;
+}
+.emp-sala.marcha {
+  border-style: dashed;
+}
 .emp-cubos {
   display: flex;
   flex-direction: column;
@@ -493,7 +508,39 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
   margin-top: 12px;
+}
+
+/* Acao exclusiva do dono do castelo. */
+.emp-guardiao {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border: 1px solid var(--cristal);
+  border-radius: 3px;
+  background: var(--cristal-fundo);
+}
+.emp-guardiao em {
+  font-style: normal;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cristal);
+  font-weight: 700;
+}
+.emp-guardiao select {
+  background: var(--pedra);
+  color: var(--tinta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 3px;
+  padding: 3px;
+  font-size: 0.7rem;
+  max-width: 130px;
+}
+.emp-montagem b.penal {
+  color: var(--sangue);
 }
 
 /* ── Montagem do comprometimento ───────────────────────── */
@@ -638,6 +685,7 @@
   font-size: 0.63rem;
 }
 .emp-lut-ordem { color: var(--tinta-fraca); }
+.emp-lut-marcha { color: var(--sangue); }
 .emp-lut-baixa { color: var(--sangue); font-weight: 700; }
 .emp-lut-dano  { color: var(--ouro); font-weight: 700; }
 .emp-lut-bloq  { color: var(--tinta-fraca); font-style: italic; }

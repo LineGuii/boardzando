@@ -63,6 +63,7 @@ interface FactionResultV {
   ordem: OrderId | null;
   baixas: string[];
   venceu: boolean;
+  marcha: number;
 }
 interface RoomResolutionV {
   slot: RoomSlot;
@@ -94,6 +95,8 @@ interface EmperiumView {
   meusComprometimentos: CommitmentV[];
   confirmados: string[];
   salasPermitidas: RoomSlot[];
+  distanciaMarcha: Record<string, number>;
+  marchaPenalidade: number;
   emperiumCubos: Record<string, number>;
   emperiumDurabilidade: number;
   escudoBase: number;
@@ -278,6 +281,11 @@ function Confronto({
                 </span>
                 <span className="emp-lut-tags">
                   {f.ordem && <span className="emp-lut-ordem">{ORDEM_INFO[f.ordem].nome}</span>}
+                  {f.marcha > 0 && (
+                    <span className="emp-lut-marcha" title="Chegou por Marcha Forçada">
+                      marcha −{f.marcha * 2}
+                    </span>
+                  )}
                   {f.baixas.length > 0 && (
                     <span className="emp-lut-baixa">
                       {f.baixas.length} {f.baixas.length === 1 ? 'baixa' : 'baixas'}
@@ -331,6 +339,8 @@ export function EmperiumBoard() {
   const [charParaEquipar, setCharParaEquipar] = useState<string>('');
   /** Trocar esta chave remonta os confrontos e roda a animacao de novo. */
   const [replay, setReplay] = useState(0);
+  const [guardiaoDe, setGuardiaoDe] = useState<string>('');
+  const [guardiaoPara, setGuardiaoPara] = useState<string>('');
 
   const nomeDe = useMemo(() => {
     const mapa = new Map<string, string>();
@@ -478,15 +488,24 @@ export function EmperiumBoard() {
               .map((slot) => {
                 const r = view.rooms[slot]!;
                 const permitida = view.salasPermitidas.includes(slot);
+                const dist = view.distanciaMarcha?.[slot] ?? 0;
+                const custoMarcha = dist * (view.marchaPenalidade ?? 2);
                 const meuCommit = rascunho.find((c) => c.slot === slot);
                 return (
                   <div
                     key={slot}
                     className={`emp-sala ${slot === 'emperium' ? 'emperium' : ''} ${
                       permitida ? 'permitida' : ''
-                    } ${slotAlvo === slot ? 'alvo' : ''}`}
+                    } ${dist > 0 ? 'marcha' : ''} ${slotAlvo === slot ? 'alvo' : ''}`}
                   >
                     <div className="emp-sala-nome">{TILE_NOMES[r.tileId] ?? r.tileId}</div>
+                    {custoMarcha > 0 ? (
+                      <div className="emp-sala-marcha" title={`Marcha Forçada: ${dist} sala(s) além da sua linha de frente`}>
+                        marcha −{custoMarcha}
+                      </div>
+                    ) : (
+                      <div className="emp-sala-frente">linha de frente</div>
+                    )}
                     <div className="emp-sala-dono">
                       {slot === 'emperium' ? (
                         <span className="emp-cubos">
@@ -647,6 +666,45 @@ export function EmperiumBoard() {
                     </button>
                   );
                 })}
+              {view.castleOwnerId === me && (
+                <span className="emp-guardiao">
+                  <em>Mover Guardião</em>
+                  <select value={guardiaoDe} onChange={(e) => setGuardiaoDe(e.target.value)}>
+                    <option value="">de...</option>
+                    {view.slots
+                      .filter((s) => (view.rooms[s]?.guardioesDefensor ?? 0) > 0)
+                      .map((s) => (
+                        <option key={s} value={s}>
+                          {TILE_NOMES[view.rooms[s]!.tileId] ?? s} ({view.rooms[s]!.guardioesDefensor})
+                        </option>
+                      ))}
+                  </select>
+                  <select value={guardiaoPara} onChange={(e) => setGuardiaoPara(e.target.value)}>
+                    <option value="">para...</option>
+                    {view.slots
+                      .filter((s) => s !== guardiaoDe)
+                      .map((s) => (
+                        <option key={s} value={s}>
+                          {TILE_NOMES[view.rooms[s]!.tileId] ?? s}
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="emp-mini"
+                    disabled={!guardiaoDe || !guardiaoPara}
+                    onClick={() =>
+                      emit('reposicionarGuardiao', {
+                        type: 'reposicionarGuardiao',
+                        de: guardiaoDe,
+                        para: guardiaoPara,
+                      })
+                    }
+                  >
+                    mover
+                  </button>
+                </span>
+              )}
               <button
                 type="button"
                 className="emp-btn ghost"
@@ -675,6 +733,11 @@ export function EmperiumBoard() {
                 Escolha personagens da Reserva, uma sala e uma Ordem. Você tem 4 Ordens e cada uma
                 só vale uma vez por rodada — comprometer em quatro salas significa gastar Resguardo
                 onde você queria Investida.
+              </p>
+              <p className="emp-dica">
+                <b>Toda sala do castelo é alcançável.</b> Ir além da sua linha de frente é uma{' '}
+                <b>Marcha Forçada</b>: você chega disperso, a −{view.marchaPenalidade ?? 2} de Poder
+                por sala de distância. Tomar uma sala aproxima a linha e barateia a próxima.
               </p>
 
               <h4>Sua Reserva</h4>
@@ -707,6 +770,16 @@ export function EmperiumBoard() {
                 <div>
                   <em>Sala</em>
                   <b>{slotAlvo ? (TILE_NOMES[view.rooms[slotAlvo]!.tileId] ?? slotAlvo) : '—'}</b>
+                </div>
+                <div>
+                  <em>Marcha</em>
+                  <b className={slotAlvo && (view.distanciaMarcha?.[slotAlvo] ?? 0) > 0 ? 'penal' : ''}>
+                    {!slotAlvo
+                      ? '—'
+                      : (view.distanciaMarcha[slotAlvo] ?? 0) === 0
+                        ? 'sem custo'
+                        : `−${(view.distanciaMarcha[slotAlvo] ?? 0) * (view.marchaPenalidade ?? 2)} de Poder`}
+                  </b>
                 </div>
                 <div>
                   <em>Selecionados</em>

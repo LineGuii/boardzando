@@ -224,13 +224,36 @@ vez e depois joga contra as fichas.
 O losango força a decisão de rota. Empilhar tudo numa perna é rápido e legível para os
 rivais; dividir entre B e C é seguro e lento.
 
-### Regra de posicionamento
+### Regra de posicionamento — Marcha Forçada
 
-Você pode comprometer personagens no **Portão Principal sempre**, e em qualquer sala
-**adjacente a uma sala que você controlava no fim da rodada anterior**.
+**Toda sala do castelo é alcançável, sempre. O que varia é o preço.**
 
-O dono do castelo ignora essa regra: ele compromete em **qualquer sala do próprio
-castelo**, sempre. É a segunda perna da agência do defensor.
+Sua **linha de frente** é o Portão Principal, mais toda sala que você controlava no fim
+da rodada anterior, mais as salas que fazem fronteira com essas. Entrar na linha de
+frente é grátis.
+
+Entrar em qualquer outra sala é uma **Marcha Forçada**: você chega disperso e sem
+fôlego, a **−2 de Poder por sala de distância** da sua linha de frente. Tomar uma sala
+aproxima a linha e barateia a próxima.
+
+Na rodada 1, isso dá a um atacante: Portão de graça, alas internas a −2, alas fundas a
+−4, Salão do Trono a −6, Sala do Emperium a −8.
+
+O dono do castelo ignora tudo isso: ele compromete em **qualquer sala do próprio
+castelo**, sempre a custo zero. É a segunda perna da agência do defensor.
+
+> **Por que esta regra existe.** A v0.1 exigia adjacência estrita, e o resultado foi que
+> na rodada 1 o Portão era a **única sala legal** para todo atacante. A decisão que este
+> jogo diz ser central — onde *não* colocar sua gente — simplesmente não existia até a
+> rodada 3, e o defensor, sabendo onde todo mundo ia estar, só tinha que empilhar tudo
+> num lugar. A Marcha Forçada resolve os dois de uma vez: o atacante ganha sete destinos
+> desde o primeiro turno, e o defensor passa a ter que adivinhar entre eles.
+>
+> Isso também **remove o portão do Salão do Trono** como regra dura. A Sala do Emperium
+> não exige mais controlar o Trono — ela custa −8 de marcha, e a aritmética faz o
+> trabalho que a proibição fazia, sem tirar a carta de cima da mesa. O assalto
+> desesperado de última rodada passou a ser possível, e o defensor nunca mais pode
+> deixar o Emperium vazio.
 
 ### As 3 salas fixas
 
@@ -350,8 +373,9 @@ Corredor Estreito existe para ensinar.
 
 ### Comprometer
 
-Só pode comprometer na Sala do Emperium quem **controlou o Salão do Trono no fim da
-rodada anterior**. O dono do castelo sempre pode.
+Qualquer um pode comprometer na Sala do Emperium — mas quem não controla o Salão do
+Trono chega por Marcha Forçada e paga o preço em Poder (−8 direto do Portão). O dono do
+castelo sempre entra de graça.
 
 ### Escudo e absorção crescente
 
