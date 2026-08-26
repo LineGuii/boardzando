@@ -19,6 +19,7 @@ import {
   PlaceableDragDto,
   QuizAnswerDto,
   QuizNextDto,
+  QuizPauseDto,
   QuizPingDto,
   QuizReadyDto,
   StartGameDto,
@@ -210,6 +211,23 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const { roomId, player } = client.data;
     if (dto.roomId !== roomId) return;
     this.quiz.markReady(roomId, player.id, dto.questionIndex);
+  }
+
+  @SubscribeMessage('quiz:pause')
+  onQuizPause(
+    @ConnectedSocket() client: GameSocket,
+    @MessageBody() dto: QuizPauseDto,
+  ): { ok: true } {
+    const { roomId, player } = client.data;
+    if (dto.roomId !== roomId) {
+      throw new WsException({ code: 'VALIDATION', message: 'roomId divergente da sessao.' });
+    }
+    try {
+      this.quiz.pauseReveal(roomId, player.id, dto.paused);
+      return { ok: true };
+    } catch (e) {
+      throw new WsException({ code: 'INVALID_MOVE', message: (e as Error).message });
+    }
   }
 
   @SubscribeMessage('quiz:ping')

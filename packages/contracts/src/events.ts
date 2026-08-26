@@ -59,6 +59,11 @@ export interface ClientToServerEvents {
   ) => void;
   /** Host pula o intervalo de reveal para a proxima pergunta. */
   'quiz:next': (payload: { roomId: RoomId }, ack: (res: AckResult) => void) => void;
+  /** Host pausa/retoma o auto-advance do reveal. */
+  'quiz:pause': (
+    payload: { roomId: RoomId; paused: boolean },
+    ack: (res: AckResult) => void,
+  ) => void;
   /** Cliente confirma que o audio da pergunta X esta pre-carregado (canplaythrough). */
   'quiz:ready': (payload: { roomId: RoomId; questionIndex: number }) => void;
   /** Sincronizacao de relogio: cliente manda seu t_now e recebe t_server. */

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EmperiumModule } from './emperium/emperium.module';
 import { Flip7Module } from './flip7/flip7.module';
 import { HuesModule } from './hues/hues.module';
 import { ItoModule } from './ito/ito.module';
@@ -29,6 +30,7 @@ import { MusicQuizModule } from './musicquiz/musicquiz.module';
     Flip7Module,
     StopConnectModule,
     MusicQuizModule,
+    EmperiumModule,
   ],
 })
 export class GamesModule {}

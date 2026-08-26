@@ -12,6 +12,7 @@ export default defineConfig({
     },
   },
   server: {
+    allowedHosts: ['localhost', 'quiz.rpgzando.com'],
     port: 5174,
     hmr: process.env.VITE_DISABLE_HMR
       ? false

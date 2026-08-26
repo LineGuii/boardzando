@@ -3,6 +3,8 @@ import { QuizCover } from './QuizCover';
 import type { QuizQuestionPublic } from '@boardzando/contracts';
 import { useQuiz } from '../net/store';
 import { QuizAudioPlayer, playCorrect, playTick, playWrong } from '../audio/quizAudio';
+import { SpotifyPlayerWrapper } from '../audio/spotifyPlayer';
+import { isLoggedIn as isSpotifyLoggedIn } from '../audio/spotifyAuth';
 
 interface Props {
   question: QuizQuestionPublic;
@@ -22,7 +24,8 @@ const LETTERS = ['A', 'B', 'C', 'D'];
  * - Emitir `quiz:answer` no clique. Bloqueia apos responder.
  * - No `presenter` (audioMode='presenter'), so o host toca audio; os demais so
  *   veem UI silenciosa.
- * - Host que nao joga (`isPresenter`) recebe correctIndex e ve o gabarito.
+ * - Host que nao joga (`isPresenter`) NAO recebe correctIndex — a tela dele
+ *   costuma ir para uma TV e nao pode entregar a resposta antes do reveal.
  */
 export function QuestionScreen(props: Props): JSX.Element {
   const socket = useQuiz((s) => s.socket);
@@ -33,24 +36,60 @@ export function QuestionScreen(props: Props): JSX.Element {
   const phase = useQuiz((s) => s.phase);
 
   const playerRef = useRef<QuizAudioPlayer | null>(null);
+  const spotifyRef = useRef<SpotifyPlayerWrapper | null>(null);
   const [remainingMs, setRemainingMs] = useState<number>(props.question.answerWindowMs);
+  const [audioError, setAudioError] = useState<string | undefined>();
   const lastTickSecRef = useRef<number>(999);
+
+  const isSpotify = props.question.audioUrl.startsWith('spotify:track:');
+  const spotifyTrackId = isSpotify ? props.question.audioUrl.split(':').pop()! : '';
 
   // Setup audio. Este bloco cria o player, faz preload e agenda o play.
   useEffect(() => {
-    if (!playerRef.current) playerRef.current = new QuizAudioPlayer();
-    const player = playerRef.current;
-
     // Modo "presenter": so o host toca; os outros ficam mudos
     const shouldPlay =
       props.audioMode === 'remote' || (props.audioMode === 'presenter' && props.isHost);
-
     if (!shouldPlay) return;
 
     let cancelled = false;
+    setAudioError(undefined);
+
+    if (isSpotify) {
+      // Reprodutor Spotify — requer login PKCE. Se nao logou, avisa e sai.
+      if (!isSpotifyLoggedIn()) {
+        setAudioError('Faca login no Spotify em /?admin antes de comecar.');
+        return;
+      }
+      if (!spotifyRef.current) spotifyRef.current = new SpotifyPlayerWrapper();
+      const sp = spotifyRef.current;
+      const startSec = props.question.startSec;
+      const fireLocalMs = props.question.serverStartAt - clockOffset;
+      void (async () => {
+        try {
+          await sp.connect();
+          if (cancelled) return;
+          await sp.preload(spotifyTrackId, startSec);
+          if (cancelled) return;
+          socket?.emit('quiz:ready', {
+            roomId: session?.roomId ?? '',
+            questionIndex: props.question.index,
+          });
+          await sp.resumeAt(fireLocalMs);
+        } catch (e) {
+          if (!cancelled) setAudioError((e as Error).message);
+        }
+      })();
+      return () => {
+        cancelled = true;
+        void sp.stop();
+      };
+    }
+
+    // Fonte local (HTMLAudioElement)
+    if (!playerRef.current) playerRef.current = new QuizAudioPlayer();
+    const player = playerRef.current;
     void player.preload(props.question.audioUrl).then(() => {
       if (cancelled) return;
-      // Marca ready para eventual sincronia futura
       socket?.emit('quiz:ready', {
         roomId: session?.roomId ?? '',
         questionIndex: props.question.index,
@@ -64,7 +103,10 @@ export function QuestionScreen(props: Props): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.question.index]);
 
-  useEffect(() => () => playerRef.current?.stop(), []);
+  useEffect(() => () => {
+    playerRef.current?.stop();
+    spotifyRef.current?.disconnect();
+  }, []);
 
   // Timer visual — atualiza a cada 100ms. Baseado no relogio do servidor.
   useEffect(() => {
@@ -112,7 +154,10 @@ export function QuestionScreen(props: Props): JSX.Element {
   const pct = useMemo(() => (remainingMs / totalMs) * 100, [remainingMs, totalMs]);
   const remSec = Math.ceil(remainingMs / 1000);
 
-  const showCorrect = props.isPresenter && props.question.correctIndex !== undefined;
+  // Durante playing, NUNCA destacamos a resposta correta — nem para o host
+  // apresentador. O server tambem nao envia correctIndex nessa fase; esta
+  // constante fica false para reforcar o contrato na UI.
+  const showCorrect = false;
 
   const answeredCount = props.totalPlayers - props.waitingCount;
 
@@ -133,6 +178,13 @@ export function QuestionScreen(props: Props): JSX.Element {
         </div>
         <div className="q-timer-count">{remSec}</div>
       </div>
+
+      {audioError && (
+        <div className="q-alert" style={{ marginBottom: 12 }}>
+          <span>Audio: {audioError}</span>
+          <button onClick={() => setAudioError(undefined)}>×</button>
+        </div>
+      )}
 
       <div className="q-options">
         {props.question.options.map((label, i) => {
@@ -171,7 +223,7 @@ export function QuestionScreen(props: Props): JSX.Element {
       )}
       {props.isPresenter && (
         <div className="q-presenter-note">
-          🎤 Modo apresentador — voce ve a resposta correta destacada
+          🎤 Modo apresentador — projete esta tela; os jogadores respondem no celular
         </div>
       )}
     </div>

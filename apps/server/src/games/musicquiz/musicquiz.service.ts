@@ -19,6 +19,8 @@ import { RoomService } from '../../core/room/room.service';
 import { CoreModule } from '../../core/core.module';
 import { QUIZ_MEDIA_PREFIX, TracksRepository } from './tracks.repository';
 import { MusicQuizGame } from './musicquiz.game';
+import { QuizAdminController } from './quiz-admin.controller';
+import { SpotifyService } from './spotify.service';
 
 const ANSWER_WINDOW_MS = 30_000;
 /** Tempo entre `quiz:preload` e `quiz:question` — janela para pre-carregar audio. */
@@ -105,9 +107,11 @@ export class MusicQuizService {
   snapshotFor(roomId: RoomId, _playerId: PlayerId): QuizSnapshot | undefined {
     const m = this.matches.get(roomId);
     if (!m) return undefined;
-    const question = m.round
-      ? this.stripCorrect(m.round.question, m.hostId === _playerId && !m.options.hostIsPlayer)
-      : undefined;
+    // NUNCA vaza correctIndex durante playing/preloading — nem para o host
+    // apresentador. O host projeta a tela na TV e nao deve saber a resposta
+    // (surpresa vale para todo mundo). No reveal, o correctIndex vai no
+    // proprio payload de quiz:reveal.
+    const question = m.round ? this.stripCorrect(m.round.question, false) : undefined;
     return {
       phase: m.phase,
       options: m.options,
@@ -130,15 +134,21 @@ export class MusicQuizService {
     if (room.status === 'playing') throw new Error('ALREADY_STARTED');
 
     const options = this.readOptions(rawOptions);
-    const trackPool = this.tracks.list();
-    if (trackPool.length === 0) {
-      throw new Error('SEM_MUSICAS_CADASTRADAS');
-    }
 
     // Cancela partida antiga (se reiniciando)
     this.disposeMatch(roomId);
 
-    const chosen = this.tracks.sample(options.rounds);
+    // Se o host escolheu um quiz especifico, sorteia dele; caso contrario
+    // usa a biblioteca inteira (fallback / compat com salas antigas).
+    const orderMode = options.orderMode ?? 'random';
+    const chosen = options.quizId
+      ? this.tracks.sampleFromQuiz(options.quizId, options.rounds, orderMode)
+      : this.tracks.sampleFromLibrary(options.rounds, orderMode);
+    if (chosen.length === 0) {
+      throw new Error(
+        options.quizId ? `QUIZ_VAZIO:${options.quizId}` : 'SEM_MUSICAS_CADASTRADAS',
+      );
+    }
     const match: QuizMatch = {
       roomId,
       hostId: room.hostId,
@@ -172,6 +182,33 @@ export class MusicQuizService {
     if (m.phase !== 'reveal') return;
     if (m.round?.revealTimeout) clearTimeout(m.round.revealTimeout);
     this.nextQuestion(m);
+  }
+
+  /**
+   * Host pausa/retoma o auto-advance do reveal. Enquanto pausado, o
+   * `revealTimeout` fica desarmado — proxima pergunta so vem via
+   * `quiz:next` (Continuar) ou nova chamada de pause(false) que reagenda.
+   */
+  pauseReveal(roomId: RoomId, requesterId: PlayerId, paused: boolean): void {
+    const m = this.matches.get(roomId);
+    if (!m) throw new Error('SEM_PARTIDA');
+    if (requesterId !== m.hostId) throw new Error('ONLY_HOST');
+    if (m.phase !== 'reveal' || !m.round || !m.lastReveal) return;
+    if (paused) {
+      if (m.round.revealTimeout) {
+        clearTimeout(m.round.revealTimeout);
+        m.round.revealTimeout = undefined;
+      }
+      m.lastReveal = { ...m.lastReveal, paused: true };
+    } else {
+      // Retoma com uma janela nova (mesma duracao do reveal).
+      const nextAt = Date.now() + REVEAL_MS;
+      m.round.revealTimeout = setTimeout(() => this.nextQuestion(m), REVEAL_MS);
+      m.lastReveal = { ...m.lastReveal, paused: false, nextAt };
+    }
+    m.seq += 1;
+    m.lastReveal = { ...m.lastReveal, seq: m.seq };
+    this.server?.to(`room:${m.roomId}`).emit('quiz:reveal', { roomId: m.roomId, reveal: m.lastReveal });
   }
 
   /** Cliente respondeu. */
@@ -245,9 +282,23 @@ export class MusicQuizService {
     const track = m.tracks[nextIdx]!;
     const serverStartAt = Date.now() + PRELOAD_LEAD_MS;
 
-    // Base da URL: proxy do Vite mapeia /media/* -> :3000/media/*
-    const audioUrl = `${QUIZ_MEDIA_PREFIX}/${track.audioFile}`;
-    const coverUrl = track.coverFile ? `${QUIZ_MEDIA_PREFIX}/${track.coverFile}` : undefined;
+    // URL do audio depende da fonte:
+    //   - local:   /media/musicquiz/<audioFile>  (proxy do Vite passa)
+    //   - spotify: URI reproduzido pelo cliente via Web Playback SDK (fase 4);
+    //              por ora expomos o trackId como "spotify:track:<id>" e o
+    //              cliente ramifica em source.kind na hora de tocar.
+    let audioUrl: string;
+    if (track.source.kind === 'local') {
+      audioUrl = `${QUIZ_MEDIA_PREFIX}/${track.source.audioFile}`;
+    } else {
+      audioUrl = `spotify:track:${track.source.trackId}`;
+    }
+    // Capa: se vier absoluta (Spotify), usa direto; senao concatena o prefixo.
+    const coverUrl = track.coverUrl
+      ? (/^https?:/i.test(track.coverUrl)
+          ? track.coverUrl
+          : `${QUIZ_MEDIA_PREFIX}/${track.coverUrl}`)
+      : undefined;
 
     const publicQ: QuizQuestionPublic = {
       index: nextIdx,
@@ -287,13 +338,22 @@ export class MusicQuizService {
 
   private revealQuestion(m: QuizMatch): void {
     if (!m.round || m.phase === 'reveal') return;
-    m.phase = 'reveal';
 
-    // Consolida pontos
+    // Consolida pontos ANTES de decidir o fluxo (ranking final precisa).
     for (const [pid, rec] of m.round.answers) {
       const cur = m.scores.get(pid) ?? 0;
       m.scores.set(pid, cur + rec.gain);
     }
+
+    // Na ULTIMA pergunta pula o placar da rodada e vai direto pro reveal
+    // final (a tela "Fim da Partida" ja faz o suspense com drum roll).
+    const isLastRound = m.currentIndex >= m.options.rounds - 1;
+    if (isLastRound) {
+      this.finishMatch(m);
+      return;
+    }
+
+    m.phase = 'reveal';
 
     // Monta ranking com rankBefore e lastGain/lastCorrect/lastElapsedMs
     const nowRanking = this.rankingSnapshot(m).map<QuizPlayerScore>((r) => {
@@ -350,11 +410,10 @@ export class MusicQuizService {
     if (!m.round || !this.server) return;
     const room = this.rooms.get(m.roomId);
     if (!room) return;
-    const hostPresenter = Boolean(m.hostId) && !m.options.hostIsPlayer;
-    for (const [pid, player] of room.players) {
+    // Ver comentario em emitQuestion — correctIndex nunca vai antes do reveal.
+    const q = this.stripCorrect(m.round.question, false);
+    for (const [, player] of room.players) {
       if (!player.connected || !player.socketId) continue;
-      const showsCorrect = hostPresenter && pid === m.hostId;
-      const q = this.stripCorrect(m.round.question, showsCorrect);
       this.server.to(player.socketId).emit('quiz:preload', { roomId: m.roomId, question: q });
     }
   }
@@ -363,11 +422,12 @@ export class MusicQuizService {
     if (!m.round || !this.server) return;
     const room = this.rooms.get(m.roomId);
     if (!room) return;
-    const hostPresenter = Boolean(m.hostId) && !m.options.hostIsPlayer;
-    for (const [pid, player] of room.players) {
+    // Ninguem recebe correctIndex durante playing — nem o host. A tela do
+    // host tende a ser projetada e nao pode revelar o gabarito antes do
+    // reveal para nao entregar a resposta a todo mundo na sala.
+    const q = this.stripCorrect(m.round.question, false);
+    for (const [, player] of room.players) {
       if (!player.connected || !player.socketId) continue;
-      const showsCorrect = hostPresenter && pid === m.hostId;
-      const q = this.stripCorrect(m.round.question, showsCorrect);
       this.server.to(player.socketId).emit('quiz:question', { roomId: m.roomId, question: q });
     }
   }
@@ -431,7 +491,11 @@ export class MusicQuizService {
       : QUIZ_DEFAULTS.rounds;
     const audioMode = o.audioMode === 'presenter' ? 'presenter' : 'remote';
     const hostIsPlayer = typeof o.hostIsPlayer === 'boolean' ? o.hostIsPlayer : QUIZ_DEFAULTS.hostIsPlayer;
-    return { rounds, audioMode, hostIsPlayer };
+    const quizId = typeof o.quizId === 'string' && o.quizId ? o.quizId : undefined;
+    const orderMode = (o.orderMode === 'difficulty' || o.orderMode === 'sequence')
+      ? o.orderMode
+      : 'random';
+    return { rounds, audioMode, hostIsPlayer, quizId, orderMode };
   }
 }
 
@@ -446,7 +510,8 @@ export class MusicQuizService {
   // MusicQuizService -> MusicQuizModule -> CoreModule. Sem forwardRef, um dos
   // lados chega como `undefined` no tempo de leitura do modulo.
   imports: [forwardRef(() => CoreModule)],
-  providers: [TracksRepository, MusicQuizGame, MusicQuizService],
+  controllers: [QuizAdminController],
+  providers: [TracksRepository, MusicQuizGame, MusicQuizService, SpotifyService],
   exports: [MusicQuizService, MusicQuizGame],
 })
 export class MusicQuizModule {}

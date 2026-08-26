@@ -12,8 +12,12 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config = app.get(ConfigService);
 
+  // `WEB_ORIGIN` aceita lista separada por virgula para varios frontends
+  // (ex: boardzando.rpgzando.com + quiz.rpgzando.com + localhost:5173,5174).
+  const webOrigins = (config.get<string>('WEB_ORIGIN', 'http://localhost:5173,http://localhost:5174'))
+    .split(',').map((s) => s.trim()).filter(Boolean);
   app.enableCors({
-    origin: config.get<string>('WEB_ORIGIN', 'http://localhost:5173'),
+    origin: webOrigins.length === 1 ? webOrigins[0] : webOrigins,
     credentials: true,
   });
 

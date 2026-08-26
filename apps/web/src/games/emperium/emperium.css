@@ -1,0 +1,1045 @@
+/* =========================================================
+ * Guerra do Emperium.
+ * A casca do Boardzando e clara e quente; o tabuleiro e um
+ * painel de pedra escura, deliberadamente em contraste: o
+ * jogador entrou no castelo. Acento ciano = o cristal.
+ * ========================================================= */
+
+.emp-board {
+  --pedra: #131A1E;
+  --pedra-alta: #1B242A;
+  --pedra-borda: #2C3941;
+  --tinta: #E4E9EB;
+  --tinta-fraca: #93A0A7;
+  --cristal: #3CD4CC;
+  --cristal-fundo: #10393A;
+  --sangue: #D9756B;
+  --sangue-fundo: #47211D;
+  --ouro: #D8B45F;
+  --combo: #9A7AD6;
+
+  --vanguarda: #B07B3C;
+  --arcano: #5B82CE;
+  --agil: #7CA34E;
+  --suporte: #B06A97;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #161E23 0%, #101619 100%);
+  border: 1px solid var(--pedra-borda);
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.emp-board h3,
+.emp-board h4 {
+  margin: 0 0 8px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.emp-board h3 {
+  font-size: 1.05rem;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.emp-board h4 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--tinta-fraca);
+  margin-top: 10px;
+}
+
+/* ── Cabecalho ─────────────────────────────────────────── */
+
+.emp-header {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--pedra-borda);
+}
+.emp-header em,
+.emp-clan-stats em,
+.emp-montagem em {
+  display: block;
+  font-style: normal;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--tinta-fraca);
+}
+.emp-header b {
+  font-size: 1.3rem;
+  font-variant-numeric: tabular-nums;
+}
+.emp-header b span {
+  font-size: 0.85rem;
+  color: var(--tinta-fraca);
+}
+.emp-emperium {
+  flex: 1;
+  min-width: 180px;
+}
+.emp-durab {
+  position: relative;
+  height: 22px;
+  border-radius: 3px;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  overflow: hidden;
+}
+.emp-durab-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--cristal-fundo), var(--cristal));
+  transition: width 0.4s ease;
+}
+.emp-durab span {
+  position: relative;
+  display: block;
+  text-align: center;
+  line-height: 20px;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.emp-trans {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ouro);
+  border: 1px solid var(--ouro);
+  border-radius: 2px;
+  padding: 3px 7px;
+}
+
+/* ── Clas ──────────────────────────────────────────────── */
+
+.emp-clans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px;
+}
+.emp-clan {
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 5px;
+  padding: 9px 11px;
+}
+.emp-clan.dono {
+  border-color: var(--cristal);
+  box-shadow: inset 0 0 0 1px rgba(60, 212, 204, 0.2);
+}
+.emp-clan.eu {
+  background: #1F2A30;
+}
+.emp-clan-nome {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.emp-tag {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 5px;
+  border-radius: 2px;
+  background: var(--cristal-fundo);
+  color: var(--cristal);
+  font-weight: 700;
+}
+.emp-tag.ok {
+  background: #23401F;
+  color: #9ED27E;
+}
+.emp-clan-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.emp-clan-stats b {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+}
+
+/* ── Castelo ───────────────────────────────────────────── */
+
+.emp-castelo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px;
+  background: var(--pedra);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 8px;
+}
+.emp-fileira {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.emp-sala {
+  min-width: 168px;
+  max-width: 200px;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 4px;
+  padding: 8px 10px;
+  text-align: center;
+}
+.emp-sala.permitida {
+  border-color: #4A6B62;
+}
+.emp-sala.alvo {
+  border-color: var(--cristal);
+  background: var(--cristal-fundo);
+}
+.emp-sala.emperium {
+  border-color: var(--cristal);
+}
+.emp-sala-nome {
+  font-weight: 700;
+  font-size: 0.86rem;
+  line-height: 1.25;
+}
+.emp-sala-dono,
+.emp-sala-guarda {
+  font-size: 0.68rem;
+  color: var(--tinta-fraca);
+  margin-top: 3px;
+}
+/* Marcha Forcada: o preco em Poder de entrar alem da sua linha de frente. */
+.emp-sala-marcha {
+  font-size: 0.63rem;
+  font-weight: 700;
+  color: var(--sangue);
+  margin-top: 2px;
+}
+.emp-sala-frente {
+  font-size: 0.63rem;
+  color: var(--cristal);
+  margin-top: 2px;
+}
+.emp-sala.marcha {
+  border-style: dashed;
+}
+.emp-cubos {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.emp-sala-commit {
+  margin-top: 5px;
+  font-size: 0.68rem;
+  color: var(--cristal);
+  font-weight: 700;
+}
+
+/* ── Cartas ────────────────────────────────────────────── */
+
+.emp-fileira-cartas {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.emp-card {
+  position: relative;
+  width: 168px;
+  text-align: left;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 4px;
+  padding: 12px 10px 9px;
+  color: var(--tinta);
+  font: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow: hidden;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+.emp-card:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+.emp-card:not(:disabled):hover {
+  border-color: var(--cristal);
+  transform: translateY(-2px);
+}
+.emp-card.sel {
+  border-color: var(--cristal);
+  background: var(--cristal-fundo);
+}
+.emp-card.compacto {
+  width: 150px;
+  padding-top: 10px;
+}
+.emp-card-band {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: var(--tinta-fraca);
+}
+.emp-card[data-papel='vanguarda'] .emp-card-band { background: var(--vanguarda); }
+.emp-card[data-papel='arcano']    .emp-card-band { background: var(--arcano); }
+.emp-card[data-papel='agil']      .emp-card-band { background: var(--agil); }
+.emp-card[data-papel='suporte']   .emp-card-band { background: var(--suporte); }
+
+.emp-card-nome {
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+.emp-card-cls {
+  font-size: 0.65rem;
+  color: var(--tinta-fraca);
+}
+.emp-card-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  border-top: 1px dashed var(--pedra-borda);
+  border-bottom: 1px dashed var(--pedra-borda);
+  padding: 5px 0;
+}
+.emp-stat em {
+  display: block;
+  font-style: normal;
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tinta-fraca);
+}
+.emp-stat b {
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+.emp-stat.pow b {
+  color: var(--cristal);
+}
+.emp-stat .plus {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--ouro);
+}
+.emp-slots {
+  margin-left: auto;
+  color: var(--tinta-fraca);
+  letter-spacing: 0.12em;
+}
+.emp-kws {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.emp-chip {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  padding: 3px 5px;
+  border-radius: 2px;
+  background: var(--cristal-fundo);
+  color: var(--cristal);
+  white-space: nowrap;
+}
+.emp-equips {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.emp-equip {
+  font-size: 0.63rem;
+  color: var(--ouro);
+}
+.emp-equip i {
+  font-style: normal;
+  color: var(--cristal);
+}
+.emp-card-build {
+  font-size: 0.63rem;
+  font-style: italic;
+  color: var(--tinta-fraca);
+  margin-top: auto;
+}
+
+/* ── Combos: a linha que faz um personagem enxergar o outro ── */
+
+.emp-card-combo {
+  font-size: 0.62rem;
+  line-height: 1.3;
+  color: var(--combo);
+  border-top: 1px dashed var(--pedra-borda);
+  padding-top: 4px;
+}
+
+.emp-combos {
+  margin-top: 12px;
+  padding: 11px;
+  border: 1px solid var(--combo);
+  border-radius: 5px;
+  background: rgba(154, 122, 214, 0.06);
+}
+.emp-combos-rot {
+  display: block;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--combo);
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+.emp-combos-lista {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.emp-combo-op {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  text-align: left;
+  max-width: 18rem;
+  padding: 7px 9px;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 3px;
+  color: var(--tinta);
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.emp-combo-op:hover {
+  border-color: var(--combo);
+}
+.emp-combo-op.sel {
+  border-color: var(--combo);
+  background: rgba(154, 122, 214, 0.16);
+}
+.emp-combo-op.apagado {
+  opacity: 0.5;
+}
+.emp-combo-op b {
+  font-size: 0.75rem;
+}
+.emp-combo-op span {
+  color: var(--tinta-fraca);
+  line-height: 1.3;
+}
+.emp-combo-op i {
+  font-style: normal;
+  font-size: 0.6rem;
+  color: var(--sangue);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.emp-lut-combo {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--combo);
+  line-height: 1.25;
+}
+.emp-lut-marca {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: var(--sangue);
+  border: 1px solid var(--sangue);
+  border-radius: 2px;
+  padding: 1px 4px;
+}
+
+/* ── Transcendencia: a evolucao empilhada sobre a carta ── */
+
+.emp-card.transcendido {
+  border-color: var(--ouro);
+  box-shadow: inset 0 0 0 1px rgba(216, 180, 95, 0.16);
+}
+.emp-card-forma {
+  font-family: inherit;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 700;
+  color: var(--ouro);
+}
+.emp-stat .asc {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--ouro);
+}
+.emp-chip.asc {
+  background: rgba(216, 180, 95, 0.16);
+  color: var(--ouro);
+}
+
+/* O Altar nao e uma fileira sorteada: e uma tabela de precos fixa. */
+.emp-altar {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 11px;
+  border: 1px solid var(--ouro);
+  border-radius: 5px;
+  background: rgba(216, 180, 95, 0.05);
+}
+.emp-altar-alvo {
+  background: var(--pedra);
+  color: var(--tinta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 3px;
+  padding: 5px 7px;
+  font-size: 0.8rem;
+  max-width: 22rem;
+}
+.emp-caminhos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 8px;
+}
+.emp-caminho {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 9px 11px;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 4px;
+  color: var(--tinta);
+  font: inherit;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+.emp-caminho:not(:disabled):hover {
+  border-color: var(--ouro);
+}
+.emp-caminho:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.emp-caminho-nome {
+  font-weight: 700;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  padding-right: 2.6rem;
+}
+.emp-caminho-ganho {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 0.7rem;
+}
+.emp-caminho-ganho b {
+  color: var(--ouro);
+}
+.emp-caminho-custo {
+  position: absolute;
+  top: 9px;
+  right: 11px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--ouro);
+  font-variant-numeric: tabular-nums;
+}
+.emp-caminho-build {
+  font-size: 0.63rem;
+  font-style: italic;
+  color: var(--tinta-fraca);
+}
+
+/* ── Equipamento no mercado ────────────────────────────── */
+
+.emp-equip-row {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.emp-equip-card {
+  width: 176px;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 4px;
+  padding: 9px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+.emp-equip-meta,
+.emp-equip-papel {
+  font-size: 0.65rem;
+  color: var(--tinta-fraca);
+}
+.emp-equip-acao {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+  margin-top: 4px;
+}
+.emp-equip-acao select {
+  flex: 1;
+  min-width: 0;
+  background: var(--pedra);
+  color: var(--tinta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 3px;
+  padding: 3px;
+  font-size: 0.7rem;
+}
+
+/* ── Paineis e controles ───────────────────────────────── */
+
+.emp-painel {
+  background: var(--pedra);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 8px;
+  padding: 14px;
+}
+.emp-acoes {
+  font-size: 0.68rem;
+  color: var(--cristal);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.emp-dica {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--tinta-fraca);
+  max-width: 62ch;
+  border-left: 2px solid var(--cristal);
+  padding-left: 10px;
+}
+.emp-vazio {
+  color: var(--tinta-fraca);
+  font-size: 0.8rem;
+}
+
+.emp-btn,
+.emp-mini,
+.emp-ordem {
+  background: var(--pedra-alta);
+  color: var(--tinta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 3px;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+.emp-btn {
+  padding: 7px 13px;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+.emp-mini {
+  padding: 3px 7px;
+  font-size: 0.68rem;
+  margin-top: 5px;
+}
+.emp-ordem {
+  padding: 5px 9px;
+  font-size: 0.75rem;
+}
+.emp-btn:not(:disabled):hover,
+.emp-mini:not(:disabled):hover,
+.emp-ordem:not(:disabled):hover {
+  border-color: var(--cristal);
+}
+.emp-btn:disabled,
+.emp-mini:disabled,
+.emp-ordem:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+.emp-ordem.sel {
+  background: var(--cristal-fundo);
+  border-color: var(--cristal);
+  color: var(--cristal);
+  font-weight: 700;
+}
+.emp-btn.ghost {
+  background: transparent;
+}
+.emp-btn.confirmar {
+  background: var(--cristal-fundo);
+  border-color: var(--cristal);
+  color: var(--cristal);
+  margin-top: 12px;
+}
+.emp-board :focus-visible {
+  outline: 2px solid var(--cristal);
+  outline-offset: 2px;
+}
+
+.emp-mercado-acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 12px;
+}
+
+/* Acao exclusiva do dono do castelo. */
+.emp-guardiao {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border: 1px solid var(--cristal);
+  border-radius: 3px;
+  background: var(--cristal-fundo);
+}
+.emp-guardiao em {
+  font-style: normal;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cristal);
+  font-weight: 700;
+}
+.emp-guardiao select {
+  background: var(--pedra);
+  color: var(--tinta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 3px;
+  padding: 3px;
+  font-size: 0.7rem;
+  max-width: 130px;
+}
+.emp-montagem b.penal {
+  color: var(--sangue);
+}
+
+/* ── Montagem do comprometimento ───────────────────────── */
+
+.emp-montagem {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding: 11px;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 5px;
+}
+.emp-montagem b {
+  font-size: 0.9rem;
+}
+.emp-ordens {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.emp-rascunho {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+.emp-rascunho-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+.emp-rascunho-item span {
+  color: var(--tinta-fraca);
+}
+.emp-rascunho-item .emp-mini {
+  margin: 0 0 0 auto;
+}
+
+/* ── Resolucao: o confronto ────────────────────────────── */
+
+.emp-confrontos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+  gap: 9px;
+}
+.emp-confronto {
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 4px;
+  padding: 9px 11px;
+  /* --i vem do JSX: escalona as salas na ordem em que resolveram. */
+  --atraso: calc(var(--i, 0) * 150ms);
+}
+.emp-conf-cab {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed var(--pedra-borda);
+}
+.emp-conf-escudo {
+  margin-left: auto;
+  font-weight: 400;
+  font-size: 0.68rem;
+  color: var(--cristal);
+}
+.emp-conf-vazia,
+.emp-conf-nota {
+  font-size: 0.74rem;
+  color: var(--tinta-fraca);
+  font-style: italic;
+  padding: 6px 0;
+}
+.emp-conf-vazia b {
+  font-style: normal;
+  color: var(--tinta);
+}
+
+/* A linha do choque. */
+.emp-clash {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 10px;
+  min-height: 62px;
+  flex-wrap: wrap;
+}
+/*
+ * Regra de ouro daqui para baixo: o CSS em repouso ja e o ESTADO FINAL, e as
+ * animacoes so decoram o caminho ate ele (sem animation-fill-mode). Se o
+ * navegador nao rodar a animacao — aba em segundo plano, frames suspensos,
+ * prefers-reduced-motion — o jogador ve o resultado correto na hora, em vez de
+ * um lutador congelado em opacity 0.
+ */
+.emp-lutador {
+  flex: 1 1 96px;
+  min-width: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 9px;
+  border-radius: 3px;
+  background: var(--pedra);
+  border: 1px solid var(--pedra-borda);
+  /* --dir: -1 entra pela esquerda, 1 pela direita. */
+  animation: emp-avanca 620ms cubic-bezier(0.3, 1.5, 0.5, 1);
+  animation-delay: var(--atraso);
+}
+.emp-lut-nome {
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1.15;
+}
+.emp-lut-poder {
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.emp-lut-poder s {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--tinta-fraca);
+  margin-right: 3px;
+}
+.emp-lut-tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  font-size: 0.63rem;
+}
+.emp-lut-ordem { color: var(--tinta-fraca); }
+.emp-lut-marcha { color: var(--sangue); }
+.emp-lut-baixa { color: var(--sangue); font-weight: 700; }
+.emp-lut-dano  { color: var(--ouro); font-weight: 700; }
+.emp-lut-bloq  { color: var(--tinta-fraca); font-style: italic; }
+
+/* Vencedor fica de pe e brilhando; derrotado recua e apaga. Os valores em
+   repouso abaixo SAO o resultado final — as keyframes terminam neles. */
+.emp-lutador.venceu {
+  border-color: var(--cristal);
+  box-shadow: 0 0 7px 0 rgba(60, 212, 204, 0.28);
+  animation-name: emp-avanca, emp-brilha;
+  animation-duration: 620ms, 520ms;
+  animation-delay: var(--atraso), calc(var(--atraso) + 420ms);
+  animation-timing-function: cubic-bezier(0.3, 1.5, 0.5, 1), ease-out;
+}
+.emp-lutador.venceu .emp-lut-poder { color: var(--cristal); }
+.emp-lutador.perdeu {
+  opacity: 0.5;
+  transform: translateX(calc(var(--dir, -1) * 5px));
+  animation-name: emp-avanca, emp-recua;
+  animation-duration: 620ms, 460ms;
+  animation-delay: var(--atraso), calc(var(--atraso) + 420ms);
+  animation-timing-function: cubic-bezier(0.3, 1.5, 0.5, 1), ease-out;
+}
+
+/* O clarao do impacto, so quando ha mais de um lado. Em repouso e invisivel,
+   que tambem e como a animacao termina. */
+.emp-impacto {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(60, 212, 204, 0.5) 45%, transparent 70%);
+  opacity: 0;
+  animation: emp-impacto 460ms ease-out;
+  animation-delay: calc(var(--atraso) + 380ms);
+}
+
+@keyframes emp-avanca {
+  0%   { transform: translateX(calc(var(--dir, -1) * 42px)); opacity: 0; }
+  60%  { transform: translateX(calc(var(--dir, -1) * -5px)); opacity: 1; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+@keyframes emp-brilha {
+  0%   { box-shadow: 0 0 0 0 rgba(60, 212, 204, 0); }
+  40%  { box-shadow: 0 0 16px 2px rgba(60, 212, 204, 0.55); }
+  100% { box-shadow: 0 0 7px 0 rgba(60, 212, 204, 0.28); }
+}
+@keyframes emp-recua {
+  0%   { transform: translateX(0) rotate(0deg); opacity: 1; }
+  35%  { transform: translateX(calc(var(--dir, -1) * 9px)) rotate(calc(var(--dir, -1) * 1.6deg)); }
+  100% { transform: translateX(calc(var(--dir, -1) * 5px)) rotate(0deg); opacity: 0.5; }
+}
+@keyframes emp-impacto {
+  0%   { transform: scale(0.3); opacity: 0; }
+  30%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Resguardo: literalmente fora da linha do combate. */
+.emp-fora {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 9px;
+  padding: 5px 9px;
+  border: 1px dashed var(--pedra-borda);
+  border-radius: 3px;
+  background: transparent;
+  opacity: 0.62;
+  animation: emp-afasta 520ms ease-out;
+  animation-delay: calc(var(--atraso) + 300ms);
+}
+.emp-fora-rot {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--tinta-fraca);
+}
+.emp-fora-clan {
+  font-size: 0.72rem;
+  color: var(--tinta-fraca);
+  font-style: italic;
+}
+@keyframes emp-afasta {
+  0%   { transform: translateY(-8px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0.62; }
+}
+
+.emp-quebrou {
+  margin-top: 7px;
+  padding: 5px 8px;
+  background: var(--cristal-fundo);
+  color: var(--cristal);
+  border-radius: 3px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Consumiveis e log ─────────────────────────────────── */
+
+.emp-consumiveis {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.emp-consumivel {
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  border-radius: 3px;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  cursor: help;
+}
+.emp-log {
+  font-size: 0.72rem;
+  color: var(--tinta-fraca);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 170px;
+  overflow-y: auto;
+  padding: 9px 11px;
+  background: var(--pedra);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 5px;
+}
+.emp-log .marco {
+  color: var(--cristal);
+  font-weight: 700;
+  margin-top: 5px;
+  letter-spacing: 0.03em;
+}
+
+/* Sem movimento: basta desligar as animacoes — o estado em repouso ja e o
+   resultado final, entao nada precisa ser redeclarado aqui. */
+@media (prefers-reduced-motion: reduce) {
+  .emp-board *,
+  .emp-board *::before,
+  .emp-board *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .emp-impacto {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .emp-fileira {
+    gap: 8px;
+  }
+  .emp-sala {
+    min-width: 138px;
+  }
+  .emp-card {
+    width: 148px;
+  }
+}

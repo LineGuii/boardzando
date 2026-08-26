@@ -1,27 +1,875 @@
 {
-  "version": 1,
+  "version": 2,
   "_readme": "Edite este arquivo para adicionar/remover perguntas. O servidor recarrega automaticamente (fs.watch). Arquivos de audio ficam em ./assets/audio/, capas em ./assets/covers/. Cada track precisa: id, audioFile, questionText, options (array de 4), correctIndex (0..3). Opcionais: title, artist, coverFile, startSec, durationSec.",
   "tracks": [
     {
-      "id": "exemplo-1",
-      "title": "Exemplo 1",
-      "artist": "Artista X",
-      "audioFile": "audio/exemplo-1.mp3",
-      "coverFile": "covers/exemplo-1.jpg",
-      "questionText": "Qual e essa musica?",
-      "options": ["Opcao A", "Opcao B", "Opcao C", "Opcao D"],
+      "id": "counter-strike",
+      "title": "Counter Strike",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/CounterStrike.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Counter Strike",
+        "Half-Life",
+        "Quake",
+        "Team Fortress"
+      ],
       "correctIndex": 0,
-      "startSec": 0,
-      "durationSec": 20
+      "startSec": 10,
+      "durationSec": 20,
+      "difficulty": "easy"
     },
     {
-      "id": "exemplo-2",
-      "audioFile": "audio/exemplo-2.mp3",
-      "questionText": "Qual e o artista?",
-      "options": ["Artista W", "Artista X", "Artista Y", "Artista Z"],
+      "id": "crash-bandicoot",
+      "title": "Crash Bandicoot",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Crash Bandicoot 1 Theme.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Spyro the Dragon",
+        "Crash Bandicoot",
+        "Donkey Kong Country",
+        "Super Mario 64"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "donkey-kong-country",
+      "title": "Donkey Kong Country",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Donkey Kong Country OST (Super Nintendo) - Track 01/23 - Theme.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Crash Bandicoot",
+        "Super Mario 64",
+        "Donkey Kong Country",
+        "Banjo-Kazooie"
+      ],
       "correctIndex": 2,
-      "startSec": 12,
-      "durationSec": 20
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "final-fantasy-7",
+      "title": "Final Fantasy 7",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Final Fantasy 7 Soundtrack - Prelude.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Chrono Trigger",
+        "Final Fantasy 7",
+        "Blue Dragon",
+        "Dragon Quest 8"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "god-of-war-2",
+      "title": "God of War 2",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Musica Tema Do God Of War 2 PS2.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "God of War 2",
+        "Ragnarok Online",
+        "Prince of Persia",
+        "Dante's Inferno"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "goof-troop",
+      "title": "Goof Troop",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Goof Troop SNES - Let's Start.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Double Dragon",
+        "Sonic the Hedgehog",
+        "Kirby's Adventure",
+        "Goof Troop"
+      ],
+      "correctIndex": 3,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gun-bound",
+      "title": "Gun Bound",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Lobby - GunBound OST.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Gun Bound",
+        "Worms 3D",
+        "Maplestory",
+        "Grand Chase"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gun-z-the-duel",
+      "title": "GunZ The Duel",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/GunZ The Duel OST - Ryswick Style [Duel Theme 5].mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Jump Ultimate Stars",
+        "GunZ The Duel",
+        "RF Online",
+        "Winning Eleven 11"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "hard"
+    },
+    {
+      "id": "hollow-knight",
+      "title": "Hollow Knight",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Hollow Knight OST - Hornet.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Hollow Knight",
+        "Silksong",
+        "Pokemon Legends Arceus",
+        "Hades"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "kingdom-hearts",
+      "title": "Kingdom Hearts",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Kingdom Hearts OST Menu Theme.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Kingdom Hearts",
+        "Final Fantasy X",
+        "Baldur's Gate Dark Alliance 2",
+        "Radiata Stories"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "league-of-legends",
+      "title": "League of Legends",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/League of Legends - Ranked Champion Select Soundtrack (Season 1-4).mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "League of Legends",
+        "Ragnarok Online",
+        "Pokemon",
+        "Kingdom Hearts"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "pokemon-blue",
+      "title": "Pokemon",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Pokemon RedBlue Opening.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Pokemon",
+        "Donkey Kong Country",
+        "Kingdom Hearts",
+        "Minecraft"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "radiata-stories",
+      "title": "Radiata Stories",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Radiata Stories: OST - Struggle I (HD).mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "RF Online",
+        "Kingdom Hearts",
+        "Gun Bound",
+        "Radiata Stories"
+      ],
+      "correctIndex": 3,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "starcraft",
+      "title": "Starcraft",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Starcraft Main Menu.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Command & Conquer",
+        "Star Wars Knights of the Old Republic",
+        "Starcraft",
+        "Heroes of the Storm"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "hard"
+    },
+    {
+      "id": "final-fantasy-tactics",
+      "title": "Final Fantasy Tactics",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Final Fantasy Tactics Advance - Walking in Invalice.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Jump Ultimate Stars",
+        "Final Fantasy Tactics",
+        "Yu-Gi-Oh! Forbidden Memories",
+        "Digimon Stories"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "hard"
+    },
+    {
+      "id": "zelda-ocarina-title",
+      "title": "The Legend of Zelda: Ocarina of Time",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/The Legend of Zelda: Ocarina of Time | Title Theme | if_ < [Koji Kondo].mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Ragnarok Online",
+        "Super Mario 64",
+        "The Legend of Zelda: Ocarina of Time",
+        "RF Online"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "zelda-lost-woods",
+      "title": "The Legend of Zelda",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Lost Woods - The Legend of Zelda: Ocarina of Time OST.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Breath of the Wild",
+        "The Legend of Zelda",
+        "Kingdom Hearts",
+        "Metroid"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "super-mario-64",
+      "title": "Super Mario 64",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Super Mario 64 - Main Theme Music - Bob-Omb Battlefield.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Super Mario World",
+        "Super Mario Bros 3",
+        "Super Mario 64",
+        "Super Mario Galaxy"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "super-mario-world",
+      "title": "Super Mario World",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Super Mario World OST - Title Theme.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Super Mario Bros 3",
+        "Super Mario 64",
+        "Super Mario World",
+        "New Super Mario Bros"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "hades",
+      "title": "Hades",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Hades - No Escape.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Hollow Knight",
+        "Celeste",
+        "Hades",
+        "Dead Cells"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "tekken-3-select",
+      "title": "Tekken 3",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Character select - Tekken 3 OST.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Soul Calibur II",
+        "Tekken 3",
+        "Virtua Fighter 5",
+        "Street Fighter II"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "tekken-3-opening",
+      "title": "Tekken 3",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Opening - Tekken 3 OST.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Soul Calibur II",
+        "Tekken 3",
+        "Virtua Fighter 2",
+        "Street Fighter II"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "super-smash-bros",
+      "title": "Super Smash Bros",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Character Select - Super Smash Bros .. mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Mario Kart 64",
+        "Super Smash Bros",
+        "F-Zero X",
+        "Perfect Dark"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "dark-souls-iii",
+      "title": "Dark Souls III",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Dark Souls III OST 1 - Main Theme.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Bloodborne",
+        "Elden Ring",
+        "Dark Souls III",
+        "Dark Souls"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "hard"
+    },
+    {
+      "id": "dark-souls-firelink",
+      "title": "Dark Souls",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Firelink Shrine - Dark Souls Soundtrack 03.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Bloodborne",
+        "Elden Ring",
+        "Dark Souls III",
+        "Dark Souls"
+      ],
+      "correctIndex": 3,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "hard"
+    },
+    {
+      "id": "elden-ring",
+      "title": "Elden Ring",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Elden Ring.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Dark Souls III",
+        "Bloodborne",
+        "Elden Ring",
+        "Sekiro: Shadows Die Twice"
+      ],
+      "correctIndex": 2,
+      "startSec": 10,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "elden-ring-malenia",
+      "title": "Elden Ring",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Malenia, Blade of Miquella.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Dark Souls III",
+        "Bloodborne",
+        "Elden Ring",
+        "Sekiro: Shadows Die Twice"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "hard"
+    },
+    {
+      "id": "diablo-tristram",
+      "title": "Diablo",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Diablo 1 - Tristram Village music HD.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Hollow Knight",
+        "Diablo",
+        "Baldur's Gate Dark Alliance 2",
+        "Path of Exile"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "clair-obscur",
+      "title": "Clair Obscur: Expedition 33",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Clair Obscur: Expedition 33 (Original Soundtrack) 03 - Lumiere.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Final Fantasy XVI",
+        "Clair Obscur: Expedition 33",
+        "Dragon Age: Inquisition",
+        "Baldur's Gate 3"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "hard"
+    },
+    {
+      "id": "final-fantasy-vi",
+      "title": "Final Fantasy VI",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/FF6 Terra's Theme Music Remake.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Final Fantasy X",
+        "Final Fantasy VI",
+        "Final Fantasy V",
+        "Final Fantasy IX"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "hard"
+    },
+    {
+      "id": "donkey-kong-jungle-hijinx",
+      "title": "Donkey Kong Country",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Donkey Kong Country-Jungle Hijinx.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Crash Bandicoot",
+        "Super Mario 64",
+        "Donkey Kong Country",
+        "Banjo-Kazooie"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "minecraft",
+      "title": "Minecraft",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Minecraft Volume Alpha - 8 - Minecraft.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Terraria",
+        "Minecraft",
+        "Stardew Valley",
+        "Roblox"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "terraria",
+      "title": "Terraria",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Terraria Music - Day.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Minecraft",
+        "Stardew Valley",
+        "Terraria",
+        "Risk of Rain"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "plants-vs-zombies",
+      "title": "Plants vs. Zombies",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Plants vs. Zombies (Main Theme).mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Monster Train",
+        "Plants vs. Zombies",
+        "Bloons Tower Defense",
+        "Kingdom Rush"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "easy"
+    },
+    {
+      "id": "mario-slider",
+      "title": "Super Mario 64",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Super Mario 64 Slider Race Theme Song.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Mario Kart 64",
+        "Super Mario 64",
+        "Mario Party 2",
+        "Mario Party 3"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "maplestory",
+      "title": "MapleStory",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Maplestory Theme Music - Intro.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Ragnarok Online",
+        "MapleStory",
+        "Grand Chase",
+        "Terraria"
+      ],
+      "correctIndex": 1,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "yugioh-forbidden-memories",
+      "title": "Yu-Gi-Oh! Forbidden Memories",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/yugioh.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Jump Ultimate Stars",
+        "Final Fantasy Tactics",
+        "Yu-Gi-Oh! Forbidden Memories",
+        "Digimon Stories"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "sekiro",
+      "title": "Sekiro: Shadows Die Twice",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Sekiro - Sekiro: Shadows Die Twice.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Dark Souls III",
+        "Bloodborne",
+        "Sekiro: Shadows Die Twice",
+        "Elden Ring"
+      ],
+      "correctIndex": 2,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "hard"
+    },
+    {
+      "id": "ori-main",
+      "title": "Ori and the Blind Forest",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Ori and the Blind Forest - Ori, Lost In the Storm (feat. Aeralie Brighton) - OST.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Hades",
+        "Celeste",
+        "Hollow Knight",
+        "Ori and the Blind Forest"
+      ],
+      "correctIndex": 3,
+      "startSec": 0,
+      "durationSec": 20,
+      "difficulty": "medium"
+    },
+    {
+      "id": "ori-escape",
+      "title": "Ori and the Blind Forest",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Ori and the Blind Forest - Restoring the Light, Facing the Dark - OST.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Ori and the Blind Forest",
+        "Hades",
+        "Celeste",
+        "Hollow Knight"
+      ],
+      "correctIndex": 0,
+      "startSec": 20,
+      "durationSec": 30,
+      "difficulty": "hard"
+    },
+    {
+      "id": "overcooked2-menu",
+      "title": "Overcooked 2",
+      "source": {
+        "kind": "local",
+        "audioFile": "audio/Overcooked 2 Soundtrack - Menu.mp3"
+      },
+      "questionText": "De que jogo é essa música?",
+      "options": [
+        "Overcooked 2",
+        "Hades",
+        "Celeste",
+        "Hollow Knight"
+      ],
+      "correctIndex": 0,
+      "startSec": 0,
+      "durationSec": 30,
+      "difficulty": "easy"
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "acervo-completo",
+      "name": "Acervo completo",
+      "description": "Todas as faixas em assets/audio.",
+      "trackIds": [
+        "counter-strike",
+        "crash-bandicoot",
+        "donkey-kong-country",
+        "final-fantasy-7",
+        "god-of-war-2",
+        "goof-troop",
+        "gun-bound",
+        "gun-z-the-duel",
+        "hollow-knight",
+        "kingdom-hearts",
+        "league-of-legends",
+        "pokemon-blue",
+        "radiata-stories",
+        "starcraft",
+        "final-fantasy-tactics",
+        "zelda-ocarina-title",
+        "zelda-lost-woods",
+        "super-mario-64",
+        "super-mario-world",
+        "hades",
+        "tekken-3-select",
+        "tekken-3-opening",
+        "super-smash-bros",
+        "dark-souls-iii",
+        "dark-souls-firelink",
+        "elden-ring",
+        "elden-ring-malenia",
+        "diablo-tristram",
+        "clair-obscur",
+        "final-fantasy-vi",
+        "donkey-kong-jungle-hijinx",
+        "minecraft",
+        "terraria",
+        "plants-vs-zombies",
+        "mario-slider",
+        "maplestory",
+        "yugioh-forbidden-memories",
+        "ori-main",
+        "ori-escape",
+        "overcooked2-menu"
+      ],
+      "createdAt": 1786239053041,
+      "updatedAt": 1786239112056
+    },
+    {
+      "id": "test",
+      "name": "Teste",
+      "trackIds": [
+        "overcooked2-menu"
+      ],
+      "createdAt": 1786239332873,
+      "updatedAt": 1786239378664
+    },
+    {
+      "id": "quiz-definicao-guilherme",
+      "name": "Quiz definindo o Guilherme",
+      "trackIds": [
+        "goof-troop",
+        "starcraft",
+        "elden-ring",
+        "kingdom-hearts",
+        "crash-bandicoot",
+        "counter-strike",
+        "dark-souls-firelink",
+        "gun-bound",
+        "gun-z-the-duel",
+        "terraria",
+        "minecraft",
+        "tekken-3-opening",
+        "yugioh-forbidden-memories",
+        "plants-vs-zombies",
+        "final-fantasy-tactics",
+        "hades",
+        "league-of-legends",
+        "diablo-tristram",
+        "super-mario-world",
+        "pokemon-blue",
+        "ori-escape",
+        "overcooked2-menu"
+      ],
+      "createdAt": 1786307794066,
+      "updatedAt": 1786307794066
     }
   ]
 }

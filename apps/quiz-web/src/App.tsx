@@ -327,6 +327,11 @@ function RoomPage(): JSX.Element {
     socket.emit('quiz:next', { roomId: session.roomId }, () => { /* ack */ });
   };
 
+  const togglePauseReveal = (paused: boolean): void => {
+    if (!socket) return;
+    socket.emit('quiz:pause', { roomId: session.roomId, paused }, () => { /* ack */ });
+  };
+
   // Nao-jogadores (presenters) nao contam para "esperando responder"
   const nonPresenters = room.players.filter(
     (p) => !(p.id === room.hostId && !hostIsPlayer),
@@ -413,6 +418,7 @@ function RoomPage(): JSX.Element {
           correctAnswerText={correctText}
           isHost={isHost}
           onSkip={skipReveal}
+          onTogglePause={togglePauseReveal}
           clockOffset={clockOffset}
         />
       </div>

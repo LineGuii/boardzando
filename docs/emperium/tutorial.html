@@ -1,0 +1,852 @@
+<title>Guerra do Emperium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,800;1,400&family=Karla:wght@400;500;700&family=Silkscreen:wght@400;700&display=swap">
+
+<style>
+/* ── Tokens: light is the base, both dark states redefine only these ───── */
+:root {
+  --ground:      #E9EBEC;
+  --surface:     #F8F9F9;
+  --surface-alt: #DFE3E4;
+  --ink:         #151B1F;
+  --ink-soft:    #3A454C;
+  --muted:       #667279;
+  --rule:        #C6CCCE;
+  --rule-soft:   #D8DCDE;
+
+  --emperium:    #00807E;
+  --emperium-dim:#B9DEDC;
+  --garnet:      #A03F36;
+  --garnet-dim:  #EBD2CF;
+
+  --shadow: 0 1px 2px rgba(21,27,31,.06), 0 8px 24px -12px rgba(21,27,31,.18);
+
+  --display: "Spectral", Georgia, "Times New Roman", serif;
+  --body:    "Karla", "Helvetica Neue", Arial, sans-serif;
+  --bitmap:  "Silkscreen", "Courier New", monospace;
+
+  --measure: 64ch;
+  --s1: .35rem; --s2: .7rem; --s3: 1.1rem; --s4: 1.75rem;
+  --s5: 2.75rem; --s6: 4.25rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0F1417;
+    --surface:     #161D21;
+    --surface-alt: #1E272C;
+    --ink:         #E3E8E9;
+    --ink-soft:    #BAC4C7;
+    --muted:       #89949A;
+    --rule:        #2B363B;
+    --rule-soft:   #222C31;
+    --emperium:    #3CD4CC;
+    --emperium-dim:#12403F;
+    --garnet:      #E08A80;
+    --garnet-dim:  #48231F;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"] {
+  --ground:      #0F1417;
+  --surface:     #161D21;
+  --surface-alt: #1E272C;
+  --ink:         #E3E8E9;
+  --ink-soft:    #BAC4C7;
+  --muted:       #89949A;
+  --rule:        #2B363B;
+  --rule-soft:   #222C31;
+  --emperium:    #3CD4CC;
+  --emperium-dim:#12403F;
+  --garnet:      #E08A80;
+  --garnet-dim:  #48231F;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 78rem; margin: 0 auto; padding: 0 var(--s3) var(--s6); }
+.col  { max-width: var(--measure); }
+
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+p, ul, ol { margin: 0; }
+
+a { color: var(--emperium); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--emperium); outline-offset: 3px; border-radius: 2px; }
+
+.eyebrow {
+  font-family: var(--bitmap); font-size: .6rem; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+/* ── Masthead ──────────────────────────────────────────────────────────── */
+.mast {
+  border-bottom: 1px solid var(--rule);
+  padding: var(--s6) 0 var(--s5);
+  margin-bottom: var(--s5);
+  display: flex; flex-direction: column; gap: var(--s3);
+}
+.mast h1 {
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  font-weight: 800; line-height: .98; letter-spacing: -.022em;
+}
+.mast h1 .crystal { color: var(--emperium); font-style: italic; font-weight: 400; }
+.mast .lede {
+  font-family: var(--display); font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+  color: var(--ink-soft); max-width: 46ch; line-height: 1.5;
+}
+.specs {
+  display: flex; flex-wrap: wrap; gap: var(--s1) 0;
+  border-top: 1px solid var(--rule-soft); padding-top: var(--s3);
+}
+.specs div { padding-right: var(--s4); }
+.specs dt { font-family: var(--bitmap); font-size: .58rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); }
+.specs dd { margin: 2px 0 0; font-weight: 700; font-size: .95rem;
+  font-variant-numeric: tabular-nums; }
+
+/* ── Sections ──────────────────────────────────────────────────────────── */
+section { margin-bottom: var(--s6); scroll-margin-top: var(--s3); }
+section > h2 {
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem); font-weight: 700;
+  letter-spacing: -.015em; margin-bottom: var(--s2);
+}
+.step-no {
+  font-family: var(--bitmap); font-size: .68rem; color: var(--emperium);
+  letter-spacing: .08em; display: block; margin-bottom: var(--s1);
+}
+.stack   { display: flex; flex-direction: column; gap: var(--s3); }
+.stack-l { display: flex; flex-direction: column; gap: var(--s4); }
+
+h3 { font-size: 1.18rem; font-weight: 600; margin-bottom: var(--s1); }
+
+ul.body, ol.body { padding-left: 1.15rem; display: flex; flex-direction: column; gap: var(--s2); }
+li::marker { color: var(--muted); }
+
+strong { font-weight: 700; }
+em.term { font-style: normal; font-weight: 700; color: var(--emperium); }
+
+/* ── Cards ─────────────────────────────────────────────────────────────── */
+.card-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--s3);
+}
+.gcard {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 3px; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.gcard .band { height: 5px; background: var(--role, var(--muted)); }
+.gcard[data-role="vanguarda"] { --role: #8A5A2B; }
+.gcard[data-role="arcano"]    { --role: #3C5FA8; }
+.gcard[data-role="agil"]      { --role: #5B7A3A; }
+.gcard[data-role="suporte"]   { --role: #8A4A72; }
+
+.gcard .head { padding: var(--s3) var(--s3) var(--s2); border-bottom: 1px dashed var(--rule-soft); }
+.gcard .nm { font-family: var(--display); font-weight: 700; font-size: 1.05rem; line-height: 1.2; }
+.gcard .cls { font-size: .78rem; color: var(--muted); margin-top: 3px; }
+.gcard .stats {
+  display: flex; align-items: baseline; gap: var(--s3);
+  padding: var(--s2) var(--s3); border-bottom: 1px dashed var(--rule-soft);
+  font-variant-numeric: tabular-nums;
+}
+.gcard .stat .k { font-family: var(--bitmap); font-size: .55rem; letter-spacing: .08em;
+  color: var(--muted); text-transform: uppercase; display: block; }
+.gcard .stat .v { font-family: var(--display); font-weight: 800; font-size: 1.5rem; line-height: 1; }
+.gcard .stat.pow .v { color: var(--emperium); }
+.gcard .slots { margin-left: auto; color: var(--role, var(--muted)); font-size: 1rem; letter-spacing: .1em; }
+.gcard .kw { padding: var(--s2) var(--s3); display: flex; flex-wrap: wrap; gap: var(--s1); }
+.gcard .foot { padding: 0 var(--s3) var(--s3); font-family: var(--display);
+  font-style: italic; font-size: .82rem; color: var(--muted); margin-top: auto; }
+/* Carta transcendida: a evolucao empilhada sobre a base. */
+.gcard.asc { border-color: var(--garnet); }
+.gcard .forma { font-family: var(--bitmap); font-size: .58rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--garnet); margin-bottom: 3px; }
+.gcard .stat .v i { font-style: normal; color: var(--garnet); font-size: .95rem; }
+
+.chip {
+  font-family: var(--bitmap); font-size: .58rem; letter-spacing: .06em;
+  text-transform: uppercase; padding: 4px 7px; border-radius: 2px;
+  background: var(--emperium-dim); color: var(--ink); white-space: nowrap;
+}
+.chip.deck { background: var(--surface-alt); color: var(--ink-soft); }
+.chip.warn { background: var(--garnet-dim); color: var(--ink); }
+
+/* ── Castle map ────────────────────────────────────────────────────────── */
+.castle {
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 3px; padding: var(--s4) var(--s3); box-shadow: var(--shadow);
+}
+.room {
+  border: 1px solid var(--rule); background: var(--surface-alt);
+  border-radius: 2px; padding: var(--s2) var(--s3); text-align: center;
+  min-width: 11rem; max-width: 15rem;
+}
+.room .rn { font-family: var(--display); font-weight: 700; font-size: .95rem; line-height: 1.2; }
+.room .rr { font-size: .74rem; color: var(--muted); line-height: 1.35; margin-top: 3px; }
+.room.emp { border-color: var(--emperium); background: var(--emperium-dim); }
+.room.emp .rn { color: var(--emperium); }
+.pair { display: flex; gap: var(--s4); flex-wrap: wrap; justify-content: center; }
+.link { width: 1px; height: var(--s3); background: var(--rule); }
+.link.wide { width: 60%; height: 1px; margin: var(--s2) 0; }
+
+/* ── Shield diagram ────────────────────────────────────────────────────── */
+.absorb { display: flex; flex-direction: column; gap: var(--s2); }
+.abar { display: grid; grid-template-columns: 6.5rem 1fr; align-items: center; gap: var(--s3); }
+.abar .who { font-weight: 700; font-size: .88rem; }
+.abar .who small { display: block; font-weight: 400; color: var(--muted); font-size: .75rem; }
+.track { display: flex; height: 30px; border-radius: 2px; overflow: hidden;
+  border: 1px solid var(--rule); background: var(--surface); }
+.seg { display: flex; align-items: center; justify-content: center;
+  font-family: var(--bitmap); font-size: .58rem; color: #fff; }
+.seg.blocked { background: var(--muted); }
+.seg.through { background: var(--emperium); color: var(--ground); }
+
+/* ── Tables ────────────────────────────────────────────────────────────── */
+.twrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: var(--s2) var(--s3); border-bottom: 1px solid var(--rule-soft);
+  vertical-align: top; }
+thead th { font-family: var(--bitmap); font-size: .58rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted); background: var(--surface-alt);
+  border-bottom: 1px solid var(--rule); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+td .kwname { font-family: var(--bitmap); font-size: .64rem; letter-spacing: .05em;
+  color: var(--emperium); white-space: nowrap; }
+
+/* ── Callouts ──────────────────────────────────────────────────────────── */
+.note {
+  border-left: 3px solid var(--emperium); background: var(--surface);
+  padding: var(--s3); border-radius: 0 3px 3px 0;
+}
+.note.warn { border-left-color: var(--garnet); }
+.note .lbl { font-family: var(--bitmap); font-size: .58rem; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--muted); display: block; margin-bottom: var(--s1); }
+
+/* ── Phase list ────────────────────────────────────────────────────────── */
+.phases { display: flex; flex-direction: column; gap: 0; counter-reset: ph;
+  border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--surface); }
+.phase { display: grid; grid-template-columns: 3rem 1fr; gap: var(--s3);
+  padding: var(--s3); border-bottom: 1px solid var(--rule-soft); }
+.phase:last-child { border-bottom: 0; }
+.phase .num { font-family: var(--display); font-weight: 800; font-size: 1.5rem;
+  color: var(--emperium); line-height: 1; font-variant-numeric: tabular-nums; }
+.phase h3 { margin-bottom: var(--s1); }
+.phase .sim { font-family: var(--bitmap); font-size: .55rem; letter-spacing: .08em;
+  color: var(--garnet); text-transform: uppercase; }
+
+/* ── Math block ────────────────────────────────────────────────────────── */
+.math {
+  font-family: var(--bitmap); font-size: .72rem; line-height: 2.1;
+  background: var(--surface-alt); border: 1px solid var(--rule);
+  border-radius: 3px; padding: var(--s3); overflow-x: auto; white-space: pre;
+  font-variant-numeric: tabular-nums;
+}
+.math .win { color: var(--emperium); }
+.math .lose { color: var(--garnet); }
+
+/* ── Protocol cards ────────────────────────────────────────────────────── */
+.protos { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: var(--s3); }
+.proto { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px;
+  padding: var(--s3); display: flex; flex-direction: column; gap: var(--s2); box-shadow: var(--shadow); }
+.proto .tag { display: flex; gap: var(--s1); flex-wrap: wrap; }
+.proto h3 { margin: 0; }
+.proto .what { font-size: .88rem; color: var(--ink-soft); }
+.proto .rec { font-size: .82rem; border-top: 1px dashed var(--rule-soft); padding-top: var(--s2); color: var(--muted); }
+.proto .rec b { color: var(--ink); font-weight: 700; }
+
+footer { border-top: 1px solid var(--rule); padding-top: var(--s3); color: var(--muted); font-size: .85rem; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (max-width: 40rem) {
+  body { font-size: 16px; }
+  .phase { grid-template-columns: 2rem 1fr; }
+  .abar { grid-template-columns: 5rem 1fr; }
+}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <span class="eyebrow">Tutorial de aprendizado · versão 0.1</span>
+  <h1>Guerra do <span class="crystal">Emperium</span></h1>
+  <p class="lede">Quatro clãs cercam um castelo e ninguém ali é amigo de ninguém.
+     Este é o texto que você lê antes da primeira partida.</p>
+  <dl class="specs">
+    <div><dt>Jogadores</dt><dd>3–5</dd></div>
+    <div><dt>Duração</dt><dd>60–90 min</dd></div>
+    <div><dt>Peso</dt><dd>Médio-pesado</dd></div>
+    <div><dt>Personagens</dt><dd>52</dd></div>
+    <div><dt>Dados no combate</dt><dd>Nenhum</dd></div>
+  </dl>
+</header>
+
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<section id="ideia">
+  <span class="step-no">01 — Comece por aqui</span>
+  <h2>A ideia em trinta segundos</h2>
+  <div class="col stack">
+    <p>No centro da mesa há um castelo. No coração do castelo há um cristal — o
+       <em class="term">Emperium</em>. Quem quebra o cristal toma o castelo, e quem estiver com o
+       castelo quando a sexta rodada acabar quase sempre vence a partida.</p>
+    <p>Você não move peças pelo tabuleiro. A cada rodada você <strong>contrata gente</strong> no
+       mercado e depois <strong>compromete essa gente em salas</strong> — de bruços, ao mesmo tempo
+       que todo mundo. Só quando o portão se abre é que você descobre onde os rivais apostaram.</p>
+    <p>Você tem tropa para duas salas e ambição para quatro. <strong>A decisão central do jogo é
+       onde não colocar sua gente.</strong></p>
+    <div class="note">
+      <span class="lbl">O que faz este jogo ser este jogo</span>
+      <p>Dois atacantes na mesma sala <strong>não são aliados</strong> — são duas facções inimigas
+      que por acaso escolheram a mesma porta. Uma delas vai controlar a sala e a outra vai sofrer
+      baixas, mesmo que as duas tenham superado o defensor. Não existe "atacar junto".</p>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<section id="cartas">
+  <span class="step-no">02 — Seus soldados</span>
+  <h2>Anatomia de uma carta</h2>
+  <div class="col stack" style="margin-bottom: var(--s4)">
+    <p>Cada personagem é uma variação de uma das treze classes. As duas coisas que você olha
+       primeiro são <strong>Custo</strong> (o que sai do bolso) e <strong>Poder</strong> (o que ele
+       soma numa sala). O <strong>Papel</strong> só diz que equipamento a carta aceita. Os losangos
+       são os <strong>slots</strong> de equipamento.</p>
+  </div>
+
+  <div class="card-row">
+    <article class="gcard" data-role="arcano">
+      <div class="band"></div>
+      <div class="head">
+        <div class="nm">Bruxo Tempestade</div>
+        <div class="cls">Bruxo · Arcano</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="k">Custo</span><span class="v">7z</span></div>
+        <div class="stat pow"><span class="k">Poder</span><span class="v">3</span></div>
+        <div class="slots">◇</div>
+      </div>
+      <div class="kw"><span class="chip">Muralha 2</span><span class="chip">Alcance</span>
+        <span class="chip deck">Deck I</span></div>
+      <div class="foot">Storm Gust — trava o corredor</div>
+    </article>
+
+    <article class="gcard" data-role="vanguarda">
+      <div class="band"></div>
+      <div class="head">
+        <div class="nm">Monge Combo</div>
+        <div class="cls">Monge · Vanguarda</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="k">Custo</span><span class="v">6z</span></div>
+        <div class="stat pow"><span class="k">Poder</span><span class="v">4</span></div>
+        <div class="slots">◇</div>
+      </div>
+      <div class="kw"><span class="chip deck">Base</span></div>
+      <div class="foot">Chain Combo — barato e sem firula</div>
+    </article>
+
+    <article class="gcard asc" data-role="vanguarda">
+      <div class="band"></div>
+      <div class="head">
+        <div class="forma">Mestre</div>
+        <div class="nm">Monge Combo</div>
+        <div class="cls">Monge · transcendido</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="k">Altar</span><span class="v">14z</span></div>
+        <div class="stat pow"><span class="k">Poder</span><span class="v">4<i>+7</i></span></div>
+        <div class="slots">◇</div>
+      </div>
+      <div class="kw"><span class="chip warn">Esgotar</span></div>
+      <div class="foot">Punho de Asura — um golpe, e ele acaba</div>
+    </article>
+  </div>
+
+  <div class="col stack" style="margin-top: var(--s4)">
+    <h3>A Transcendência — seu veterano evolui</h3>
+    <p>Cada classe tem <strong>duas variações base</strong>, contratadas no mercado, e
+       <strong>três caminhos de Transcendência</strong>, comprados no <em class="term">Altar</em> a
+       partir da rodada 3. As duas cartas acima são <strong>o mesmo personagem</strong>: o Monge
+       Combo antes e depois de evoluir.</p>
+    <p><strong>A Transcendência não é um personagem novo.</strong> É uma carta empilhada sobre
+       alguém que já é seu. Poder e palavras-chave <strong>somam</strong>; o equipamento, o refino
+       e as cartas de monstro continuam com ele. O Bruxo que você contratou na rodada 1, equipou
+       na 2 e viu sobreviver ao Corredor na 3 é <em>o mesmo cara</em> que vira Arquimago na 4.</p>
+    <div class="note">
+      <span class="lbl">Por que isso muda como você joga</span>
+      <p>Primeiro, <strong>qual base evoluiu continua importando</strong>: um Bruxo Tempestade que
+      virou Arquimago Nevasca fica com Muralha 4; um Bruxo Jupitel pelo mesmo caminho fica com mais
+      Poder bruto e Muralha 2. Mesmo caminho, personagens diferentes — são <strong>seis desfechos
+      por classe</strong>.</p>
+      <p style="margin-top:var(--s2)">Segundo, <strong>perder um transcendido dói</strong>. Ele
+      custou o recrutamento mais a evolução, às vezes mais de vinte zeny. Você vai pensar duas
+      vezes antes de mandá-lo para o Corredor Estreito — e é exatamente aí que o jogo fica bom.</p>
+    </div>
+    <p>Um detalhe que vale ouro: <strong>dá para transcender alguém que está na Enfermaria</strong>,
+       e ele volta para a Reserva na hora. É o Rebirth do Ragnarok — quem caiu levanta mais forte.
+       Custa a evolução inteira num resgate em vez de num upgrade, mas às vezes salva a rodada.</p>
+
+    <h3>Os dois mercados funcionam ao contrário um do outro</h3>
+    <p>O <strong>recrutamento</strong> é uma fileira sorteada e disputada: você compra o que
+       apareceu, e o que você não levar o vizinho leva. É oportunismo.</p>
+    <p>O <strong>Altar</strong> é uma tabela de preços fixa. Os três caminhos de cada classe estão
+       sempre lá, sempre pelo mesmo preço, e ninguém tira nada de ninguém. É plano: dá para decidir
+       na rodada 3 que você vai juntar 11 zeny para o Arquimago Nevasca — e cumprir.</p>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<section id="castelo">
+  <span class="step-no">03 — O mapa</span>
+  <h2>O castelo</h2>
+  <div class="col stack" style="margin-bottom: var(--s4)">
+    <p>Sete salas em losango. O Portão, o Salão do Trono e a Sala do Emperium são sempre os
+       mesmos. As <strong>quatro alas</strong> do meio são sorteadas de um conjunto de doze fichas,
+       então cada partida tem uma textura diferente sem mudar a geometria.</p>
+  </div>
+
+  <div class="castle">
+    <div class="room emp">
+      <div class="rn">Sala do Emperium</div>
+      <div class="rr">Aqui não se disputa controle. Aqui se quebra o cristal.</div>
+    </div>
+    <div class="link"></div>
+    <div class="room">
+      <div class="rn">Salão do Trono</div>
+      <div class="rr">Limite 3. Defensor +2. É o pedágio: sem controlá-lo, você não entra no Emperium.</div>
+    </div>
+    <div class="link"></div>
+    <div class="pair">
+      <div class="room"><div class="rn">Ala B2</div><div class="rr">ficha sorteada</div></div>
+      <div class="room"><div class="rn">Ala C2</div><div class="rr">ficha sorteada</div></div>
+    </div>
+    <div class="link"></div>
+    <div class="pair">
+      <div class="room"><div class="rn">Ala B1</div><div class="rr">ficha sorteada</div></div>
+      <div class="room"><div class="rn">Ala C1</div><div class="rr">ficha sorteada</div></div>
+    </div>
+    <div class="link"></div>
+    <div class="room">
+      <div class="rn">Portão Principal</div>
+      <div class="rr">Sem limite, sem efeito. Todo mundo sempre pode entrar por aqui.</div>
+    </div>
+  </div>
+
+  <div class="col stack" style="margin-top: var(--s4)">
+    <h3>Como você avança — a Marcha Forçada</h3>
+    <p><strong>Toda sala do castelo é alcançável desde a primeira rodada.</strong> O que muda é o
+       preço. Sua <em class="term">linha de frente</em> é o Portão, mais o que você controlava no
+       fim da rodada anterior, mais o que faz fronteira com isso. Entrar ali é de graça.</p>
+    <p>Entrar em qualquer outra sala é uma <strong>Marcha Forçada</strong>: você chega disperso, a
+       <strong>−2 de Poder por sala de distância</strong>. Tomar uma sala aproxima a linha e
+       barateia a próxima.</p>
+    <div class="twrap" style="margin: var(--s3) 0">
+      <table>
+        <thead><tr><th>Na rodada 1, um atacante paga</th><th class="num">Poder</th></tr></thead>
+        <tbody>
+          <tr><td>Portão Principal</td><td class="num">grátis</td></tr>
+          <tr><td>Alas internas (B1 / C1)</td><td class="num">−2</td></tr>
+          <tr><td>Alas fundas (B2 / C2)</td><td class="num">−4</td></tr>
+          <tr><td>Salão do Trono</td><td class="num">−6</td></tr>
+          <tr><td>Sala do Emperium</td><td class="num">−8</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Isso quase sempre é uma péssima ideia — e é exatamente por isso que funciona. A opção
+       existir obriga o defensor a cobrir sete salas em vez de uma, e obriga você a decidir se o
+       Armazém desguarnecido vale o desconto no Poder.</p>
+    <div class="note">
+      <span class="lbl">O privilégio do dono</span>
+      <p>Quem está com o castelo <strong>não paga marcha nenhuma</strong> e compromete em qualquer
+      sala, sempre. Ele também recebe <strong>+6 zeny por rodada</strong> do tesouro, e pode gastar
+      uma ação de mercado <strong>movendo um Guardião</strong> de uma sala para outra. Um contra
+      quatro, mas o dobro do dinheiro e liberdade total de posição.</p>
+    </div>
+    <h3>As doze fichas de ala</h3>
+    <p>Cada ficha tem uma linha de regra impressa. Só quatro entram em jogo, então ninguém decora
+       nada — a regra fica debaixo das peças.</p>
+  </div>
+
+  <div class="twrap" style="margin-top: var(--s3)">
+    <table>
+      <thead><tr><th>Sala</th><th>Regra</th></tr></thead>
+      <tbody>
+        <tr><td><b>Corredor Estreito</b></td><td>Limite 2 personagens por facção.</td></tr>
+        <tr><td><b>Pátio Aberto</b></td><td>Personagens com Alcance têm +1 de Poder.</td></tr>
+        <tr><td><b>Ponte sobre o Fosso</b></td><td>Facções derrotadas não sofrem baixa: voltam à Reserva.</td></tr>
+        <tr><td><b>Labirinto</b></td><td>Comprometer aqui custa 1 zeny por personagem. Alcance não funciona.</td></tr>
+        <tr><td><b>Salão dos Guardiões</b></td><td>Guarnição de Poder 6 que combate todas as facções. Ninguém controla enquanto viva.</td></tr>
+        <tr><td><b>Armazém</b></td><td>Quem controla ganha 4 zeny no fim da rodada.</td></tr>
+        <tr><td><b>Forja</b></td><td>Quem controla faz 1 refino grátis e sem risco no fim da rodada.</td></tr>
+        <tr><td><b>Capela</b></td><td>Quem controla move 1 personagem da Enfermaria para a Reserva.</td></tr>
+        <tr><td><b>Torre de Vigia</b></td><td>Quem controla olha os comprometimentos ocultos de 1 sala adjacente antes da revelação.</td></tr>
+        <tr><td><b>Cripta</b></td><td>Baixas aqui vão para a Reserva, não para a Enfermaria.</td></tr>
+        <tr><td><b>Portal Rúnico</b></td><td>Ignore a regra de posicionamento para comprometer aqui.</td></tr>
+        <tr><td><b>Terraço</b></td><td>Arcano tem Poder dobrado. Vanguarda tem −2 de Poder.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<section id="rodada">
+  <span class="step-no">04 — O relógio</span>
+  <h2>Uma rodada, cinco fases</h2>
+  <div class="col stack" style="margin-bottom: var(--s4)">
+    <p>A partida tem <strong>seis rodadas</strong>. Cada uma passa por estas cinco fases, sempre
+       na mesma ordem.</p>
+  </div>
+
+  <div class="phases">
+    <div class="phase">
+      <span class="num">1</span>
+      <div>
+        <h3>Renda <span class="sim">· simultâneo</span></h3>
+        <p>Todo mundo pega <strong>6 zeny</strong>. O dono do castelo pega <strong>+6</strong>.
+           Quem controla o Armazém pega <strong>+4</strong>. Vinte segundos.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <span class="num">2</span>
+      <div>
+        <h3>Mercado</h3>
+        <p>Em ordem <strong>inversa de Glória</strong> — quem está perdendo compra primeiro, o
+           dono do castelo compra por último. Você tem exatamente <strong>três ações</strong>:
+           recrutar, equipar, refinar ou comprar consumível, podendo repetir.</p>
+        <p style="margin-top:var(--s2)"><strong>Esse limite de três é o coração da economia.</strong>
+           Refinar duas vezes é não recrutar. Equipamento e personagem saem do mesmo bolso e do
+           mesmo orçamento de ações.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <span class="num">3</span>
+      <div>
+        <h3>Comprometimento <span class="sim">· simultâneo e secreto</span></h3>
+        <p>Todo mundo ao mesmo tempo coloca cartas de bruços nas salas, com uma
+           <strong>Ordem</strong> de bruços em cada sala usada. Você tem quatro Ordens e cada uma
+           só serve uma vez por rodada — então <strong>no máximo quatro salas</strong>.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <span class="num">4</span>
+      <div>
+        <h3>Revelação e resolução</h3>
+        <p>Vira tudo. As salas resolvem <strong>do Portão para dentro</strong>, e quem jogou
+           Emboscada resolve antes de todos.</p>
+      </div>
+    </div>
+    <div class="phase">
+      <span class="num">5</span>
+      <div>
+        <h3>Fim de rodada</h3>
+        <p>Renda das salas controladas, <strong>Glória para o dono do castelo</strong>, Enfermaria
+           volta para a Reserva, avança a trilha.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<section id="confronto">
+  <span class="step-no">05 — O momento decisivo</span>
+  <h2>Como uma sala resolve</h2>
+  <div class="col stack" style="margin-bottom: var(--s4)">
+    <p>Não há dados. Você soma, aplica as palavras-chave, e o maior número controla a sala. Toda a
+       incerteza do jogo já aconteceu — ela estava em <em>não saber onde os outros apostaram</em>.</p>
+    <p>Vamos ver uma sala de verdade. <strong>Rodada 4, Corredor Estreito</strong> (limite 2 por
+       facção). Três facções revelam.</p>
+  </div>
+
+  <div class="math"><span class="win">ANA</span>  (atacante) — Ordem: INVESTIDA
+  Arquimago Nevasca ...... 4   + Cajado da Tempestade +2 ..... 5
+  Carta Hydra (atacando) . 2   + Templário Escudeiro ......... 2
+  Investida .............. 3
+  <b>subtotal .............. 16</b>
+
+<span class="lose">BRUNO</span> (atacante) — Ordem: EMBOSCADA
+  Mestre Punho de Asura .. 10  + SOLO 2 (está sozinho) ....... 2
+  Emboscada (único) ...... 2
+  <b>subtotal .............. 14</b>
+
+<span class="lose">CARLA</span> (DEFENSORA) — Ordem: RESGUARDO
+  Caçador Armadilheiro ... 2   + Sumo Sacerdote Assumptio .... 3
+  ELO 2 .................. 2   + Resguardo ................. −2
+  <b>subtotal ............... 5</b>
+
+── MURALHA ────────────────────────────────────────────
+  Carla tem MURALHA 2  →  −2 em Ana e em Bruno
+  Ana   tem MURALHA 4  →  −4 em Bruno e em Carla
+
+  <span class="win">Ana ..... 16 − 2 = 14   ← controla a sala</span>
+  <span class="lose">Bruno ... 14 − 2 − 4 = 8</span>
+  <span class="lose">Carla .... 5 − 4 = 1</span></div>
+
+  <div class="col stack" style="margin-top: var(--s4)">
+    <h3>O que aconteceu com cada um</h3>
+    <ul class="body">
+      <li><strong>Ana controla o Corredor.</strong> Na próxima rodada ela pode comprometer nas
+          salas adjacentes a ele.</li>
+      <li><strong>Bruno perde por 6.</strong> Ele precisa remover personagens cuja soma de Poder
+          base chegue a 6, e só tem o Mestre (Poder 10). O Mestre cai — o que ia acontecer de
+          qualquer jeito, porque <em class="term">Esgotar</em> manda ele para a Enfermaria mesmo
+          quando vence.</li>
+      <li><strong>Carla sai limpa.</strong> Resguardo cancela todas as baixas dela. Ela perdeu a
+          sala de propósito e ainda embolsou 3 zeny. Foi uma retirada, não uma derrota.</li>
+    </ul>
+    <div class="note warn">
+      <span class="lbl">A lição que o Corredor Estreito existe para ensinar</span>
+      <p>Bruno trouxe o maior Poder bruto da mesa e perdeu. A Muralha 4 da Ana comeu ele vivo
+      porque ele não tinha <em class="term">Perfurar</em>. Poder alto não vence sala estreita —
+      <strong>Perfurar</strong> vence sala estreita. Se você só olha o número grande da carta, você
+      vai perder essa sala muitas vezes antes de entender.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<section id="emperium">
+  <span class="step-no">06 — O clímax</span>
+  <h2>Quebrando o Emperium</h2>
+  <div class="col stack" style="margin-bottom: var(--s4)">
+    <p>Qualquer um pode entrar na Sala do Emperium. Quem não controla o <strong>Salão do
+       Trono</strong> chega por Marcha Forçada e paga em Poder — mas a porta nunca está trancada,
+       então o defensor jamais pode deixá-la vazia.</p>
+    <p>Aqui não se disputa controle. O defensor forma um <strong>Escudo</strong> — o Poder dele
+       naquela sala mais o valor da rodada — e esse escudo absorve os atacantes
+       <strong>em ordem crescente</strong>: o menor primeiro, até acabar.</p>
+  </div>
+
+  <h3 class="col" style="margin-bottom: var(--s3)">Escudo 8 · três atacantes</h3>
+  <div class="absorb">
+    <div class="abar">
+      <div class="who">Ana <small>Poder 4</small></div>
+      <div class="track"><div class="seg blocked" style="flex:4">bloqueada — 0 de dano</div></div>
+    </div>
+    <div class="abar">
+      <div class="who">Bruno <small>Poder 6</small></div>
+      <div class="track">
+        <div class="seg blocked" style="flex:4">absorvido</div>
+        <div class="seg through" style="flex:2">2</div>
+      </div>
+    </div>
+    <div class="abar">
+      <div class="who">Carla <small>Poder 10</small></div>
+      <div class="track"><div class="seg through" style="flex:10">10 de dano — escudo já acabou</div></div>
+    </div>
+  </div>
+
+  <div class="col stack" style="margin-top: var(--s4)">
+    <p>Ana mandou pouco e não fez <strong>nada</strong>. Carla mandou tudo e passou inteira. Cada
+       ponto que passa vira um <strong>cubo da sua cor</strong> em cima do Emperium.</p>
+    <div class="note">
+      <span class="lbl">Por que a ordem é crescente</span>
+      <p>Porque este jogo precisa punir quem fica esperando os outros gastarem tropa. Mandar
+      sobras para o Emperium não é uma aposta pequena — é uma aposta <em>nula</em>. Some isso ao
+      fato de que o escudo cai de 8 para 6, 4 e 2 nas rodadas 4, 5 e 6, e o fim de jogo explode em
+      vez de travar.</p>
+    </div>
+
+    <h3>Quando o cristal quebra</h3>
+    <ol class="body">
+      <li>Cada jogador ganha <strong>1 de Glória por cubo seu</strong>. Quem passou duas rodadas
+          amolecendo a defesa recebe por esse trabalho mesmo perdendo a corrida.</li>
+      <li>Quem colocou <strong>mais cubos nesta rodada</strong> toma o castelo e ganha
+          <strong>+3 de Glória</strong>.</li>
+      <li>Todos os cubos saem e o Emperium volta ao valor cheio.</li>
+      <li><strong>Todo mundo que estava na Sala do Emperium vai para a Enfermaria</strong> — dos
+          dois lados, vencedor incluído.</li>
+    </ol>
+    <p>Esse último item é o que impede a conquista de encerrar a partida. Você acorda dono do
+       castelo, rico, e sem metade do seu exército. A mesa tem uma janela real para tomar de volta,
+       e você tem uma rodada para se reerguer.</p>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<section id="vitoria">
+  <span class="step-no">07 — Placar</span>
+  <h2>Como se ganha</h2>
+  <div class="col stack" style="margin-bottom: var(--s3)">
+    <p>Vence quem tiver mais <strong>Glória</strong> no fim da rodada 6. Empate vai para quem
+       estiver com o castelo.</p>
+  </div>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Fonte</th><th class="num">Glória</th><th>Comentário</th></tr></thead>
+      <tbody>
+        <tr><td>Dono do castelo no fim das rodadas 1–5</td><td class="num">2 <span style="color:var(--muted)">cada</span></td><td>Segurar já é pontuar. Esperar é deixar o líder pontuar.</td></tr>
+        <tr><td>Dono do castelo no fim da rodada 6</td><td class="num">8</td><td>Quatro vezes uma rodada normal.</td></tr>
+        <tr><td>Cada cubo seu no Emperium quando ele quebra</td><td class="num">1</td><td>Contribuição parcial é paga.</td></tr>
+        <tr><td>Tomar o castelo</td><td class="num">+3</td><td>A conquista é paga melhor.</td></tr>
+        <tr><td>Derrotar personagens inimigos</td><td class="num">0</td><td>De propósito. Matar é meio, não fim — senão o jogo vira briga de rua no pátio e ninguém entra no castelo.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col stack" style="margin-top: var(--s3)">
+    <p>Segurar da primeira à última rodada dá <strong>18</strong>. Tomar o castelo na rodada 6 com
+       dez cubos dá <strong>21</strong>. Ou seja: quem chega no fim vence, mas quem segurou o meio
+       do jogo obriga o invasor a fazer um <em>assalto de verdade</em>, não um arranhão de última
+       hora.</p>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<section id="erros">
+  <span class="step-no">08 — Antes da primeira partida</span>
+  <h2>Cinco erros de novato</h2>
+  <div class="col">
+    <ol class="body">
+      <li><strong>Comprar o número maior.</strong> Poder 10 numa sala com Muralha 4 é Poder 6.
+          Leia a sala antes de ler a carta.</li>
+      <li><strong>Espalhar por quatro salas na rodada 1.</strong> Suas quatro Ordens incluem
+          Resguardo e Cerco, que são fracas em Poder. Espalhar significa atacar de verdade em uma
+          sala só.</li>
+      <li><strong>Marchar fundo cedo demais.</strong> −6 de Poder na rodada 1 é quase todo o seu
+          clã. A Marcha Forçada é uma faca para roubar uma sala desguarnecida, não uma rota.</li>
+      <li><strong>Empilhar equipamento num herói.</strong> Quando ele cai, o vencedor da sala
+          <strong>escolhe uma peça dele e fica com ela</strong>. Você financiou o inimigo.</li>
+      <li><strong>Mandar sobras para o Emperium.</strong> O escudo absorve em ordem crescente.
+          Meia força é dano zero.</li>
+      <li><strong>Tratar outro atacante como aliado.</strong> Vocês não são. Se os dois entrarem
+          na mesma sala, um dos dois sangra.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<section id="solo">
+  <span class="step-no">09 — O que você pediu</span>
+  <h2>Testando sozinho</h2>
+  <div class="col stack" style="margin-bottom: var(--s4)">
+    <p>Um jogo de informação oculta não pode ser jogado sozinho de verdade — mas
+       <strong>quase nada do que precisa ser testado numa v0.1 é a camada de blefe</strong>. O que
+       quebra primeiro é economia, curva de poder e ritmo. Tudo isso se testa sozinho.</p>
+    <p>Rode os quatro protocolos <strong>nesta ordem</strong>. Cada um responde uma pergunta
+       diferente, e os dois primeiros são muito mais baratos que uma partida cheia.</p>
+  </div>
+
+  <div class="protos">
+    <div class="proto">
+      <div class="tag"><span class="chip">20 min</span><span class="chip deck">Faça primeiro</span></div>
+      <h3>A. Sala isolada, vinte vezes</h3>
+      <p class="what">Não jogue a partida. Monte <strong>só um confronto de sala</strong>: escolha
+         uma ficha de ala, monte duas ou três facções com cartas aleatórias somando custos
+         parecidos, e resolva. Repita vinte vezes trocando as cartas.</p>
+      <p class="rec"><b>Anote:</b> quantas vezes a facção com maior Poder bruto perdeu, e por qual
+         palavra-chave. Se Muralha ganhou mais de 14 das 20, o meta está travado e a alavanca da
+         seção 18 do design entra aqui.</p>
+    </div>
+
+    <div class="proto">
+      <div class="tag"><span class="chip">15 min</span><span class="chip deck">Faça primeiro</span></div>
+      <h3>B. Solitário de economia</h3>
+      <p class="what">Jogue <strong>só a fase de mercado</strong>, seis rodadas seguidas, sem
+         combate nenhum. Renda 6 por rodada, três ações, mercado repondo normalmente. Faça duas
+         vezes: uma recrutando barato e largo, outra economizando para transcender no Altar.</p>
+      <p class="rec"><b>Anote:</b> quantos personagens e quanto Poder total cada estratégia tem na
+         rodada 6. Se a diferença for maior que 30%, um dos dois caminhos é dominante e os custos
+         precisam mexer.</p>
+    </div>
+
+    <div class="proto">
+      <div class="tag"><span class="chip">60 min</span></div>
+      <h3>C. Partida aberta, quatro mãos</h3>
+      <p class="what">Jogue os quatro clãs você mesmo, com <strong>tudo virado para cima</strong>.
+         Você perde o blefe e ganha a coisa que importa agora: ver se o Emperium quebra na hora
+         certa e se as seis rodadas têm ritmo.</p>
+      <p class="rec"><b>Anote:</b> em que rodada o castelo trocou de dono pela primeira vez.
+         <b>Se não trocou até a rodada 5</b>, o escudo ou a renda do defensor estão altos demais —
+         é o risco número um do design.</p>
+    </div>
+
+    <div class="proto">
+      <div class="tag"><span class="chip">60 min</span><span class="chip warn">Só depois do C</span></div>
+      <h3>D. Contra três políticas escritas</h3>
+      <p class="what">Aqui você recupera parte da informação oculta. Antes de começar, escreva numa
+         folha a política fixa de cada clã rival e <strong>execute sem pensar</strong>, mesmo quando
+         for burrice:</p>
+      <ul class="body" style="font-size:.85rem; margin-top:var(--s1)">
+        <li><b>Clã Rubro —</b> sempre concentra tudo na sala mais próxima do Emperium que consegue
+            alcançar. Ordem: Investida.</li>
+        <li><b>Clã Cinza —</b> sempre divide entre duas salas diferentes. Ordem: Cerco e Resguardo.</li>
+        <li><b>Clã Verde —</b> sempre entra na sala onde o dono do castelo comprometeu mais gente na
+            rodada anterior. Ordem: Emboscada.</li>
+      </ul>
+      <p class="rec"><b>Anote:</b> se alguma das três políticas burras venceu você. <b>Se venceu</b>,
+         existe uma estratégia dominante que não exige leitura de mesa — e isso é o defeito mais
+         grave que um jogo assim pode ter.</p>
+    </div>
+  </div>
+
+  <div class="col stack" style="margin-top: var(--s4)">
+    <div class="note">
+      <span class="lbl">A regra do playtest solo</span>
+      <p>Nenhuma dessas perguntas é "foi divertido?". Divertido não é falseável e você não é
+      público imparcial do seu próprio jogo. Teste <strong>números e ritmo</strong> sozinho, e
+      guarde a pergunta da diversão para a primeira mesa com gente de verdade.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────────────────────────────────────────────────────────── -->
+<section id="referencia">
+  <span class="step-no">10 — Cole na mesa</span>
+  <h2>Referência rápida</h2>
+
+  <h3 class="col" style="margin-bottom: var(--s2)">As quatro Ordens</h3>
+  <div class="twrap" style="margin-bottom: var(--s4)">
+    <table>
+      <thead><tr><th>Ordem</th><th>Efeito</th></tr></thead>
+      <tbody>
+        <tr><td><span class="kwname">Investida</span></td><td>+3 de Poder. Se você perder a sala, sofra 1 baixa extra.</td></tr>
+        <tr><td><span class="kwname">Cerco</span></td><td>Ignore o limite de personagens da sala. −1 de Poder.</td></tr>
+        <tr><td><span class="kwname">Emboscada</span></td><td>Esta sala resolve antes de todas. +2 se você for o único com Emboscada aqui; −2 se houver outra.</td></tr>
+        <tr><td><span class="kwname">Resguardo</span></td><td>−2 de Poder. Você não sofre baixas nesta sala. Ganhe 3 zeny.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="col" style="margin-bottom: var(--s2)">As catorze palavras-chave</h3>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Palavra-chave</th><th>Efeito</th></tr></thead>
+      <tbody>
+        <tr><td><span class="kwname">Alcance</span></td><td>Só sofre baixa se você não tiver nenhum personagem com Escudar vivo nesta sala.</td></tr>
+        <tr><td><span class="kwname">Escudar</span></td><td>Absorve as baixas da sua facção antes de qualquer outro personagem seu nesta sala.</td></tr>
+        <tr><td><span class="kwname">Muralha X</span></td><td>Reduz em X o Poder Total de <em>cada</em> facção inimiga nesta sala.</td></tr>
+        <tr><td><span class="kwname">Perfurar X</span></td><td>X pontos do Poder deste personagem ignoram a Muralha inimiga.</td></tr>
+        <tr><td><span class="kwname">Rajada X</span></td><td>+X de Poder, apenas na primeira rodada em que este personagem entra nesta sala.</td></tr>
+        <tr><td><span class="kwname">Elo X</span></td><td>+X de Poder para cada <em>outro</em> personagem seu nesta sala.</td></tr>
+        <tr><td><span class="kwname">Solo X</span></td><td>+X de Poder se este for o seu único personagem nesta sala.</td></tr>
+        <tr><td><span class="kwname">Oculto</span></td><td>Não é revelado com os outros. Entra depois das Ordens. Ignora limite de sala.</td></tr>
+        <tr><td><span class="kwname">Devoção</span></td><td>Quando outro personagem seu nesta sala sofreria baixa, este sofre no lugar.</td></tr>
+        <tr><td><span class="kwname">Anular</span></td><td>Cancela uma palavra-chave <em>ou</em> um equipamento de um personagem inimigo nesta sala.</td></tr>
+        <tr><td><span class="kwname">Restaurar X</span></td><td>No fim da rodada, mova X personagens da Enfermaria para a Reserva.</td></tr>
+        <tr><td><span class="kwname">Pilhar X</span></td><td>Se sua facção vencer, ganhe X zeny. Com X ≥ 3, ganhe 1 equipamento caído.</td></tr>
+        <tr><td><span class="kwname">Esgotar</span></td><td>Após resolver, este personagem vai para a Enfermaria — tendo vencido ou perdido.</td></tr>
+        <tr><td><span class="kwname">Imitar</span></td><td>Copia as palavras-chave de outro personagem revelado nesta sala.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Guerra do Emperium</strong> — design v0.1, ainda não testado na mesa. Um board game
+  original inspirado na War of Emperium do Ragnarok Online; nenhum material da Gravity Corp. é
+  usado ou reproduzido. As regras completas, a tabela das 52 variações e o catálogo de itens estão
+  em <code>docs/emperium/01-design-v0.1.md</code>.</p>
+</footer>
+
+</div>

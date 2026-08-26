@@ -14,6 +14,7 @@ import { PatoBoard } from './games/pato/PatoBoard';
 import { PerchBoard } from './games/perch/PerchBoard';
 import { Flip7Board } from './games/flip7/Flip7Board';
 import { StopConnectBoard } from './games/stopconnect/StopConnectBoard';
+import { EmperiumBoard } from './games/emperium/EmperiumBoard';
 import { TurnGate } from './shell/TurnGate';
 import { GameOverBanner } from './shell/GameOverBanner';
 import { GameOptionsPanel } from './shell/GameOptionsPanel';
@@ -548,6 +549,7 @@ function RoomPage(): JSX.Element {
       room?.gameId === 'manada' ||
       room?.gameId === 'perch' ||
       room?.gameId === 'flip7' ||
+      room?.gameId === 'emperium' ||
       room?.gameId === 'stopconnect');
 
   return (
@@ -620,6 +622,12 @@ function RoomPage(): JSX.Element {
 
         {room?.status === 'playing' && room?.gameId === 'stopconnect' && (
           <StopConnectBoard key={matchGen} />
+        )}
+
+        {/* Sem <TurnGate>: a ordem do mercado e inversa a Gloria e a fase de
+            comprometimento e simultanea. O gate vive no proprio tabuleiro. */}
+        {room?.status === 'playing' && room?.gameId === 'emperium' && (
+          <EmperiumBoard key={matchGen} />
         )}
 
         <GameOverBanner />
