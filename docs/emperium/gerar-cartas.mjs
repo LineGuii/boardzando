@@ -52,7 +52,7 @@ const ESPECIAL = {
   'ignora-posicionamento': 'Ignora a Marcha Forçada',
   'revela-oculto': 'Revela Oculto inimigo na sala',
   'poder-emperium': '+2 de Poder na Sala do Emperium',
-  'penalidade-escudar': '−1 se o portador tiver Escudar',
+  'penalidade-escudar': '−1 se o portador tiver PROTEGER',
   'marcha-livre': 'anula a Marcha Forçada do clã inteiro',
   'forja-suprema': 'refino sem quebra e 1 grátis por rodada',
   imortal: 'não pode sofrer baixa',

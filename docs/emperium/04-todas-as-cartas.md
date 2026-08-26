@@ -340,7 +340,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|
 | **Espada Bastarda** | Vanguarda | 5z | +2 | ◈ | — | — |
 | **Lança de Cavalaria** | Vanguarda | 6z | +2 | ◈ | PERFURAR 1 | — |
-| **Machado de Guerra** | Vanguarda | 7z | +4 | ◈ | — | −1 se o portador tiver Escudar |
+| **Machado de Guerra** | Vanguarda | 7z | +4 | ◈ | — | −1 se o portador tiver PROTEGER |
 | **Cajado da Tempestade** | Arcano | 6z | +3 | ◈ | — | — |
 | **Grimório** | Arcano | 5z | +1 | ◈ | MURALHA 1 | — |
 | **Varinha de Anulação** | Arcano | 7z | +1 | — | ANULAR | — |

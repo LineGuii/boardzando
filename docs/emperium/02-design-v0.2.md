@@ -92,24 +92,25 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 
 ---
 
-## 4. A gramática — 14 palavras-chave
+## 4. A gramática — 15 palavras-chave
 
 | Palavra-chave | Efeito |
 |---|---|
-| **ALCANCE** | Só sofre baixa se você não tiver nenhum personagem com Escudar vivo nesta sala. |
+| **ALCANCE** | Ataca de longe: só sofre baixa se você não tiver nenhum personagem com PROTEGER (ou DEVOÇÃO) vivo nesta sala. |
 | **PROTEGER** | Absorve as baixas da seu clã antes de qualquer outro personagem seu. |
 | **MURALHA X** | Reduz em X o Poder Total de **cada** clã inimigo nesta sala. |
 | **PERFURAR X** | X pontos do Poder deste personagem ignoram Muralha inimiga. |
 | **RAJADA X** | +X de Poder, apenas na primeira rodada em que este personagem entra nesta sala. |
 | **ELO X** | +X de Poder para cada **outro** personagem seu nesta sala. |
 | **SOLO X** | +X de Poder se este for o seu único personagem nesta sala. |
-| **OCULTO** | Não é revelado com os outros. Entra depois das Ordens. Ignora limite de sala. |
+| **OCULTO** | Na revelação, se o seu clã não estiver REVELADO, ele pode escorregar para uma sala vizinha — sem pagar marcha — e luta lá sem Ordem. |
 | **DEVOÇÃO X** | Ele se joga na frente: cada baixa que ele leva conta por X, e os outros ficam de pé. Cai antes até do PROTEGER. |
 | **ANULAR** | Cancela a **maior palavra-chave inimiga da sala**, qualquer que seja. Não se anula um ANULAR. |
 | **RESTAURAR X** | No fim da rodada, mova X personagens da Enfermaria para a Reserva. |
 | **PILHAR X** | Se vencer, ganhe X zeny. Com X ≥ 3, ganhe 1 equipamento caído. |
 | **ESGOTAR** | Após resolver, este personagem vai para a Enfermaria — vencendo ou perdendo. |
-| **IMITAR** | Copia as palavras-chave de outro personagem revelado nesta sala. |
+| **IMITAR X** | Copia até X palavras-chave do personagem inimigo de maior Poder de carta nesta sala. Resolve **antes** do ANULAR. |
+| **MOVER X** | Encurta a Marcha Forçada em até X salas — você paga só o que passar disso. |
 
 Toda carta tem **no máximo 2** palavras-chave, mais no máximo **um Combo**.
 
@@ -149,7 +150,7 @@ Isso precisa de um alvo persistente, e o conjunto é fechado em três:
 | Marca | Efeito | Origem |
 |---|---|---|
 | **EXPOSTO** | O clã marcado perde **toda a Muralha**. | Fogo grego quebrando armadura |
-| **PRESO** | Perde o bônus da Ordem e **não pode usar Escudar**. | Corpo Fechado + Dilema travando o alvo |
+| **PRESO** | Perde o bônus da Ordem e **não pode usar Proteger**. | Corpo Fechado + Dilema travando o alvo |
 | **REVELADO** | Cancela Oculto: entra na revelação normal. | Falcão do Sniper achando o Mercenário |
 
 Marcas sempre caem na **maior clã inimigo da sala**. O design deixaria a escolha ao
@@ -332,7 +333,7 @@ As salas resolvem do Portão para dentro. Emboscada resolve antes de todas.
 7. **Maior total controla a sala.** Empate no topo: ninguém controla, todos os empatados
    sofrem 1 baixa.
 8. **Baixas.** Cada clã derrotado remove personagens cuja soma de Poder de carta
-   alcance a **margem** de derrota. Escudar cai primeiro — a menos que o clã esteja
+   alcance a **margem** de derrota. Proteger cai primeiro — a menos que o clã esteja
    Presa. Teto: metade dos personagens, arredondado para cima.
 9. **Espólio.** O vencedor pega 1 equipamento de um caído inimigo. Aplica Pilhar.
 10. **Sobreviventes voltam à Reserva.** Baixas vão à Enfermaria e perdem uma rodada.

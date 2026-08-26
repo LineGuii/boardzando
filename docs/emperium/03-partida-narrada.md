@@ -168,7 +168,7 @@ Com o Sábio na sala, a Muralha **não morde nada**.
 
 **Tobias controla o Corredor, 11 a 8.**
 
-**As baixas de Kaeda.** Margem **3**. Nenhum dos dois tem Escudar, então caem os de menor
+**As baixas de Kaeda.** Margem **3**. Nenhum dos dois tem Proteger, então caem os de menor
 Poder de carta: o **Sacerdote Pneuma** (carta 2). Faltam 1 — o próximo seria o Bruxo (3),
 mas o teto de 1 baixa a protege…
 
@@ -243,7 +243,7 @@ KAEDA    Arquimago 5 +3 (Cajado) = 8 · Templário Defensor 3
 
 **Kaeda vence com folga, 20 a 13.** Margem **7**.
 
-As baixas de Tobias: o **Templário Escudeiro** tem Escudar e cai primeiro (carta 2), depois
+As baixas de Tobias: o **Templário Escudeiro** tem Proteger e cai primeiro (carta 2), depois
 o **Sábio** (carta 2). Somam 4, faltam 3 — mas o teto é **2** (metade de 4). Ele para aí.
 
 E Kaeda, com **Resguardo**, não perde ninguém. Ela sacrificou 2 de Poder para segurar o

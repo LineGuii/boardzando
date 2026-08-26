@@ -240,7 +240,7 @@ A parte que mais confunde é o passo 9. Vamos por inteiro.
 
 | Personagem | Poder de carta | Poder na sala |
 |---|---|---|
-| Templário Escudeiro *(Escudar)* | 2 | 2 |
+| Templário Escudeiro *(Proteger)* | 2 | 2 |
 | Bruxo Jupitel *(Alcance)* | 4 | 4 + 1 *(Pátio premia Alcance)* = 5 |
 | Superaprendiz Teimoso | 2 | 2 |
 | | | **+3 da Investida** |
@@ -265,7 +265,7 @@ Bruno precisa remover personagens cuja soma de **Poder de carta** alcance ou pas
 Repare: conta o **Poder de carta** (base + evolução), *não* o Poder que ele teve na sala.
 O Cavaleiro vale 4 na conta de baixas, não 5.
 
-**Quem cai primeiro?** Nenhum dos dois tem Escudar, então vale a regra seguinte: **os de
+**Quem cai primeiro?** Nenhum dos dois tem Proteger, então vale a regra seguinte: **os de
 menor Poder de carta**. Os dois têm 4 — empate, Bruno escolhe.
 
 Ele escolhe o **Monge Combo** *(quer preservar o Cavaleiro, que tem 2 slots de
@@ -289,13 +289,13 @@ seguinte — ele perde uma rodada inteira. O Cavaleiro volta à **Reserva** norm
 Repare na linha da Emboscada: ela não só dá +2 a Bruno como tira os +3 de Ana. Os 12 dela
 viram 9, os 8 dele viram 11, e a sala **muda de dono**. É o swing de 5 pontos.
 
-#### Se Ana tivesse levado um Escudar a mais
+#### Se Ana tivesse levado um Proteger a mais
 
 Personagens com **PROTEGER** caem primeiro, obrigatoriamente. Se Ana perdesse com margem 6
 e tivesse o Templário Escudeiro (Poder de carta 2) na sala, ele cairia primeiro mesmo
 sendo o mais barato — e só depois o próximo entraria na conta, até somar 6.
 
-**A exceção:** se o clã de Ana estivesse **PRESO**, o Escudar não funcionaria e o Templário
+**A exceção:** se o clã de Ana estivesse **PRESO**, o Proteger não funcionaria e o Templário
 entraria na fila normal, pelo Poder de carta como todo mundo.
 
 ---
@@ -416,7 +416,7 @@ O caminho completo é este:
 | Marca | O que faz | Serve contra |
 |---|---|---|
 | **EXPOSTO** | O clã marcado perde **toda a Muralha** | Bruxos, Sacerdotes Pneuma, Caçadores Armadilheiros — quem se defende reduzindo o seu Poder |
-| **PRESO** | Perde o **bônus positivo da Ordem** e **não pode usar Escudar** | Quem veio de Investida, e quem trouxe um Templário Escudeiro para absorver as baixas |
+| **PRESO** | Perde o **bônus positivo da Ordem** e **não pode usar Proteger** | Quem veio de Investida, e quem trouxe um Templário Escudeiro para absorver as baixas |
 | **REVELADO** | Cancela **OCULTO** | Mercenários Furtivos e qualquer um com Traje de Sombras |
 
 #### Exemplo de uso
@@ -510,11 +510,11 @@ metade do exército.
 
 ---
 
-## 11. As 14 palavras-chave
+## 11. As 15 palavras-chave
 
 | Palavra-chave | Efeito |
 |---|---|
-| **ALCANCE** | Só sofre baixa se você não tiver nenhum personagem com Escudar vivo nesta sala. |
+| **ALCANCE** | Ataca de longe: só sofre baixa se você não tiver nenhum personagem com PROTEGER (ou DEVOÇÃO) vivo nesta sala. |
 | **PROTEGER** | Absorve as baixas da seu clã antes de qualquer outro personagem seu. |
 | **MURALHA X** | Reduz em X o Poder Total de **cada** clã inimigo nesta sala. |
 | **PERFURAR X** | X pontos do Poder deste personagem ignoram a Muralha inimiga. |
@@ -527,7 +527,8 @@ metade do exército.
 | **RESTAURAR X** | No fim da rodada, mova X personagens da Enfermaria para a Reserva. |
 | **PILHAR X** | Se vencer, ganhe X zeny. Com X ≥ 3, ganhe 1 equipamento caído. |
 | **ESGOTAR** | Após resolver, vai para a Enfermaria — tendo vencido ou perdido. |
-| **IMITAR** | Copia as palavras-chave de outro personagem revelado nesta sala. |
+| **IMITAR X** | Copia até X palavras-chave do personagem inimigo de maior Poder de carta nesta sala. Resolve **antes** do ANULAR. |
+| **MOVER X** | Encurta a Marcha Forçada em até X salas — você paga só o que passar disso. |
 
 ---
 
