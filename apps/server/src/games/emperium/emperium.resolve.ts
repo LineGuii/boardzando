@@ -58,6 +58,12 @@ interface CharCompute {
   imortal: boolean;
   /** Poder de carta + evolucao — usado para calcular baixas. */
   poderCarta: number;
+  /**
+   * Quanto de Poder cada palavra-chave ja colocou em poderBruto. E o que o
+   * ANULAR precisa devolver: sem isso ele apagaria um ELO ja somado e o numero
+   * na mesa nao mudaria.
+   */
+  bonusAplicado: Map<KeywordName, number>;
 }
 
 /** Agrega as keywords do personagem + equipamentos + cartas de monstro. */
@@ -104,7 +110,7 @@ function computeChar(state: EmperiumState, clan: Clan, instId: string): CharComp
   }
 
   // Machado de Guerra: -1 se o portador tiver Escudar.
-  if (equipSpecials.has('penalidade-escudar') && keywords.has('escudar')) poder -= 1;
+  if (equipSpecials.has('penalidade-escudar') && keywords.has('proteger')) poder -= 1;
 
   const ghostring = monsterSpecials.has('ghostring');
   if (ghostring) poder = Math.floor(poder / 2);
@@ -123,6 +129,7 @@ function computeChar(state: EmperiumState, clan: Clan, instId: string): CharComp
     imuneAnular: monsterSpecials.has('imune-anular') || equipSpecials.has('imune-anular'),
     ghostring,
     imortal: transSpecials.has('imortal'),
+    bonusAplicado: new Map<KeywordName, number>(),
   };
 }
 
@@ -141,6 +148,9 @@ interface Faction {
   imuneMuralha: number;
   /** Salas de Marcha Forcada percorridas. */
   marcha: number;
+  /** Poder efetivamente perdido para a marcha, ja descontado o MOVER das
+   *  palavras-chave. O combo de MOVER nao pode devolver mais do que isto. */
+  penalidadeMarcha: number;
   /** Sofreu uma Emboscada: perdeu o bonus da propria Ordem. */
   emboscado?: boolean;
   /** Bonus vindo da Ordem, separado porque a marca PRESO o remove. */
@@ -211,20 +221,33 @@ function factionPower(
     const alcanceAtivo = has('alcance') && effect !== 'pedagio-sem-alcance';
 
     // Regras de sala.
-    if (effect === 'bonus-alcance' && alcanceAtivo) p += 1;
+    if (effect === 'bonus-alcance' && alcanceAtivo) {
+      p += 1;
+      c.bonusAplicado.set('alcance', 1);
+    }
     if (effect === 'terraco') {
       if (c.def.papel === 'arcano') p *= 2;
       if (c.def.papel === 'vanguarda') p -= 2;
     }
 
     // ELO X: +X por cada OUTRO personagem seu na sala.
-    if (has('elo')) p += val('elo') * Math.max(0, n - 1);
+    if (has('elo')) {
+      const ganho = val('elo') * Math.max(0, n - 1);
+      p += ganho;
+      c.bonusAplicado.set('elo', ganho);
+    }
     // SOLO X: +X se for o unico personagem seu na sala.
-    if (has('solo') && n === 1) p += val('solo');
+    if (has('solo') && n === 1) {
+      p += val('solo');
+      c.bonusAplicado.set('solo', val('solo'));
+    }
     // RAJADA X: so na primeira rodada deste personagem nesta sala.
     if (has('rajada')) {
       const inst = playerId ? state.clans[playerId]?.chars[c.instId] : undefined;
-      if (!inst || !inst.salasVisitadas.includes(slot)) p += val('rajada');
+      if (!inst || !inst.salasVisitadas.includes(slot)) {
+        p += val('rajada');
+        c.bonusAplicado.set('rajada', val('rajada'));
+      }
     }
 
     // Cartas de monstro condicionais.
@@ -278,12 +301,16 @@ function factionPower(
   }
   total += bonusOrdem;
 
-  // Marcha Forcada: quem pulou salas chega disperso. Salto (Mestre) e Marcha
-  // Silenciosa (Desordeiro) guiam o grupo: um so deles anula a penalidade da
-  // cla inteira — e o que faz dessas duas evolucoes uma jogada estrategica
-  // e nao so mais um bonus de Poder.
-  const guia = chars.some((c) => c.transSpecials.has('marcha-livre'));
-  if (!guia) total -= MARCHA_PENALIDADE * marcha;
+  // MOVER X: ignora X salas de Marcha Forcada. Vale para o cla inteiro na sala,
+  // e o MAIOR X manda — dois personagens com MOVER nao somam.
+  //
+  // Antes disso os efeitos de mobilidade anulavam a marcha INTEIRA, sem teto:
+  // quem tivesse um Salto chegava de graca em qualquer sala do castelo. Com
+  // MOVER o alcance passa a ser um numero que da para balancear.
+  const mover = chars.reduce((m, c) => Math.max(m, c.keywords.get('mover') ?? 0), 0);
+  const salasPagas = Math.max(0, marcha - mover);
+  const penalidadeMarcha = MARCHA_PENALIDADE * salasPagas;
+  total -= penalidadeMarcha;
 
   return {
     playerId,
@@ -297,6 +324,7 @@ function factionPower(
     temAnular,
     imuneMuralha,
     marcha,
+    penalidadeMarcha,
     bonusOrdem,
     marcas: new Set<Marca>(),
     cancelaEsgotar: false,
@@ -328,7 +356,7 @@ function applyCombos(factions: Faction[], zenyDe: (p: PlayerId) => number): void
       case 'perfurar-total':
         f.perfurarTotal = true;
         break;
-      case 'protege-papel':
+      case 'cobrir-papel':
         f.protegePapel = e.papel;
         break;
       case 'rajada-papel':
@@ -337,10 +365,15 @@ function applyCombos(factions: Faction[], zenyDe: (p: PlayerId) => number): void
       case 'cancela-esgotar':
         f.cancelaEsgotar = true;
         break;
-      case 'marcha-livre':
-        // Devolve o que a Marcha Forcada tinha cobrado.
-        f.poderBruto += MARCHA_PENALIDADE * f.marcha;
+      case 'mover': {
+        // O combo concede MOVER X ao cla. Devolve no maximo o que a marcha
+        // realmente cobrou — senao um cla com MOVER de palavra-chave E de combo
+        // ganharia Poder do nada numa sala perto.
+        const devolve = Math.min(f.penalidadeMarcha, MARCHA_PENALIDADE * e.x);
+        f.poderBruto += devolve;
+        f.penalidadeMarcha -= devolve;
         break;
+      }
       case 'troco':
         f.troco = true;
         break;
@@ -382,25 +415,100 @@ function maiorInimiga(factions: readonly Faction[], eu: Faction): Faction | null
  * impactante para nao travar a resolucao pedindo alvo. Angeling e Manto Elfico
  * tornam o portador imune.
  */
+/**
+ * Palavras-chave que o ANULAR pode cancelar.
+ *
+ * Fora da lista: **anular** (nao se anula um Anular), **oculto** (quem ja foi
+ * revelado nao tem o que cancelar, e quem nao foi nao esta na conta),
+ * **imitar** (resolve antes e ja copiou) e **mover** (a marcha ja aconteceu:
+ * cancelar o passo depois de dado nao desfaz o caminho).
+ */
+const ANULAVEIS: readonly KeywordName[] = [
+  'muralha',
+  'perfurar',
+  'rajada',
+  'elo',
+  'solo',
+  'proteger',
+  'devocao',
+  'restaurar',
+  'pilhar',
+];
+
+/**
+ * ANULAR cancela a MAIOR palavra-chave inimiga da sala — nao so Muralha.
+ *
+ * "Maior" e por valor de X, e keywords sem X (PROTEGER, DEVOCAO) contam como 1.
+ * A regra e automatica de proposito: escolher alvo exigiria pausar a resolucao,
+ * e a fase foi feita simultanea justamente para nao ter downtime. Sendo
+ * deterministica, da para o jogador calcular o alvo olhando a mesa antes de
+ * comprometer.
+ */
 function applyAnular(factions: Faction[]): void {
   for (const f of factions) {
     for (let i = 0; i < f.temAnular; i++) {
-      let alvo: Faction | null = null;
+      let melhor: { alvo: Faction; c: CharCompute; kw: KeywordName; x: number } | null = null;
+
       for (const outra of factions) {
         if (outra === f) continue;
-        if (outra.muralha <= 0) continue;
-        const todosImunes = outra.chars.every((c) => c.imuneAnular);
-        if (todosImunes) continue;
-        if (!alvo || outra.muralha > alvo.muralha) alvo = outra;
+        for (const c of outra.chars) {
+          if (c.imuneAnular) continue;
+          for (const kwName of ANULAVEIS) {
+            const x = c.keywords.get(kwName);
+            if (x === undefined || x <= 0) continue;
+            if (!melhor || x > melhor.x) melhor = { alvo: outra, c, kw: kwName, x };
+          }
+        }
       }
-      if (!alvo) break;
-      // Cancela a maior contribuicao individual de Muralha da cla alvo.
-      let maior = 0;
-      for (const c of alvo.chars) {
-        if (c.imuneAnular) continue;
-        maior = Math.max(maior, c.keywords.get('muralha') ?? 0);
+
+      if (!melhor) break;
+      melhor.c.keywords.delete(melhor.kw);
+      // Muralha e Perfurar ja foram somados no cla; desfaz o total tambem.
+      if (melhor.kw === 'muralha') melhor.alvo.muralha = Math.max(0, melhor.alvo.muralha - melhor.x);
+      if (melhor.kw === 'perfurar') melhor.alvo.perfurar = Math.max(0, melhor.alvo.perfurar - melhor.x);
+      // ELO, SOLO, RAJADA e o bonus de sala ja entraram no Poder: devolve.
+      const jaSomado = melhor.c.bonusAplicado.get(melhor.kw) ?? 0;
+      if (jaSomado > 0) {
+        melhor.alvo.poderBruto -= jaSomado;
+        melhor.c.bonusAplicado.delete(melhor.kw);
       }
-      alvo.muralha = Math.max(0, alvo.muralha - (maior || alvo.muralha));
+    }
+  }
+}
+
+/**
+ * IMITAR X: copia ate X palavras-chave de UM personagem inimigo revelado na
+ * sala — o de maior Poder de carta, que e o alvo que um jogador escolheria.
+ *
+ * Resolve ANTES do Anular de proposito: o imitador copia o que ainda esta de
+ * pe, e so depois o Anular corta.
+ */
+function applyImitar(factions: Faction[]): void {
+  for (const f of factions) {
+    for (const c of f.chars) {
+      const quantas = c.keywords.get('imitar');
+      if (quantas === undefined) continue;
+
+      let alvo: CharCompute | null = null;
+      for (const outra of factions) {
+        if (outra === f) continue;
+        for (const o of outra.chars) {
+          if (o.keywords.size === 0) continue;
+          if (!alvo || o.poderCarta > alvo.poderCarta) alvo = o;
+        }
+      }
+      if (!alvo) continue;
+
+      const copiaveis = [...alvo.keywords.entries()]
+        .filter(([k]) => k !== 'imitar')
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, Math.max(1, quantas));
+
+      for (const [k, x] of copiaveis) {
+        c.keywords.set(k, (c.keywords.get(k) ?? 0) + x);
+        if (k === 'muralha') f.muralha += x;
+        if (k === 'perfurar') f.perfurar += x;
+      }
     }
   }
 }
@@ -430,22 +538,31 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
   if (margem <= 0) return [];
   const teto = Math.ceil(f.chars.length / 2);
 
+  // PRESO tira o PROTEGER do alvo: travado, ele nao consegue cobrir ninguem.
+  const preso = f.marcas.has('preso');
+  const ehProtetor = (c: CharCompute) => !preso && c.keywords.has('proteger');
+
+  // ALCANCE: quem ataca de longe so sofre baixa se nao houver ninguem com
+  // PROTEGER vivo no cla. Esta regra estava no manual desde a v0.1 e NUNCA
+  // tinha sido implementada — ALCANCE so valia como bonus no Patio Aberto.
+  const temProtetorVivo = f.chars.some((c) => ehProtetor(c) && !c.ghostring && !c.imortal);
+
   const elegiveis = f.chars.filter((c) => {
     if (c.ghostring) return false; // Ghostring nao pode sofrer baixa.
     if (c.imortal) return false; // Corpo de Aco Supremo / Teimosia Absurda.
     if (c.def.special === 'teimoso' && round === 1) return false;
-    // Combo de protecao: o tanque provocando enquanto o bruxo conjura.
+    // Combo COBRIR: o tanque provocando enquanto o bruxo conjura.
     if (f.protegePapel && c.def.papel === f.protegePapel) return false;
+    // ALCANCE protegido por quem esta na frente.
+    if (c.keywords.has('alcance') && temProtetorVivo && !ehProtetor(c)) return false;
     return true;
   });
 
-  // PRESO tira o Escudar do alvo: travado, ele nao consegue cobrir ninguem —
-  // os escudos deixam de vir primeiro e entram na fila normal.
-  const preso = f.marcas.has('preso');
-  const ehEscudo = (c: CharCompute) => !preso && c.keywords.has('escudar');
-  const escudar = elegiveis.filter(ehEscudo);
+  // Protetores caem primeiro. Se o cla estiver PRESO eles nao cobrem ninguem e
+  // entram na fila normal, pelo Poder de carta como todo mundo.
+  const protetores = elegiveis.filter(ehProtetor);
   const resto = elegiveis
-    .filter((c) => !ehEscudo(c))
+    .filter((c) => !ehProtetor(c))
     .sort((a, b) => {
       // Amuleto de Ferro: nunca e a primeira baixa.
       const aAmu = a.equipSpecials.has('nunca-primeira-baixa') ? 1 : 0;
@@ -454,7 +571,7 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
       return a.poderCarta - b.poderCarta;
     });
 
-  const fila = [...escudar, ...resto];
+  const fila = [...protetores, ...resto];
   const caidos: string[] = [];
   let acumulado = 0;
   for (const c of fila) {
@@ -518,6 +635,93 @@ function aplicarRaptos(grupos: { input: RoomInput; chars: CharCompute[] }[]): st
   return [alvo.c.instId];
 }
 
+/** O personagem carrega OCULTO depois de evolucao, equipamento e cartas? */
+export function temOculto(state: EmperiumState, playerId: PlayerId, instId: string): boolean {
+  const clan = state.clans[playerId];
+  if (!clan) return false;
+  const c = computeChar(state, clan, instId);
+  return c !== null && c.keywords.has('oculto');
+}
+
+/** Quem, nesta sala, enxerga infiltrado: o falcao, os oculos, o Horong. */
+function temOlhoParaOcultos(state: EmperiumState, playerId: PlayerId, c: Commitment): boolean {
+  const clan = state.clans[playerId];
+  if (!clan) return false;
+  const chars = c.charInstIds
+    .map((id) => computeChar(state, clan, id))
+    .filter((x): x is CharCompute => x !== null);
+  for (const ch of chars) {
+    if (ch.equipSpecials.has('revela-oculto')) return true;
+    if (ch.transSpecials.has('revela-oculto')) return true;
+    if (ch.monsterSpecials.has('revela-ocultos')) return true;
+    // O combo que marca REVELADO tambem conta: se ele vai acender nesta sala,
+    // ninguem sai daqui pela sombra.
+    const combo = comboDe(ch);
+    if (
+      combo &&
+      c.combo === ch.instId &&
+      combo.efeito.tipo === 'marca' &&
+      combo.efeito.marca === 'revelado' &&
+      comboAcende(ch, chars, combo)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Executa as infiltracoes de OCULTO antes de qualquer sala resolver: quem nao
+ * foi revelado escorrega para a sala adjacente declarada e luta la, de graca.
+ *
+ * Muta `state.commitments`. Devolve as linhas de log.
+ */
+export function aplicarInfiltracoes(state: EmperiumState): string[] {
+  const linhas: string[] = [];
+  for (const playerId of state.order) {
+    const meus = state.commitments[playerId];
+    if (!meus) continue;
+    for (const c of meus) {
+      const inf = c.infiltrar;
+      if (!inf) continue;
+      if (!c.charInstIds.includes(inf.charInstId)) continue;
+      if (!temOculto(state, playerId, inf.charInstId)) continue;
+
+      // Revelado pelo inimigo que esta na MESMA sala de origem: fica e luta ali.
+      const revelado = state.order.some((outro) => {
+        if (outro === playerId) return false;
+        const dele = (state.commitments[outro] ?? []).find((x) => x.slot === c.slot);
+        return dele !== undefined && temOlhoParaOcultos(state, outro, dele);
+      });
+      const nome = CHARACTER_BY_ID.get(state.clans[playerId]?.chars[inf.charInstId]?.defId ?? '')?.nome;
+      if (revelado) {
+        linhas.push(`${nome ?? 'Um oculto'} foi REVELADO e ficou preso na sala de origem.`);
+        continue;
+      }
+
+      c.charInstIds = c.charInstIds.filter((id) => id !== inf.charInstId);
+      if (c.combo === inf.charInstId) c.combo = undefined;
+      const existente = meus.find((x) => x.slot === inf.destino);
+      if (existente) {
+        existente.charInstIds.push(inf.charInstId);
+      } else {
+        meus.push({
+          slot: inf.destino,
+          charInstIds: [inf.charInstId],
+          ordem: c.ordem,
+          semOrdem: true,
+          marcha: 0,
+        });
+      }
+      const destinoNome = TILE_BY_ID.get(state.rooms[inf.destino]?.tileId ?? '')?.nome ?? inf.destino;
+      linhas.push(`${nome ?? 'Um oculto'} infiltrou-se em ${destinoNome} sem pagar marcha.`);
+    }
+    // Grupos que ficaram vazios (o unico personagem infiltrou) saem da conta.
+    state.commitments[playerId] = meus.filter((x) => x.charInstIds.length > 0);
+  }
+  return linhas;
+}
+
 /**
  * Resolve uma sala comum (nao-Emperium). Devolve o resultado; nao muta estado.
  */
@@ -530,7 +734,9 @@ export function resolveRoom(
   const tile = room ? TILE_BY_ID.get(room.tileId) : undefined;
   const effect = tile?.effect ?? 'nenhum';
 
-  const emboscadores = inputs.filter((i) => i.commitment.ordem === 'emboscada').length;
+  const emboscadores = inputs.filter(
+    (i) => i.commitment.ordem === 'emboscada' && !i.commitment.semOrdem,
+  ).length;
 
   // Pass 0 — monta os grupos e resolve o RAPTO antes de somar qualquer Poder:
   // arrancar alguem muda o calculo de quem ficou (ELO, SOLO), entao tem que
@@ -559,7 +765,7 @@ export function resolveRoom(
       slot,
       g.input.playerId,
       g.chars,
-      g.input.commitment.ordem,
+      g.input.commitment.semOrdem ? null : g.input.commitment.ordem,
       emboscadores === 1,
       g.input.commitment.consumivel,
       g.input.commitment.marcha ?? 0,
@@ -582,6 +788,7 @@ export function resolveRoom(
       temAnular: 0,
       imuneMuralha: 0,
       marcha: 0,
+      penalidadeMarcha: 0,
       bonusOrdem: 0,
       marcas: new Set<Marca>(),
       cancelaEsgotar: false,
@@ -610,6 +817,8 @@ export function resolveRoom(
   // Pass 2 — combos e marcas, ANTES de Anular e Muralha: EXPOSTO zera a
   // Muralha do alvo e PRESO tira o bonus da Ordem dele.
   applyCombos(factions, (p) => state.clans[p]?.zeny ?? 0);
+  // IMITAR antes de ANULAR: copia o que ainda esta de pe, depois o Anular corta.
+  applyImitar(factions);
   applyAnular(factions);
   applyMuralha(factions);
 

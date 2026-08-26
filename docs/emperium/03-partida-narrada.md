@@ -96,7 +96,7 @@ teria 16 e a margem seria 7, não 4.
 **As baixas de Bran.** Margem 13 − 9 = **4**. Ele precisa entregar personagens cuja soma
 de **Poder de carta** chegue a 4.
 
-O **Templário Escudeiro tem ESCUDAR**, então cai primeiro obrigatoriamente — Poder de
+O **Templário Escudeiro tem PROTEGER**, então cai primeiro obrigatoriamente — Poder de
 carta 2. Ainda faltam 2. O próximo seria o Cavaleiro (4)… mas o **teto** interrompe: Bran
 tinha 2 personagens na sala, e o máximo é metade arredondado para cima, **1 baixa**.
 

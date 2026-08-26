@@ -11,7 +11,12 @@ import {
 } from './emperium.cards';
 import { EmperiumGame } from './emperium.game';
 import { jogadorDoMercado } from './emperium.moves';
-import { resolveEmperium, resolveRoom, type RoomInput } from './emperium.resolve';
+import {
+  aplicarInfiltracoes,
+  resolveEmperium,
+  resolveRoom,
+  type RoomInput,
+} from './emperium.resolve';
 import {
   ADJACENCY,
   FIXED_TILES,
@@ -454,7 +459,7 @@ describe('EmperiumGame — Transcendencia', () => {
     expect(depois.voltaNaRodada).toBeUndefined();
   });
 
-  it('Salto e Marcha Silenciosa anulam a penalidade de Marcha Forcada', () => {
+  it('MOVER encurta a Marcha Forcada em vez de anula-la', () => {
     const semGuia = makeClan('ana', ['mon-combo']);
     const comGuia = makeClan('bruno', ['mon-combo']);
     comGuia.chars[ids(comGuia)[0]!]!.transcendencia = 'tr-mon-salto';
@@ -467,8 +472,8 @@ describe('EmperiumGame — Transcendencia', () => {
     const a = res.clas.find((f) => f.playerId === 'ana')!;
     const b = res.clas.find((f) => f.playerId === 'bruno')!;
     expect(a.poderBruto).toBe(4 - 1 - MARCHA_PENALIDADE * 3);
-    // Salto: +3 de Poder e nenhuma penalidade, apesar de marcha 3.
-    expect(b.poderBruto).toBe(4 + 3 - 1);
+    // Salto e MOVER 2: das 3 salas de marcha, so 1 e paga.
+    expect(b.poderBruto).toBe(4 + 3 - 1 - MARCHA_PENALIDADE);
   });
 
   it('o Altar abre na rodada 3 sem mexer no baralho de recrutamento', () => {
@@ -607,7 +612,7 @@ describe('EmperiumGame — Combos', () => {
     expect(comCombo.de('carla').marcas).toContain('exposto');
   });
 
-  it('PRESO tira o bonus da Ordem e o Escudar do alvo', () => {
+  it('PRESO tira o bonus da Ordem e o Proteger do alvo', () => {
     // Monge Corpo de Aco: COMBO -> a maior cla inimiga fica PRESA.
     const ana = makeClan('ana', ['mon-aco', 'mon-combo']);
     const carla = makeClan('carla', ['tem-escudeiro', 'cav-bb']);
@@ -674,13 +679,13 @@ describe('EmperiumGame — Combos', () => {
     expect(r.de('carla').baixas).not.toContain(r.res.raptados[0]);
   });
 
-  it('um combo pode anular a Marcha Forcada da cla inteira', () => {
-    // Sacerdote Suporte: COMBO Vanguarda -> a cla ignora a Marcha Forcada.
+  it('um combo de MOVER devolve parte da Marcha Forcada da cla inteira', () => {
+    // Sacerdote Suporte: COMBO Vanguarda -> a cla inteira ganha MOVER 1.
     const ana = makeClan('ana', ['sac-suporte', 'cav-bb']);
     const carla = makeClan('carla', ['sup-teimoso']);
     const sem = sala({ ana, carla }, { ana: { marcha: 3 } });
     const com = sala({ ana, carla }, { ana: { marcha: 3, combo: ids(ana)[0] } });
-    expect(com.de('ana').poderBruto - sem.de('ana').poderBruto).toBe(MARCHA_PENALIDADE * 3);
+    expect(com.de('ana').poderBruto - sem.de('ana').poderBruto).toBe(MARCHA_PENALIDADE);
   });
 
   it('a evolucao substitui o combo da base quando traz um', () => {
@@ -1032,3 +1037,129 @@ describe('EmperiumGame — partida completa', () => {
 });
 
 const GLORIA_MINIMA_DONO = 18;
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+describe('EmperiumGame — v0.3: Alcance, Anular, Imitar e infiltracao', () => {
+  function duelo(
+    clans: Record<PlayerId, Clan>,
+    opts: { tileId?: string; castleOwnerId?: PlayerId } = {},
+  ) {
+    const state = makeState(clans, { tileId: opts.tileId ?? 'sala-patio', ...opts });
+    const inputs: RoomInput[] = Object.keys(clans).map((p) => ({
+      playerId: p,
+      commitment: { slot: 'b1', charInstIds: ids(clans[p]!), ordem: 'cerco' as OrderId, marcha: 0 },
+    }));
+    const res = resolveRoom(state, 'b1', inputs);
+    return { res, de: (p: PlayerId) => res.clas.find((f) => f.playerId === p)! };
+  }
+
+  it('ALCANCE nao sofre baixa enquanto houver um PROTEGER vivo na sala', () => {
+    // Templario Escudeiro (proteger) + Cacador Tiro Duplo (alcance).
+    const ana = makeClan('ana', ['tem-escudeiro', 'cac-tiroduplo']);
+    const [escudeiro, atirador] = ids(ana);
+    // Poder alto do outro lado: baixas o bastante para pegar os dois.
+    const bruno = makeClan('bruno', ['cav-bb', 'cav-bb', 'cav-bb', 'cav-bb']);
+
+    const r = duelo({ ana, bruno });
+    const baixas = r.de('ana').baixas;
+    expect(baixas).toContain(escudeiro);
+    expect(baixas).not.toContain(atirador);
+  });
+
+  it('sem PROTEGER na sala, o ALCANCE cai como qualquer um', () => {
+    const ana = makeClan('ana', ['cac-tiroduplo']);
+    const bruno = makeClan('bruno', ['cav-bb', 'cav-bb', 'cav-bb']);
+    expect(duelo({ ana, bruno }).de('ana').baixas).toContain(ids(ana)[0]);
+  });
+
+  it('ANULAR corta a maior palavra-chave inimiga, nao so a Muralha', () => {
+    // Tres Cavaleiros Bola de Boliche: ELO 1 cada, +2 de Poder por cabeca.
+    const alvo = () => makeClan('carla', ['cav-bb', 'cav-bb', 'cav-bb']);
+    // Bruxo Jupitel: so ALCANCE, nenhuma Muralha e nenhum Anular.
+    const semAnular = duelo({ carla: alvo(), ana: makeClan('ana', ['bru-jupitel']) });
+    // Sabio Protecao de Solo: ANULAR, e tambem sem Muralha nenhuma.
+    const comAnular = duelo({ carla: alvo(), ana: makeClan('ana', ['sab-solo']) });
+
+    // Nenhum dos dois lados tem Muralha, entao a unica diferenca possivel no
+    // Poder da Carla e o ELO que o Anular arrancou de um dos Cavaleiros.
+    expect(comAnular.de('carla').poderFinal).toBe(semAnular.de('carla').poderFinal - 2);
+  });
+
+  it('nao se anula um ANULAR: dois Sabios frente a frente mantem os dois', () => {
+    const ana = makeClan('ana', ['sab-solo', 'bru-tempestade']);
+    const bruno = makeClan('bruno', ['sab-solo', 'bru-tempestade']);
+    const r = duelo({ ana, bruno });
+    // Simetria total: cada Anular corta a Muralha do outro, e o empate se mantem.
+    expect(r.de('ana').poderFinal).toBe(r.de('bruno').poderFinal);
+  });
+
+  it('IMITAR copia a palavra-chave do maior inimigo da sala', () => {
+    // Superaprendiz Improvisado: IMITAR 2 e nenhuma palavra-chave propria.
+    const imitador = makeClan('ana', ['sup-improvisado']);
+    // Templario Escudeiro: mesmo Poder 2, mas sem IMITAR — o controle.
+    const controle = makeClan('ana', ['tem-escudeiro']);
+    const muralha = () => makeClan('bruno', ['bru-tempestade']); // MURALHA 2
+
+    const sem = duelo({ ana: controle, bruno: muralha() });
+    const com = duelo({ ana: imitador, bruno: muralha() });
+
+    // Copiada a MURALHA 2, ela passa a morder o Bruxo do outro lado.
+    expect(sem.de('bruno').poderFinal).toBe(sem.de('bruno').poderBruto);
+    expect(com.de('bruno').poderFinal).toBe(com.de('bruno').poderBruto - 2);
+  });
+
+  it('a evolucao pode abrir um slot de equipamento (Teimosia Absurda)', () => {
+    const base = CHARACTER_BY_ID.get('sup-teimoso')!;
+    const tr = TRANSCENDENCIA_BY_ID.get('tr-sup-teimosia')!;
+    expect(base.slots).toBe(3);
+    expect(tr.slotsBonus).toBe(1);
+  });
+
+  it('o OCULTO infiltra para a sala vizinha sem pagar marcha', () => {
+    const ana = makeClan('ana', ['mer-furtivo', 'cav-bb']);
+    const [furtivo] = ids(ana);
+    const state = makeState({ ana }, { castleOwnerId: 'bruno' });
+    state.commitments['ana'] = [
+      {
+        slot: 'portao',
+        charInstIds: ids(ana),
+        ordem: 'investida',
+        marcha: 0,
+        infiltrar: { charInstId: furtivo!, destino: ADJACENCY['portao']![0]! },
+      },
+    ];
+    const linhas = aplicarInfiltracoes(state);
+    const grupos = state.commitments['ana']!;
+    expect(linhas.join(' ')).toContain('infiltrou-se');
+    expect(grupos.find((c) => c.slot === 'portao')!.charInstIds).not.toContain(furtivo);
+    const infiltrado = grupos.find((c) => c.slot !== 'portao')!;
+    expect(infiltrado.charInstIds).toEqual([furtivo]);
+    expect(infiltrado.marcha).toBe(0);
+    expect(infiltrado.semOrdem).toBe(true);
+  });
+
+  it('quem tem olho para ocultos prende o infiltrado na sala de origem', () => {
+    const ana = makeClan('ana', ['mer-furtivo']);
+    const [furtivo] = ids(ana);
+    // Olho de Falcao: revela ocultos.
+    const bruno = makeClanTr('bruno', ['cac-tiroduplo'][0]!, 'tr-cac-falcao');
+    const state = makeState({ ana, bruno }, { castleOwnerId: 'carla' });
+    state.commitments['ana'] = [
+      {
+        slot: 'portao',
+        charInstIds: ids(ana),
+        ordem: 'investida',
+        marcha: 0,
+        infiltrar: { charInstId: furtivo!, destino: ADJACENCY['portao']![0]! },
+      },
+    ];
+    state.commitments['bruno'] = [
+      { slot: 'portao', charInstIds: ids(bruno), ordem: 'cerco', marcha: 0 },
+    ];
+    const linhas = aplicarInfiltracoes(state);
+    expect(linhas.join(' ')).toContain('REVELADO');
+    expect(state.commitments['ana']![0]!.charInstIds).toContain(furtivo);
+    expect(state.commitments['ana']).toHaveLength(1);
+  });
+});

@@ -23,7 +23,7 @@ export type Deck = 1;
 /** As 14 palavras-chave. Toda carta compoe a partir desta lista. */
 export type KeywordName =
   | 'alcance'
-  | 'escudar'
+  | 'proteger'
   | 'muralha'
   | 'perfurar'
   | 'rajada'
@@ -35,7 +35,9 @@ export type KeywordName =
   | 'restaurar'
   | 'pilhar'
   | 'esgotar'
-  | 'imitar';
+  | 'imitar'
+  /** Ignora X salas de Marcha Forcada. Vale para o cla inteiro na sala. */
+  | 'mover';
 
 /** Palavra-chave com seu valor X (ausente quando a keyword nao usa X). */
 export interface Keyword {
@@ -49,7 +51,7 @@ export interface Keyword {
  */
 export const KEYWORD_LABEL: Readonly<Record<KeywordName, string>> = {
   alcance: 'ALCANCE',
-  escudar: 'ESCUDAR',
+  proteger: 'PROTEGER',
   muralha: 'MURALHA',
   perfurar: 'PERFURAR',
   rajada: 'RAJADA',
@@ -62,6 +64,7 @@ export const KEYWORD_LABEL: Readonly<Record<KeywordName, string>> = {
   pilhar: 'PILHAR',
   esgotar: 'ESGOTAR',
   imitar: 'IMITAR',
+  mover: 'MOVER',
 };
 
 /** Texto pronto de uma palavra-chave, com o X quando houver. */
@@ -135,12 +138,12 @@ export type ComboEfeito =
   /** A cla ignora toda a Muralha inimiga. Proteção de Solo abrindo caminho. */
   | { readonly tipo: 'perfurar-total' }
   /** Personagens deste Papel nao sofrem baixa. Provocar enquanto o bruxo conjura. */
-  | { readonly tipo: 'protege-papel'; readonly papel: Papel }
+  | { readonly tipo: 'cobrir-papel'; readonly papel: Papel }
   | { readonly tipo: 'rajada-papel'; readonly papel: Papel; readonly x: number }
   /** Ninguem seu vai para a Enfermaria por Esgotar. O SP de volta pro segundo Asura. */
   | { readonly tipo: 'cancela-esgotar' }
-  /** Anula a penalidade de Marcha Forcada da cla. Buffs de velocidade. */
-  | { readonly tipo: 'marcha-livre' }
+  /** Ignora X salas de Marcha Forcada. Buffs de velocidade. */
+  | { readonly tipo: 'mover'; readonly x: number }
   /** Marca a cla inimiga de maior Poder. */
   | { readonly tipo: 'marca'; readonly marca: Marca }
   /** Arranca 1 personagem da maior cla inimiga; ele volta a Reserva do dono. */
@@ -175,8 +178,8 @@ export const DECK_I: readonly CharacterDef[] = [
   { id: 'cav-bb', nome: 'Cavaleiro Bola de Boliche', classe: 'Cavaleiro', deck: 1, custo: 6, poder: 4, papel: 'vanguarda', slots: 2, keywords: [kw('elo', 1)], build: 'Bowling Bash' , combo: comClasse('Templário', 'COMBO Templário: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
   { id: 'cav-lanca', nome: 'Cavaleiro Lanceiro', classe: 'Cavaleiro', deck: 1, custo: 5, poder: 3, papel: 'vanguarda', slots: 1, keywords: [kw('perfurar', 2)], build: 'Pierce montado' },
 
-  { id: 'tem-escudeiro', nome: 'Templário Escudeiro', classe: 'Templário', deck: 1, custo: 5, poder: 2, papel: 'vanguarda', slots: 2, keywords: [kw('escudar')], build: 'Tanque de escudo' },
-  { id: 'tem-defensor', nome: 'Templário Defensor', classe: 'Templário', deck: 1, custo: 6, poder: 3, papel: 'vanguarda', slots: 1, keywords: [kw('muralha', 1)], build: 'Defender' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.', { tipo: 'protege-papel', papel: 'arcano' })},
+  { id: 'tem-escudeiro', nome: 'Templário Escudeiro', classe: 'Templário', deck: 1, custo: 5, poder: 2, papel: 'vanguarda', slots: 2, keywords: [kw('proteger')], build: 'Tanque de escudo' },
+  { id: 'tem-defensor', nome: 'Templário Defensor', classe: 'Templário', deck: 1, custo: 6, poder: 3, papel: 'vanguarda', slots: 1, keywords: [kw('muralha', 1)], build: 'Defender' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.', { tipo: 'cobrir-papel', papel: 'arcano' })},
 
   { id: 'bru-tempestade', nome: 'Bruxo Tempestade', classe: 'Bruxo', deck: 1, custo: 7, poder: 3, papel: 'arcano', slots: 1, keywords: [kw('muralha', 2), kw('alcance')], build: 'Storm Gust' },
   { id: 'bru-jupitel', nome: 'Bruxo Jupitel', classe: 'Bruxo', deck: 1, custo: 5, poder: 4, papel: 'arcano', slots: 1, keywords: [kw('alcance')], build: 'Jupitel / Napalm' },
@@ -196,11 +199,11 @@ export const DECK_I: readonly CharacterDef[] = [
   { id: 'alq-homunculo', nome: 'Alquimista Homúnculo', classe: 'Alquimista', deck: 1, custo: 6, poder: 2, papel: 'suporte', slots: 1, keywords: [kw('elo', 1)], build: 'Bio-ethics' },
   { id: 'alq-boticario', nome: 'Alquimista Boticário', classe: 'Alquimista', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('restaurar', 1)], build: 'Potion Pitcher' , combo: sozinho('COMBO: o maior clã inimigo fica EXPOSTO.', { tipo: 'marca', marca: 'exposto' })},
 
-  { id: 'sac-suporte', nome: 'Sacerdote Suporte', classe: 'Sacerdote', deck: 1, custo: 6, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('elo', 2)], build: 'Full Support' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seu clã ignora a Marcha Forçada.', { tipo: 'marcha-livre' })},
+  { id: 'sac-suporte', nome: 'Sacerdote Suporte', classe: 'Sacerdote', deck: 1, custo: 6, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('elo', 2)], build: 'Full Support' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seu clã ganha MOVER 1.', { tipo: 'mover', x: 1 })},
   { id: 'sac-pneuma', nome: 'Sacerdote Pneuma', classe: 'Sacerdote', deck: 1, custo: 6, poder: 2, papel: 'suporte', slots: 1, keywords: [kw('muralha', 2)], build: 'Pneuma / Safety Wall' },
 
   { id: 'mon-combo', nome: 'Monge Combo', classe: 'Monge', deck: 1, custo: 6, poder: 4, papel: 'vanguarda', slots: 1, keywords: [], build: 'Chain Combo' },
-  { id: 'mon-aco', nome: 'Monge Corpo de Aço', classe: 'Monge', deck: 1, custo: 5, poder: 0, papel: 'vanguarda', slots: 2, keywords: [kw('escudar'), kw('esgotar')], build: 'Steel Body' , combo: sozinho('COMBO: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
+  { id: 'mon-aco', nome: 'Monge Corpo de Aço', classe: 'Monge', deck: 1, custo: 5, poder: 0, papel: 'vanguarda', slots: 2, keywords: [kw('proteger'), kw('esgotar')], build: 'Steel Body' , combo: sozinho('COMBO: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
 
   { id: 'cac-armadilheiro', nome: 'Caçador Armadilheiro', classe: 'Caçador', deck: 1, custo: 6, poder: 2, papel: 'agil', slots: 1, keywords: [kw('muralha', 2)], build: 'Trapper' , combo: sozinho('COMBO: o maior clã inimigo fica REVELADO.', { tipo: 'marca', marca: 'revelado' })},
   { id: 'cac-tiroduplo', nome: 'Caçador Tiro Duplo', classe: 'Caçador', deck: 1, custo: 6, poder: 4, papel: 'agil', slots: 1, keywords: [kw('alcance')], build: 'Double Strafe' },
@@ -208,8 +211,8 @@ export const DECK_I: readonly CharacterDef[] = [
   { id: 'bar-cancao', nome: 'Bardo Canção', classe: 'Bardo/Odalisca', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('elo', 2)], build: 'Canções de grupo' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos ganham +3 de Poder.', { tipo: 'rajada-papel', papel: 'arcano', x: 3 })},
   { id: 'bar-dancalenta', nome: 'Odalisca Dança Lenta', classe: 'Bardo/Odalisca', deck: 1, custo: 6, poder: 2, papel: 'suporte', slots: 1, keywords: [kw('muralha', 2)], build: 'Slow Grace' , combo: comClasse('Bardo/Odalisca', 'COMBO Bardo/Odalisca: +4 de Poder — o dueto.', { tipo: 'poder', x: 4 })},
 
-  { id: 'sup-teimoso', nome: 'Superaprendiz Teimoso', classe: 'Superaprendiz', deck: 1, custo: 3, poder: 2, papel: 'agil', slots: 1, keywords: [], build: 'Sobrevivência', special: 'teimoso' },
-  { id: 'sup-improvisado', nome: 'Superaprendiz Improvisado', classe: 'Superaprendiz', deck: 1, custo: 4, poder: 2, papel: 'suporte', slots: 2, keywords: [kw('imitar')], build: 'Faz de tudo' },
+  { id: 'sup-teimoso', nome: 'Superaprendiz Teimoso', classe: 'Superaprendiz', deck: 1, custo: 3, poder: 1, papel: 'agil', slots: 3, keywords: [], build: 'Sobrevivência teimosa', special: 'teimoso' },
+  { id: 'sup-improvisado', nome: 'Superaprendiz Improvisado', classe: 'Superaprendiz', deck: 1, custo: 4, poder: 2, papel: 'suporte', slots: 2, keywords: [kw('imitar', 2)], build: 'Faz de tudo' },
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -245,8 +248,9 @@ export interface TranscendenceDef {
   /** Somadas as palavras-chave da carta base. */
   readonly keywords: readonly Keyword[];
   readonly build: string;
+  /** Slots de equipamento que a evolucao CONCEDE a carta base. */
+  readonly slotsBonus?: number;
   readonly special?:
-    | 'marcha-livre'
     | 'forja-suprema'
     | 'ensemble'
     | 'marionete'
@@ -264,11 +268,11 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   // Cavaleiro
   { id: 'tr-cav-espiral', nome: 'Lorde dos Cavaleiros — Espiral', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 11, poderBonus: 3, keywords: [kw('perfurar', 4)], build: 'Spiral Pierce' },
   { id: 'tr-cav-berserk', nome: 'Lorde dos Cavaleiros — Fúria Berserk', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 12, poderBonus: 5, keywords: [kw('esgotar')], build: 'Berserk' },
-  { id: 'tr-cav-aura', nome: 'Lorde dos Cavaleiros — Aura Lâmina', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 10, poderBonus: 2, keywords: [kw('elo', 2)], build: 'Aura Blade' },
+  { id: 'tr-cav-montaria', nome: 'Lorde dos Cavaleiros — Montaria', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 13, poderBonus: 2, keywords: [kw('mover', 4)], build: 'Peco-Peco de guerra' },
 
   // Templário
   { id: 'tr-tem-devocao', nome: 'Paladino — Devoção', classe: 'Templário', forma: 'Paladino', custo: 11, poderBonus: 2, keywords: [kw('devocao')], build: 'Devotion' , combo: comPapel('vanguarda', 'COMBO Vanguarda: se você perder, o vencedor também sofre 1 baixa.', { tipo: 'troco' })},
-  { id: 'tr-tem-corrente', nome: 'Paladino — Corrente de Escudo', classe: 'Templário', forma: 'Paladino', custo: 11, poderBonus: 4, keywords: [kw('escudar')], build: 'Shield Chain' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.', { tipo: 'protege-papel', papel: 'arcano' })},
+  { id: 'tr-tem-corrente', nome: 'Paladino — Corrente de Escudo', classe: 'Templário', forma: 'Paladino', custo: 11, poderBonus: 4, keywords: [kw('proteger')], build: 'Shield Chain' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.', { tipo: 'cobrir-papel', papel: 'arcano' })},
   { id: 'tr-tem-sacrificio', nome: 'Paladino — Sacrifício', classe: 'Templário', forma: 'Paladino', custo: 10, poderBonus: 3, keywords: [kw('rajada', 3), kw('esgotar')], build: 'Sacrifice' },
 
   // Bruxo
@@ -289,7 +293,7 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   // Arruaceiro
   { id: 'tr-arr-despojar', nome: 'Desordeiro — Despojar Total', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 10, poderBonus: 2, keywords: [kw('anular'), kw('pilhar', 3)], build: 'Full Strip' },
   { id: 'tr-arr-plagio', nome: 'Desordeiro — Plágio', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 10, poderBonus: 2, keywords: [kw('imitar')], build: 'Plagiarism' },
-  { id: 'tr-arr-silenciosa', nome: 'Desordeiro — Marcha Silenciosa', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 12, poderBonus: 2, keywords: [kw('oculto')], build: 'Chase Walk', special: 'marcha-livre' , combo: sozinho('COMBO: RAPTO — arranque 1 inimigo da sala.', { tipo: 'rapto' })},
+  { id: 'tr-arr-silenciosa', nome: 'Desordeiro — Marcha Silenciosa', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 12, poderBonus: 2, keywords: [kw('oculto'), kw('mover', 2)], build: 'Chase Walk' , combo: sozinho('COMBO: RAPTO — arranque 1 inimigo da sala.', { tipo: 'rapto' })},
 
   // Ferreiro
   { id: 'tr-fer-carrocerada', nome: 'Mestre-Ferreiro — Carrocerada', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 11, poderBonus: 4, keywords: [], build: 'Cart Termination' , combo: sozinho('COMBO: +1 de Poder a cada 3 zeny no seu bolso.', { tipo: 'poder-por-zeny', cada: 3 })},
@@ -308,8 +312,8 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
 
   // Monge
   { id: 'tr-mon-asura', nome: 'Mestre — Punho de Asura', classe: 'Monge', forma: 'Mestre', custo: 14, poderBonus: 7, keywords: [kw('esgotar')], build: 'Asura Strike' },
-  { id: 'tr-mon-salto', nome: 'Mestre — Salto', classe: 'Monge', forma: 'Mestre', custo: 11, poderBonus: 3, keywords: [], build: 'Body Relocation', special: 'marcha-livre' , combo: sozinho('COMBO: seu clã ignora a Marcha Forçada.', { tipo: 'marcha-livre' })},
-  { id: 'tr-mon-aco', nome: 'Mestre — Corpo de Aço Supremo', classe: 'Monge', forma: 'Mestre', custo: 10, poderBonus: 1, keywords: [kw('escudar')], build: 'Steel Body', special: 'imortal' },
+  { id: 'tr-mon-salto', nome: 'Mestre — Salto', classe: 'Monge', forma: 'Mestre', custo: 11, poderBonus: 3, keywords: [kw('mover', 2)], build: 'Body Relocation' },
+  { id: 'tr-mon-aco', nome: 'Mestre — Corpo de Aço Supremo', classe: 'Monge', forma: 'Mestre', custo: 10, poderBonus: 1, keywords: [kw('proteger')], build: 'Steel Body', special: 'imortal' },
 
   // Caçador
   { id: 'tr-cac-flechas', nome: 'Atirador de Elite — Chuva de Flechas', classe: 'Caçador', forma: 'Atirador de Elite', custo: 12, poderBonus: 5, keywords: [kw('alcance')], build: 'Arrow Storm' },
@@ -319,12 +323,12 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   // Bardo/Odalisca
   { id: 'tr-bar-ensemble', nome: 'Menestrel/Cigana — Ensemble', classe: 'Bardo/Odalisca', forma: 'Menestrel/Cigana', custo: 9, poderBonus: 2, keywords: [], build: 'Ensemble', special: 'ensemble' },
   { id: 'tr-bar-marionete', nome: 'Menestrel/Cigana — Marionete', classe: 'Bardo/Odalisca', forma: 'Menestrel/Cigana', custo: 11, poderBonus: 0, keywords: [], build: 'Marionette Control', special: 'marionete' },
-  { id: 'tr-bar-cancao', nome: 'Menestrel/Cigana — Canção Longa', classe: 'Bardo/Odalisca', forma: 'Menestrel/Cigana', custo: 10, poderBonus: 2, keywords: [kw('elo', 2)], build: 'Longing for Freedom' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seu clã ignora a Marcha Forçada.', { tipo: 'marcha-livre' })},
+  { id: 'tr-bar-cancao', nome: 'Menestrel/Cigana — Canção Longa', classe: 'Bardo/Odalisca', forma: 'Menestrel/Cigana', custo: 10, poderBonus: 2, keywords: [kw('elo', 2)], build: 'Longing for Freedom' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seu clã ganha MOVER 1.', { tipo: 'mover', x: 1 })},
 
   // Superaprendiz — nao transcende. So insiste, e fica barato.
-  { id: 'tr-sup-teimosia', nome: 'Superaprendiz — Teimosia Absurda', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 7, poderBonus: 2, keywords: [], build: 'Guardian Angel', special: 'imortal' },
+  { id: 'tr-sup-teimosia', nome: 'Superaprendiz — Teimosia Absurda', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 8, poderBonus: 1, keywords: [], build: 'Guardian Angel', slotsBonus: 1, special: 'imortal' },
   { id: 'tr-sup-sorte', nome: 'Superaprendiz — Sorte de Principiante', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 8, poderBonus: 3, keywords: [kw('solo', 3)], build: 'Sorte pura' },
-  { id: 'tr-sup-imitacao', nome: 'Superaprendiz — Imitação Descarada', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 7, poderBonus: 2, keywords: [kw('imitar')], build: 'Cópia de tudo' },
+  { id: 'tr-sup-imitacao', nome: 'Superaprendiz — Imitação Descarada', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 7, poderBonus: 2, keywords: [kw('imitar', 2)], build: 'Cópia de tudo' },
 ];
 
 export const TRANSCENDENCIA_BY_ID: ReadonlyMap<string, TranscendenceDef> = new Map(
@@ -382,7 +386,6 @@ export interface EquipDef {
     | 'renda2'
     | 'acao-extra'
     | 'nunca-primeira-baixa'
-    | 'ignora-posicionamento'
     | 'revela-oculto'
     | 'poder-emperium'
     | 'penalidade-escudar';
@@ -405,7 +408,7 @@ export const EQUIPMENT: readonly EquipDef[] = [
 
   // Armaduras
   { id: 'eq-cota', nome: 'Cota de Malha', kind: 'armadura', papeis: [], custo: 4, poder: 1, keywords: [], encaixes: 1 },
-  { id: 'eq-completa', nome: 'Armadura Completa', kind: 'armadura', papeis: ['vanguarda'], custo: 7, poder: 2, keywords: [kw('escudar')], encaixes: 1 },
+  { id: 'eq-completa', nome: 'Armadura Completa', kind: 'armadura', papeis: ['vanguarda'], custo: 7, poder: 2, keywords: [kw('proteger')], encaixes: 1 },
   { id: 'eq-ninfa', nome: 'Manto de Ninfa', kind: 'armadura', papeis: ['arcano', 'suporte'], custo: 6, poder: 0, keywords: [], encaixes: 1, special: 'ignora-primeira-baixa' },
   { id: 'eq-sombras', nome: 'Traje de Sombras', kind: 'armadura', papeis: ['agil'], custo: 6, poder: 1, keywords: [kw('oculto')], encaixes: 0 },
   { id: 'eq-escudo', nome: 'Escudo Sagrado', kind: 'armadura', papeis: ['vanguarda'], custo: 5, poder: 0, keywords: [kw('muralha', 1)], encaixes: 1 },
@@ -419,7 +422,7 @@ export const EQUIPMENT: readonly EquipDef[] = [
   { id: 'eq-anelmercador', nome: 'Anel do Mercador', kind: 'acessorio', papeis: [], custo: 5, poder: 0, keywords: [], encaixes: 0, special: 'renda2' },
   { id: 'eq-broche', nome: 'Broche do Guildmaster', kind: 'acessorio', papeis: [], custo: 6, poder: 0, keywords: [], encaixes: 0, special: 'acao-extra' },
   { id: 'eq-amuleto', nome: 'Amuleto de Ferro', kind: 'acessorio', papeis: [], custo: 4, poder: 0, keywords: [], encaixes: 0, special: 'nunca-primeira-baixa' },
-  { id: 'eq-talisma', nome: 'Talismã do Vento', kind: 'acessorio', papeis: [], custo: 4, poder: 0, keywords: [], encaixes: 0, special: 'ignora-posicionamento' },
+  { id: 'eq-talisma', nome: 'Talismã do Vento', kind: 'acessorio', papeis: [], custo: 4, poder: 0, keywords: [kw('mover', 1)], encaixes: 0 },
   { id: 'eq-oculos', nome: 'Oculos do Caçador', kind: 'acessorio', papeis: [], custo: 5, poder: 0, keywords: [], encaixes: 0, special: 'revela-oculto' },
   { id: 'eq-colar', nome: 'Colar de Zeny', kind: 'acessorio', papeis: [], custo: 3, poder: 0, keywords: [kw('pilhar', 2)], encaixes: 0 },
   { id: 'eq-selo', nome: 'Selo do Emperium', kind: 'acessorio', papeis: [], custo: 8, poder: 0, keywords: [], encaixes: 0, special: 'poder-emperium' },
@@ -446,7 +449,8 @@ export interface MonsterCardDef {
     | 'imune-muralha'
     | 'imune-anular'
     | 'ghostring'
-    | 'poring';
+    | 'poring'
+    | 'revela-ocultos';
 }
 
 export const MONSTER_CARDS: readonly MonsterCardDef[] = [
@@ -459,6 +463,7 @@ export const MONSTER_CARDS: readonly MonsterCardDef[] = [
   { id: 'mc-poring', nome: 'Poring', poder: 0, keywords: [], special: 'poring', texto: "+3 zeny sempre que este personagem vence uma sala." },
   { id: 'mc-baphomet', nome: 'Baphomet', poder: 0, keywords: [kw('elo', 1)], texto: "Elo 1." },
   { id: 'mc-doppel', nome: 'Doppelganger', poder: 0, keywords: [kw('rajada', 2)], texto: "Rajada 2." },
+  { id: 'mc-horong', nome: 'Horong', poder: 0, keywords: [], special: 'revela-ocultos', texto: 'Revela todos os inimigos ocultos desta sala.' },
   { id: 'mc-orcheroi', nome: 'Orc Herói', poder: 0, keywords: [kw('perfurar', 2)], texto: "Perfurar 2." },
 ];
 
@@ -496,11 +501,11 @@ export interface ConsumableDef {
 export const CONSUMABLES: readonly ConsumableDef[] = [
   { id: 'co-pocao', nome: 'Poção Branca', efeito: 'Cancele 1 baixa sua nesta sala.', naSala: true },
   { id: 'co-mosca', nome: 'Asa de Mosca', efeito: 'Mova 1 personagem seu para uma sala adjacente antes de revelar.', naSala: true },
-  { id: 'co-borboleta', nome: 'Asa de Borboleta', efeito: 'Retire todos os seus personagens desta sala. Sem baixas, sem controle.', naSala: true },
+  { id: 'co-borboleta', nome: 'Asa de Borboleta', efeito: 'Retire o grupo do seu clã desta sala. Sem baixas, sem controle.', naSala: true },
   { id: 'co-yggdrasil', nome: 'Folha de Yggdrasil', efeito: 'Traga 1 personagem da Enfermaria direto para esta sala.', naSala: true },
   { id: 'co-acido', nome: 'Frasco de Ácido', efeito: '+3 de Poder nesta sala, ignorando Muralha.', naSala: true },
   { id: 'co-convocacao', nome: 'Pergaminho de Convocação', efeito: 'Um Guardião Poder 3 luta por você nesta sala, nesta rodada.', naSala: true },
-  { id: 'co-pedra', nome: 'Pedra do Ferreiro', efeito: 'Refino automático, sem rolar.', naSala: false },
+  { id: 'co-pedra', nome: 'Elunium', efeito: 'Refino automático, sem rolar.', naSala: false },
   { id: 'co-fumaca', nome: 'Fumaça', efeito: 'Seus personagens nesta sala ficam Oculto.', naSala: true },
 ];
 

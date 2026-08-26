@@ -18,7 +18,13 @@ import {
   TOTAL_ROUNDS,
   type RoomSlot,
 } from './emperium.rooms';
-import { resolveEmperium, resolveRoom, type RoomInput } from './emperium.resolve';
+import {
+  aplicarInfiltracoes,
+  resolveEmperium,
+  resolveRoom,
+  temOculto,
+  type RoomInput,
+} from './emperium.resolve';
 import {
   ALL_ORDERS,
   allowedSlots,
@@ -197,7 +203,10 @@ export const equipar = (state: EmperiumState, ctx: GameContext, payload: Equipar
 
   // Papel compativel (lista vazia = qualquer um) e slot livre.
   if (eqDef.papeis.length > 0 && !eqDef.papeis.includes(charDef.papel)) return INVALID_MOVE;
-  if (charInst.equips.length >= charDef.slots) return INVALID_MOVE;
+  // A evolucao pode abrir um slot (Teimosia Absurda).
+  const trans = charInst.transcendencia ? TRANSCENDENCIA_BY_ID.get(charInst.transcendencia) : undefined;
+  const slots = charDef.slots + (trans?.slotsBonus ?? 0);
+  if (charInst.equips.length >= slots) return INVALID_MOVE;
   // Arco Composto exige que o portador tenha Alcance.
   if (eqDef.exige && !charDef.keywords.some((k) => k.kw === eqDef.exige)) return INVALID_MOVE;
 
@@ -464,6 +473,14 @@ function validarComprometimento(
     if (c.consumivel && !clan.consumiveis.includes(c.consumivel)) return false;
     // O portador do combo declarado precisa estar comprometido nesta sala.
     if (c.combo && !c.charInstIds.includes(c.combo)) return false;
+    // Infiltracao: so um OCULTO daqui, e so para uma sala vizinha em jogo.
+    if (c.infiltrar) {
+      const { charInstId, destino } = c.infiltrar;
+      if (!c.charInstIds.includes(charInstId)) return false;
+      if (!state.slots.includes(destino)) return false;
+      if (!(state.adjacency[c.slot] ?? []).includes(destino)) return false;
+      if (!temOculto(state, p, charInstId)) return false;
+    }
   }
   return true;
 }
@@ -552,6 +569,10 @@ export function resolverRodada(state: EmperiumState, ctx: GameContext): void {
   state.step = 'resolucao';
   const resolucoes: RoomResolution[] = [];
   state.log.push(`— Rodada ${state.round}: o portao se abre —`);
+
+  // As sombras se mexem antes das tropas: quem nao foi revelado ja esta na sala
+  // vizinha quando a primeira Emboscada resolve.
+  for (const linha of aplicarInfiltracoes(state)) state.log.push(linha);
 
   // Emboscada resolve antes de tudo, depois do portao para dentro.
   const ordem: RoomSlot[] = [];

@@ -95,7 +95,7 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 | Palavra-chave | Efeito |
 |---|---|
 | **ALCANCE** | Só sofre baixa se você não tiver nenhum personagem com Escudar vivo nesta sala. |
-| **ESCUDAR** | Absorve as baixas da seu clã antes de qualquer outro personagem seu. |
+| **PROTEGER** | Absorve as baixas da seu clã antes de qualquer outro personagem seu. |
 | **MURALHA X** | Reduz em X o Poder Total de **cada** clã inimigo nesta sala. |
 | **PERFURAR X** | X pontos do Poder deste personagem ignoram Muralha inimiga. |
 | **RAJADA X** | +X de Poder, apenas na primeira rodada em que este personagem entra nesta sala. |

@@ -81,6 +81,22 @@ export interface Commitment {
    * declarou a investida.
    */
   marcha?: number;
+  /**
+   * Infiltracao do OCULTO: um personagem oculto declarado aqui que, se o clã
+   * NAO for revelado, escorrega para uma sala adjacente antes de qualquer sala
+   * resolver — sem pagar Marcha Forcada — e luta la.
+   *
+   * O destino e declarado agora, junto do comprometimento, e nao na hora da
+   * revelacao: a resolucao inteira e automatica, entao nao ha um momento em que
+   * a mesa pare para voce escolher. Voce aposta no destino as cegas, como todo
+   * o resto do comprometimento.
+   */
+  infiltrar?: { charInstId: string; destino: RoomSlot };
+  /**
+   * Grupo criado pela infiltracao, nao pelo jogador: luta sem Ordem nenhuma.
+   * O infiltrado entrou pela sombra, nao numa formacao.
+   */
+  semOrdem?: boolean;
 }
 
 export interface RoomState {

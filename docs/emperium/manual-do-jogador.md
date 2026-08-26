@@ -180,7 +180,7 @@ Poder de cada personagem (carta + evolução + equipamento + refino)
 **9. Baixas.** Cada clã derrotado remove personagens cuja soma de **Poder de carta**
 (base + evolução) alcance a **margem de derrota** — a diferença para o vencedor.
 
-- Personagens com **ESCUDAR** caem primeiro, obrigatoriamente… a menos que o clã
+- Personagens com **PROTEGER** caem primeiro, obrigatoriamente… a menos que o clã
   esteja **Preso**.
 - Depois, os de menor Poder de carta.
 - **Teto: metade dos seus personagens na sala, arredondado para cima.**
@@ -259,7 +259,7 @@ viram 9, os 8 dele viram 11, e a sala **muda de dono**. É o swing de 5 pontos.
 
 #### Se Ana tivesse levado um Escudar a mais
 
-Personagens com **ESCUDAR** caem primeiro, obrigatoriamente. Se Ana perdesse com margem 6
+Personagens com **PROTEGER** caem primeiro, obrigatoriamente. Se Ana perdesse com margem 6
 e tivesse o Templário Escudeiro (Poder de carta 2) na sala, ele cairia primeiro mesmo
 sendo o mais barato — e só depois o próximo entraria na conta, até somar 6.
 
@@ -483,7 +483,7 @@ metade do exército.
 | Palavra-chave | Efeito |
 |---|---|
 | **ALCANCE** | Só sofre baixa se você não tiver nenhum personagem com Escudar vivo nesta sala. |
-| **ESCUDAR** | Absorve as baixas da seu clã antes de qualquer outro personagem seu. |
+| **PROTEGER** | Absorve as baixas da seu clã antes de qualquer outro personagem seu. |
 | **MURALHA X** | Reduz em X o Poder Total de **cada** clã inimigo nesta sala. |
 | **PERFURAR X** | X pontos do Poder deste personagem ignoram a Muralha inimiga. |
 | **RAJADA X** | +X de Poder, só na primeira rodada em que este personagem entra nesta sala. |
@@ -536,11 +536,11 @@ Jogados de bruços junto do comprometimento, revelados na resolução da sala.
 |---|---|
 | **Poção Branca** | Cancele 1 baixa sua nesta sala. |
 | **Asa de Mosca** | Mova 1 personagem seu para uma sala adjacente antes de revelar. |
-| **Asa de Borboleta** | Retire todos os seus personagens desta sala. Sem baixas, sem controle. |
+| **Asa de Borboleta** | Retire o grupo do seu clã desta sala. Sem baixas, sem controle. |
 | **Folha de Yggdrasil** | Traga 1 personagem da Enfermaria direto para esta sala. |
 | **Frasco de Ácido** | +3 de Poder nesta sala, ignorando Muralha. |
 | **Pergaminho de Convocação** | Um Guardião Poder 3 luta por você nesta sala, nesta rodada. |
-| **Pedra do Ferreiro** | Refino automático, sem rolar. |
+| **Elunium** | Refino automático, sem rolar. |
 | **Fumaça** | Seus personagens nesta sala ficam Oculto. |
 
 ---

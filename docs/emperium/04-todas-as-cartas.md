@@ -38,12 +38,12 @@ segunda olhada.
 | Transcendências | **39** (13 classes × 3) |
 | Desfechos possíveis | **78** (cada base × 3 caminhos) |
 | Bases com combo | 12 de 26 |
-| Transcendências com combo | 12 de 39 |
+| Transcendências com combo | 11 de 39 |
 | Custo das bases | 3–7 zeny |
 | Poder das bases | 0–4 |
 | Custo das evoluções | 7–14 zeny |
 | Equipamentos | 30 |
-| Cartas de monstro | 10 tipos |
+| Cartas de monstro | 11 tipos |
 | Consumíveis | 8 tipos |
 
 **Cartas sem palavra-chave e sem combo** — são as mais simples do baralho, e vale
@@ -66,7 +66,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|
 | **Espiral** | 11z | +3 | PERFURAR 4 | *Spiral Pierce* |
 | **Fúria Berserk** | 12z | +5 | ESGOTAR | *Berserk* |
-| **Aura Lâmina** | 10z | +2 | ELO 2 | *Aura Blade* |
+| **Montaria** | 13z | +2 | MOVER 4 | *Peco-Peco de guerra* |
 
 > **Anotações:**
 
@@ -74,7 +74,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 
 | Base | Custo | Poder | z/P | Papel | Slots | Palavras-chave | Build |
 |---|---|---|---|---|---|---|---|
-| **Templário Escudeiro** | 5z | 2 | 2.5 | Vanguarda | ◇◇ | ESCUDAR | *Tanque de escudo* |
+| **Templário Escudeiro** | 5z | 2 | 2.5 | Vanguarda | ◇◇ | PROTEGER | *Tanque de escudo* |
 | **Templário Defensor** | 6z | 3 | 2.0 | Vanguarda | ◇ | MURALHA 1 | *Defender* |
 
 - **Templário Defensor** — COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.
@@ -82,7 +82,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
 | **Devoção** | 11z | +2 | DEVOÇÃO | *Devotion* |
-| **Corrente de Escudo** | 11z | +4 | ESCUDAR | *Shield Chain* |
+| **Corrente de Escudo** | 11z | +4 | PROTEGER | *Shield Chain* |
 | **Sacrifício** | 10z | +3 | RAJADA 3 · ESGOTAR | *Sacrifice* |
 
 - **Devoção** — COMBO Vanguarda: se você perder, o vencedor também sofre 1 baixa.
@@ -157,7 +157,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|
 | **Despojar Total** | 10z | +2 | ANULAR · PILHAR 3 | *Full Strip* |
 | **Plágio** | 10z | +2 | IMITAR | *Plagiarism* |
-| **Marcha Silenciosa** | 12z | +2 | OCULTO · *anula a Marcha Forçada do clã inteiro* | *Chase Walk* |
+| **Marcha Silenciosa** | 12z | +2 | OCULTO · MOVER 2 | *Chase Walk* |
 
 - **Marcha Silenciosa** — COMBO: RAPTO — arranque 1 inimigo da sala.
 
@@ -209,7 +209,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Sacerdote Suporte** | 6z | 1 | 6.0 | Suporte | ◇ | ELO 2 | *Full Support* |
 | **Sacerdote Pneuma** | 6z | 2 | 3.0 | Suporte | ◇ | MURALHA 2 | *Pneuma / Safety Wall* |
 
-- **Sacerdote Suporte** — COMBO Vanguarda: seu clã ignora a Marcha Forçada.
+- **Sacerdote Suporte** — COMBO Vanguarda: seu clã ganha MOVER 1.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
@@ -224,17 +224,15 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | Base | Custo | Poder | z/P | Papel | Slots | Palavras-chave | Build |
 |---|---|---|---|---|---|---|---|
 | **Monge Combo** | 6z | 4 | 1.5 | Vanguarda | ◇ | — | *Chain Combo* |
-| **Monge Corpo de Aço** | 5z | 0 | — | Vanguarda | ◇◇ | ESCUDAR · ESGOTAR | *Steel Body* |
+| **Monge Corpo de Aço** | 5z | 0 | — | Vanguarda | ◇◇ | PROTEGER · ESGOTAR | *Steel Body* |
 
 - **Monge Corpo de Aço** — COMBO: o maior clã inimigo fica PRESO.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
 | **Punho de Asura** | 14z | +7 | ESGOTAR | *Asura Strike* |
-| **Salto** | 11z | +3 | — · *anula a Marcha Forçada do clã inteiro* | *Body Relocation* |
-| **Corpo de Aço Supremo** | 10z | +1 | ESCUDAR · *não pode sofrer baixa* | *Steel Body* |
-
-- **Salto** — COMBO: seu clã ignora a Marcha Forçada.
+| **Salto** | 11z | +3 | MOVER 2 | *Body Relocation* |
+| **Corpo de Aço Supremo** | 10z | +1 | PROTEGER · *não pode sofrer baixa* | *Steel Body* |
 
 > **Anotações:**
 
@@ -273,7 +271,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Marionete** | 11z | +0 | — · *dobra o Poder base de outro seu, máx. +6* | *Marionette Control* |
 | **Canção Longa** | 10z | +2 | ELO 2 | *Longing for Freedom* |
 
-- **Canção Longa** — COMBO Vanguarda: seu clã ignora a Marcha Forçada.
+- **Canção Longa** — COMBO Vanguarda: seu clã ganha MOVER 1.
 
 > **Anotações:**
 
@@ -281,14 +279,14 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 
 | Base | Custo | Poder | z/P | Papel | Slots | Palavras-chave | Build |
 |---|---|---|---|---|---|---|---|
-| **Superaprendiz Teimoso** | 3z | 2 | 1.5 | Ágil | ◇ | — | *Sobrevivência* |
-| **Superaprendiz Improvisado** | 4z | 2 | 2.0 | Suporte | ◇◇ | IMITAR | *Faz de tudo* |
+| **Superaprendiz Teimoso** | 3z | 1 | 3.0 | Ágil | ◇◇◇ | — | *Sobrevivência teimosa* |
+| **Superaprendiz Improvisado** | 4z | 2 | 2.0 | Suporte | ◇◇ | IMITAR 2 | *Faz de tudo* |
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
-| **Teimosia Absurda** | 7z | +2 | — · *não pode sofrer baixa* | *Guardian Angel* |
+| **Teimosia Absurda** | 8z | +1 | — · *não pode sofrer baixa* | *Guardian Angel* |
 | **Sorte de Principiante** | 8z | +3 | SOLO 3 | *Sorte pura* |
-| **Imitação Descarada** | 7z | +2 | IMITAR | *Cópia de tudo* |
+| **Imitação Descarada** | 7z | +2 | IMITAR 2 | *Cópia de tudo* |
 
 > **Anotações:**
 
@@ -320,7 +318,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | Carta | Papel | Custo | +Poder | Encaixes | Palavras-chave | Efeito próprio |
 |---|---|---|---|---|---|---|
 | **Cota de Malha** | qualquer | 4z | +1 | ◈ | — | — |
-| **Armadura Completa** | Vanguarda | 7z | +2 | ◈ | ESCUDAR | — |
+| **Armadura Completa** | Vanguarda | 7z | +2 | ◈ | PROTEGER | — |
 | **Manto de Ninfa** | Arcano / Suporte | 6z | +0 | ◈ | — | Ignora a primeira baixa desta sala |
 | **Traje de Sombras** | Ágil | 6z | +1 | — | OCULTO | — |
 | **Escudo Sagrado** | Vanguarda | 5z | +0 | ◈ | MURALHA 1 | — |
@@ -339,7 +337,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Anel do Mercador** | qualquer | 5z | +0 | — | — | +2 de renda por rodada |
 | **Broche do Guildmaster** | qualquer | 6z | +0 | — | — | +1 ação de mercado por rodada |
 | **Amuleto de Ferro** | qualquer | 4z | +0 | — | — | Nunca é a primeira baixa |
-| **Talismã do Vento** | qualquer | 4z | +0 | — | — | Ignora a Marcha Forçada |
+| **Talismã do Vento** | qualquer | 4z | +0 | — | MOVER 1 | — |
 | **Oculos do Caçador** | qualquer | 5z | +0 | — | — | Revela Oculto inimigo na sala |
 | **Colar de Zeny** | qualquer | 3z | +0 | — | PILHAR 2 | — |
 | **Selo do Emperium** | qualquer | 8z | +0 | — | — | +2 de Poder na Sala do Emperium |
@@ -364,6 +362,7 @@ Encaixam nos slots ◈ dos equipamentos. Permanentes e viradas para cima na mesa
 | **Poring** | +3 zeny sempre que este personagem vence uma sala. |
 | **Baphomet** | Elo 1. |
 | **Doppelganger** | Rajada 2. |
+| **Horong** | Revela todos os inimigos ocultos desta sala. |
 | **Orc Herói** | Perfurar 2. |
 
 > **Anotações:**
@@ -376,11 +375,11 @@ Encaixam nos slots ◈ dos equipamentos. Permanentes e viradas para cima na mesa
 |---|---|---|
 | **Poção Branca** | Cancele 1 baixa sua nesta sala. | na sala, de bruços |
 | **Asa de Mosca** | Mova 1 personagem seu para uma sala adjacente antes de revelar. | na sala, de bruços |
-| **Asa de Borboleta** | Retire todos os seus personagens desta sala. Sem baixas, sem controle. | na sala, de bruços |
+| **Asa de Borboleta** | Retire o grupo do seu clã desta sala. Sem baixas, sem controle. | na sala, de bruços |
 | **Folha de Yggdrasil** | Traga 1 personagem da Enfermaria direto para esta sala. | na sala, de bruços |
 | **Frasco de Ácido** | +3 de Poder nesta sala, ignorando Muralha. | na sala, de bruços |
 | **Pergaminho de Convocação** | Um Guardião Poder 3 luta por você nesta sala, nesta rodada. | na sala, de bruços |
-| **Pedra do Ferreiro** | Refino automático, sem rolar. | no mercado |
+| **Elunium** | Refino automático, sem rolar. | no mercado |
 | **Fumaça** | Seus personagens nesta sala ficam Oculto. | na sala, de bruços |
 
 > **Anotações:**

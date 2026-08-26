@@ -143,5 +143,5 @@ export const GLORIA_HOLD_FINAL = 8;
 export const GLORIA_BREAK_BONUS = 3;
 
 export const RENDA_BASE = 6;
-export const RENDA_CASTELO = 6;
+export const RENDA_CASTELO = 2;
 export const ACOES_MERCADO = 3;
