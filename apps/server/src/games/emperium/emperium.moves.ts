@@ -582,7 +582,7 @@ export function resolverRodada(state: EmperiumState, ctx: GameContext): void {
       resolucoes.push({
         slot,
         tileId: room?.tileId ?? '',
-        faccoes: [],
+        clas: [],
         controlador: dono,
         controladorAnterior: dono,
         semDisputa: true,
@@ -609,10 +609,10 @@ export function resolverRodada(state: EmperiumState, ctx: GameContext): void {
     }
 
     // Espolio: o vencedor pega 1 equipamento de um caido inimigo.
-    const vencedor = res.faccoes.find((f) => f.venceu)?.playerId ?? null;
+    const vencedor = res.clas.find((f) => f.venceu)?.playerId ?? null;
     if (vencedor) {
       let melhor: { dono: PlayerId; eqId: string; poder: number } | null = null;
-      for (const f of res.faccoes) {
+      for (const f of res.clas) {
         if (!f.playerId || f.playerId === vencedor) continue;
         const dono = state.clans[f.playerId];
         if (!dono) continue;
@@ -640,7 +640,7 @@ export function resolverRodada(state: EmperiumState, ctx: GameContext): void {
       }
 
       // PILHAR: zeny para quem venceu.
-      const fac = res.faccoes.find((f) => f.playerId === vencedor);
+      const fac = res.clas.find((f) => f.playerId === vencedor);
       if (fac) {
         const clan = state.clans[vencedor]!;
         const commit = (state.commitments[vencedor] ?? []).find((x) => x.slot === slot);
@@ -653,7 +653,7 @@ export function resolverRodada(state: EmperiumState, ctx: GameContext): void {
     }
 
     // Baixas.
-    for (const f of res.faccoes) {
+    for (const f of res.clas) {
       if (!f.playerId) continue;
       for (const instId of f.baixas) aplicarBaixa(state, slot, f.playerId, instId);
     }
@@ -674,7 +674,7 @@ export function resolverRodada(state: EmperiumState, ctx: GameContext): void {
     for (const input of inputs) {
       const clan = state.clans[input.playerId];
       if (!clan) continue;
-      const fac = res.faccoes.find((f) => f.playerId === input.playerId);
+      const fac = res.clas.find((f) => f.playerId === input.playerId);
       if (fac?.cancelaEsgotar) continue;
       for (const id of input.commitment.charInstIds) {
         const inst = clan.chars[id];

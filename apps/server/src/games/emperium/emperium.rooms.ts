@@ -64,7 +64,7 @@ export type RoomEffect =
  * o limite. Na v0.2 so o Corredor Estreito limitava, entao o Cerco valia em uma
  * sala de sete e era uma Ordem morta nas outras seis.
  *
- * As duas excecoes sao deliberadas: o **Patio Aberto** e o **Salao do Trono**
+ * As duas excecoes sao deliberadas: o **Pátio Aberto** e o **Salão do Trono**
  * nao tem limite nenhum. O Patio e a sala onde exercito grande simplesmente
  * ganha; o Trono e o ultimo degrau antes do Emperium e precisa comportar um
  * cerco de verdade dos dois lados.
@@ -82,32 +82,32 @@ export interface RoomTileDef {
 
 /** As 12 fichas de ala. Quatro entram em jogo por partida. */
 export const WING_TILES: readonly RoomTileDef[] = [
-  { id: 'sala-corredor', nome: 'Corredor Estreito', regra: 'Limite 2 personagens por cla.', effect: 'limite2', limite: 2 },
-  { id: 'sala-patio', nome: 'Patio Aberto', regra: 'Personagens com Alcance tem +1 de Poder.', effect: 'bonus-alcance', limite: 0 },
-  { id: 'sala-ponte', nome: 'Ponte sobre o Fosso', regra: 'Clas derrotados nao sofrem baixa: voltam a Reserva.', effect: 'sem-baixa', limite: LIMITE_PADRAO },
-  { id: 'sala-labirinto', nome: 'Labirinto', regra: 'Comprometer aqui custa 1 zeny por personagem. Alcance nao funciona.', effect: 'pedagio-sem-alcance', limite: LIMITE_PADRAO },
-  { id: 'sala-guardioes', nome: 'Salao dos Guardioes', regra: 'Guarnicao de Poder 6 que combate todos os clas. Ninguem controla enquanto viva.', effect: 'guarnicao6', limite: LIMITE_PADRAO },
-  { id: 'sala-armazem', nome: 'Armazem', regra: 'Quem controla ganha 4 zeny no fim da rodada.', effect: 'renda4', limite: LIMITE_PADRAO },
-  { id: 'sala-forja', nome: 'Forja', regra: 'Quem controla faz 1 refino gratis e sem risco no fim da rodada.', effect: 'forja-gratis', limite: LIMITE_PADRAO },
+  { id: 'sala-corredor', nome: 'Corredor Estreito', regra: 'Limite 2 personagens por clã.', effect: 'limite2', limite: 2 },
+  { id: 'sala-patio', nome: 'Pátio Aberto', regra: 'Personagens com Alcance têm +1 de Poder.', effect: 'bonus-alcance', limite: 0 },
+  { id: 'sala-ponte', nome: 'Ponte sobre o Fosso', regra: 'Clãs derrotados não sofrem baixa: voltam à Reserva.', effect: 'sem-baixa', limite: LIMITE_PADRAO },
+  { id: 'sala-labirinto', nome: 'Labirinto', regra: 'Comprometer aqui custa 1 zeny por personagem. Alcance não funciona.', effect: 'pedagio-sem-alcance', limite: LIMITE_PADRAO },
+  { id: 'sala-guardioes', nome: 'Salão dos Guardiões', regra: 'Guarnição de Poder 6 que combate todos os clãs. Ninguém controla enquanto viva.', effect: 'guarnicao6', limite: LIMITE_PADRAO },
+  { id: 'sala-armazem', nome: 'Armazém', regra: 'Quem controla ganha 4 zeny no fim da rodada.', effect: 'renda4', limite: LIMITE_PADRAO },
+  { id: 'sala-forja', nome: 'Forja', regra: 'Quem controla faz 1 refino grátis e sem risco no fim da rodada.', effect: 'forja-gratis', limite: LIMITE_PADRAO },
   { id: 'sala-capela', nome: 'Capela', regra: 'Quem controla move 1 personagem da Enfermaria para a Reserva no fim da rodada.', effect: 'capela', limite: LIMITE_PADRAO },
-  { id: 'sala-vigia', nome: 'Torre de Vigia', regra: 'Quem controla olha os comprometimentos ocultos de 1 sala adjacente antes da revelacao.', effect: 'vigia', limite: LIMITE_PADRAO },
-  { id: 'sala-cripta', nome: 'Cripta', regra: 'Baixas aqui vao para a Reserva, nao para a Enfermaria.', effect: 'cripta', limite: LIMITE_PADRAO },
-  { id: 'sala-portal', nome: 'Portal Runico', regra: 'Ignore a regra de posicionamento para comprometer aqui.', effect: 'portal', limite: LIMITE_PADRAO },
-  { id: 'sala-terraco', nome: 'Terraco', regra: 'Arcano tem Poder dobrado. Vanguarda tem -2 de Poder.', effect: 'terraco', limite: LIMITE_PADRAO },
+  { id: 'sala-vigia', nome: 'Torre de Vigia', regra: 'Quem controla olha os comprometimentos ocultos de 1 sala adjacente antes da revelação.', effect: 'vigia', limite: LIMITE_PADRAO },
+  { id: 'sala-cripta', nome: 'Cripta', regra: 'Baixas aqui vão para a Reserva, não para a Enfermaria.', effect: 'cripta', limite: LIMITE_PADRAO },
+  { id: 'sala-portal', nome: 'Portal Rúnico', regra: 'Ignore a Marcha Forçada para comprometer aqui.', effect: 'portal', limite: LIMITE_PADRAO },
+  { id: 'sala-terraco', nome: 'Terraço', regra: 'Arcano tem Poder dobrado. Vanguarda tem −2 de Poder.', effect: 'terraco', limite: LIMITE_PADRAO },
 ];
 
 /** As tres salas fixas, que ancoram o aprendizado do castelo. */
 export const FIXED_TILES: Readonly<Record<'portao' | 'trono' | 'emperium', RoomTileDef>> = {
   portao: {
     id: 'sala-portao',
-    nome: 'Portao Principal',
-    regra: 'Limite 3 por cla. Todo mundo sempre pode entrar por aqui.',
+    nome: 'Portão Principal',
+    regra: 'Limite 3 por clã. Todo mundo sempre pode entrar por aqui.',
     effect: 'nenhum',
     limite: LIMITE_PADRAO,
   },
   trono: {
     id: 'sala-trono',
-    nome: 'Salao do Trono',
+    nome: 'Salão do Trono',
     regra: 'Sem limite. O dono do castelo tem +2 de Poder aqui.',
     effect: 'nenhum',
     limite: 0,
@@ -115,7 +115,7 @@ export const FIXED_TILES: Readonly<Record<'portao' | 'trono' | 'emperium', RoomT
   emperium: {
     id: 'sala-emperium',
     nome: 'Sala do Emperium',
-    regra: 'Nao se disputa controle. O escudo do defensor absorve em ordem crescente.',
+    regra: 'Não se disputa controle. O escudo do defensor absorve em ordem crescente.',
     effect: 'nenhum',
     limite: 0,
   },

@@ -5,6 +5,7 @@ import {
   EQUIP_BY_ID,
   TRANSCENDENCIA_BY_ID,
   caminhosDaClasse,
+  rotuloKeyword,
   type CharacterDef,
   type Keyword,
 } from '@boardzando/contracts';
@@ -140,8 +141,7 @@ const ORDEM_INFO: Record<OrderId, { nome: string; efeito: string }> = {
   resguardo: { nome: 'Resguardo', efeito: '−2 Poder. Sem baixas. +3 zeny.' },
 };
 
-const kwLabel = (k: Keyword): string =>
-  k.x === undefined ? k.kw.toUpperCase() : `${k.kw.toUpperCase()} ${k.x}`;
+const kwLabel = (k: Keyword): string => rotuloKeyword(k);
 
 /* ── Carta de personagem ─────────────────────────────────────────────────── */
 

@@ -334,10 +334,10 @@ describe('EmperiumGame — Transcendencia', () => {
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco', marcha: 0 } },
       { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'cerco', marcha: 0 } },
     ]);
-    const anaRes = res.faccoes.find((f) => f.playerId === 'ana')!;
-    const brunoRes = res.faccoes.find((f) => f.playerId === 'bruno')!;
+    const anaRes = res.clas.find((f) => f.playerId === 'ana')!;
+    const brunoRes = res.clas.find((f) => f.playerId === 'bruno')!;
 
-    // base 3 + evolucao 2 + 1 (Patio Aberto premia ALCANCE) - 1 (cerco).
+    // base 3 + evolucao 2 + 1 (Pátio Aberto premia ALCANCE) - 1 (cerco).
     expect(anaRes.poderBruto).toBe(3 + 2 + 1 - 1);
     // Muralha 2 (base) + 2 (evolucao) = 4, aplicada em Bruno.
     expect(brunoRes.poderBruto - brunoRes.poderFinal).toBe(4);
@@ -355,8 +355,8 @@ describe('EmperiumGame — Transcendencia', () => {
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(comTempestade), ordem: 'cerco', marcha: 0 } },
       { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(comJupitel), ordem: 'cerco', marcha: 0 } },
     ]);
-    const a = res.faccoes.find((f) => f.playerId === 'ana')!;
-    const b = res.faccoes.find((f) => f.playerId === 'bruno')!;
+    const a = res.clas.find((f) => f.playerId === 'ana')!;
+    const b = res.clas.find((f) => f.playerId === 'bruno')!;
     // Jupitel tem mais Poder bruto, Tempestade tem mais Muralha: sao builds
     // distintos mesmo com a MESMA evolucao comprada.
     expect(b.poderBruto).toBeGreaterThan(a.poderBruto);
@@ -464,8 +464,8 @@ describe('EmperiumGame — Transcendencia', () => {
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(semGuia), ordem: 'cerco', marcha: 3 } },
       { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(comGuia), ordem: 'cerco', marcha: 3 } },
     ]);
-    const a = res.faccoes.find((f) => f.playerId === 'ana')!;
-    const b = res.faccoes.find((f) => f.playerId === 'bruno')!;
+    const a = res.clas.find((f) => f.playerId === 'ana')!;
+    const b = res.clas.find((f) => f.playerId === 'bruno')!;
     expect(a.poderBruto).toBe(4 - 1 - MARCHA_PENALIDADE * 3);
     // Salto: +3 de Poder e nenhuma penalidade, apesar de marcha 3.
     expect(b.poderBruto).toBe(4 + 3 - 1);
@@ -490,7 +490,7 @@ describe('EmperiumGame — as Ordens', () => {
     // Sem limite quase universal, o Cerco so servia no Corredor Estreito.
     const semLimite = [...WING_TILES, ...Object.values(FIXED_TILES)].filter((t) => t.limite === 0);
     const nomes = semLimite.map((t) => t.nome).sort();
-    expect(nomes).toEqual(['Patio Aberto', 'Sala do Emperium', 'Salao do Trono']);
+    expect(nomes).toEqual(['Pátio Aberto', 'Sala do Emperium', 'Salão do Trono']);
   });
 
   it('a EMBOSCADA cancela o bonus positivo da Ordem alheia', () => {
@@ -507,8 +507,8 @@ describe('EmperiumGame — as Ordens', () => {
       { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(investida), ordem: 'investida', marcha: 0 } },
     ]);
 
-    const brunoSem = semEmboscada.faccoes.find((f) => f.playerId === 'bruno')!;
-    const brunoCom = comEmboscada.faccoes.find((f) => f.playerId === 'bruno')!;
+    const brunoSem = semEmboscada.clas.find((f) => f.playerId === 'bruno')!;
+    const brunoCom = comEmboscada.clas.find((f) => f.playerId === 'bruno')!;
     expect(brunoSem.poderBruto - brunoCom.poderBruto).toBe(3); // os +3 da Investida
     expect(brunoCom.emboscado).toBe(true);
   });
@@ -521,7 +521,7 @@ describe('EmperiumGame — as Ordens', () => {
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(emboscador), ordem: 'emboscada', marcha: 0 } },
       { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(recuado), ordem: 'resguardo', marcha: 0 } },
     ]);
-    const bruno = res.faccoes.find((f) => f.playerId === 'bruno')!;
+    const bruno = res.clas.find((f) => f.playerId === 'bruno')!;
     expect(bruno.poderBruto).toBe(4 - 2); // Monge 4, Resguardo -2 mantido
     expect(bruno.emboscado).toBe(false);
   });
@@ -536,7 +536,7 @@ describe('EmperiumGame — as Ordens', () => {
     ]);
     // Com duas Emboscadas o bonus ja e -2 (nao exclusiva), entao nao ha bonus
     // positivo para cancelar — as duas ficam com Poder 4 - 2 = 2.
-    for (const f of res.faccoes) expect(f.poderBruto).toBe(2);
+    for (const f of res.clas) expect(f.poderBruto).toBe(2);
   });
 });
 
@@ -559,11 +559,11 @@ describe('EmperiumGame — Combos', () => {
       },
     }));
     const res = resolveRoom(state, 'b1', inputs);
-    return { res, de: (p: PlayerId) => res.faccoes.find((f) => f.playerId === p)! };
+    return { res, de: (p: PlayerId) => res.clas.find((f) => f.playerId === p)! };
   }
 
   it('so acende com o companheiro exigido na sala', () => {
-    // Sabio Protecao de Solo: COMBO Bruxo -> a faccao ignora toda a Muralha.
+    // Sabio Protecao de Solo: COMBO Bruxo -> a cla ignora toda a Muralha.
     const semBruxo = makeClan('ana', ['sab-solo', 'mon-combo']); // sem Bruxo junto
     const comBruxo = makeClan('bruno', ['sab-solo', 'bru-jupitel']);
     // Parede grossa o bastante para o ANULAR do proprio Sabio nao zerar sozinho.
@@ -580,7 +580,7 @@ describe('EmperiumGame — Combos', () => {
     expect(a.de('ana').poderBruto - a.de('ana').poderFinal).toBeGreaterThan(0);
   });
 
-  it('so UM combo por faccao, e e o declarado no comprometimento', () => {
+  it('so UM combo por cla, e e o declarado no comprometimento', () => {
     // Dois portadores de combo na mesma sala; so o declarado dispara.
     const ana = makeClan('ana', ['sab-solo', 'bru-jupitel', 'fer-mercador']);
     const carla = makeClan('carla', ['bru-tempestade']);
@@ -594,7 +594,7 @@ describe('EmperiumGame — Combos', () => {
   });
 
   it('EXPOSTO zera a Muralha do alvo', () => {
-    // Alquimista Boticario: COMBO -> a maior faccao inimiga fica EXPOSTA.
+    // Alquimista Boticario: COMBO -> a maior cla inimiga fica EXPOSTA.
     const ana = makeClan('ana', ['alq-boticario', 'mon-combo']);
     const carla = makeClan('carla', ['bru-tempestade', 'bru-tempestade']); // MURALHA 4
     const semCombo = sala({ ana, carla }, {});
@@ -608,7 +608,7 @@ describe('EmperiumGame — Combos', () => {
   });
 
   it('PRESO tira o bonus da Ordem e o Escudar do alvo', () => {
-    // Monge Corpo de Aco: COMBO -> a maior faccao inimiga fica PRESA.
+    // Monge Corpo de Aco: COMBO -> a maior cla inimiga fica PRESA.
     const ana = makeClan('ana', ['mon-aco', 'mon-combo']);
     const carla = makeClan('carla', ['tem-escudeiro', 'cav-bb']);
     const r = sala({ ana, carla }, { ana: { combo: ids(ana)[0] }, carla: { ordem: 'investida' } });
@@ -674,8 +674,8 @@ describe('EmperiumGame — Combos', () => {
     expect(r.de('carla').baixas).not.toContain(r.res.raptados[0]);
   });
 
-  it('um combo pode anular a Marcha Forcada da faccao inteira', () => {
-    // Sacerdote Suporte: COMBO Vanguarda -> a faccao ignora a Marcha Forcada.
+  it('um combo pode anular a Marcha Forcada da cla inteira', () => {
+    // Sacerdote Suporte: COMBO Vanguarda -> a cla ignora a Marcha Forcada.
     const ana = makeClan('ana', ['sac-suporte', 'cav-bb']);
     const carla = makeClan('carla', ['sup-teimoso']);
     const sem = sala({ ana, carla }, { ana: { marcha: 3 } });
@@ -743,9 +743,9 @@ describe('EmperiumGame — Marcha Forcada', () => {
     const comMarcha = resolveRoom(state, 'b1', [
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco', marcha: 3 } },
     ]);
-    expect(semMarcha.faccoes[0]!.poderBruto).toBe(3); // 4 - 1 (cerco)
-    expect(comMarcha.faccoes[0]!.poderBruto).toBe(3 - MARCHA_PENALIDADE * 3);
-    expect(comMarcha.faccoes[0]!.marcha).toBe(3);
+    expect(semMarcha.clas[0]!.poderBruto).toBe(3); // 4 - 1 (cerco)
+    expect(comMarcha.clas[0]!.poderBruto).toBe(3 - MARCHA_PENALIDADE * 3);
+    expect(comMarcha.clas[0]!.marcha).toBe(3);
     expect(comMarcha.resumo).toContain('marcha -6');
   });
 
@@ -786,7 +786,7 @@ describe('EmperiumGame — resolucao de sala', () => {
     ];
 
     const res = resolveRoom(state, 'b1', inputs);
-    const de = (p: PlayerId) => res.faccoes.find((f) => f.playerId === p)!;
+    const de = (p: PlayerId) => res.clas.find((f) => f.playerId === p)!;
 
     // Ana: Tempestade 3 + Nevasca 2 + cajado 3 + refino 2 + Hydra 2
     //      + Escudeiro 2 + investida 3 = 17 — mas Bruno EMBOSCOU, e a Emboscada
@@ -825,7 +825,7 @@ describe('EmperiumGame — resolucao de sala', () => {
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco' } },
       { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'cerco' } },
     ]);
-    const ana_ = res.faccoes.find((f) => f.playerId === 'ana')!;
+    const ana_ = res.clas.find((f) => f.playerId === 'ana')!;
     // 6 - 1 (cerco) = 5 bruto; Muralha 4 - Perfurar 4 = 0 de reducao.
     expect(ana_.poderBruto).toBe(5);
     expect(ana_.poderFinal).toBe(5);
@@ -838,7 +838,7 @@ describe('EmperiumGame — resolucao de sala', () => {
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(grupo), ordem: 'cerco' } },
     ]);
     // Sacerdote Suporte P1 + ELO 2 x 2 outros = 5; Monge 4; Lanceiro 3. -1 cerco.
-    expect(res.faccoes[0]!.poderBruto).toBe(1 + 4 + 4 + 3 - 1);
+    expect(res.clas[0]!.poderBruto).toBe(1 + 4 + 4 + 3 - 1);
   });
 
   it('empate no topo: ninguem controla e os empatados sofrem baixa', () => {
@@ -850,11 +850,11 @@ describe('EmperiumGame — resolucao de sala', () => {
       { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'cerco' } },
     ]);
     expect(res.controlador).toBeNull();
-    expect(res.faccoes[0]!.baixas.length).toBe(1);
-    expect(res.faccoes[1]!.baixas.length).toBe(1);
+    expect(res.clas[0]!.baixas.length).toBe(1);
+    expect(res.clas[1]!.baixas.length).toBe(1);
   });
 
-  it('dois atacantes na mesma sala sao faccoes inimigas — o perdedor sangra', () => {
+  it('dois atacantes na mesma sala sao clas inimigas — o perdedor sangra', () => {
     const ana = makeClanTr('ana', 'cav-bb', 'tr-cav-berserk'); // P8
     const bruno = makeClan('bruno', ['cav-lanca']); // P3
     const carla = makeClan('carla', ['sup-teimoso']); // defensora fraca, P2
@@ -866,10 +866,10 @@ describe('EmperiumGame — resolucao de sala', () => {
     ]);
     expect(res.controlador).toBe('ana');
     // Bruno superou Carla mas perdeu para Ana: sangra do mesmo jeito.
-    expect(res.faccoes.find((f) => f.playerId === 'bruno')!.baixas.length).toBeGreaterThan(0);
+    expect(res.clas.find((f) => f.playerId === 'bruno')!.baixas.length).toBeGreaterThan(0);
   });
 
-  it('ESCUDAR cai antes dos outros personagens da faccao', () => {
+  it('ESCUDAR cai antes dos outros personagens da cla', () => {
     const ana = makeClan('ana', ['tem-escudeiro', 'bru-jupitel']);
     const bruno = makeClanTr('bruno', 'bru-jupitel', 'tr-bru-meteoros');
     const state = makeState({ ana, bruno }, { castleOwnerId: 'bruno' });
@@ -877,11 +877,11 @@ describe('EmperiumGame — resolucao de sala', () => {
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco' } },
       { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'investida' } },
     ]);
-    const baixas = res.faccoes.find((f) => f.playerId === 'ana')!.baixas;
+    const baixas = res.clas.find((f) => f.playerId === 'ana')!.baixas;
     expect(baixas[0]).toBe(ids(ana)[0]); // o Escudeiro
   });
 
-  it('as baixas nunca passam de metade dos personagens da faccao', () => {
+  it('as baixas nunca passam de metade dos personagens da cla', () => {
     const ana = makeClan('ana', ['sup-teimoso', 'sup-teimoso', 'sup-teimoso', 'sup-teimoso']);
     const bruno = makeClanTr('bruno', 'mon-combo', 'tr-mon-asura');
     const state = makeState({ ana, bruno }, { castleOwnerId: 'bruno', round: 4 });
@@ -889,7 +889,7 @@ describe('EmperiumGame — resolucao de sala', () => {
       { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco' } },
       { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'investida' } },
     ]);
-    expect(res.faccoes.find((f) => f.playerId === 'ana')!.baixas.length).toBeLessThanOrEqual(2);
+    expect(res.clas.find((f) => f.playerId === 'ana')!.baixas.length).toBeLessThanOrEqual(2);
   });
 });
 
@@ -910,7 +910,7 @@ describe('EmperiumGame — Sala do Emperium', () => {
     expect(res.danoPorJogador!['ana']).toBe(0);
     expect(res.danoPorJogador!['bruno']).toBe(4);
     // Ana foi totalmente absorvida: sofre 1 baixa.
-    expect(res.faccoes.find((f) => f.playerId === 'ana')!.baixas.length).toBe(1);
+    expect(res.clas.find((f) => f.playerId === 'ana')!.baixas.length).toBe(1);
   });
 
   it('o escudo decai com a rodada, deixando o fim de jogo explosivo', () => {
@@ -990,7 +990,7 @@ describe('EmperiumGame — partida completa', () => {
     const vazias = res.filter((r) => r.semDisputa);
     expect(vazias.length).toBeGreaterThan(0);
     for (const v of vazias) {
-      expect(v.faccoes).toEqual([]);
+      expect(v.clas).toEqual([]);
       expect(v.resumo).toContain('ninguem veio');
     }
     // E o log tambem cobre cada sala.
@@ -1008,10 +1008,10 @@ describe('EmperiumGame — partida completa', () => {
       { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'resguardo' } },
     ]);
     expect(res.resumo).toContain('bruno resguardou-se');
-    expect(res.faccoes.find((f) => f.playerId === 'bruno')!.ordem).toBe('resguardo');
+    expect(res.clas.find((f) => f.playerId === 'bruno')!.ordem).toBe('resguardo');
   });
 
-  it('uma faccao sozinha na sala toma sem resistencia', () => {
+  it('uma cla sozinha na sala toma sem resistencia', () => {
     const ana = makeClan('ana', ['mon-combo']);
     const state = makeState({ ana }, { castleOwnerId: 'ana' });
     const res = resolveRoom(state, 'b1', [

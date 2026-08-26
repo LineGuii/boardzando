@@ -70,7 +70,7 @@ export interface Commitment {
   consumivel?: string;
   /**
    * Qual combo voce declara disparar nesta sala: o instId do portador. So UM
-   * combo por faccao por sala — juntar cinco personagens nao acumula cinco
+   * combo por cla por sala — juntar cinco personagens nao acumula cinco
    * combos, senao a mesa volta a empilhar todo mundo num lugar so.
    */
   combo?: string;
@@ -94,7 +94,7 @@ export interface RoomState {
   guardioesDefensor: number;
 }
 
-/** Resultado de uma faccao numa sala, para o log e para a UI. */
+/** Resultado de uma cla numa sala, para o log e para a UI. */
 export interface FactionResult {
   playerId: PlayerId | null; // null = guarnicao / Cla Fantasma
   poderBruto: number;
@@ -110,20 +110,20 @@ export interface FactionResult {
   combo?: string;
   /** Marcas sofridas nesta sala. */
   marcas: ('exposto' | 'preso' | 'revelado')[];
-  /** Um combo cancelou o Esgotar desta faccao (o SP de volta pro Asura). */
+  /** Um combo cancelou o Esgotar desta cla (o SP de volta pro Asura). */
   cancelaEsgotar: boolean;
 }
 
 export interface RoomResolution {
   slot: RoomSlot;
   tileId: string;
-  faccoes: FactionResult[];
+  clas: FactionResult[];
   controlador: PlayerId | null;
   /** Quem controlava a sala ANTES desta resolucao. */
   controladorAnterior: PlayerId | null;
-  /** Nenhuma faccao comprometeu aqui: a sala e reportada, mas nada aconteceu. */
+  /** Nenhuma cla comprometeu aqui: a sala e reportada, mas nada aconteceu. */
   semDisputa: boolean;
-  /** Uma unica faccao entrou: tomada sem resistencia. */
+  /** Uma unica cla entrou: tomada sem resistencia. */
   semResistencia: boolean;
   /** Frase pronta para o log e para a legenda do confronto. */
   resumo: string;

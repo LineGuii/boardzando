@@ -1,0 +1,1125 @@
+<title>Cartas do Emperium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@600;800&family=Karla:wght@400;500;700&family=Silkscreen&display=swap">
+<style>
+:root{--ground:#E9EBEC;--surface:#F8F9F9;--alt:#DFE3E4;--ink:#151B1F;--soft:#3A454C;
+--muted:#667279;--rule:#C6CCCE;--soft-rule:#D8DCDE;--tea:#00807E;--combo:#6B4BA8;
+--gold:#8A6A18;--vanguarda:#8A5A2B;--arcano:#3C5FA8;--agil:#5B7A3A;--suporte:#8A4A72;
+--d:"Spectral",Georgia,serif;--b:"Karla",system-ui,sans-serif;--m:"Silkscreen",monospace;}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+--ground:#0F1417;--surface:#161D21;--alt:#1E272C;--ink:#E3E8E9;--soft:#BAC4C7;
+--muted:#89949A;--rule:#2B363B;--soft-rule:#222C31;--tea:#3CD4CC;--combo:#A98CE0;
+--gold:#D8B45F;--vanguarda:#B07B3C;--arcano:#5B82CE;--agil:#7CA34E;--suporte:#B06A97;}}
+:root[data-theme="dark"]{--ground:#0F1417;--surface:#161D21;--alt:#1E272C;--ink:#E3E8E9;
+--soft:#BAC4C7;--muted:#89949A;--rule:#2B363B;--soft-rule:#222C31;--tea:#3CD4CC;
+--combo:#A98CE0;--gold:#D8B45F;--vanguarda:#B07B3C;--arcano:#5B82CE;--agil:#7CA34E;--suporte:#B06A97;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--b);
+font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:60rem;margin:0 auto;padding:0 1rem 4rem}
+h1,h2,h3{font-family:var(--d);margin:0;text-wrap:balance}
+p{margin:0}
+a{color:var(--tea)}
+:focus-visible{outline:2px solid var(--tea);outline-offset:3px}
+header{padding:3rem 0 1.5rem;border-bottom:1px solid var(--rule);margin-bottom:1.2rem}
+header h1{font-size:clamp(2rem,7vw,3rem);font-weight:800;line-height:1;letter-spacing:-.02em}
+header p{color:var(--soft);margin-top:.7rem;max-width:52ch}
+.eyebrow{font-family:var(--m);font-size:.58rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+nav{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:2.4rem;
+position:sticky;top:0;background:var(--ground);padding:.6rem 0;z-index:5;
+border-bottom:1px solid var(--soft-rule)}
+nav a{font-size:.72rem;text-decoration:none;color:var(--soft);
+border:1px solid var(--rule);border-radius:99px;padding:.2rem .55rem;white-space:nowrap}
+nav a:hover{color:var(--tea);border-color:var(--tea)}
+section{margin-bottom:2.8rem;scroll-margin-top:3.4rem}
+section>h2{font-size:1.5rem;font-weight:800;padding-bottom:.3rem;
+border-bottom:2px solid var(--tea);margin-bottom:.9rem}
+h3{font-family:var(--m);font-size:.6rem;letter-spacing:.11em;text-transform:uppercase;
+color:var(--muted);margin:1.1rem 0 .5rem}
+.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr));gap:.6rem}
+.carta{background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+padding:.7rem .8rem;display:flex;flex-direction:column;gap:.4rem;min-width:0;
+border-left:3px solid var(--muted)}
+.carta[data-papel=vanguarda]{border-left-color:var(--vanguarda)}
+.carta[data-papel=arcano]{border-left-color:var(--arcano)}
+.carta[data-papel=agil]{border-left-color:var(--agil)}
+.carta[data-papel=suporte]{border-left-color:var(--suporte)}
+.carta.asc{border-left-color:var(--gold)}
+.topo{display:flex;gap:.6rem;align-items:baseline}
+.nome{font-family:var(--d);font-weight:700;font-size:.98rem;line-height:1.2;flex:1;min-width:0}
+.custo{font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.stats{display:flex;gap:.9rem;flex-wrap:wrap;border-top:1px dashed var(--soft-rule);
+border-bottom:1px dashed var(--soft-rule);padding:.35rem 0}
+.stats em{display:block;font-style:normal;font-family:var(--m);font-size:.5rem;
+letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stats b{font-size:.92rem;font-variant-numeric:tabular-nums}
+.kws{display:flex;gap:.25rem;flex-wrap:wrap}
+.kw{font-family:var(--m);font-size:.53rem;letter-spacing:.05em;padding:.15rem .3rem;
+border-radius:2px;background:var(--alt);color:var(--soft)}
+.combo{font-size:.76rem;line-height:1.35;color:var(--combo)}
+.build{font-family:var(--d);font-style:italic;font-size:.76rem;color:var(--muted);margin-top:auto}
+.twrap{overflow-x:auto;border:1px solid var(--rule);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.82rem}
+th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--soft-rule);vertical-align:top}
+thead th{font-family:var(--m);font-size:.53rem;letter-spacing:.07em;text-transform:uppercase;
+color:var(--muted);background:var(--alt);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+.nota{border-left:3px solid var(--combo);background:var(--surface);padding:.8rem 1rem;
+border-radius:0 4px 4px 0;margin-bottom:1.6rem}
+.nota ul{margin:.5rem 0 0;padding-left:1.1rem;font-size:.88rem}
+.nota li{margin-bottom:.2rem}
+footer{border-top:1px solid var(--rule);padding-top:1rem;color:var(--muted);font-size:.8rem}
+@media(max-width:30rem){body{font-size:16px}.grade{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Catálogo completo · gerado do código</span>
+  <h1>Cartas do Emperium</h1>
+  <p>26 variações base, 39 Transcendências,
+     30 equipamentos, 10 cartas de monstro e
+     8 consumíveis. Agrupados por classe, porque problema de
+     balanceamento aparece comparando irmãs.</p>
+</header>
+
+<div class="nota">
+  <b>O que procurar enquanto lê</b>
+  <ul>
+    <li>Alguma classe tem duas bases que fazem a mesma coisa?</li>
+    <li>Algum caminho de Transcendência nunca seria escolhido sobre os outros dois?</li>
+    <li>Alguma carta tem <b>z/P</b> muito fora da faixa da classe dela?</li>
+    <li>Algum combo exige um companheiro que quase nunca estaria na mesma sala?</li>
+    <li>Alguma carta sem palavra-chave e sem combo é chata demais para existir?</li>
+  </ul>
+</div>
+
+<nav><a href="#cavaleiro">Cavaleiro</a><a href="#templrio">Templário</a><a href="#bruxo">Bruxo</a><a href="#sbio">Sábio</a><a href="#mercenrio">Mercenário</a><a href="#arruaceiro">Arruaceiro</a><a href="#ferreiro">Ferreiro</a><a href="#alquimista">Alquimista</a><a href="#sacerdote">Sacerdote</a><a href="#monge">Monge</a><a href="#caador">Caçador</a><a href="#bardoodalisca">Bardo/Odalisca</a><a href="#superaprendiz">Superaprendiz</a><a href="#itens">Itens</a></nav>
+
+  <section id="cavaleiro">
+    <h2>Cavaleiro</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="vanguarda">
+        <div class="topo">
+          <span class="nome">Cavaleiro Bola de Boliche</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>4</b></span>
+          <span><em>z/P</em><b>1.5</b></span>
+          <span><em>Papel</em><b>Vanguarda</b></span>
+          <span><em>Slots</em><b>◇◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ELO 1</span></span>
+        <p class="combo">COMBO Templário: o maior clã inimigo fica PRESO.</p>
+        <p class="build">Bowling Bash</p>
+      </article>
+      <article class="carta" data-papel="vanguarda">
+        <div class="topo">
+          <span class="nome">Cavaleiro Lanceiro</span>
+          <span class="custo">5z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>3</b></span>
+          <span><em>z/P</em><b>1.7</b></span>
+          <span><em>Papel</em><b>Vanguarda</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">PERFURAR 2</span></span>
+        
+        <p class="build">Pierce montado</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Espiral</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+3</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">PERFURAR 4</span></span>
+        
+        <p class="build">Spiral Pierce</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Fúria Berserk</span>
+          <span class="custo">12z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+5</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ESGOTAR</span></span>
+        
+        <p class="build">Berserk</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Aura Lâmina</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ELO 2</span></span>
+        
+        <p class="build">Aura Blade</p>
+      </article></div>
+  </section>
+  <section id="templrio">
+    <h2>Templário</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="vanguarda">
+        <div class="topo">
+          <span class="nome">Templário Escudeiro</span>
+          <span class="custo">5z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>2.5</b></span>
+          <span><em>Papel</em><b>Vanguarda</b></span>
+          <span><em>Slots</em><b>◇◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ESCUDAR</span></span>
+        
+        <p class="build">Tanque de escudo</p>
+      </article>
+      <article class="carta" data-papel="vanguarda">
+        <div class="topo">
+          <span class="nome">Templário Defensor</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>3</b></span>
+          <span><em>z/P</em><b>2.0</b></span>
+          <span><em>Papel</em><b>Vanguarda</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">MURALHA 1</span></span>
+        <p class="combo">COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.</p>
+        <p class="build">Defender</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Devoção</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">DEVOÇÃO</span></span>
+        <p class="combo">COMBO Vanguarda: se você perder, o vencedor também sofre 1 baixa.</p>
+        <p class="build">Devotion</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Corrente de Escudo</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+4</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ESCUDAR</span></span>
+        <p class="combo">COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.</p>
+        <p class="build">Shield Chain</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Sacrifício</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+3</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">RAJADA 3</span><span class="kw">ESGOTAR</span></span>
+        
+        <p class="build">Sacrifice</p>
+      </article></div>
+  </section>
+  <section id="bruxo">
+    <h2>Bruxo</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="arcano">
+        <div class="topo">
+          <span class="nome">Bruxo Tempestade</span>
+          <span class="custo">7z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>3</b></span>
+          <span><em>z/P</em><b>2.3</b></span>
+          <span><em>Papel</em><b>Arcano</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">MURALHA 2</span><span class="kw">ALCANCE</span></span>
+        
+        <p class="build">Storm Gust</p>
+      </article>
+      <article class="carta" data-papel="arcano">
+        <div class="topo">
+          <span class="nome">Bruxo Jupitel</span>
+          <span class="custo">5z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>4</b></span>
+          <span><em>z/P</em><b>1.3</b></span>
+          <span><em>Papel</em><b>Arcano</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ALCANCE</span></span>
+        
+        <p class="build">Jupitel / Napalm</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Nevasca</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">MURALHA 2</span></span>
+        
+        <p class="build">Storm Gust ampliado</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Chuva de Meteoros</span>
+          <span class="custo">13z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+5</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">RAJADA 3</span></span>
+        
+        <p class="build">Meteor Storm</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Ganbantein</span>
+          <span class="custo">9z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+1</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ANULAR</span></span>
+        <p class="combo">COMBO Sábio: seus personagens ignoram toda a Muralha inimiga.</p>
+        <p class="build">Ganbantein</p>
+      </article></div>
+  </section>
+  <section id="sbio">
+    <h2>Sábio</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="arcano">
+        <div class="topo">
+          <span class="nome">Sábio Proteção de Solo</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>3.0</b></span>
+          <span><em>Papel</em><b>Arcano</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ANULAR</span></span>
+        <p class="combo">COMBO Bruxo: seus personagens ignoram toda a Muralha inimiga.</p>
+        <p class="build">Land Protection</p>
+      </article>
+      <article class="carta" data-papel="arcano">
+        <div class="topo">
+          <span class="nome">Sábio Encantador</span>
+          <span class="custo">5z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>2.5</b></span>
+          <span><em>Papel</em><b>Arcano</b></span>
+          <span><em>Slots</em><b>◇◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ELO 1</span></span>
+        
+        <p class="build">Endow</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Dissonância</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ANULAR</span></span>
+        <p class="combo">COMBO: o maior clã inimigo fica PRESO.</p>
+        <p class="build">Dispell</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Duplo Cast</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+4</b></span>
+          
+        </div>
+        
+        
+        <p class="build">Double Casting</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Memorizar</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">IMITAR</span></span>
+        <p class="combo">COMBO Monge: ninguém seu vai à Enfermaria por Esgotar.</p>
+        <p class="build">Memorize</p>
+      </article></div>
+  </section>
+  <section id="mercenrio">
+    <h2>Mercenário</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="agil">
+        <div class="topo">
+          <span class="nome">Mercenário Golpe Sônico</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>3</b></span>
+          <span><em>z/P</em><b>2.0</b></span>
+          <span><em>Papel</em><b>Ágil</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">RAJADA 3</span></span>
+        <p class="combo">COMBO Alquimista: +4 de Poder — ele entra pela brecha.</p>
+        <p class="build">Sonic Blow</p>
+      </article>
+      <article class="carta" data-papel="agil">
+        <div class="topo">
+          <span class="nome">Mercenário Furtivo</span>
+          <span class="custo">7z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>3.5</b></span>
+          <span><em>Papel</em><b>Ágil</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">OCULTO</span></span>
+        
+        <p class="build">Cloaking</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Rompe-Alma</span>
+          <span class="custo">12z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+5</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">RAJADA 2</span></span>
+        
+        <p class="build">Soul Breaker</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Presa Sombria</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">OCULTO</span></span>
+        
+        <p class="build">Grimtooth</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Veneno Mortal</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+3</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">PERFURAR 3</span></span>
+        
+        <p class="build">Enchant Deadly Poison</p>
+      </article></div>
+  </section>
+  <section id="arruaceiro">
+    <h2>Arruaceiro</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="agil">
+        <div class="topo">
+          <span class="nome">Arruaceiro Gatuno</span>
+          <span class="custo">5z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>2.5</b></span>
+          <span><em>Papel</em><b>Ágil</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">PILHAR 2</span></span>
+        <p class="combo">COMBO Agil: RAPTO — arranque 1 inimigo da sala.</p>
+        <p class="build">Steal</p>
+      </article>
+      <article class="carta" data-papel="agil">
+        <div class="topo">
+          <span class="nome">Arruaceiro Saqueador</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>3</b></span>
+          <span><em>z/P</em><b>2.0</b></span>
+          <span><em>Papel</em><b>Ágil</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ANULAR</span></span>
+        
+        <p class="build">Strip</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Despojar Total</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ANULAR</span><span class="kw">PILHAR 3</span></span>
+        
+        <p class="build">Full Strip</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Plágio</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">IMITAR</span></span>
+        
+        <p class="build">Plagiarism</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Marcha Silenciosa</span>
+          <span class="custo">12z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          <span><em>Especial</em><b>anula a Marcha Forçada do clã inteiro</b></span>
+        </div>
+        <span class="kws"><span class="kw">OCULTO</span></span>
+        <p class="combo">COMBO: RAPTO — arranque 1 inimigo da sala.</p>
+        <p class="build">Chase Walk</p>
+      </article></div>
+  </section>
+  <section id="ferreiro">
+    <h2>Ferreiro</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="vanguarda">
+        <div class="topo">
+          <span class="nome">Ferreiro Forjador</span>
+          <span class="custo">5z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>2.5</b></span>
+          <span><em>Papel</em><b>Vanguarda</b></span>
+          <span><em>Slots</em><b>◇◇</b></span>
+        </div>
+        
+        
+        <p class="build">Forja</p>
+      </article>
+      <article class="carta" data-papel="vanguarda">
+        <div class="topo">
+          <span class="nome">Ferreiro Mercador</span>
+          <span class="custo">4z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>1</b></span>
+          <span><em>z/P</em><b>4.0</b></span>
+          <span><em>Papel</em><b>Vanguarda</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">PILHAR 3</span></span>
+        <p class="combo">COMBO: +1 de Poder a cada 5 zeny no seu bolso.</p>
+        <p class="build">Overcharge</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Carrocerada</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+4</b></span>
+          
+        </div>
+        
+        <p class="combo">COMBO: +1 de Poder a cada 3 zeny no seu bolso.</p>
+        <p class="build">Cart Termination</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Fundição Suprema</span>
+          <span class="custo">9z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+1</b></span>
+          <span><em>Especial</em><b>refino sem quebra e 1 grátis por rodada</b></span>
+        </div>
+        
+        
+        <p class="build">Forja lendária</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Adrenalina Suprema</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ELO 2</span></span>
+        
+        <p class="build">Adrenaline Rush</p>
+      </article></div>
+  </section>
+  <section id="alquimista">
+    <h2>Alquimista</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="suporte">
+        <div class="topo">
+          <span class="nome">Alquimista Homúnculo</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>3.0</b></span>
+          <span><em>Papel</em><b>Suporte</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ELO 1</span></span>
+        
+        <p class="build">Bio-ethics</p>
+      </article>
+      <article class="carta" data-papel="suporte">
+        <div class="topo">
+          <span class="nome">Alquimista Boticário</span>
+          <span class="custo">5z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>1</b></span>
+          <span><em>z/P</em><b>5.0</b></span>
+          <span><em>Papel</em><b>Suporte</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">RESTAURAR 1</span></span>
+        <p class="combo">COMBO: o maior clã inimigo fica EXPOSTO.</p>
+        <p class="build">Potion Pitcher</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Demonstração Ácida</span>
+          <span class="custo">12z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+4</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">PERFURAR 4</span></span>
+        <p class="combo">COMBO: o maior clã inimigo fica EXPOSTO e PRESO.</p>
+        <p class="build">Acid Demonstration</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Homúnculo Superior</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+3</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ELO 2</span></span>
+        <p class="combo">COMBO: +3 de Poder — o homúnculo luta junto.</p>
+        <p class="build">Homunculus S</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Bomba de Esferas</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+1</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">MURALHA 3</span></span>
+        
+        <p class="build">Sphere Mine</p>
+      </article></div>
+  </section>
+  <section id="sacerdote">
+    <h2>Sacerdote</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="suporte">
+        <div class="topo">
+          <span class="nome">Sacerdote Suporte</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>1</b></span>
+          <span><em>z/P</em><b>6.0</b></span>
+          <span><em>Papel</em><b>Suporte</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ELO 2</span></span>
+        <p class="combo">COMBO Vanguarda: seu clã ignora a Marcha Forçada.</p>
+        <p class="build">Full Support</p>
+      </article>
+      <article class="carta" data-papel="suporte">
+        <div class="topo">
+          <span class="nome">Sacerdote Pneuma</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>3.0</b></span>
+          <span><em>Papel</em><b>Suporte</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">MURALHA 2</span></span>
+        
+        <p class="build">Pneuma / Safety Wall</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Assumptio</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">DEVOÇÃO</span></span>
+        
+        <p class="build">Assumptio</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Ressurreição</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+1</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">RESTAURAR 2</span></span>
+        
+        <p class="build">Resurrection</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Julgamento</span>
+          <span class="custo">12z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+5</b></span>
+          
+        </div>
+        
+        
+        <p class="build">Magnus Exorcismus</p>
+      </article></div>
+  </section>
+  <section id="monge">
+    <h2>Monge</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="vanguarda">
+        <div class="topo">
+          <span class="nome">Monge Combo</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>4</b></span>
+          <span><em>z/P</em><b>1.5</b></span>
+          <span><em>Papel</em><b>Vanguarda</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        
+        
+        <p class="build">Chain Combo</p>
+      </article>
+      <article class="carta" data-papel="vanguarda">
+        <div class="topo">
+          <span class="nome">Monge Corpo de Aço</span>
+          <span class="custo">5z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>0</b></span>
+          <span><em>z/P</em><b>—</b></span>
+          <span><em>Papel</em><b>Vanguarda</b></span>
+          <span><em>Slots</em><b>◇◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ESCUDAR</span><span class="kw">ESGOTAR</span></span>
+        <p class="combo">COMBO: o maior clã inimigo fica PRESO.</p>
+        <p class="build">Steel Body</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Punho de Asura</span>
+          <span class="custo">14z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+7</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ESGOTAR</span></span>
+        
+        <p class="build">Asura Strike</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Salto</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+3</b></span>
+          <span><em>Especial</em><b>anula a Marcha Forçada do clã inteiro</b></span>
+        </div>
+        
+        <p class="combo">COMBO: seu clã ignora a Marcha Forçada.</p>
+        <p class="build">Body Relocation</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Corpo de Aço Supremo</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+1</b></span>
+          <span><em>Especial</em><b>não pode sofrer baixa</b></span>
+        </div>
+        <span class="kws"><span class="kw">ESCUDAR</span></span>
+        
+        <p class="build">Steel Body</p>
+      </article></div>
+  </section>
+  <section id="caador">
+    <h2>Caçador</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="agil">
+        <div class="topo">
+          <span class="nome">Caçador Armadilheiro</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>3.0</b></span>
+          <span><em>Papel</em><b>Ágil</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">MURALHA 2</span></span>
+        <p class="combo">COMBO: o maior clã inimigo fica REVELADO.</p>
+        <p class="build">Trapper</p>
+      </article>
+      <article class="carta" data-papel="agil">
+        <div class="topo">
+          <span class="nome">Caçador Tiro Duplo</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>4</b></span>
+          <span><em>z/P</em><b>1.5</b></span>
+          <span><em>Papel</em><b>Ágil</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ALCANCE</span></span>
+        
+        <p class="build">Double Strafe</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Chuva de Flechas</span>
+          <span class="custo">12z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+5</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ALCANCE</span></span>
+        
+        <p class="build">Arrow Storm</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Armadilha Suprema</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">MURALHA 3</span></span>
+        
+        <p class="build">Trap Research</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Olho de Falcão</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          <span><em>Especial</em><b>Revela Oculto inimigo na sala</b></span>
+        </div>
+        <span class="kws"><span class="kw">ANULAR</span></span>
+        <p class="combo">COMBO: o maior clã inimigo fica REVELADO.</p>
+        <p class="build">Falcon Assault</p>
+      </article></div>
+  </section>
+  <section id="bardoodalisca">
+    <h2>Bardo/Odalisca</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="suporte">
+        <div class="topo">
+          <span class="nome">Bardo Canção</span>
+          <span class="custo">5z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>1</b></span>
+          <span><em>z/P</em><b>5.0</b></span>
+          <span><em>Papel</em><b>Suporte</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">ELO 2</span></span>
+        <p class="combo">COMBO Arcano: seus Arcanos ganham +3 de Poder.</p>
+        <p class="build">Canções de grupo</p>
+      </article>
+      <article class="carta" data-papel="suporte">
+        <div class="topo">
+          <span class="nome">Odalisca Dança Lenta</span>
+          <span class="custo">6z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>3.0</b></span>
+          <span><em>Papel</em><b>Suporte</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">MURALHA 2</span></span>
+        <p class="combo">COMBO Bardo/Odalisca: +4 de Poder — o dueto.</p>
+        <p class="build">Slow Grace</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Ensemble</span>
+          <span class="custo">9z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          <span><em>Especial</em><b>com outro Bardo/Odalisca seu na sala, ambos +5</b></span>
+        </div>
+        
+        
+        <p class="build">Ensemble</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Marionete</span>
+          <span class="custo">11z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+0</b></span>
+          <span><em>Especial</em><b>dobra o Poder base de outro seu, máx. +6</b></span>
+        </div>
+        
+        
+        <p class="build">Marionette Control</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Canção Longa</span>
+          <span class="custo">10z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">ELO 2</span></span>
+        <p class="combo">COMBO Vanguarda: seu clã ignora a Marcha Forçada.</p>
+        <p class="build">Longing for Freedom</p>
+      </article></div>
+  </section>
+  <section id="superaprendiz">
+    <h2>Superaprendiz</h2>
+    <h3>Bases</h3>
+    <div class="grade">
+      <article class="carta" data-papel="agil">
+        <div class="topo">
+          <span class="nome">Superaprendiz Teimoso</span>
+          <span class="custo">3z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>1.5</b></span>
+          <span><em>Papel</em><b>Ágil</b></span>
+          <span><em>Slots</em><b>◇</b></span>
+        </div>
+        
+        
+        <p class="build">Sobrevivência</p>
+      </article>
+      <article class="carta" data-papel="suporte">
+        <div class="topo">
+          <span class="nome">Superaprendiz Improvisado</span>
+          <span class="custo">4z</span>
+        </div>
+        <div class="stats">
+          <span><em>Poder</em><b>2</b></span>
+          <span><em>z/P</em><b>2.0</b></span>
+          <span><em>Papel</em><b>Suporte</b></span>
+          <span><em>Slots</em><b>◇◇</b></span>
+        </div>
+        <span class="kws"><span class="kw">IMITAR</span></span>
+        
+        <p class="build">Faz de tudo</p>
+      </article></div>
+    <h3>Transcendências</h3>
+    <div class="grade">
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Teimosia Absurda</span>
+          <span class="custo">7z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          <span><em>Especial</em><b>não pode sofrer baixa</b></span>
+        </div>
+        
+        
+        <p class="build">Guardian Angel</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Sorte de Principiante</span>
+          <span class="custo">8z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+3</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">SOLO 3</span></span>
+        
+        <p class="build">Sorte pura</p>
+      </article>
+      <article class="carta asc">
+        <div class="topo">
+          <span class="nome">Imitação Descarada</span>
+          <span class="custo">7z</span>
+        </div>
+        <div class="stats">
+          <span><em>+Poder</em><b>+2</b></span>
+          
+        </div>
+        <span class="kws"><span class="kw">IMITAR</span></span>
+        
+        <p class="build">Cópia de tudo</p>
+      </article></div>
+  </section>
+<section id="itens">
+  <h2>Equipamento e itens</h2>
+  
+  <h3>Armas</h3>
+  <div class="twrap"><table>
+    <thead><tr><th>Carta</th><th>Papel</th><th>Custo</th><th>+Poder</th><th>◈</th><th>Palavras-chave</th><th>Efeito</th></tr></thead>
+    <tbody><tr><td><b>Espada Bastarda</b></td><td>Vanguarda</td><td>5z</td><td>+2</td><td>◈</td><td>—</td><td>—</td></tr><tr><td><b>Lança de Cavalaria</b></td><td>Vanguarda</td><td>6z</td><td>+2</td><td>◈</td><td>PERFURAR 1</td><td>—</td></tr><tr><td><b>Machado de Guerra</b></td><td>Vanguarda</td><td>7z</td><td>+4</td><td>◈</td><td>—</td><td>−1 se o portador tiver Escudar</td></tr><tr><td><b>Cajado da Tempestade</b></td><td>Arcano</td><td>6z</td><td>+3</td><td>◈</td><td>—</td><td>—</td></tr><tr><td><b>Grimório</b></td><td>Arcano</td><td>5z</td><td>+1</td><td>◈</td><td>MURALHA 1</td><td>—</td></tr><tr><td><b>Varinha de Anulação</b></td><td>Arcano</td><td>7z</td><td>+1</td><td>—</td><td>ANULAR</td><td>—</td></tr><tr><td><b>Adaga Gêmea</b></td><td>Ágil</td><td>5z</td><td>+2</td><td>◈</td><td>RAJADA 1</td><td>—</td></tr><tr><td><b>Arco Composto</b></td><td>Ágil</td><td>6z</td><td>+3</td><td>◈</td><td>—</td><td>exige ALCANCE</td></tr><tr><td><b>Katar Sombria</b></td><td>Ágil</td><td>7z</td><td>+3</td><td>◈</td><td>—</td><td>—</td></tr><tr><td><b>Alaúde</b></td><td>Suporte</td><td>5z</td><td>+1</td><td>◈</td><td>ELO 1</td><td>—</td></tr><tr><td><b>Chicote de Seda</b></td><td>Suporte</td><td>5z</td><td>+2</td><td>◈</td><td>—</td><td>—</td></tr><tr><td><b>Maça Sagrada</b></td><td>Suporte</td><td>6z</td><td>+2</td><td>—</td><td>RESTAURAR 1</td><td>—</td></tr></tbody>
+  </table></div>
+  <h3>Armaduras</h3>
+  <div class="twrap"><table>
+    <thead><tr><th>Carta</th><th>Papel</th><th>Custo</th><th>+Poder</th><th>◈</th><th>Palavras-chave</th><th>Efeito</th></tr></thead>
+    <tbody><tr><td><b>Cota de Malha</b></td><td>qualquer</td><td>4z</td><td>+1</td><td>◈</td><td>—</td><td>—</td></tr><tr><td><b>Armadura Completa</b></td><td>Vanguarda</td><td>7z</td><td>+2</td><td>◈</td><td>ESCUDAR</td><td>—</td></tr><tr><td><b>Manto de Ninfa</b></td><td>Arcano / Suporte</td><td>6z</td><td>+0</td><td>◈</td><td>—</td><td>Ignora a primeira baixa desta sala</td></tr><tr><td><b>Traje de Sombras</b></td><td>Ágil</td><td>6z</td><td>+1</td><td>—</td><td>OCULTO</td><td>—</td></tr><tr><td><b>Escudo Sagrado</b></td><td>Vanguarda</td><td>5z</td><td>+0</td><td>◈</td><td>MURALHA 1</td><td>—</td></tr><tr><td><b>Botas de Fuga</b></td><td>qualquer</td><td>4z</td><td>+0</td><td>—</td><td>—</td><td>Baixas vão para a Reserva, não para a Enfermaria</td></tr><tr><td><b>Manto Élfico</b></td><td>qualquer</td><td>5z</td><td>+1</td><td>—</td><td>—</td><td>Imune a Anular</td></tr><tr><td><b>Vestes do Sábio</b></td><td>Arcano</td><td>6z</td><td>+1</td><td>◈</td><td>PERFURAR 2</td><td>—</td></tr><tr><td><b>Peitoral Rúnico</b></td><td>Vanguarda</td><td>8z</td><td>+3</td><td>◈</td><td>—</td><td>—</td></tr><tr><td><b>Túnica Simples</b></td><td>qualquer</td><td>3z</td><td>+1</td><td>◈◈</td><td>—</td><td>—</td></tr></tbody>
+  </table></div>
+  <h3>Acessórios</h3>
+  <div class="twrap"><table>
+    <thead><tr><th>Carta</th><th>Papel</th><th>Custo</th><th>+Poder</th><th>◈</th><th>Palavras-chave</th><th>Efeito</th></tr></thead>
+    <tbody><tr><td><b>Anel do Mercador</b></td><td>qualquer</td><td>5z</td><td>+0</td><td>—</td><td>—</td><td>+2 de renda por rodada</td></tr><tr><td><b>Broche do Guildmaster</b></td><td>qualquer</td><td>6z</td><td>+0</td><td>—</td><td>—</td><td>+1 ação de mercado por rodada</td></tr><tr><td><b>Amuleto de Ferro</b></td><td>qualquer</td><td>4z</td><td>+0</td><td>—</td><td>—</td><td>Nunca é a primeira baixa</td></tr><tr><td><b>Talismã do Vento</b></td><td>qualquer</td><td>4z</td><td>+0</td><td>—</td><td>—</td><td>Ignora a Marcha Forçada</td></tr><tr><td><b>Oculos do Caçador</b></td><td>qualquer</td><td>5z</td><td>+0</td><td>—</td><td>—</td><td>Revela Oculto inimigo na sala</td></tr><tr><td><b>Colar de Zeny</b></td><td>qualquer</td><td>3z</td><td>+0</td><td>—</td><td>PILHAR 2</td><td>—</td></tr><tr><td><b>Selo do Emperium</b></td><td>qualquer</td><td>8z</td><td>+0</td><td>—</td><td>—</td><td>+2 de Poder na Sala do Emperium</td></tr><tr><td><b>Pergaminho Antigo</b></td><td>qualquer</td><td>5z</td><td>+0</td><td>—</td><td>IMITAR</td><td>—</td></tr></tbody>
+  </table></div>
+  
+  <h3>Cartas de monstro</h3>
+  <div class="twrap"><table>
+    <thead><tr><th>Carta</th><th>Efeito</th></tr></thead>
+    <tbody><tr><td><b>Thara Frog</b></td><td>Ignora a primeira baixa causada por personagem inimigo.</td></tr><tr><td><b>Raydric</b></td><td>+2 de Poder quando você é o dono do castelo.</td></tr><tr><td><b>Hydra</b></td><td>+2 de Poder quando você é atacante.</td></tr><tr><td><b>Marc</b></td><td>Imune a Muralha.</td></tr><tr><td><b>Angeling</b></td><td>Imune a Anular.</td></tr><tr><td><b>Ghostring</b></td><td>Não pode sofrer baixa. Poder reduzido à metade.</td></tr><tr><td><b>Poring</b></td><td>+3 zeny sempre que este personagem vence uma sala.</td></tr><tr><td><b>Baphomet</b></td><td>Elo 1.</td></tr><tr><td><b>Doppelganger</b></td><td>Rajada 2.</td></tr><tr><td><b>Orc Herói</b></td><td>Perfurar 2.</td></tr></tbody>
+  </table></div>
+  
+  <h3>Consumíveis</h3>
+  <div class="twrap"><table>
+    <thead><tr><th>Carta</th><th>Efeito</th></tr></thead>
+    <tbody><tr><td><b>Poção Branca</b></td><td>Cancele 1 baixa sua nesta sala.</td></tr><tr><td><b>Asa de Mosca</b></td><td>Mova 1 personagem seu para uma sala adjacente antes de revelar.</td></tr><tr><td><b>Asa de Borboleta</b></td><td>Retire todos os seus personagens desta sala. Sem baixas, sem controle.</td></tr><tr><td><b>Folha de Yggdrasil</b></td><td>Traga 1 personagem da Enfermaria direto para esta sala.</td></tr><tr><td><b>Frasco de Ácido</b></td><td>+3 de Poder nesta sala, ignorando Muralha.</td></tr><tr><td><b>Pergaminho de Convocação</b></td><td>Um Guardião Poder 3 luta por você nesta sala, nesta rodada.</td></tr><tr><td><b>Pedra do Ferreiro</b></td><td>Refino automático, sem rolar.</td></tr><tr><td><b>Fumaça</b></td><td>Seus personagens nesta sala ficam Oculto.</td></tr></tbody>
+  </table></div>
+</section>
+
+<footer>
+  <p>Gerado de <code>packages/contracts/src/emperium.ts</code> por
+  <code>docs/emperium/gerar-cartas.mjs</code>. Se um número aqui parecer errado, ele
+  está errado <em>no jogo</em> — os dois saem da mesma fonte.</p>
+</footer>
+</div>

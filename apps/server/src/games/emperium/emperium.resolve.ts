@@ -145,11 +145,11 @@ interface Faction {
   emboscado?: boolean;
   /** Bonus vindo da Ordem, separado porque a marca PRESO o remove. */
   bonusOrdem: number;
-  /** O combo declarado por esta faccao nesta sala, se acendeu. */
+  /** O combo declarado por esta cla nesta sala, se acendeu. */
   comboAtivo?: Combo;
-  /** Marcas que esta faccao esta sofrendo. */
+  /** Marcas que esta cla esta sofrendo. */
   marcas: Set<Marca>;
-  /** Efeitos de combo aplicados a esta faccao. */
+  /** Efeitos de combo aplicados a esta cla. */
   protegePapel?: Papel;
   cancelaEsgotar: boolean;
   troco: boolean;
@@ -177,7 +177,7 @@ function comboDe(c: CharCompute): Combo | undefined {
 
 /**
  * Aplica as regras da sala e as keywords que dependem de contagem (ELO, SOLO,
- * RAJADA) ao conjunto de personagens de uma faccao.
+ * RAJADA) ao conjunto de personagens de uma cla.
  */
 function factionPower(
   state: EmperiumState,
@@ -280,7 +280,7 @@ function factionPower(
 
   // Marcha Forcada: quem pulou salas chega disperso. Salto (Mestre) e Marcha
   // Silenciosa (Desordeiro) guiam o grupo: um so deles anula a penalidade da
-  // faccao inteira — e o que faz dessas duas evolucoes uma jogada estrategica
+  // cla inteira — e o que faz dessas duas evolucoes uma jogada estrategica
   // e nao so mais um bonus de Poder.
   const guia = chars.some((c) => c.transSpecials.has('marcha-livre'));
   if (!guia) total -= MARCHA_PENALIDADE * marcha;
@@ -306,10 +306,10 @@ function factionPower(
 }
 
 /**
- * Dispara o combo declarado de cada faccao e aplica marcas nos inimigos.
+ * Dispara o combo declarado de cada cla e aplica marcas nos inimigos.
  *
- * So UM combo por faccao por sala, escolhido no comprometimento. Marcas sempre
- * caem na maior faccao inimiga — o design deixa a escolha ao jogador, mas a
+ * So UM combo por cla por sala, escolhido no comprometimento. Marcas sempre
+ * caem na maior cla inimiga — o design deixa a escolha ao jogador, mas a
  * versao digital automatiza no alvo obvio para nao travar a resolucao pedindo
  * alvo a cada efeito.
  */
@@ -352,7 +352,7 @@ function applyCombos(factions: Faction[], zenyDe: (p: PlayerId) => number): void
         break;
       }
       case 'rapto':
-        // Resolvido antes, na montagem das faccoes.
+        // Resolvido antes, na montagem das clas.
         break;
     }
   }
@@ -394,7 +394,7 @@ function applyAnular(factions: Faction[]): void {
         if (!alvo || outra.muralha > alvo.muralha) alvo = outra;
       }
       if (!alvo) break;
-      // Cancela a maior contribuicao individual de Muralha da faccao alvo.
+      // Cancela a maior contribuicao individual de Muralha da cla alvo.
       let maior = 0;
       for (const c of alvo.chars) {
         if (c.imuneAnular) continue;
@@ -405,7 +405,7 @@ function applyAnular(factions: Faction[]): void {
   }
 }
 
-/** Cada Muralha X reduz o total de CADA faccao inimiga em X; Perfurar devolve. */
+/** Cada Muralha X reduz o total de CADA cla inimiga em X; Perfurar devolve. */
 function applyMuralha(factions: Faction[]): void {
   for (const f of factions) {
     let reducao = 0;
@@ -422,7 +422,7 @@ function applyMuralha(factions: Faction[]): void {
 }
 
 /**
- * Escolhe quem cai numa faccao derrotada. ESCUDAR primeiro (obrigatorio),
+ * Escolhe quem cai numa cla derrotada. ESCUDAR primeiro (obrigatorio),
  * depois os de menor Poder de carta — minimiza a perda, que e o que um jogador
  * faria. Teto de baixas: metade dos personagens, arredondado para cima.
  */
@@ -490,7 +490,7 @@ function comboDeclarado(chars: readonly CharCompute[], declarado?: string): Comb
 }
 
 /**
- * RAPTO: arranca 1 personagem da maior faccao inimiga da sala; ele volta a
+ * RAPTO: arranca 1 personagem da maior cla inimiga da sala; ele volta a
  * Reserva do dono sem sofrer baixa. E o Rapto do Arruaceiro criando o 1 contra
  * 1 — o alvo escolhido e o de maior Poder de carta, que e o que um jogador
  * faria. No maximo um rapto por sala: o caos precisa de teto.
@@ -550,7 +550,7 @@ export function resolveRoom(
 
   const raptados = aplicarRaptos(grupos);
 
-  // Pass 1 — agora sim, o Poder de cada faccao.
+  // Pass 1 — agora sim, o Poder de cada cla.
   const factions: Faction[] = [];
   for (const g of grupos) {
     if (g.chars.length === 0) continue;
@@ -568,7 +568,7 @@ export function resolveRoom(
     factions.push(f);
   }
 
-  // Guarnicao fixa da sala (Salao dos Guardioes) combate todas as faccoes.
+  // Guarnicao fixa da sala (Salao dos Guardioes) combate todas as clas.
   const guarnicao = room?.guarnicaoFixa ?? 0;
   if (guarnicao > 0) {
     factions.push({
@@ -681,7 +681,7 @@ export function resolveRoom(
   return {
     slot,
     tileId: room?.tileId ?? '',
-    faccoes: resultados,
+    clas: resultados,
     controlador,
     controladorAnterior: room?.controlador ?? null,
     semDisputa: false,
@@ -837,7 +837,7 @@ export function resolveEmperium(
   return {
     slot: 'emperium',
     tileId: 'sala-emperium',
-    faccoes: resultados,
+    clas: resultados,
     controlador: null,
     controladorAnterior: null,
     semDisputa: false,

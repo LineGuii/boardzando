@@ -83,6 +83,7 @@ castelo.
 | Documento | Para quem |
 |---|---|
 | **[Manual do Jogador](manual-do-jogador.md)** · [versão web](manual.html) | Quem vai jogar e precisa da regra exata. Referência completa. |
+| **[Todas as cartas](04-todas-as-cartas.md)** · [versão web](cartas.html) | O catálogo completo — 65 personagens, 30 equipamentos, monstros e consumíveis, agrupados por classe. **Gerado do código**, então não pode divergir do jogo. |
 | **[A Queda de Glast Heim](03-partida-narrada.md)** | Uma partida inteira narrada, quatro jogadores, seis rodadas — com baixas, combos, marcas, evolução, forja e o Emperium caindo duas vezes. O melhor jeito de ver as regras funcionando juntas. |
 | **[Tutorial](tutorial.html)** | Quem nunca jogou. Ensina pela primeira partida, com exemplo comentado. |
 | **[Design v0.2](02-design-v0.2.md)** · [versão web](design-v0.2.html) | Quem quer entender *por que* cada regra existe. O documento de design atual. |
