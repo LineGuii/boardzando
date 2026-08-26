@@ -57,6 +57,7 @@ interface CommitmentV {
   slot: RoomSlot;
   charInstIds: string[];
   ordem: OrderId;
+  combo?: string;
   consumivel?: string;
 }
 interface FactionResultV {
@@ -67,6 +68,9 @@ interface FactionResultV {
   baixas: string[];
   venceu: boolean;
   marcha: number;
+  combo?: string;
+  marcas: ('exposto' | 'preso' | 'revelado')[];
+  cancelaEsgotar: boolean;
 }
 interface RoomResolutionV {
   slot: RoomSlot;
@@ -226,6 +230,9 @@ function CharCard({
           })}
         </span>
       )}
+      {(trans?.combo ?? def.combo) && (
+        <span className="emp-card-combo">{(trans?.combo ?? def.combo)!.texto}</span>
+      )}
       {!compacto && <span className="emp-card-build">{trans ? trans.build : def.build}</span>}
     </button>
   );
@@ -282,6 +289,11 @@ function Confronto({
                 <span className="emp-lut-nome">
                   {f.playerId === null ? 'Guarnição' : nomeDe(f.playerId)}
                 </span>
+                {f.combo && (
+                  <span className="emp-lut-combo" title={f.combo}>
+                    ⚡ {f.combo.replace(/^COMBO[^:]*:\s*/, '')}
+                  </span>
+                )}
                 <span className="emp-lut-poder">
                   {f.poderFinal !== f.poderBruto ? (
                     <>
@@ -298,6 +310,11 @@ function Confronto({
                       marcha −{f.marcha * 2}
                     </span>
                   )}
+                  {f.marcas?.map((m) => (
+                    <span key={m} className="emp-lut-marca">
+                      {m}
+                    </span>
+                  ))}
                   {f.baixas.length > 0 && (
                     <span className="emp-lut-baixa">
                       {f.baixas.length} {f.baixas.length === 1 ? 'baixa' : 'baixas'}
@@ -354,6 +371,7 @@ export function EmperiumBoard() {
   const [guardiaoDe, setGuardiaoDe] = useState<string>('');
   const [guardiaoPara, setGuardiaoPara] = useState<string>('');
   const [altarAlvo, setAltarAlvo] = useState<string>('');
+  const [comboAlvo, setComboAlvo] = useState<string>('');
 
   const nomeDe = useMemo(() => {
     const mapa = new Map<string, string>();
@@ -383,12 +401,45 @@ export function EmperiumBoard() {
     (c) => c.local === 'reserva' && !usadosNoRascunho.has(c.instId),
   );
 
+  /**
+   * Os combos dos personagens selecionados, com a informacao de se acendem
+   * dado quem mais foi selecionado. A evolucao substitui o combo da base.
+   */
+  const combosDisponiveis = selecionados.flatMap((instId) => {
+    const inst = meuClan?.chars[instId];
+    const def = inst ? CHARACTER_BY_ID.get(inst.defId) : undefined;
+    if (!inst || !def) return [];
+    const trans = inst.transcendencia ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia) : undefined;
+    const combo = trans?.combo ?? def.combo;
+    if (!combo) return [];
+    const exige = combo.exige;
+    const acende =
+      exige.tipo === 'nenhum' ||
+      selecionados.some((outroId) => {
+        if (outroId === instId) return false;
+        const o = meuClan?.chars[outroId];
+        const od = o ? CHARACTER_BY_ID.get(o.defId) : undefined;
+        if (!od) return false;
+        return exige.tipo === 'classe' ? od.classe === exige.valor : od.papel === exige.valor;
+      });
+    return [{ instId, def, combo, acende }];
+  });
+
   const adicionarAoRascunho = () => {
     if (!slotAlvo || !ordemAlvo || selecionados.length === 0) return;
-    setRascunho([...rascunho, { slot: slotAlvo, charInstIds: selecionados, ordem: ordemAlvo }]);
+    setRascunho([
+      ...rascunho,
+      {
+        slot: slotAlvo,
+        charInstIds: selecionados,
+        ordem: ordemAlvo,
+        combo: comboAlvo || undefined,
+      },
+    ]);
     setSelecionados([]);
     setSlotAlvo('');
     setOrdemAlvo('');
+    setComboAlvo('');
   };
 
   const confirmar = () => {
@@ -895,6 +946,43 @@ export function EmperiumBoard() {
                   Adicionar investida
                 </button>
               </div>
+
+              {/* Só UM combo dispara por sala — você declara qual. */}
+              {combosDisponiveis.length > 0 && (
+                <div className="emp-combos">
+                  <span className="emp-combos-rot">
+                    Combo desta investida — só um dispara
+                  </span>
+                  <div className="emp-combos-lista">
+                    <button
+                      type="button"
+                      className={`emp-combo-op ${comboAlvo === '' ? 'sel' : ''}`}
+                      onClick={() => setComboAlvo('')}
+                    >
+                      nenhum
+                    </button>
+                    {combosDisponiveis.map(({ instId, def, combo, acende }) => (
+                      <button
+                        key={instId}
+                        type="button"
+                        className={`emp-combo-op ${comboAlvo === instId ? 'sel' : ''} ${
+                          acende ? '' : 'apagado'
+                        }`}
+                        onClick={() => setComboAlvo(instId)}
+                        title={
+                          acende
+                            ? combo.texto
+                            : `${combo.texto} — falta o companheiro exigido nesta investida`
+                        }
+                      >
+                        <b>{def.nome}</b>
+                        <span>{combo.texto}</span>
+                        {!acende && <i>não acende</i>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {rascunho.length > 0 && (
                 <div className="emp-rascunho">

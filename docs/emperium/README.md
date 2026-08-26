@@ -26,8 +26,11 @@ e de onde os rivais apostaram. Dado só no refino.
 
 | Arquivo | O que é |
 |---|---|
-| [00-prompt-mestre.md](00-prompt-mestre.md) | O briefing que gerou a v0.1. Reuse para regerar do zero, ou como checklist do que uma versão precisa cobrir. |
-| [01-design-v0.1.md](01-design-v0.1.md) | O design completo: motor, economia, castelo, 52 variações, itens, 3 modos, riscos. |
+| [**02-design-v0.2.md**](02-design-v0.2.md) | **O design atual.** Marcha Forçada, Transcendência como evolução, Combos e Marcas. |
+| [design-v0.2.html](design-v0.2.html) | Apresentação do design v0.2 (publicada como artifact). |
+| [tutorial.html](tutorial.html) | Tutorial de aprendizado, para quem vai jogar (publicado como artifact). |
+| [01-design-v0.1.md](01-design-v0.1.md) | Registro histórico. Mantém as tabelas completas das 26 bases e das 39 evoluções. |
+| [00-prompt-mestre.md](00-prompt-mestre.md) | O briefing que gerou a v0.1. Útil como checklist do que uma versão precisa cobrir. |
 
 ## Roadmap
 

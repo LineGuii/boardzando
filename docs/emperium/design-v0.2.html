@@ -1,0 +1,579 @@
+<title>Guerra do Emperium v0.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,800;1,400&family=Karla:wght@400;500;700&family=Silkscreen:wght@400;700&display=swap">
+
+<style>
+:root {
+  --ground:      #E9EBEC;
+  --surface:     #F8F9F9;
+  --surface-alt: #DFE3E4;
+  --ink:         #151B1F;
+  --ink-soft:    #3A454C;
+  --muted:       #667279;
+  --rule:        #C6CCCE;
+  --rule-soft:   #D8DCDE;
+
+  --emperium:    #00807E;
+  --emperium-dim:#B9DEDC;
+  --combo:       #6B4BA8;
+  --combo-dim:   #DED3F0;
+  --garnet:      #A03F36;
+  --garnet-dim:  #EBD2CF;
+
+  --shadow: 0 1px 2px rgba(21,27,31,.06), 0 8px 24px -12px rgba(21,27,31,.18);
+
+  --display: "Spectral", Georgia, serif;
+  --body:    "Karla", "Helvetica Neue", Arial, sans-serif;
+  --bitmap:  "Silkscreen", "Courier New", monospace;
+
+  --measure: 66ch;
+  --s1: .35rem; --s2: .7rem; --s3: 1.1rem; --s4: 1.75rem;
+  --s5: 2.75rem; --s6: 4.25rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0F1417; --surface: #161D21; --surface-alt: #1E272C;
+    --ink: #E3E8E9; --ink-soft: #BAC4C7; --muted: #89949A;
+    --rule: #2B363B; --rule-soft: #222C31;
+    --emperium: #3CD4CC; --emperium-dim: #12403F;
+    --combo: #A98CE0; --combo-dim: #2A2140;
+    --garnet: #E08A80; --garnet-dim: #48231F;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0F1417; --surface: #161D21; --surface-alt: #1E272C;
+  --ink: #E3E8E9; --ink-soft: #BAC4C7; --muted: #89949A;
+  --rule: #2B363B; --rule-soft: #222C31;
+  --emperium: #3CD4CC; --emperium-dim: #12403F;
+  --combo: #A98CE0; --combo-dim: #2A2140;
+  --garnet: #E08A80; --garnet-dim: #48231F;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--ground); color: var(--ink);
+  font-family: var(--body); font-size: 17px; line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 78rem; margin: 0 auto; padding: 0 var(--s3) var(--s6); }
+.col { max-width: var(--measure); }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+p, ul, ol { margin: 0; }
+a { color: var(--emperium); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--emperium); outline-offset: 3px; }
+
+.eyebrow {
+  font-family: var(--bitmap); font-size: .6rem; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+/* ── Masthead ─────────────────────────────────────────── */
+.mast {
+  border-bottom: 1px solid var(--rule);
+  padding: var(--s6) 0 var(--s5); margin-bottom: var(--s5);
+  display: flex; flex-direction: column; gap: var(--s3);
+}
+.mast h1 {
+  font-size: clamp(2.4rem, 6.5vw, 4.2rem);
+  font-weight: 800; line-height: .98; letter-spacing: -.022em;
+}
+.mast h1 .v { color: var(--combo); font-style: italic; font-weight: 400; }
+.mast .lede {
+  font-family: var(--display); font-size: clamp(1.05rem, 2.1vw, 1.3rem);
+  color: var(--ink-soft); max-width: 52ch; line-height: 1.5;
+}
+.specs { display: flex; flex-wrap: wrap; gap: var(--s1) 0;
+  border-top: 1px solid var(--rule-soft); padding-top: var(--s3); }
+.specs div { padding-right: var(--s4); }
+.specs dt { font-family: var(--bitmap); font-size: .58rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); }
+.specs dd { margin: 2px 0 0; font-weight: 700; font-size: .95rem;
+  font-variant-numeric: tabular-nums; }
+
+section { margin-bottom: var(--s6); }
+section > h2 {
+  font-size: clamp(1.5rem, 3.2vw, 2.1rem); font-weight: 700;
+  letter-spacing: -.015em; margin-bottom: var(--s2);
+}
+.step-no { font-family: var(--bitmap); font-size: .68rem; color: var(--combo);
+  letter-spacing: .08em; display: block; margin-bottom: var(--s1); }
+.stack { display: flex; flex-direction: column; gap: var(--s3); }
+h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: var(--s1); }
+ul.body, ol.body { padding-left: 1.15rem; display: flex; flex-direction: column; gap: var(--s2); }
+li::marker { color: var(--muted); }
+em.term { font-style: normal; font-weight: 700; color: var(--combo); }
+
+/* ── Changelog: defeito → correção ────────────────────── */
+.changes { display: flex; flex-direction: column; gap: var(--s3); }
+.change {
+  display: grid; grid-template-columns: 2.2rem 1fr 1fr; gap: var(--s3);
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 3px; padding: var(--s3); box-shadow: var(--shadow);
+}
+.change .n {
+  font-family: var(--display); font-weight: 800; font-size: 1.6rem;
+  color: var(--combo); line-height: 1; font-variant-numeric: tabular-nums;
+}
+.change h3 { grid-column: 2 / -1; margin-bottom: var(--s2); }
+.change .lado { display: flex; flex-direction: column; gap: 5px; }
+.change .rot {
+  font-family: var(--bitmap); font-size: .55rem; letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.change .rot.mal { color: var(--garnet); }
+.change .rot.bom { color: var(--emperium); }
+.change p { font-size: .88rem; line-height: 1.55; }
+
+/* ── Combo showcase ───────────────────────────────────── */
+.showcase {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--s3);
+  align-items: center; background: var(--surface);
+  border: 1px solid var(--combo); border-radius: 3px;
+  padding: var(--s4) var(--s3); box-shadow: var(--shadow);
+}
+/* min-width:0 em filhos de grid/flex: sem isso o conteudo define o minimo e
+   empurra a pagina para os lados. */
+.sc-card, .change .lado, .rung > * { min-width: 0; }
+.sc-card {
+  border: 1px solid var(--rule); border-radius: 3px; background: var(--surface-alt);
+  padding: var(--s3); display: flex; flex-direction: column; gap: var(--s1);
+}
+.sc-card .nm, .change p, .marca .ef { overflow-wrap: break-word; }
+.sc-card .forma { font-family: var(--bitmap); font-size: .55rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--garnet); }
+.sc-card .nm { font-family: var(--display); font-weight: 700; font-size: 1.02rem; line-height: 1.2; }
+.sc-card .kw { font-family: var(--bitmap); font-size: .55rem; letter-spacing: .06em;
+  color: var(--muted); }
+.sc-card .cb { font-size: .8rem; color: var(--combo); line-height: 1.4; }
+.sc-liga {
+  font-family: var(--bitmap); font-size: 1.4rem; color: var(--combo); text-align: center;
+}
+
+/* ── Marcas ───────────────────────────────────────────── */
+.marcas { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--s3); }
+.marca {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-left: 3px solid var(--garnet); border-radius: 0 3px 3px 0;
+  padding: var(--s3); display: flex; flex-direction: column; gap: var(--s1);
+}
+.marca .nm {
+  font-family: var(--bitmap); font-size: .68rem; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--garnet); font-weight: 700;
+}
+.marca .ef { font-size: .88rem; }
+.marca .orig { font-size: .78rem; font-style: italic; color: var(--muted); }
+
+/* ── Tabelas ──────────────────────────────────────────── */
+.twrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px;
+  background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { text-align: left; padding: var(--s2) var(--s3);
+  border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+thead th { font-family: var(--bitmap); font-size: .58rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted); background: var(--surface-alt);
+  border-bottom: 1px solid var(--rule); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+td .cb { color: var(--combo); }
+
+/* ── Callouts ─────────────────────────────────────────── */
+.note { border-left: 3px solid var(--combo); background: var(--surface);
+  padding: var(--s3); border-radius: 0 3px 3px 0; }
+.note.tea { border-left-color: var(--emperium); }
+.note .lbl { font-family: var(--bitmap); font-size: .58rem; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--muted); display: block; margin-bottom: var(--s1); }
+
+/* ── Marcha ladder ────────────────────────────────────── */
+.ladder { display: flex; flex-direction: column; gap: 4px; }
+.rung { display: grid; grid-template-columns: 11rem 1fr 3.5rem; align-items: center;
+  gap: var(--s3); font-size: .88rem; }
+.rung .bar { height: 20px; border-radius: 2px; background: var(--garnet-dim);
+  border: 1px solid var(--rule); }
+.rung .bar span { display: block; height: 100%; background: var(--garnet); border-radius: 1px; }
+.rung .v { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; }
+.rung.livre .v { color: var(--emperium); }
+
+/* ── Status ───────────────────────────────────────────── */
+.status { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: var(--s3); }
+.st { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: var(--s3); }
+.st h3 { margin-bottom: var(--s2); }
+.st ul { padding-left: 1.1rem; display: flex; flex-direction: column; gap: 4px; font-size: .86rem; }
+
+footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
+  color: var(--muted); font-size: .85rem; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (max-width: 46rem) {
+  .change { grid-template-columns: 1.8rem 1fr; }
+  .change h3 { grid-column: 2; }
+  .showcase { grid-template-columns: 1fr; }
+  .sc-liga { transform: rotate(90deg); }
+  .rung { grid-template-columns: 8rem 1fr 3rem; }
+}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <span class="eyebrow">Documento de design · substitui a v0.1</span>
+  <h1>Guerra do Emperium <span class="v">v0.2</span></h1>
+  <p class="lede">Três mudanças estruturais, cada uma nascida de um defeito concreto que a
+     versão anterior tinha e a gente não tinha visto.</p>
+  <dl class="specs">
+    <div><dt>Jogadores</dt><dd>3–5</dd></div>
+    <div><dt>Duração</dt><dd>60–90 min</dd></div>
+    <div><dt>Personagens base</dt><dd>26</dd></div>
+    <div><dt>Evoluções</dt><dd>39</dd></div>
+    <div><dt>Combos</dt><dd>24</dd></div>
+    <div><dt>Testes</dt><dd>197</dd></div>
+  </dl>
+</header>
+
+<!-- ─────────────────────────────────────────────────── -->
+<section>
+  <span class="step-no">01 — O que mudou</span>
+  <h2>Três defeitos, três correções</h2>
+  <div class="col stack" style="margin-bottom: var(--s4)">
+    <p>Nenhuma das três mudanças começou como "seria legal se". Todas começaram como um
+       sintoma na mesa que, rastreado até a causa, revelou uma decisão de design errada.</p>
+  </div>
+
+  <div class="changes">
+    <article class="change">
+      <span class="n">1</span>
+      <h3>Marcha Forçada</h3>
+      <div class="lado">
+        <span class="rot mal">o defeito</span>
+        <p>A regra exigia adjacência estrita, então <strong>na rodada 1 o Portão era a única
+           sala legal para todo atacante</strong>. A decisão que o jogo diz ser central — onde
+           não colocar sua gente — não existia até a rodada 3, e o defensor, sabendo onde
+           todos estariam, só precisava empilhar tudo num lugar.</p>
+      </div>
+      <div class="lado">
+        <span class="rot bom">a correção</span>
+        <p>Toda sala é alcançável sempre; o que varia é o preço. Ir além da sua linha de
+           frente custa <strong>−2 de Poder por sala de distância</strong>. Sete destinos
+           desde o primeiro turno, e o defensor passa a ter que cobrir sete salas.</p>
+      </div>
+    </article>
+
+    <article class="change">
+      <span class="n">2</span>
+      <h3>Transcendência virou evolução</h3>
+      <div class="lado">
+        <span class="rot mal">o defeito</span>
+        <p>Era um segundo baralho de <em>personagens</em>. Você comprava um Arquimago pronto
+           e o seu Bruxo — o que sobreviveu a quatro rodadas, com a arma refinada e a Carta
+           Hydra encaixada — virava enchimento. <strong>O jogo aposentava seus veteranos.</strong></p>
+      </div>
+      <div class="lado">
+        <span class="rot bom">a correção</span>
+        <p>A evolução é empilhada sobre alguém que já é seu: Poder e palavras-chave
+           <strong>somam</strong>, o equipamento fica. O veterano é <em>o próprio</em> que
+           vira Arquimago, e perdê-lo custa o recrutamento mais a evolução.</p>
+      </div>
+    </article>
+
+    <article class="change">
+      <span class="n">3</span>
+      <h3>Combos</h3>
+      <div class="lado">
+        <span class="rot mal">o defeito</span>
+        <p>As palavras-chave eram todas aritmética <em>dentro</em> da própria facção. Elo soma
+           por aliado, Muralha subtrai do inimigo — nenhuma perguntava <strong>quem</strong>
+           está do seu lado, só quantos. Um Monge ao lado de um Sábio valia o mesmo que ao
+           lado de outro Monge.</p>
+      </div>
+      <div class="lado">
+        <span class="rot bom">a correção</span>
+        <p>Algumas cartas ganharam uma linha que <strong>nomeia outro personagem</strong>. A
+           Reserva deixou de ser um saco de números e virou um clã, e nada disso passa por
+           equipamento.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────── -->
+<section>
+  <span class="step-no">02 — O sistema novo</span>
+  <h2>Combos</h2>
+  <div class="col stack" style="margin-bottom: var(--s4)">
+    <p>Algumas cartas trazem uma linha extra com a forma:</p>
+    <div class="note">
+      <span class="lbl">Anatomia de um combo</span>
+      <p><strong>COMBO Bruxo:</strong> seus personagens ignoram toda a Muralha inimiga.<br>
+      <span style="color:var(--muted); font-size:.88rem">ativa se você tiver um Bruxo
+      comprometido na mesma sala</span></p>
+    </div>
+    <p>Um Combo pode exigir uma <strong>classe</strong> (Bruxo, Monge), um <strong>Papel</strong>
+       (Arcano, Vanguarda), ou nada — alguns são incondicionais. O portador nunca conta como
+       o próprio companheiro.</p>
+  </div>
+
+  <h3 class="col">A jogada que melhor explica o sistema</h3>
+  <div class="col stack" style="margin-bottom: var(--s3)">
+    <p>Dois personagens transcendidos na mesma sala, mais de 40 zeny de investimento:</p>
+  </div>
+
+  <div class="showcase">
+    <div class="sc-card">
+      <span class="forma">Professor</span>
+      <span class="nm">Sábio Encantador</span>
+      <span class="kw">ELO 1 · +2 PODER</span>
+      <span class="cb"><strong>COMBO Monge:</strong> ninguém seu vai à Enfermaria por Esgotar.</span>
+    </div>
+    <span class="sc-liga" aria-hidden="true">⚡</span>
+    <div class="sc-card">
+      <span class="forma">Mestre</span>
+      <span class="nm">Monge Combo</span>
+      <span class="kw">ESGOTAR · +7 PODER</span>
+      <span class="cb">Punho de Asura: bate como um caminhão e sai de cena.</span>
+    </div>
+  </div>
+
+  <div class="col stack" style="margin-top: var(--s3)">
+    <p>O Asura dá +7 de Poder e vai para a Enfermaria — vencendo ou perdendo. O combo do
+       Professor cancela o Esgotar da facção inteira. Resultado: <strong>o Monge bate e
+       continua na Reserva para a rodada seguinte.</strong></p>
+    <p>É literalmente o Professor devolvendo SP para o segundo Asura, e só é possível porque
+       um personagem agora enxerga o outro.</p>
+  </div>
+
+  <h3 class="col" style="margin-top: var(--s5)">O freio: um combo por sala</h3>
+  <div class="col stack">
+    <p><strong>Só um combo dispara por facção por sala</strong>, declarado no comprometimento.
+       Juntar cinco personagens não acumula cinco combos.</p>
+    <div class="note tea">
+      <span class="lbl">Por que o teto não é burocracia</span>
+      <p>Combo puxa para <strong>concentrar</strong> — preciso do Sábio junto do Bruxo. Marcha
+      Forçada e as quatro Ordens puxam para <strong>espalhar</strong>. Sem o teto, a mesa
+      voltaria a empilhar todo mundo numa sala só, que é exatamente o defeito que a mudança
+      número 1 acabou de consertar. As duas forças brigando é o que dá textura ao
+      posicionamento.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────── -->
+<section>
+  <span class="step-no">03 — Quebrar o inimigo</span>
+  <h2>As três marcas</h2>
+  <div class="col stack" style="margin-bottom: var(--s4)">
+    <p>Vários combos não melhoram o seu grupo: eles <strong>quebram o inimigo para outro
+       aproveitar</strong>. Isso precisa de um alvo persistente, e o conjunto é fechado em
+       três — de propósito, porque marca demais vira contabilidade.</p>
+    <p>Marcas sempre caem na <strong>maior facção inimiga da sala</strong>.</p>
+  </div>
+
+  <div class="marcas">
+    <div class="marca">
+      <span class="nm">Exposto</span>
+      <span class="ef">A facção marcada perde <strong>toda a Muralha</strong>.</span>
+      <span class="orig">O fogo grego do Alquimista quebrando a armadura — e o Ácido do
+        Criador, na transclasse, ainda marca Preso junto.</span>
+    </div>
+    <div class="marca">
+      <span class="nm">Preso</span>
+      <span class="ef">Perde o bônus da Ordem e <strong>não pode usar Escudar</strong>.</span>
+      <span class="orig">Corpo Fechado e Dilema travando o alvo enquanto o amigo mata.</span>
+    </div>
+    <div class="marca">
+      <span class="nm">Revelado</span>
+      <span class="ef">Cancela <strong>Oculto</strong>: entra na revelação normal.</span>
+      <span class="orig">O falcão do Sniper achando o Mercenário escondido.</span>
+    </div>
+  </div>
+
+  <div class="col stack" style="margin-top: var(--s4)">
+    <h3>E o Rapto</h3>
+    <p>Um efeito à parte: <strong>arranca 1 personagem da maior facção inimiga</strong>, e ele
+       volta à Reserva do dono <em>sem sofrer baixa</em>. É o Rapto do Arruaceiro criando o 1
+       contra 1.</p>
+    <p>Resolve <strong>antes de somar qualquer Poder</strong>, porque arrancar alguém muda o
+       cálculo de quem ficou. E se dois clãs declararem Rapto na mesma sala,
+       <strong>nenhum acontece</strong> — os dois se atrapalham. O caos precisa de teto.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────── -->
+<section>
+  <span class="step-no">04 — Posicionamento</span>
+  <h2>Marcha Forçada</h2>
+  <div class="col stack" style="margin-bottom: var(--s4)">
+    <p>Sua <em class="term">linha de frente</em> é o Portão, mais o que você controlava no fim
+       da rodada anterior, mais o que faz fronteira com isso. Entrar ali é grátis. Qualquer
+       outra sala custa <strong>−2 de Poder por sala de distância</strong>.</p>
+    <p>O que um atacante paga na rodada 1:</p>
+  </div>
+
+  <div class="ladder">
+    <div class="rung livre">
+      <span>Portão Principal</span>
+      <span class="bar"><span style="width:0"></span></span>
+      <span class="v">grátis</span>
+    </div>
+    <div class="rung">
+      <span>Alas internas</span>
+      <span class="bar"><span style="width:25%"></span></span>
+      <span class="v">−2</span>
+    </div>
+    <div class="rung">
+      <span>Alas fundas</span>
+      <span class="bar"><span style="width:50%"></span></span>
+      <span class="v">−4</span>
+    </div>
+    <div class="rung">
+      <span>Salão do Trono</span>
+      <span class="bar"><span style="width:75%"></span></span>
+      <span class="v">−6</span>
+    </div>
+    <div class="rung">
+      <span>Sala do Emperium</span>
+      <span class="bar"><span style="width:100%"></span></span>
+      <span class="v">−8</span>
+    </div>
+  </div>
+
+  <div class="col stack" style="margin-top: var(--s4)">
+    <p>Marchar fundo quase sempre é uma péssima ideia — e é por isso que funciona. A opção
+       existir obriga o defensor a cobrir sete salas em vez de uma.</p>
+    <div class="note tea">
+      <span class="lbl">O efeito colateral que virou o melhor da regra</span>
+      <p>Tomar uma sala <strong>aproxima a linha de frente</strong>. Num teste real, roubar o
+      Terraço na rodada 1 tornou a Forja grátis e derrubou o Salão do Trono de −6 para −2.
+      Conquistar uma sala passou a valer muito além dela mesma: o avanço deixou de ser um
+      corredor e virou investimento.</p>
+    </div>
+    <p>O portão duro do Salão do Trono <strong>deixou de existir</strong>. A Sala do Emperium
+       custa −8 de marcha, e a aritmética faz o trabalho que a proibição fazia — sem tirar a
+       carta de cima da mesa. O assalto desesperado de última rodada passou a ser possível, e
+       o defensor nunca mais pode deixar o Emperium vazio.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────── -->
+<section>
+  <span class="step-no">05 — Os 24 combos</span>
+  <h2>O catálogo</h2>
+  <div class="col stack" style="margin-bottom: var(--s3)">
+    <p>Nem toda carta tem combo — cartas simples devem continuar simples.</p>
+  </div>
+
+  <h3 class="col" style="margin-bottom: var(--s2)">Nas bases</h3>
+  <div class="twrap" style="margin-bottom: var(--s4)">
+    <table>
+      <thead><tr><th>Carta</th><th>Combo</th></tr></thead>
+      <tbody>
+        <tr><td>Sábio Proteção de Solo</td><td><span class="cb"><b>COMBO Bruxo:</b></span> sua facção ignora toda a Muralha inimiga</td></tr>
+        <tr><td>Templário Defensor</td><td><span class="cb"><b>COMBO Arcano:</b></span> seus Arcanos não sofrem baixa</td></tr>
+        <tr><td>Bardo Canção</td><td><span class="cb"><b>COMBO Arcano:</b></span> seus Arcanos ganham +3 de Poder</td></tr>
+        <tr><td>Odalisca Dança Lenta</td><td><span class="cb"><b>COMBO Bardo/Odalisca:</b></span> +4 de Poder — o dueto</td></tr>
+        <tr><td>Cavaleiro Bola de Boliche</td><td><span class="cb"><b>COMBO Templário:</b></span> a maior facção inimiga fica Presa</td></tr>
+        <tr><td>Monge Corpo de Aço</td><td><span class="cb"><b>COMBO:</b></span> a maior facção inimiga fica Presa</td></tr>
+        <tr><td>Alquimista Boticário</td><td><span class="cb"><b>COMBO:</b></span> a maior facção inimiga fica Exposta</td></tr>
+        <tr><td>Caçador Armadilheiro</td><td><span class="cb"><b>COMBO:</b></span> a maior facção inimiga fica Revelada</td></tr>
+        <tr><td>Ferreiro Mercador</td><td><span class="cb"><b>COMBO:</b></span> +1 de Poder a cada 5 zeny no bolso</td></tr>
+        <tr><td>Arruaceiro Gatuno</td><td><span class="cb"><b>COMBO Ágil:</b></span> Rapto</td></tr>
+        <tr><td>Sacerdote Suporte</td><td><span class="cb"><b>COMBO Vanguarda:</b></span> sua facção ignora a Marcha Forçada</td></tr>
+        <tr><td>Mercenário Golpe Sônico</td><td><span class="cb"><b>COMBO Alquimista:</b></span> +4 de Poder — ele entra pela brecha</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="col" style="margin-bottom: var(--s2)">Nas Transcendências</h3>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Evolução</th><th>Combo</th></tr></thead>
+      <tbody>
+        <tr><td>Professor — Memorizar</td><td><span class="cb"><b>COMBO Monge:</b></span> ninguém seu vai à Enfermaria por Esgotar</td></tr>
+        <tr><td>Criador — Demonstração Ácida</td><td><span class="cb"><b>COMBO:</b></span> a maior facção inimiga fica Exposta <b>e</b> Presa</td></tr>
+        <tr><td>Mestre-Ferreiro — Carrocerada</td><td><span class="cb"><b>COMBO:</b></span> +1 de Poder a cada <b>3</b> zeny <i>(era 5 na base)</i></td></tr>
+        <tr><td>Paladino — Devoção</td><td><span class="cb"><b>COMBO Vanguarda:</b></span> se você perder, o vencedor também sofre 1 baixa</td></tr>
+        <tr><td>Desordeiro — Marcha Silenciosa</td><td><span class="cb"><b>COMBO:</b></span> Rapto</td></tr>
+        <tr><td>Atirador de Elite — Olho de Falcão</td><td><span class="cb"><b>COMBO:</b></span> a maior facção inimiga fica Revelada</td></tr>
+        <tr><td>Menestrel/Cigana — Canção Longa</td><td><span class="cb"><b>COMBO Vanguarda:</b></span> sua facção ignora a Marcha Forçada</td></tr>
+        <tr><td>Professor — Dissonância</td><td><span class="cb"><b>COMBO:</b></span> a maior facção inimiga fica Presa</td></tr>
+        <tr><td>Paladino — Corrente de Escudo</td><td><span class="cb"><b>COMBO Arcano:</b></span> seus Arcanos não sofrem baixa</td></tr>
+        <tr><td>Mestre — Salto</td><td><span class="cb"><b>COMBO:</b></span> sua facção ignora a Marcha Forçada</td></tr>
+        <tr><td>Arquimago — Ganbantein</td><td><span class="cb"><b>COMBO Sábio:</b></span> sua facção ignora toda a Muralha inimiga</td></tr>
+        <tr><td>Criador — Homúnculo Superior</td><td><span class="cb"><b>COMBO:</b></span> +3 de Poder — o homúnculo luta junto</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────── -->
+<section>
+  <span class="step-no">06 — Onde isso pode dar errado</span>
+  <h2>Riscos conhecidos</h2>
+  <div class="col stack" style="margin-bottom: var(--s3)">
+    <p>Cada risco tem um sinal observável e uma alavanca de uma linha. Nenhum diz
+       "balancear no playtest".</p>
+  </div>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Risco</th><th>Sinal no playtest</th><th>Alavanca</th></tr></thead>
+      <tbody>
+        <tr><td><b>Combo empurra tudo para uma sala</b></td><td>Ninguém compromete em mais de 2 salas</td><td>Exigir 3+ personagens para o combo acender</td></tr>
+        <tr><td><b>Marcas decidem a sala sozinhas</b></td><td>Quem marca sempre vence</td><td>Marcar custa 1 baixa a quem aplica</td></tr>
+        <tr><td><b>Professor + Asura dominante</b></td><td>Toda partida termina nele</td><td>Cancela-Esgotar vale para 1 personagem, não a facção</td></tr>
+        <tr><td><b>−2 por sala está errado</b></td><td>Ninguém marcha, ou todos pulam pro Trono</td><td><code>MARCHA_PENALIDADE</code>, uma constante</td></tr>
+        <tr><td><b>Rapto é frustrante de sofrer</b></td><td>Reclamação na mesa</td><td>Restringir o alvo ao de menor Poder</td></tr>
+        <tr><td><b>Defensor rico demais</b></td><td>Castelo nunca troca de dono</td><td>Bônus do castelo de +6 para +4 zeny</td></tr>
+        <tr><td><b>Mercado arrastado</b></td><td>Mais de 5 min com 4 jogadores</td><td>3 ações → 2, renda base 6 → 8</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────── -->
+<section>
+  <span class="step-no">07 — Estado</span>
+  <h2>O que roda e o que falta</h2>
+  <div class="status">
+    <div class="st">
+      <h3>Implementado</h3>
+      <ul>
+        <li>Modo 3 (Cerco) completo, 6 rodadas</li>
+        <li>Marcha Forçada e avanço da linha de frente</li>
+        <li>Transcendência com 39 caminhos</li>
+        <li>Combos, as 3 marcas e o Rapto</li>
+        <li>Equipamento, refino e cartas de monstro</li>
+        <li>Reposicionamento de Guardiões</li>
+        <li><b>197 testes</b>, incluindo o exemplo trabalhado do design reproduzido número a número</li>
+      </ul>
+    </div>
+    <div class="st">
+      <h3>Falta</h3>
+      <ul>
+        <li>Modo 1 (Assalto Selvagem) e Modo 2 (Guerra dos Reinos)</li>
+        <li>Seletor de consumíveis na interface — eles são compráveis mas ainda não jogáveis</li>
+        <li>Botão para comprar carta de monstro (existe no servidor)</li>
+        <li>Playtest físico de verdade: nada disso foi jogado numa mesa ainda</li>
+      </ul>
+    </div>
+    <div class="st">
+      <h3>Perguntas em aberto</h3>
+      <ul>
+        <li>−2 por sala de marcha é o número certo?</li>
+        <li>24 combos é pouco ou demais para 26 bases?</li>
+        <li>Um personagem deveria poder transcender duas vezes num jogo mais longo?</li>
+        <li>A fase de mercado ainda é o trecho mais parado da rodada</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Guerra do Emperium v0.2</strong> — board game original inspirado na War of
+  Emperium do Ragnarok Online. Nenhum material da Gravity Corp. é usado ou reproduzido; a
+  arte e as regras são próprias. O documento completo está em
+  <code>docs/emperium/02-design-v0.2.md</code>; o tutorial de aprendizado é um artefato
+  separado.</p>
+</footer>
+
+</div>

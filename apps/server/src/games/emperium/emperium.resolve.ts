@@ -5,7 +5,10 @@ import {
   MONSTER_BY_ID,
   TRANSCENDENCIA_BY_ID,
   type CharacterDef,
+  type Combo,
   type KeywordName,
+  type Marca,
+  type Papel,
   type TranscendenceDef,
 } from './emperium.cards';
 import {
@@ -138,6 +141,36 @@ interface Faction {
   imuneMuralha: number;
   /** Salas de Marcha Forcada percorridas. */
   marcha: number;
+  /** Bonus vindo da Ordem, separado porque a marca PRESO o remove. */
+  bonusOrdem: number;
+  /** O combo declarado por esta faccao nesta sala, se acendeu. */
+  comboAtivo?: Combo;
+  /** Marcas que esta faccao esta sofrendo. */
+  marcas: Set<Marca>;
+  /** Efeitos de combo aplicados a esta faccao. */
+  protegePapel?: Papel;
+  cancelaEsgotar: boolean;
+  troco: boolean;
+  perfurarTotal: boolean;
+}
+
+/**
+ * O combo acende? Precisa do companheiro exigido na mesma sala — e o portador
+ * nao conta como o proprio companheiro.
+ */
+function comboAcende(portador: CharCompute, chars: readonly CharCompute[], c: Combo): boolean {
+  if (c.exige.tipo === 'nenhum') return true;
+  return chars.some((o) => {
+    if (o.instId === portador.instId) return false;
+    if (c.exige.tipo === 'classe') return o.def.classe === c.exige.valor;
+    if (c.exige.tipo === 'papel') return o.def.papel === c.exige.valor;
+    return false;
+  });
+}
+
+/** O combo do personagem: a evolucao substitui o da base quando traz um. */
+function comboDe(c: CharCompute): Combo | undefined {
+  return c.trans?.combo ?? c.def.combo;
 }
 
 /**
@@ -235,11 +268,13 @@ function factionPower(
   }
   if (consumivel === 'co-convocacao') total += 3;
 
-  // Ordem.
+  // Ordem — guardada separada porque a marca PRESO a remove depois.
+  let bonusOrdem = 0;
   if (ordem) {
-    if (ordem === 'emboscada') total += emboscadaExclusiva ? 2 : -2;
-    else total += ORDER_POWER[ordem];
+    if (ordem === 'emboscada') bonusOrdem = emboscadaExclusiva ? 2 : -2;
+    else bonusOrdem = ORDER_POWER[ordem];
   }
+  total += bonusOrdem;
 
   // Marcha Forcada: quem pulou salas chega disperso. Salto (Mestre) e Marcha
   // Silenciosa (Desordeiro) guiam o grupo: um so deles anula a penalidade da
@@ -260,7 +295,83 @@ function factionPower(
     temAnular,
     imuneMuralha,
     marcha,
+    bonusOrdem,
+    marcas: new Set<Marca>(),
+    cancelaEsgotar: false,
+    troco: false,
+    perfurarTotal: false,
   };
+}
+
+/**
+ * Dispara o combo declarado de cada faccao e aplica marcas nos inimigos.
+ *
+ * So UM combo por faccao por sala, escolhido no comprometimento. Marcas sempre
+ * caem na maior faccao inimiga — o design deixa a escolha ao jogador, mas a
+ * versao digital automatiza no alvo obvio para nao travar a resolucao pedindo
+ * alvo a cada efeito.
+ */
+function applyCombos(factions: Faction[], zenyDe: (p: PlayerId) => number): void {
+  for (const f of factions) {
+    const c = f.comboAtivo;
+    if (!c) continue;
+    const e = c.efeito;
+    switch (e.tipo) {
+      case 'poder':
+        f.poderBruto += e.x;
+        break;
+      case 'poder-por-zeny':
+        if (f.playerId) f.poderBruto += Math.floor(zenyDe(f.playerId) / e.cada);
+        break;
+      case 'perfurar-total':
+        f.perfurarTotal = true;
+        break;
+      case 'protege-papel':
+        f.protegePapel = e.papel;
+        break;
+      case 'rajada-papel':
+        f.poderBruto += e.x * f.chars.filter((ch) => ch.def.papel === e.papel).length;
+        break;
+      case 'cancela-esgotar':
+        f.cancelaEsgotar = true;
+        break;
+      case 'marcha-livre':
+        // Devolve o que a Marcha Forcada tinha cobrado.
+        f.poderBruto += MARCHA_PENALIDADE * f.marcha;
+        break;
+      case 'troco':
+        f.troco = true;
+        break;
+      case 'marca': {
+        const alvo = maiorInimiga(factions, f);
+        if (alvo) alvo.marcas.add(e.marca);
+        // Demonstracao Acida marca EXPOSTO e PRESO de uma vez.
+        if (alvo && e.marca === 'exposto' && c.texto.includes('PRESA')) alvo.marcas.add('preso');
+        break;
+      }
+      case 'rapto':
+        // Resolvido antes, na montagem das faccoes.
+        break;
+    }
+  }
+
+  // Consequencias das marcas.
+  for (const f of factions) {
+    if (f.marcas.has('exposto')) f.muralha = 0;
+    if (f.marcas.has('preso')) {
+      f.poderBruto -= f.bonusOrdem;
+      f.bonusOrdem = 0;
+    }
+  }
+}
+
+function maiorInimiga(factions: readonly Faction[], eu: Faction): Faction | null {
+  let melhor: Faction | null = null;
+  for (const o of factions) {
+    if (o === eu) continue;
+    if (!melhor || o.poderBruto > melhor.poderBruto) melhor = o;
+  }
+  return melhor;
 }
 
 /**
@@ -300,7 +411,8 @@ function applyMuralha(factions: Faction[]): void {
       if (outra === f) continue;
       reducao += outra.muralha;
     }
-    const efetiva = Math.max(0, reducao - f.perfurar);
+    // Proteção de Solo: a facção atravessa qualquer Muralha.
+    const efetiva = f.perfurarTotal ? 0 : Math.max(0, reducao - f.perfurar);
     // Poder marcado como imune a Muralha nao pode ser reduzido.
     const reduzivel = Math.max(0, f.poderBruto - f.imuneMuralha);
     f.poderFinal = f.poderBruto - Math.min(efetiva, reduzivel);
@@ -320,12 +432,18 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
     if (c.ghostring) return false; // Ghostring nao pode sofrer baixa.
     if (c.imortal) return false; // Corpo de Aco Supremo / Teimosia Absurda.
     if (c.def.special === 'teimoso' && round === 1) return false;
+    // Combo de protecao: o tanque provocando enquanto o bruxo conjura.
+    if (f.protegePapel && c.def.papel === f.protegePapel) return false;
     return true;
   });
 
-  const escudar = elegiveis.filter((c) => c.keywords.has('escudar'));
+  // PRESO tira o Escudar do alvo: travado, ele nao consegue cobrir ninguem —
+  // os escudos deixam de vir primeiro e entram na fila normal.
+  const preso = f.marcas.has('preso');
+  const ehEscudo = (c: CharCompute) => !preso && c.keywords.has('escudar');
+  const escudar = elegiveis.filter(ehEscudo);
   const resto = elegiveis
-    .filter((c) => !c.keywords.has('escudar'))
+    .filter((c) => !ehEscudo(c))
     .sort((a, b) => {
       // Amuleto de Ferro: nunca e a primeira baixa.
       const aAmu = a.equipSpecials.has('nunca-primeira-baixa') ? 1 : 0;
@@ -359,6 +477,45 @@ export interface RoomInput {
   commitment: Commitment;
 }
 
+/** O combo declarado no comprometimento, se o portador esta la e ele acende. */
+function comboDeclarado(chars: readonly CharCompute[], declarado?: string): Combo | undefined {
+  if (!declarado) return undefined;
+  const portador = chars.find((c) => c.instId === declarado);
+  if (!portador) return undefined;
+  const c = comboDe(portador);
+  if (!c || !comboAcende(portador, chars, c)) return undefined;
+  return c;
+}
+
+/**
+ * RAPTO: arranca 1 personagem da maior faccao inimiga da sala; ele volta a
+ * Reserva do dono sem sofrer baixa. E o Rapto do Arruaceiro criando o 1 contra
+ * 1 — o alvo escolhido e o de maior Poder de carta, que e o que um jogador
+ * faria. No maximo um rapto por sala: o caos precisa de teto.
+ */
+function aplicarRaptos(grupos: { input: RoomInput; chars: CharCompute[] }[]): string[] {
+  const raptores = grupos.filter((g) => {
+    const c = comboDeclarado(g.chars, g.input.commitment.combo);
+    return c?.efeito.tipo === 'rapto';
+  });
+  if (raptores.length === 0) return [];
+
+  // Empate de raptores: ninguem rapta. Duas emboscadas se cancelam.
+  if (raptores.length > 1) return [];
+  const raptor = raptores[0]!;
+
+  let alvo: { g: (typeof grupos)[number]; c: CharCompute } | null = null;
+  for (const g of grupos) {
+    if (g === raptor) continue;
+    for (const c of g.chars) {
+      if (!alvo || c.poderCarta > alvo.c.poderCarta) alvo = { g, c };
+    }
+  }
+  if (!alvo) return [];
+  alvo.g.chars = alvo.g.chars.filter((c) => c.instId !== alvo!.c.instId);
+  return [alvo.c.instId];
+}
+
 /**
  * Resolve uma sala comum (nao-Emperium). Devolve o resultado; nao muta estado.
  */
@@ -373,7 +530,10 @@ export function resolveRoom(
 
   const emboscadores = inputs.filter((i) => i.commitment.ordem === 'emboscada').length;
 
-  const factions: Faction[] = [];
+  // Pass 0 — monta os grupos e resolve o RAPTO antes de somar qualquer Poder:
+  // arrancar alguem muda o calculo de quem ficou (ELO, SOLO), entao tem que
+  // acontecer primeiro.
+  const grupos: { input: RoomInput; chars: CharCompute[] }[] = [];
   for (const input of inputs) {
     // Asa de Borboleta: retira todos os personagens da sala antes de resolver.
     if (input.commitment.consumivel === 'co-borboleta') continue;
@@ -383,18 +543,27 @@ export function resolveRoom(
       .map((id) => computeChar(state, clan, id))
       .filter((c): c is CharCompute => c !== null);
     if (chars.length === 0) continue;
-    factions.push(
-      factionPower(
-        state,
-        slot,
-        input.playerId,
-        chars,
-        input.commitment.ordem,
-        emboscadores === 1,
-        input.commitment.consumivel,
-        input.commitment.marcha ?? 0,
-      ),
+    grupos.push({ input, chars });
+  }
+
+  const raptados = aplicarRaptos(grupos);
+
+  // Pass 1 — agora sim, o Poder de cada faccao.
+  const factions: Faction[] = [];
+  for (const g of grupos) {
+    if (g.chars.length === 0) continue;
+    const f = factionPower(
+      state,
+      slot,
+      g.input.playerId,
+      g.chars,
+      g.input.commitment.ordem,
+      emboscadores === 1,
+      g.input.commitment.consumivel,
+      g.input.commitment.marcha ?? 0,
     );
+    f.comboAtivo = comboDeclarado(g.chars, g.input.commitment.combo);
+    factions.push(f);
   }
 
   // Guarnicao fixa da sala (Salao dos Guardioes) combate todas as faccoes.
@@ -411,9 +580,17 @@ export function resolveRoom(
       temAnular: 0,
       imuneMuralha: 0,
       marcha: 0,
+      bonusOrdem: 0,
+      marcas: new Set<Marca>(),
+      cancelaEsgotar: false,
+      troco: false,
+      perfurarTotal: false,
     });
   }
 
+  // Pass 2 — combos e marcas, ANTES de Anular e Muralha: EXPOSTO zera a
+  // Muralha do alvo e PRESO tira o bonus da Ordem dele.
+  applyCombos(factions, (p) => state.clans[p]?.zeny ?? 0);
   applyAnular(factions);
   applyMuralha(factions);
 
@@ -444,6 +621,9 @@ export function resolveRoom(
       baixas,
       venceu: vencedora === f,
       marcha: f.marcha,
+      combo: f.comboAtivo?.texto,
+      marcas: [...f.marcas],
+      cancelaEsgotar: f.cancelaEsgotar,
     };
   });
 
@@ -456,6 +636,17 @@ export function resolveRoom(
       const extra = f.chars.find((c) => !jaCaidos.has(c.instId) && !c.ghostring);
       if (extra) r.baixas = [...r.baixas, extra.instId];
     }
+  }
+
+  // Troco (Reflect Shield): quem perdeu com esse combo leva o vencedor junto.
+  const idxVencedora = factions.findIndex((f) => f === vencedora);
+  if (idxVencedora >= 0 && factions.some((f, i) => f.troco && !resultados[i]!.venceu)) {
+    const rv = resultados[idxVencedora]!;
+    const jaCaidos = new Set(rv.baixas);
+    const extra = factions[idxVencedora]!.chars.find(
+      (c) => !jaCaidos.has(c.instId) && !c.ghostring && !c.imortal,
+    );
+    if (extra) rv.baixas = [...rv.baixas, extra.instId];
   }
 
   // Ninguem controla o Salao dos Guardioes enquanto a guarnicao estiver viva.
@@ -475,6 +666,7 @@ export function resolveRoom(
     controladorAnterior: room?.controlador ?? null,
     semDisputa: false,
     semResistencia,
+    raptados,
     resumo: resumoDeSala(resultados, controlador, empate, semResistencia),
   };
 }
@@ -582,6 +774,9 @@ export function resolveEmperium(
       baixas,
       venceu: false,
       marcha: f.marcha,
+      combo: f.comboAtivo?.texto,
+      marcas: [...f.marcas],
+      cancelaEsgotar: f.cancelaEsgotar,
     };
   });
 
@@ -626,6 +821,7 @@ export function resolveEmperium(
     controladorAnterior: null,
     semDisputa: false,
     semResistencia: false,
+    raptados: [],
     resumo,
     escudo: escudoDefensor + escudoBase,
     danoPorJogador: dano,

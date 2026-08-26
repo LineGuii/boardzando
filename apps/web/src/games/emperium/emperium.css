@@ -16,6 +16,7 @@
   --sangue: #D9756B;
   --sangue-fundo: #47211D;
   --ouro: #D8B45F;
+  --combo: #9A7AD6;
 
   --vanguarda: #B07B3C;
   --arcano: #5B82CE;
@@ -376,6 +377,96 @@
   font-style: italic;
   color: var(--tinta-fraca);
   margin-top: auto;
+}
+
+/* ── Combos: a linha que faz um personagem enxergar o outro ── */
+
+.emp-card-combo {
+  font-size: 0.62rem;
+  line-height: 1.3;
+  color: var(--combo);
+  border-top: 1px dashed var(--pedra-borda);
+  padding-top: 4px;
+}
+
+.emp-combos {
+  margin-top: 12px;
+  padding: 11px;
+  border: 1px solid var(--combo);
+  border-radius: 5px;
+  background: rgba(154, 122, 214, 0.06);
+}
+.emp-combos-rot {
+  display: block;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--combo);
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+.emp-combos-lista {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.emp-combo-op {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  text-align: left;
+  max-width: 18rem;
+  padding: 7px 9px;
+  background: var(--pedra-alta);
+  border: 1px solid var(--pedra-borda);
+  border-radius: 3px;
+  color: var(--tinta);
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.emp-combo-op:hover {
+  border-color: var(--combo);
+}
+.emp-combo-op.sel {
+  border-color: var(--combo);
+  background: rgba(154, 122, 214, 0.16);
+}
+.emp-combo-op.apagado {
+  opacity: 0.5;
+}
+.emp-combo-op b {
+  font-size: 0.75rem;
+}
+.emp-combo-op span {
+  color: var(--tinta-fraca);
+  line-height: 1.3;
+}
+.emp-combo-op i {
+  font-style: normal;
+  font-size: 0.6rem;
+  color: var(--sangue);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.emp-lut-combo {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--combo);
+  line-height: 1.25;
+}
+.emp-lut-marca {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: var(--sangue);
+  border: 1px solid var(--sangue);
+  border-radius: 2px;
+  padding: 1px 4px;
 }
 
 /* ── Transcendencia: a evolucao empilhada sobre a carta ── */

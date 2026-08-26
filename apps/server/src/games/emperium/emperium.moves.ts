@@ -462,6 +462,8 @@ function validarComprometimento(
       if (!inst || inst.local !== 'reserva') return false;
     }
     if (c.consumivel && !clan.consumiveis.includes(c.consumivel)) return false;
+    // O portador do combo declarado precisa estar comprometido nesta sala.
+    if (c.combo && !c.charInstIds.includes(c.combo)) return false;
   }
   return true;
 }
@@ -585,6 +587,7 @@ export function resolverRodada(state: EmperiumState, ctx: GameContext): void {
         controladorAnterior: dono,
         semDisputa: true,
         semResistencia: false,
+        raptados: [],
         resumo: dono ? `ninguem veio — controle segue com ${dono}` : 'ninguem veio — sem controle',
       });
       state.log.push(`${tile?.nome ?? slot}: ninguem veio.`);
@@ -655,15 +658,33 @@ export function resolverRodada(state: EmperiumState, ctx: GameContext): void {
       for (const instId of f.baixas) aplicarBaixa(state, slot, f.playerId, instId);
     }
 
-    // ESGOTAR: vai para a Enfermaria tendo vencido ou perdido.
+    // RAPTO: arrancados da sala voltam a Reserva, sem baixa.
+    for (const instId of res.raptados) {
+      for (const p of state.order) {
+        const inst = state.clans[p]?.chars[instId];
+        if (inst) {
+          inst.local = 'reserva';
+          state.log.push(`${p} teve um personagem RAPTADO de ${slot}.`);
+        }
+      }
+    }
+
+    // ESGOTAR: vai para a Enfermaria tendo vencido ou perdido — a menos que um
+    // combo tenha devolvido o folego (o Professor recarregando o Monge).
     for (const input of inputs) {
       const clan = state.clans[input.playerId];
       if (!clan) continue;
+      const fac = res.faccoes.find((f) => f.playerId === input.playerId);
+      if (fac?.cancelaEsgotar) continue;
       for (const id of input.commitment.charInstIds) {
         const inst = clan.chars[id];
         if (!inst || inst.local === 'enfermaria') continue;
         const def = CHARACTER_BY_ID.get(inst.defId);
-        if (def?.keywords.some((k) => k.kw === 'esgotar')) {
+        const trans = inst.transcendencia ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia) : undefined;
+        const esgota =
+          def?.keywords.some((k) => k.kw === 'esgotar') ||
+          trans?.keywords.some((k) => k.kw === 'esgotar');
+        if (esgota) {
           inst.local = 'enfermaria';
           inst.voltaNaRodada = state.round + 1;
         }

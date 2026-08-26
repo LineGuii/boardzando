@@ -27,6 +27,10 @@ export {
 
 export type {
   CharacterDef,
+  Combo,
+  ComboEfeito,
+  ComboExige,
+  Marca,
   ConsumableDef,
   ConsumableId,
   Deck,

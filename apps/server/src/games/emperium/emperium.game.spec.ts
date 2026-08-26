@@ -19,6 +19,7 @@ import {
   slotDistances,
   type Clan,
   type EmperiumState,
+  type OrderId,
   type RoomState,
 } from './emperium.state';
 
@@ -475,6 +476,174 @@ describe('EmperiumGame — Transcendencia', () => {
     // A fileira continua sendo so de cartas base.
     for (const defId of s.fileiraRecrutamento) expect(CHARACTER_BY_ID.get(defId)).toBeDefined();
     expect(TRANSCENDENCIA_BY_ID.get(s.fileiraRecrutamento[0] ?? '')).toBeUndefined();
+  });
+});
+
+describe('EmperiumGame — Combos', () => {
+  /** Resolve uma sala com combos declarados. */
+  function sala(
+    clans: Record<PlayerId, Clan>,
+    decls: Record<PlayerId, { ordem?: OrderId; combo?: string; marcha?: number }>,
+    opts: { tileId?: string; castleOwnerId?: PlayerId } = {},
+  ) {
+    const state = makeState(clans, { tileId: opts.tileId ?? 'sala-corredor', ...opts });
+    const inputs: RoomInput[] = Object.keys(clans).map((p) => ({
+      playerId: p,
+      commitment: {
+        slot: 'b1',
+        charInstIds: ids(clans[p]!),
+        ordem: decls[p]?.ordem ?? 'cerco',
+        combo: decls[p]?.combo,
+        marcha: decls[p]?.marcha ?? 0,
+      },
+    }));
+    const res = resolveRoom(state, 'b1', inputs);
+    return { res, de: (p: PlayerId) => res.faccoes.find((f) => f.playerId === p)! };
+  }
+
+  it('so acende com o companheiro exigido na sala', () => {
+    // Sabio Protecao de Solo: COMBO Bruxo -> a faccao ignora toda a Muralha.
+    const semBruxo = makeClan('ana', ['sab-solo', 'mon-combo']); // sem Bruxo junto
+    const comBruxo = makeClan('bruno', ['sab-solo', 'bru-jupitel']);
+    // Parede grossa o bastante para o ANULAR do proprio Sabio nao zerar sozinho.
+    const parede = () => makeClan('carla', ['bru-tempestade', 'bru-tempestade']);
+
+    const a = sala({ ana: semBruxo, carla: parede() }, { ana: { combo: ids(semBruxo)[0] } });
+    const b = sala({ bruno: comBruxo, carla: parede() }, { bruno: { combo: ids(comBruxo)[0] } });
+
+    expect(a.de('ana').combo).toBeUndefined(); // sem Bruxo, nao acende
+    expect(b.de('bruno').combo).toContain('COMBO Bruxo');
+    // Com o combo aceso, nenhuma Muralha morde.
+    expect(b.de('bruno').poderBruto - b.de('bruno').poderFinal).toBe(0);
+    // Sem ele, o que o ANULAR nao apagou ainda machuca.
+    expect(a.de('ana').poderBruto - a.de('ana').poderFinal).toBeGreaterThan(0);
+  });
+
+  it('so UM combo por faccao, e e o declarado no comprometimento', () => {
+    // Dois portadores de combo na mesma sala; so o declarado dispara.
+    const ana = makeClan('ana', ['sab-solo', 'bru-jupitel', 'fer-mercador']);
+    const carla = makeClan('carla', ['bru-tempestade']);
+    const semDeclarar = sala({ ana, carla }, {});
+    const declarandoSabio = sala({ ana, carla }, { ana: { combo: ids(ana)[0] } });
+
+    expect(semDeclarar.de('ana').combo).toBeUndefined();
+    expect(declarandoSabio.de('ana').combo).toContain('COMBO Bruxo');
+    // O combo do Ferreiro (poder por zeny) NAO entrou junto.
+    expect(declarandoSabio.de('ana').combo).not.toContain('zeny');
+  });
+
+  it('EXPOSTO zera a Muralha do alvo', () => {
+    // Alquimista Boticario: COMBO -> a maior faccao inimiga fica EXPOSTA.
+    const ana = makeClan('ana', ['alq-boticario', 'mon-combo']);
+    const carla = makeClan('carla', ['bru-tempestade', 'bru-tempestade']); // MURALHA 4
+    const semCombo = sala({ ana, carla }, {});
+    const comCombo = sala({ ana, carla }, { ana: { combo: ids(ana)[0] } });
+
+    const perdaSem = semCombo.de('ana').poderBruto - semCombo.de('ana').poderFinal;
+    const perdaCom = comCombo.de('ana').poderBruto - comCombo.de('ana').poderFinal;
+    expect(perdaSem).toBeGreaterThan(0);
+    expect(perdaCom).toBe(0);
+    expect(comCombo.de('carla').marcas).toContain('exposto');
+  });
+
+  it('PRESO tira o bonus da Ordem e o Escudar do alvo', () => {
+    // Monge Corpo de Aco: COMBO -> a maior faccao inimiga fica PRESA.
+    const ana = makeClan('ana', ['mon-aco', 'mon-combo']);
+    const carla = makeClan('carla', ['tem-escudeiro', 'cav-bb']);
+    const r = sala({ ana, carla }, { ana: { combo: ids(ana)[0] }, carla: { ordem: 'investida' } });
+
+    const c = r.de('carla');
+    expect(c.marcas).toContain('preso');
+    // O +3 da Investida foi embora.
+    expect(c.poderBruto).toBe(2 + 4 + 1); // Escudeiro 2 + Bola de Boliche 4 + ELO 1, sem Investida
+  });
+
+  it('o Professor devolve o folego do Monge — o segundo Asura', () => {
+    const ana = makeClan('ana', ['sab-encantador', 'mon-combo']);
+    transcenderTeste(ana, ids(ana)[0]!, 'tr-sab-memorizar'); // COMBO Monge: cancela Esgotar
+    transcenderTeste(ana, ids(ana)[1]!, 'tr-mon-asura'); // ESGOTAR
+    const carla = makeClan('carla', ['sup-teimoso']);
+    const r = sala({ ana, carla }, { ana: { combo: ids(ana)[0] } });
+
+    expect(r.de('ana').combo).toContain('COMBO Monge');
+    expect(r.de('ana').cancelaEsgotar).toBe(true);
+  });
+
+  it('o tanque protege o conjurador de sofrer baixa', () => {
+    // Templario Defensor: COMBO Arcano -> seus Arcanos nao sofrem baixa.
+    const ana = makeClan('ana', ['tem-defensor', 'bru-jupitel']);
+    const carla = makeClan('carla', ['mon-combo', 'mon-combo', 'mon-combo']);
+    const r = sala({ ana, carla }, { ana: { combo: ids(ana)[0] }, carla: { ordem: 'investida' } });
+
+    const baixas = r.de('ana').baixas;
+    expect(baixas.length).toBeGreaterThan(0);
+    // O Bruxo (Arcano) esta protegido: so o Templario pode cair.
+    expect(baixas).not.toContain(ids(ana)[1]);
+  });
+
+  it('o Ferreiro converte o bolso em Poder', () => {
+    const rico = makeClan('ana', ['fer-mercador']);
+    rico.zeny = 40;
+    const pobre = makeClan('bruno', ['fer-mercador']);
+    pobre.zeny = 5;
+    const r = sala(
+      { ana: rico, bruno: pobre },
+      { ana: { combo: ids(rico)[0] }, bruno: { combo: ids(pobre)[0] } },
+    );
+    // +1 a cada 5 zeny: 40 -> +8, 5 -> +1.
+    expect(r.de('ana').poderBruto - r.de('bruno').poderBruto).toBe(7);
+  });
+
+  it('RAPTO arranca 1 inimigo da sala antes da soma', () => {
+    const ana = makeClan('ana', ['arr-gatuno', 'mer-furtivo']); // Gatuno: COMBO Agil -> RAPTO
+    const carla = makeClan('carla', ['mon-combo', 'sup-teimoso']);
+    const semRapto = sala({ ana, carla }, {});
+    const comRapto = sala({ ana, carla }, { ana: { combo: ids(ana)[0] } });
+
+    expect(comRapto.res.raptados).toHaveLength(1);
+    // O de maior Poder de carta (o Monge, 4) foi arrancado.
+    expect(comRapto.res.raptados[0]).toBe(ids(carla)[0]);
+    expect(comRapto.de('carla').poderBruto).toBeLessThan(semRapto.de('carla').poderBruto);
+  });
+
+  it('o raptado nao conta como baixa — ele so sai da sala', () => {
+    const ana = makeClan('ana', ['arr-gatuno', 'mer-furtivo']);
+    const carla = makeClan('carla', ['mon-combo', 'sup-teimoso']);
+    const r = sala({ ana, carla }, { ana: { combo: ids(ana)[0] } });
+    expect(r.de('carla').baixas).not.toContain(r.res.raptados[0]);
+  });
+
+  it('um combo pode anular a Marcha Forcada da faccao inteira', () => {
+    // Sacerdote Suporte: COMBO Vanguarda -> a faccao ignora a Marcha Forcada.
+    const ana = makeClan('ana', ['sac-suporte', 'cav-bb']);
+    const carla = makeClan('carla', ['sup-teimoso']);
+    const sem = sala({ ana, carla }, { ana: { marcha: 3 } });
+    const com = sala({ ana, carla }, { ana: { marcha: 3, combo: ids(ana)[0] } });
+    expect(com.de('ana').poderBruto - sem.de('ana').poderBruto).toBe(MARCHA_PENALIDADE * 3);
+  });
+
+  it('a evolucao substitui o combo da base quando traz um', () => {
+    // Mestre-Ferreiro Carrocerada: +1 a cada 3 zeny (a base era a cada 5).
+    const base = makeClan('ana', ['fer-mercador']);
+    base.zeny = 30;
+    const evoluido = makeClan('bruno', ['fer-mercador']);
+    evoluido.zeny = 30;
+    transcenderTeste(evoluido, ids(evoluido)[0]!, 'tr-fer-carrocerada');
+    const r = sala(
+      { ana: base, bruno: evoluido },
+      { ana: { combo: ids(base)[0] }, bruno: { combo: ids(evoluido)[0] } },
+    );
+    expect(r.de('ana').combo).toContain('5 zeny');
+    expect(r.de('bruno').combo).toContain('3 zeny');
+  });
+
+  it('nenhuma carta tem combo sem texto, e o texto comeca com COMBO', () => {
+    const todos = [
+      ...DECK_I.filter((c) => c.combo).map((c) => c.combo!),
+      ...TRANSCENDENCIAS.filter((t) => t.combo).map((t) => t.combo!),
+    ];
+    expect(todos.length).toBeGreaterThanOrEqual(20);
+    for (const c of todos) expect(c.texto.startsWith('COMBO')).toBe(true);
   });
 });
 

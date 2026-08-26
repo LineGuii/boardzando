@@ -69,6 +69,12 @@ export interface Commitment {
   /** ConsumableDef.id jogado de brucos nesta sala. */
   consumivel?: string;
   /**
+   * Qual combo voce declara disparar nesta sala: o instId do portador. So UM
+   * combo por faccao por sala — juntar cinco personagens nao acumula cinco
+   * combos, senao a mesa volta a empilhar todo mundo num lugar so.
+   */
+  combo?: string;
+  /**
    * Salas de Marcha Forcada, gravadas na confirmacao. Fica no comprometimento
    * (e nao e recalculado na resolucao) porque o controle das salas muda
    * conforme elas resolvem — a distancia que vale e a do momento em que voce
@@ -98,6 +104,12 @@ export interface FactionResult {
   venceu: boolean;
   /** Salas de Marcha Forcada percorridas; 0 = entrou pela linha de frente. */
   marcha: number;
+  /** Texto do combo que esta faccao disparou, se acendeu. */
+  combo?: string;
+  /** Marcas sofridas nesta sala. */
+  marcas: ('exposto' | 'preso' | 'revelado')[];
+  /** Um combo cancelou o Esgotar desta faccao (o SP de volta pro Asura). */
+  cancelaEsgotar: boolean;
 }
 
 export interface RoomResolution {
@@ -113,6 +125,8 @@ export interface RoomResolution {
   semResistencia: boolean;
   /** Frase pronta para o log e para a legenda do confronto. */
   resumo: string;
+  /** instIds arrancados da sala por RAPTO; voltam a Reserva sem baixa. */
+  raptados: string[];
   /** So na Sala do Emperium. */
   escudo?: number;
   danoPorJogador?: Record<PlayerId, number>;
