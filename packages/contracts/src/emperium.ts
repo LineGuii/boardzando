@@ -88,7 +88,7 @@ export interface CharacterDef {
    * Efeitos que nao entram no calculo de combate (economia/posicionamento).
    * Mantidos fora das keywords para nao inflar a gramatica. Ver design 17.6.
    */
-  readonly special?: 'forja' | 'teimoso';
+  readonly special?: 'forja' | 'teimoso' | 'revela-oculto';
   /**
    * A linha que faz este personagem enxergar os outros. Nem toda carta tem —
    * cartas simples devem continuar simples.
@@ -177,41 +177,67 @@ const sozinho = (texto: string, efeito: ComboEfeito): Combo =>
 export const DECK_I: readonly CharacterDef[] = [
   { id: 'cav-bb', nome: 'Cavaleiro Bola de Boliche', classe: 'Cavaleiro', deck: 1, custo: 6, poder: 4, papel: 'vanguarda', slots: 2, keywords: [kw('elo', 1)], build: 'Bowling Bash' , combo: comClasse('Templário', 'COMBO Templário: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
   { id: 'cav-lanca', nome: 'Cavaleiro Lanceiro', classe: 'Cavaleiro', deck: 1, custo: 5, poder: 3, papel: 'vanguarda', slots: 1, keywords: [kw('perfurar', 2)], build: 'Pierce montado' },
+  { id: 'cav-provocador', nome: 'Cavaleiro Provocador', classe: 'Cavaleiro', deck: 1, custo: 5, poder: 2, papel: 'vanguarda', slots: 2, keywords: [kw('proteger')], build: 'Provoke' , combo: comPapel('arcano', 'COMBO Arcano: o maior clã inimigo fica EXPOSTO — ele veio atrás de você.', { tipo: 'marca', marca: 'exposto' })},
 
   { id: 'tem-escudeiro', nome: 'Templário Escudeiro', classe: 'Templário', deck: 1, custo: 5, poder: 2, papel: 'vanguarda', slots: 2, keywords: [kw('proteger')], build: 'Tanque de escudo' },
+  { id: 'tem-redentor', nome: 'Templário Redentor', classe: 'Templário', deck: 1, custo: 6, poder: 2, papel: 'vanguarda', slots: 2, keywords: [kw('devocao', 2)], build: 'Sacrifice' , combo: comClasse('Sacerdote', 'COMBO Sacerdote: seus Vanguardas não sofrem baixa nesta sala.', { tipo: 'cobrir-papel', papel: 'vanguarda' })},
   { id: 'tem-defensor', nome: 'Templário Defensor', classe: 'Templário', deck: 1, custo: 6, poder: 3, papel: 'vanguarda', slots: 1, keywords: [kw('muralha', 1)], build: 'Defender' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.', { tipo: 'cobrir-papel', papel: 'arcano' })},
 
   { id: 'bru-tempestade', nome: 'Bruxo Tempestade', classe: 'Bruxo', deck: 1, custo: 7, poder: 3, papel: 'arcano', slots: 1, keywords: [kw('muralha', 2), kw('alcance')], build: 'Storm Gust' },
   { id: 'bru-jupitel', nome: 'Bruxo Jupitel', classe: 'Bruxo', deck: 1, custo: 5, poder: 4, papel: 'arcano', slots: 1, keywords: [kw('alcance')], build: 'Jupitel / Napalm' },
 
+  { id: 'bru-conjurador', nome: 'Bruxo Conjurador', classe: 'Bruxo', deck: 1, custo: 7, poder: 2, papel: 'arcano', slots: 1, keywords: [kw('muralha', 1)], build: 'Precast' , combo: comClasse('Bardo', 'COMBO Bardo: +5 de Poder — a canção sustenta a conjuração.', { tipo: 'poder', x: 5 })},
+
   { id: 'sab-solo', nome: 'Sábio Proteção de Solo', classe: 'Sábio', deck: 1, custo: 6, poder: 2, papel: 'arcano', slots: 1, keywords: [kw('anular')], build: 'Land Protection' , combo: comClasse('Bruxo', 'COMBO Bruxo: seus personagens ignoram toda a Muralha inimiga.', { tipo: 'perfurar-total' })},
   { id: 'sab-encantador', nome: 'Sábio Encantador', classe: 'Sábio', deck: 1, custo: 5, poder: 2, papel: 'arcano', slots: 2, keywords: [kw('elo', 1)], build: 'Endow' },
+
+  { id: 'sab-petrificador', nome: 'Sábio Petrificador', classe: 'Sábio', deck: 1, custo: 6, poder: 3, papel: 'arcano', slots: 1, keywords: [kw('muralha', 1)], build: 'Stone Curse' , combo: sozinho('COMBO: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
 
   { id: 'mer-sonico', nome: 'Mercenário Golpe Sônico', classe: 'Mercenário', deck: 1, custo: 6, poder: 3, papel: 'agil', slots: 1, keywords: [kw('rajada', 3)], build: 'Sonic Blow' , combo: comClasse('Alquimista', 'COMBO Alquimista: +4 de Poder — ele entra pela brecha.', { tipo: 'poder', x: 4 })},
   { id: 'mer-furtivo', nome: 'Mercenário Furtivo', classe: 'Mercenário', deck: 1, custo: 7, poder: 2, papel: 'agil', slots: 1, keywords: [kw('oculto')], build: 'Cloaking' },
 
+  { id: 'mer-katar', nome: 'Mercenário Katar', classe: 'Mercenário', deck: 1, custo: 6, poder: 4, papel: 'agil', slots: 1, keywords: [kw('perfurar', 2)], build: 'Katar crítico' },
+
   { id: 'arr-gatuno', nome: 'Arruaceiro Gatuno', classe: 'Arruaceiro', deck: 1, custo: 5, poder: 2, papel: 'agil', slots: 1, keywords: [kw('pilhar', 2)], build: 'Steal' , combo: comPapel('agil', 'COMBO Agil: RAPTO — arranque 1 inimigo da sala.', { tipo: 'rapto' })},
   { id: 'arr-saqueador', nome: 'Arruaceiro Saqueador', classe: 'Arruaceiro', deck: 1, custo: 6, poder: 3, papel: 'agil', slots: 1, keywords: [kw('anular')], build: 'Strip' },
+
+  { id: 'arr-batedor', nome: 'Arruaceiro Batedor', classe: 'Arruaceiro', deck: 1, custo: 5, poder: 3, papel: 'agil', slots: 1, keywords: [kw('rajada', 2)], build: 'Back Stab' },
 
   { id: 'fer-forjador', nome: 'Ferreiro Forjador', classe: 'Ferreiro', deck: 1, custo: 5, poder: 2, papel: 'vanguarda', slots: 2, keywords: [], build: 'Forja', special: 'forja' },
   { id: 'fer-mercador', nome: 'Ferreiro Mercador', classe: 'Ferreiro', deck: 1, custo: 4, poder: 1, papel: 'vanguarda', slots: 1, keywords: [kw('pilhar', 3)], build: 'Overcharge' , combo: sozinho('COMBO: +1 de Poder a cada 5 zeny no seu bolso.', { tipo: 'poder-por-zeny', cada: 5 })},
 
+  { id: 'fer-perfeicao', nome: 'Ferreiro Perfeição de Armas', classe: 'Ferreiro', deck: 1, custo: 6, poder: 2, papel: 'vanguarda', slots: 2, keywords: [kw('perfurar', 2)], build: 'Weapon Perfection' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seus personagens ignoram toda a Muralha inimiga.', { tipo: 'perfurar-total' })},
+
   { id: 'alq-homunculo', nome: 'Alquimista Homúnculo', classe: 'Alquimista', deck: 1, custo: 6, poder: 2, papel: 'suporte', slots: 1, keywords: [kw('elo', 1)], build: 'Bio-ethics' },
   { id: 'alq-boticario', nome: 'Alquimista Boticário', classe: 'Alquimista', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('restaurar', 1)], build: 'Potion Pitcher' , combo: sozinho('COMBO: o maior clã inimigo fica EXPOSTO.', { tipo: 'marca', marca: 'exposto' })},
+
+  { id: 'alq-fogogrego', nome: 'Alquimista Fogo Grego', classe: 'Alquimista', deck: 1, custo: 6, poder: 3, papel: 'suporte', slots: 1, keywords: [kw('perfurar', 2)], build: 'Fogo grego' , combo: comPapel('arcano', 'COMBO Arcano: +4 de Poder — o fogo pega no que o mago acendeu.', { tipo: 'poder', x: 4 })},
 
   { id: 'sac-suporte', nome: 'Sacerdote Suporte', classe: 'Sacerdote', deck: 1, custo: 6, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('elo', 2)], build: 'Full Support' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seu clã ganha MOVER 1.', { tipo: 'mover', x: 1 })},
   { id: 'sac-pneuma', nome: 'Sacerdote Pneuma', classe: 'Sacerdote', deck: 1, custo: 6, poder: 2, papel: 'suporte', slots: 1, keywords: [kw('muralha', 2)], build: 'Pneuma / Safety Wall' },
 
+  { id: 'sac-batalha', nome: 'Sacerdote de Batalha', classe: 'Sacerdote', deck: 1, custo: 5, poder: 3, papel: 'suporte', slots: 2, keywords: [kw('solo', 2)], build: 'Battle Priest' },
+
   { id: 'mon-combo', nome: 'Monge Combo', classe: 'Monge', deck: 1, custo: 6, poder: 4, papel: 'vanguarda', slots: 1, keywords: [], build: 'Chain Combo' },
   { id: 'mon-aco', nome: 'Monge Corpo de Aço', classe: 'Monge', deck: 1, custo: 5, poder: 0, papel: 'vanguarda', slots: 2, keywords: [kw('proteger'), kw('esgotar')], build: 'Steel Body' , combo: sozinho('COMBO: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
+
+  { id: 'mon-dilema', nome: 'Monge Dilema', classe: 'Monge', deck: 1, custo: 6, poder: 2, papel: 'vanguarda', slots: 1, keywords: [kw('perfurar', 3)], build: 'Investigate' },
 
   { id: 'cac-armadilheiro', nome: 'Caçador Armadilheiro', classe: 'Caçador', deck: 1, custo: 6, poder: 2, papel: 'agil', slots: 1, keywords: [kw('muralha', 2)], build: 'Trapper' , combo: sozinho('COMBO: o maior clã inimigo fica REVELADO.', { tipo: 'marca', marca: 'revelado' })},
   { id: 'cac-tiroduplo', nome: 'Caçador Tiro Duplo', classe: 'Caçador', deck: 1, custo: 6, poder: 4, papel: 'agil', slots: 1, keywords: [kw('alcance')], build: 'Double Strafe' },
 
-  { id: 'bar-cancao', nome: 'Bardo Canção', classe: 'Bardo/Odalisca', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('elo', 2)], build: 'Canções de grupo' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos ganham +3 de Poder.', { tipo: 'rajada-papel', papel: 'arcano', x: 3 })},
-  { id: 'bar-dancalenta', nome: 'Odalisca Dança Lenta', classe: 'Bardo/Odalisca', deck: 1, custo: 6, poder: 2, papel: 'suporte', slots: 1, keywords: [kw('muralha', 2)], build: 'Slow Grace' , combo: comClasse('Bardo/Odalisca', 'COMBO Bardo/Odalisca: +4 de Poder — o dueto.', { tipo: 'poder', x: 4 })},
+  { id: 'cac-falcoeiro', nome: 'Caçador Falcoeiro', classe: 'Caçador', deck: 1, custo: 6, poder: 2, papel: 'agil', slots: 1, keywords: [kw('alcance')], build: 'Falcão / Blitz Beat', special: 'revela-oculto' },
+
+  { id: 'bar-cancao', nome: 'Bardo Canção', classe: 'Bardo', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('elo', 2)], build: 'Canções de grupo' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos ganham +3 de Poder.', { tipo: 'rajada-papel', papel: 'arcano', x: 3 })},
+  { id: 'bar-idun', nome: 'Bardo Maçã de Idun', classe: 'Bardo', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('restaurar', 1)], build: 'Apple of Idun' },
+  { id: 'bar-flecha', nome: 'Bardo Flecha Musical', classe: 'Bardo', deck: 1, custo: 6, poder: 4, papel: 'agil', slots: 1, keywords: [kw('alcance')], build: 'Musical Strike' },
+
+  { id: 'oda-dancalenta', nome: 'Odalisca Dança Lenta', classe: 'Odalisca', deck: 1, custo: 6, poder: 2, papel: 'suporte', slots: 1, keywords: [kw('muralha', 2)], build: 'Slow Grace' , combo: comClasse('Bardo', 'COMBO Bardo: +4 de Poder — o dueto.', { tipo: 'poder', x: 4 })},
+  { id: 'oda-adaga', nome: 'Odalisca Dança das Adagas', classe: 'Odalisca', deck: 1, custo: 6, poder: 4, papel: 'agil', slots: 1, keywords: [kw('rajada', 2)], build: 'Throw Arrow' },
+  { id: 'oda-servico', nome: 'Odalisca Serviço para Você', classe: 'Odalisca', deck: 1, custo: 6, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('devocao', 2)], build: 'Service For You' , combo: comClasse('Monge', 'COMBO Monge: ninguém seu vai à Enfermaria por Esgotar.', { tipo: 'cancela-esgotar' })},
 
   { id: 'sup-teimoso', nome: 'Superaprendiz Teimoso', classe: 'Superaprendiz', deck: 1, custo: 3, poder: 1, papel: 'agil', slots: 3, keywords: [], build: 'Sobrevivência teimosa', special: 'teimoso' },
+  { id: 'sup-sorte', nome: 'Superaprendiz Sortudo', classe: 'Superaprendiz', deck: 1, custo: 4, poder: 1, papel: 'agil', slots: 1, keywords: [kw('solo', 3)], build: 'Sorte de principiante' },
   { id: 'sup-improvisado', nome: 'Superaprendiz Improvisado', classe: 'Superaprendiz', deck: 1, custo: 4, poder: 2, papel: 'suporte', slots: 2, keywords: [kw('imitar', 2)], build: 'Faz de tudo' },
 ];
 
@@ -263,7 +289,7 @@ export interface TranscendenceDef {
   readonly combo?: Combo;
 }
 
-/** 13 classes x 3 caminhos = 39 evolucoes. */
+/** 14 classes x 3 caminhos = 42 evolucoes. */
 export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   // Cavaleiro
   { id: 'tr-cav-espiral', nome: 'Lorde dos Cavaleiros — Espiral', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 11, poderBonus: 3, keywords: [kw('perfurar', 4)], build: 'Spiral Pierce' },
@@ -271,7 +297,7 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   { id: 'tr-cav-montaria', nome: 'Lorde dos Cavaleiros — Montaria', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 13, poderBonus: 2, keywords: [kw('mover', 4)], build: 'Peco-Peco de guerra' },
 
   // Templário
-  { id: 'tr-tem-devocao', nome: 'Paladino — Devoção', classe: 'Templário', forma: 'Paladino', custo: 11, poderBonus: 2, keywords: [kw('devocao')], build: 'Devotion' , combo: comPapel('vanguarda', 'COMBO Vanguarda: se você perder, o vencedor também sofre 1 baixa.', { tipo: 'troco' })},
+  { id: 'tr-tem-devocao', nome: 'Paladino — Devoção', classe: 'Templário', forma: 'Paladino', custo: 11, poderBonus: 2, keywords: [kw('devocao', 2)], build: 'Devotion' , combo: comPapel('vanguarda', 'COMBO Vanguarda: se você perder, o vencedor também sofre 1 baixa.', { tipo: 'troco' })},
   { id: 'tr-tem-corrente', nome: 'Paladino — Corrente de Escudo', classe: 'Templário', forma: 'Paladino', custo: 11, poderBonus: 4, keywords: [kw('proteger')], build: 'Shield Chain' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.', { tipo: 'cobrir-papel', papel: 'arcano' })},
   { id: 'tr-tem-sacrificio', nome: 'Paladino — Sacrifício', classe: 'Templário', forma: 'Paladino', custo: 10, poderBonus: 3, keywords: [kw('rajada', 3), kw('esgotar')], build: 'Sacrifice' },
 
@@ -306,7 +332,7 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   { id: 'tr-alq-esferas', nome: 'Criador — Bomba de Esferas', classe: 'Alquimista', forma: 'Criador', custo: 10, poderBonus: 1, keywords: [kw('muralha', 3)], build: 'Sphere Mine' },
 
   // Sacerdote
-  { id: 'tr-sac-assumptio', nome: 'Sumo Sacerdote — Assumptio', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 11, poderBonus: 2, keywords: [kw('devocao')], build: 'Assumptio' },
+  { id: 'tr-sac-assumptio', nome: 'Sumo Sacerdote — Assumptio', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 11, poderBonus: 2, keywords: [kw('devocao', 2)], build: 'Assumptio' },
   { id: 'tr-sac-ressurreicao', nome: 'Sumo Sacerdote — Ressurreição', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 10, poderBonus: 1, keywords: [kw('restaurar', 2)], build: 'Resurrection' },
   { id: 'tr-sac-julgamento', nome: 'Sumo Sacerdote — Julgamento', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 12, poderBonus: 5, keywords: [], build: 'Magnus Exorcismus' },
 
@@ -320,14 +346,19 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   { id: 'tr-cac-armadilha', nome: 'Atirador de Elite — Armadilha Suprema', classe: 'Caçador', forma: 'Atirador de Elite', custo: 10, poderBonus: 2, keywords: [kw('muralha', 3)], build: 'Trap Research' },
   { id: 'tr-cac-falcao', nome: 'Atirador de Elite — Olho de Falcão', classe: 'Caçador', forma: 'Atirador de Elite', custo: 10, poderBonus: 2, keywords: [kw('anular')], build: 'Falcon Assault', special: 'revela-oculto' , combo: sozinho('COMBO: o maior clã inimigo fica REVELADO.', { tipo: 'marca', marca: 'revelado' })},
 
-  // Bardo/Odalisca
-  { id: 'tr-bar-ensemble', nome: 'Menestrel/Cigana — Ensemble', classe: 'Bardo/Odalisca', forma: 'Menestrel/Cigana', custo: 9, poderBonus: 2, keywords: [], build: 'Ensemble', special: 'ensemble' },
-  { id: 'tr-bar-marionete', nome: 'Menestrel/Cigana — Marionete', classe: 'Bardo/Odalisca', forma: 'Menestrel/Cigana', custo: 11, poderBonus: 0, keywords: [], build: 'Marionette Control', special: 'marionete' },
-  { id: 'tr-bar-cancao', nome: 'Menestrel/Cigana — Canção Longa', classe: 'Bardo/Odalisca', forma: 'Menestrel/Cigana', custo: 10, poderBonus: 2, keywords: [kw('elo', 2)], build: 'Longing for Freedom' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seu clã ganha MOVER 1.', { tipo: 'mover', x: 1 })},
+  // Bardo — o Ensemble mora aqui, e so acende com uma Odalisca do lado.
+  { id: 'tr-bar-ensemble', nome: 'Menestrel — Ensemble', classe: 'Bardo', forma: 'Menestrel', custo: 9, poderBonus: 2, keywords: [], build: 'Ensemble', special: 'ensemble' },
+  { id: 'tr-bar-cancao', nome: 'Menestrel — Canção Longa', classe: 'Bardo', forma: 'Menestrel', custo: 10, poderBonus: 2, keywords: [kw('elo', 2)], build: 'Longing for Freedom' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seu clã ganha MOVER 1.', { tipo: 'mover', x: 1 })},
+  { id: 'tr-bar-vulcao', nome: 'Menestrel — Vulcão de Flechas', classe: 'Bardo', forma: 'Menestrel', custo: 12, poderBonus: 5, keywords: [kw('alcance')], build: 'Arrow Vulcan' },
+
+  // Odalisca
+  { id: 'tr-oda-marionete', nome: 'Cigana — Marionete', classe: 'Odalisca', forma: 'Cigana', custo: 11, poderBonus: 0, keywords: [], build: 'Marionette Control', special: 'marionete' },
+  { id: 'tr-oda-tarot', nome: 'Cigana — Tarô do Destino', classe: 'Odalisca', forma: 'Cigana', custo: 11, poderBonus: 2, keywords: [kw('anular')], build: 'Tarot Card of Fate' , combo: sozinho('COMBO: o maior clã inimigo fica EXPOSTO.', { tipo: 'marca', marca: 'exposto' })},
+  { id: 'tr-oda-ritmo', nome: 'Cigana — Ritmo Hipnótico', classe: 'Odalisca', forma: 'Cigana', custo: 10, poderBonus: 2, keywords: [kw('muralha', 3)], build: 'Slow Grace ampliado' },
 
   // Superaprendiz — nao transcende. So insiste, e fica barato.
   { id: 'tr-sup-teimosia', nome: 'Superaprendiz — Teimosia Absurda', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 8, poderBonus: 1, keywords: [], build: 'Guardian Angel', slotsBonus: 1, special: 'imortal' },
-  { id: 'tr-sup-sorte', nome: 'Superaprendiz — Sorte de Principiante', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 8, poderBonus: 3, keywords: [kw('solo', 3)], build: 'Sorte pura' },
+  { id: 'tr-sup-sobrecarga', nome: 'Superaprendiz — Sobrecarga', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 9, poderBonus: 4, keywords: [kw('esgotar')], build: 'Sobrecarga' },
   { id: 'tr-sup-imitacao', nome: 'Superaprendiz — Imitação Descarada', classe: 'Superaprendiz', forma: 'Superaprendiz', custo: 7, poderBonus: 2, keywords: [kw('imitar', 2)], build: 'Cópia de tudo' },
 ];
 

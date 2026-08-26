@@ -265,10 +265,16 @@ function factionPower(
     total += p;
   }
 
-  // Ensemble: com outro Bardo/Odalisca seu na sala, ambos +5.
-  const bardos = chars.filter((c) => c.def.classe === 'Bardo/Odalisca');
-  if (chars.some((c) => c.transSpecials.has('ensemble')) && bardos.length >= 2) {
-    total += 5 * bardos.length;
+  // Ensemble: agora que Bardo e Odalisca sao classes separadas, o dueto exige
+  // um de CADA na sala — como no jogo original. Cada musico presente da +5.
+  const bardos = chars.filter((c) => c.def.classe === 'Bardo');
+  const odaliscas = chars.filter((c) => c.def.classe === 'Odalisca');
+  if (
+    chars.some((c) => c.transSpecials.has('ensemble')) &&
+    bardos.length >= 1 &&
+    odaliscas.length >= 1
+  ) {
+    total += 5 * (bardos.length + odaliscas.length);
   }
 
   // Marionete: dobra o Poder base de outro personagem seu na sala, max +6.
@@ -530,7 +536,7 @@ function applyMuralha(factions: Faction[]): void {
 }
 
 /**
- * Escolhe quem cai numa cla derrotada. ESCUDAR primeiro (obrigatorio),
+ * Escolhe quem cai numa cla derrotada. DEVOCAO primeiro, depois PROTEGER,
  * depois os de menor Poder de carta — minimiza a perda, que e o que um jogador
  * faria. Teto de baixas: metade dos personagens, arredondado para cima.
  */
@@ -541,11 +547,17 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
   // PRESO tira o PROTEGER do alvo: travado, ele nao consegue cobrir ninguem.
   const preso = f.marcas.has('preso');
   const ehProtetor = (c: CharCompute) => !preso && c.keywords.has('proteger');
+  // DEVOCAO X: ele se joga na frente. Cada baixa que ele leva vale por X, entao
+  // um Paladino com DEVOCAO 2 sozinho absorve o que derrubaria dois dos seus.
+  // PRESO tambem o trava: quem nao se move nao cobre ninguem.
+  const devocaoDe = (c: CharCompute) => (preso ? 0 : (c.keywords.get('devocao') ?? 0));
 
   // ALCANCE: quem ataca de longe so sofre baixa se nao houver ninguem com
   // PROTEGER vivo no cla. Esta regra estava no manual desde a v0.1 e NUNCA
   // tinha sido implementada — ALCANCE so valia como bonus no Patio Aberto.
-  const temProtetorVivo = f.chars.some((c) => ehProtetor(c) && !c.ghostring && !c.imortal);
+  const temProtetorVivo = f.chars.some(
+    (c) => (ehProtetor(c) || devocaoDe(c) > 0) && !c.ghostring && !c.imortal,
+  );
 
   const elegiveis = f.chars.filter((c) => {
     if (c.ghostring) return false; // Ghostring nao pode sofrer baixa.
@@ -554,15 +566,17 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
     // Combo COBRIR: o tanque provocando enquanto o bruxo conjura.
     if (f.protegePapel && c.def.papel === f.protegePapel) return false;
     // ALCANCE protegido por quem esta na frente.
-    if (c.keywords.has('alcance') && temProtetorVivo && !ehProtetor(c)) return false;
+    if (c.keywords.has('alcance') && temProtetorVivo && !ehProtetor(c) && devocaoDe(c) === 0)
+      return false;
     return true;
   });
 
   // Protetores caem primeiro. Se o cla estiver PRESO eles nao cobrem ninguem e
   // entram na fila normal, pelo Poder de carta como todo mundo.
-  const protetores = elegiveis.filter(ehProtetor);
+  const devotos = elegiveis.filter((c) => devocaoDe(c) > 0);
+  const protetores = elegiveis.filter((c) => devocaoDe(c) === 0 && ehProtetor(c));
   const resto = elegiveis
-    .filter((c) => !ehProtetor(c))
+    .filter((c) => devocaoDe(c) === 0 && !ehProtetor(c))
     .sort((a, b) => {
       // Amuleto de Ferro: nunca e a primeira baixa.
       const aAmu = a.equipSpecials.has('nunca-primeira-baixa') ? 1 : 0;
@@ -571,7 +585,9 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
       return a.poderCarta - b.poderCarta;
     });
 
-  const fila = [...protetores, ...resto];
+  // Devoto primeiro: ele leva a baixa NO LUGAR do outro, entao entra na frente
+  // ate do PROTEGER, que so cai antes dos demais.
+  const fila = [...devotos, ...protetores, ...resto];
   const caidos: string[] = [];
   let acumulado = 0;
   for (const c of fila) {
@@ -586,7 +602,7 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
       continue;
     }
     caidos.push(c.instId);
-    acumulado += Math.max(1, c.poderCarta);
+    acumulado += Math.max(1, c.poderCarta) * Math.max(1, devocaoDe(c));
   }
   return caidos;
 }

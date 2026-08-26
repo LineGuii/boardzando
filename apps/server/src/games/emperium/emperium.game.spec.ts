@@ -170,25 +170,25 @@ function jogarRodada(match: GameInstance<EmperiumState>): void {
 /* ═════════════════════════════════════════════════════════════════════════ */
 
 describe('EmperiumGame — catalogo', () => {
-  it('tem 13 classes com 2 variacoes base cada (26 no total)', () => {
-    expect(DECK_I).toHaveLength(26);
-    expect(ALL_CHARACTERS).toHaveLength(26);
+  it('tem 14 classes com 3 variacoes base cada (42 no total)', () => {
+    expect(DECK_I).toHaveLength(42);
+    expect(ALL_CHARACTERS).toHaveLength(42);
     const porClasse = new Map<string, number>();
     for (const c of ALL_CHARACTERS) porClasse.set(c.classe, (porClasse.get(c.classe) ?? 0) + 1);
-    expect(porClasse.size).toBe(13);
-    for (const [classe, n] of porClasse) expect([classe, n]).toEqual([classe, 2]);
+    expect(porClasse.size).toBe(14);
+    for (const [classe, n] of porClasse) expect([classe, n]).toEqual([classe, 3]);
   });
 
-  it('tem 3 caminhos de Transcendencia por classe (39 no total)', () => {
-    expect(TRANSCENDENCIAS).toHaveLength(39);
+  it('tem 3 caminhos de Transcendencia por classe (42 no total)', () => {
+    expect(TRANSCENDENCIAS).toHaveLength(42);
     for (const c of DECK_I) {
       expect(caminhosDaClasse(c.classe)).toHaveLength(3);
     }
   });
 
-  it('base x caminho da 6 desfechos por classe, 78 no total', () => {
+  it('base x caminho da 9 desfechos por classe, 126 no total', () => {
     const desfechos = DECK_I.reduce((n, c) => n + caminhosDaClasse(c.classe).length, 0);
-    expect(desfechos).toBe(78);
+    expect(desfechos).toBe(126);
   });
 
   it('toda Transcendencia aponta para uma classe que existe', () => {
@@ -202,8 +202,8 @@ describe('EmperiumGame — catalogo', () => {
   });
 
   it('ids sao unicos em personagens, evolucoes e equipamentos', () => {
-    expect(new Set(ALL_CHARACTERS.map((c) => c.id)).size).toBe(26);
-    expect(new Set(TRANSCENDENCIAS.map((t) => t.id)).size).toBe(39);
+    expect(new Set(ALL_CHARACTERS.map((c) => c.id)).size).toBe(42);
+    expect(new Set(TRANSCENDENCIAS.map((t) => t.id)).size).toBe(42);
     expect(new Set(EQUIPMENT.map((e) => e.id)).size).toBe(EQUIPMENT.length);
   });
 
@@ -1161,5 +1161,59 @@ describe('EmperiumGame — v0.3: Alcance, Anular, Imitar e infiltracao', () => {
     expect(linhas.join(' ')).toContain('REVELADO');
     expect(state.commitments['ana']![0]!.charInstIds).toContain(furtivo);
     expect(state.commitments['ana']).toHaveLength(1);
+  });
+});
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+describe('EmperiumGame — v0.3 fase 2: Devocao e o dueto', () => {
+  function duelo(clans: Record<PlayerId, Clan>) {
+    const state = makeState(clans, { tileId: 'sala-corredor' });
+    const inputs: RoomInput[] = Object.keys(clans).map((p) => ({
+      playerId: p,
+      commitment: { slot: 'b1', charInstIds: ids(clans[p]!), ordem: 'cerco' as OrderId, marcha: 0 },
+    }));
+    const res = resolveRoom(state, 'b1', inputs);
+    return { res, de: (p: PlayerId) => res.clas.find((f) => f.playerId === p)! };
+  }
+
+  it('DEVOCAO absorve a margem no lugar dos outros e cai sozinho', () => {
+    // Templario Redentor: DEVOCAO 2. Ele cai, e leva o dobro de margem com ele.
+    const comDevoto = makeClan('ana', ['tem-redentor', 'cac-tiroduplo', 'sup-teimoso']);
+    // Mesmo grupo, mas o tanque nao tem DEVOCAO: mais gente cai.
+    const semDevoto = makeClan('ana', ['tem-escudeiro', 'cac-tiroduplo', 'sup-teimoso']);
+    // Margem 3: o PROTEGER comum (Poder de carta 2) nao cobre sozinho, o
+    // DEVOCAO 2 (2 x 2 = 4) cobre.
+    const rolo = () => makeClan('bruno', ['cav-bb', 'cav-bb']);
+
+    const com = duelo({ ana: comDevoto, bruno: rolo() });
+    const sem = duelo({ ana: semDevoto, bruno: rolo() });
+
+    expect(com.de('ana').baixas).toHaveLength(1);
+    expect(sem.de('ana').baixas).toHaveLength(2);
+    // Quem caiu foi o devoto — os outros ficaram de pe.
+    expect(com.de('ana').baixas).toEqual([ids(comDevoto)[0]]);
+  });
+
+  it('o Ensemble so acende com um Bardo E uma Odalisca na sala', () => {
+    // Menestrel com Ensemble, mas so com outro Bardo do lado: nao e dueto.
+    const soBardos = makeClan('ana', ['bar-cancao', 'bar-idun']);
+    transcenderTeste(soBardos, ids(soBardos)[0]!, 'tr-bar-ensemble');
+    // Mesmo Menestrel, agora com uma Odalisca: o dueto sobe.
+    const dueto = makeClan('bruno', ['bar-cancao', 'oda-servico']);
+    transcenderTeste(dueto, ids(dueto)[0]!, 'tr-bar-ensemble');
+
+    const a = duelo({ ana: soBardos, carla: makeClan('carla', ['mon-combo']) });
+    const b = duelo({ bruno: dueto, carla: makeClan('carla', ['mon-combo']) });
+
+    // Mesmas cartas dos dois lados: a unica diferenca e o dueto acender.
+    expect(b.de('bruno').poderBruto - a.de('ana').poderBruto).toBe(10);
+  });
+
+  it('cada classe tem 3 caminhos, inclusive as duas novas', () => {
+    expect(caminhosDaClasse('Bardo')).toHaveLength(3);
+    expect(caminhosDaClasse('Odalisca')).toHaveLength(3);
+    expect(caminhosDaClasse('Superaprendiz').map((t) => t.id)).not.toContain('tr-sup-sorte');
+    expect(CHARACTER_BY_ID.get('sup-sorte')?.classe).toBe('Superaprendiz');
   });
 });

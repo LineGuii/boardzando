@@ -34,11 +34,11 @@ segunda olhada.
 
 | | |
 |---|---|
-| Variações base | **26** (13 classes × 2) |
-| Transcendências | **39** (13 classes × 3) |
-| Desfechos possíveis | **78** (cada base × 3 caminhos) |
-| Bases com combo | 12 de 26 |
-| Transcendências com combo | 11 de 39 |
+| Variações base | **42** (13 classes × 2) |
+| Transcendências | **42** (13 classes × 3) |
+| Desfechos possíveis | **126** (cada base × 3 caminhos) |
+| Bases com combo | 19 de 42 |
+| Transcendências com combo | 12 de 42 |
 | Custo das bases | 3–7 zeny |
 | Poder das bases | 0–4 |
 | Custo das evoluções | 7–14 zeny |
@@ -59,8 +59,10 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Cavaleiro Bola de Boliche** | 6z | 4 | 1.5 | Vanguarda | ◇◇ | ELO 1 | *Bowling Bash* |
 | **Cavaleiro Lanceiro** | 5z | 3 | 1.7 | Vanguarda | ◇ | PERFURAR 2 | *Pierce montado* |
+| **Cavaleiro Provocador** | 5z | 2 | 2.5 | Vanguarda | ◇◇ | PROTEGER | *Provoke* |
 
 - **Cavaleiro Bola de Boliche** — COMBO Templário: o maior clã inimigo fica PRESO.
+- **Cavaleiro Provocador** — COMBO Arcano: o maior clã inimigo fica EXPOSTO — ele veio atrás de você.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
@@ -75,13 +77,15 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | Base | Custo | Poder | z/P | Papel | Slots | Palavras-chave | Build |
 |---|---|---|---|---|---|---|---|
 | **Templário Escudeiro** | 5z | 2 | 2.5 | Vanguarda | ◇◇ | PROTEGER | *Tanque de escudo* |
+| **Templário Redentor** | 6z | 2 | 3.0 | Vanguarda | ◇◇ | DEVOÇÃO 2 | *Sacrifice* |
 | **Templário Defensor** | 6z | 3 | 2.0 | Vanguarda | ◇ | MURALHA 1 | *Defender* |
 
+- **Templário Redentor** — COMBO Sacerdote: seus Vanguardas não sofrem baixa nesta sala.
 - **Templário Defensor** — COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
-| **Devoção** | 11z | +2 | DEVOÇÃO | *Devotion* |
+| **Devoção** | 11z | +2 | DEVOÇÃO 2 | *Devotion* |
 | **Corrente de Escudo** | 11z | +4 | PROTEGER | *Shield Chain* |
 | **Sacrifício** | 10z | +3 | RAJADA 3 · ESGOTAR | *Sacrifice* |
 
@@ -96,6 +100,9 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Bruxo Tempestade** | 7z | 3 | 2.3 | Arcano | ◇ | MURALHA 2 · ALCANCE | *Storm Gust* |
 | **Bruxo Jupitel** | 5z | 4 | 1.3 | Arcano | ◇ | ALCANCE | *Jupitel / Napalm* |
+| **Bruxo Conjurador** | 7z | 2 | 3.5 | Arcano | ◇ | MURALHA 1 | *Precast* |
+
+- **Bruxo Conjurador** — COMBO Bardo: +5 de Poder — a canção sustenta a conjuração.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
@@ -113,8 +120,10 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Sábio Proteção de Solo** | 6z | 2 | 3.0 | Arcano | ◇ | ANULAR | *Land Protection* |
 | **Sábio Encantador** | 5z | 2 | 2.5 | Arcano | ◇◇ | ELO 1 | *Endow* |
+| **Sábio Petrificador** | 6z | 3 | 2.0 | Arcano | ◇ | MURALHA 1 | *Stone Curse* |
 
 - **Sábio Proteção de Solo** — COMBO Bruxo: seus personagens ignoram toda a Muralha inimiga.
+- **Sábio Petrificador** — COMBO: o maior clã inimigo fica PRESO.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
@@ -133,6 +142,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Mercenário Golpe Sônico** | 6z | 3 | 2.0 | Ágil | ◇ | RAJADA 3 | *Sonic Blow* |
 | **Mercenário Furtivo** | 7z | 2 | 3.5 | Ágil | ◇ | OCULTO | *Cloaking* |
+| **Mercenário Katar** | 6z | 4 | 1.5 | Ágil | ◇ | PERFURAR 2 | *Katar crítico* |
 
 - **Mercenário Golpe Sônico** — COMBO Alquimista: +4 de Poder — ele entra pela brecha.
 
@@ -150,6 +160,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Arruaceiro Gatuno** | 5z | 2 | 2.5 | Ágil | ◇ | PILHAR 2 | *Steal* |
 | **Arruaceiro Saqueador** | 6z | 3 | 2.0 | Ágil | ◇ | ANULAR | *Strip* |
+| **Arruaceiro Batedor** | 5z | 3 | 1.7 | Ágil | ◇ | RAJADA 2 | *Back Stab* |
 
 - **Arruaceiro Gatuno** — COMBO Agil: RAPTO — arranque 1 inimigo da sala.
 
@@ -169,8 +180,10 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Ferreiro Forjador** | 5z | 2 | 2.5 | Vanguarda | ◇◇ | — | *Forja* |
 | **Ferreiro Mercador** | 4z | 1 | 4.0 | Vanguarda | ◇ | PILHAR 3 | *Overcharge* |
+| **Ferreiro Perfeição de Armas** | 6z | 2 | 3.0 | Vanguarda | ◇◇ | PERFURAR 2 | *Weapon Perfection* |
 
 - **Ferreiro Mercador** — COMBO: +1 de Poder a cada 5 zeny no seu bolso.
+- **Ferreiro Perfeição de Armas** — COMBO Vanguarda: seus personagens ignoram toda a Muralha inimiga.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
@@ -188,8 +201,10 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Alquimista Homúnculo** | 6z | 2 | 3.0 | Suporte | ◇ | ELO 1 | *Bio-ethics* |
 | **Alquimista Boticário** | 5z | 1 | 5.0 | Suporte | ◇ | RESTAURAR 1 | *Potion Pitcher* |
+| **Alquimista Fogo Grego** | 6z | 3 | 2.0 | Suporte | ◇ | PERFURAR 2 | *Fogo grego* |
 
 - **Alquimista Boticário** — COMBO: o maior clã inimigo fica EXPOSTO.
+- **Alquimista Fogo Grego** — COMBO Arcano: +4 de Poder — o fogo pega no que o mago acendeu.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
@@ -208,12 +223,13 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Sacerdote Suporte** | 6z | 1 | 6.0 | Suporte | ◇ | ELO 2 | *Full Support* |
 | **Sacerdote Pneuma** | 6z | 2 | 3.0 | Suporte | ◇ | MURALHA 2 | *Pneuma / Safety Wall* |
+| **Sacerdote de Batalha** | 5z | 3 | 1.7 | Suporte | ◇◇ | SOLO 2 | *Battle Priest* |
 
 - **Sacerdote Suporte** — COMBO Vanguarda: seu clã ganha MOVER 1.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
-| **Assumptio** | 11z | +2 | DEVOÇÃO | *Assumptio* |
+| **Assumptio** | 11z | +2 | DEVOÇÃO 2 | *Assumptio* |
 | **Ressurreição** | 10z | +1 | RESTAURAR 2 | *Resurrection* |
 | **Julgamento** | 12z | +5 | — | *Magnus Exorcismus* |
 
@@ -225,6 +241,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Monge Combo** | 6z | 4 | 1.5 | Vanguarda | ◇ | — | *Chain Combo* |
 | **Monge Corpo de Aço** | 5z | 0 | — | Vanguarda | ◇◇ | PROTEGER · ESGOTAR | *Steel Body* |
+| **Monge Dilema** | 6z | 2 | 3.0 | Vanguarda | ◇ | PERFURAR 3 | *Investigate* |
 
 - **Monge Corpo de Aço** — COMBO: o maior clã inimigo fica PRESO.
 
@@ -242,6 +259,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Caçador Armadilheiro** | 6z | 2 | 3.0 | Ágil | ◇ | MURALHA 2 | *Trapper* |
 | **Caçador Tiro Duplo** | 6z | 4 | 1.5 | Ágil | ◇ | ALCANCE | *Double Strafe* |
+| **Caçador Falcoeiro** | 6z | 2 | 3.0 | Ágil | ◇ | ALCANCE | *Falcão / Blitz Beat* |
 
 - **Caçador Armadilheiro** — COMBO: o maior clã inimigo fica REVELADO.
 
@@ -255,23 +273,44 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 
 > **Anotações:**
 
-### Bardo/Odalisca
+### Bardo
 
 | Base | Custo | Poder | z/P | Papel | Slots | Palavras-chave | Build |
 |---|---|---|---|---|---|---|---|
 | **Bardo Canção** | 5z | 1 | 5.0 | Suporte | ◇ | ELO 2 | *Canções de grupo* |
-| **Odalisca Dança Lenta** | 6z | 2 | 3.0 | Suporte | ◇ | MURALHA 2 | *Slow Grace* |
+| **Bardo Maçã de Idun** | 5z | 1 | 5.0 | Suporte | ◇ | RESTAURAR 1 | *Apple of Idun* |
+| **Bardo Flecha Musical** | 6z | 4 | 1.5 | Ágil | ◇ | ALCANCE | *Musical Strike* |
 
 - **Bardo Canção** — COMBO Arcano: seus Arcanos ganham +3 de Poder.
-- **Odalisca Dança Lenta** — COMBO Bardo/Odalisca: +4 de Poder — o dueto.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
-| **Ensemble** | 9z | +2 | — · *com outro Bardo/Odalisca seu na sala, ambos +5* | *Ensemble* |
-| **Marionete** | 11z | +0 | — · *dobra o Poder base de outro seu, máx. +6* | *Marionette Control* |
+| **Ensemble** | 9z | +2 | — · *com um Bardo E uma Odalisca seus na sala, cada músico dá +5* | *Ensemble* |
 | **Canção Longa** | 10z | +2 | ELO 2 | *Longing for Freedom* |
+| **Vulcão de Flechas** | 12z | +5 | ALCANCE | *Arrow Vulcan* |
 
 - **Canção Longa** — COMBO Vanguarda: seu clã ganha MOVER 1.
+
+> **Anotações:**
+
+### Odalisca
+
+| Base | Custo | Poder | z/P | Papel | Slots | Palavras-chave | Build |
+|---|---|---|---|---|---|---|---|
+| **Odalisca Dança Lenta** | 6z | 2 | 3.0 | Suporte | ◇ | MURALHA 2 | *Slow Grace* |
+| **Odalisca Dança das Adagas** | 6z | 4 | 1.5 | Ágil | ◇ | RAJADA 2 | *Throw Arrow* |
+| **Odalisca Serviço para Você** | 6z | 1 | 6.0 | Suporte | ◇ | DEVOÇÃO 2 | *Service For You* |
+
+- **Odalisca Dança Lenta** — COMBO Bardo: +4 de Poder — o dueto.
+- **Odalisca Serviço para Você** — COMBO Monge: ninguém seu vai à Enfermaria por Esgotar.
+
+| Transcendência | Custo | +Poder | Ganha | Origem |
+|---|---|---|---|---|
+| **Marionete** | 11z | +0 | — · *dobra o Poder base de outro seu, máx. +6* | *Marionette Control* |
+| **Tarô do Destino** | 11z | +2 | ANULAR | *Tarot Card of Fate* |
+| **Ritmo Hipnótico** | 10z | +2 | MURALHA 3 | *Slow Grace ampliado* |
+
+- **Tarô do Destino** — COMBO: o maior clã inimigo fica EXPOSTO.
 
 > **Anotações:**
 
@@ -280,12 +319,13 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | Base | Custo | Poder | z/P | Papel | Slots | Palavras-chave | Build |
 |---|---|---|---|---|---|---|---|
 | **Superaprendiz Teimoso** | 3z | 1 | 3.0 | Ágil | ◇◇◇ | — | *Sobrevivência teimosa* |
+| **Superaprendiz Sortudo** | 4z | 1 | 4.0 | Ágil | ◇ | SOLO 3 | *Sorte de principiante* |
 | **Superaprendiz Improvisado** | 4z | 2 | 2.0 | Suporte | ◇◇ | IMITAR 2 | *Faz de tudo* |
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
-| **Teimosia Absurda** | 8z | +1 | — · *não pode sofrer baixa* | *Guardian Angel* |
-| **Sorte de Principiante** | 8z | +3 | SOLO 3 | *Sorte pura* |
+| **Teimosia Absurda** | 8z | +1 | — · *não pode sofrer baixa* · *+1 slot de equipamento* | *Guardian Angel* |
+| **Sobrecarga** | 9z | +4 | ESGOTAR | *Sobrecarga* |
 | **Imitação Descarada** | 7z | +2 | IMITAR 2 | *Cópia de tudo* |
 
 > **Anotações:**

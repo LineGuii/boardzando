@@ -56,7 +56,7 @@ const ESPECIAL = {
   'marcha-livre': 'anula a Marcha Forçada do clã inteiro',
   'forja-suprema': 'refino sem quebra e 1 grátis por rodada',
   imortal: 'não pode sofrer baixa',
-  ensemble: 'com outro Bardo/Odalisca seu na sala, ambos +5',
+  ensemble: 'com um Bardo E uma Odalisca seus na sala, cada músico dá +5',
   marionete: 'dobra o Poder base de outro seu, máx. +6',
 };
 const especial = (id) => ESPECIAL[id] ?? id;
@@ -160,7 +160,8 @@ function markdown() {
     p('| Transcendência | Custo | +Poder | Ganha | Origem |');
     p('|---|---|---|---|---|');
     for (const t of paths) {
-      const extra = t.special ? ` · *${especial(t.special)}*` : '';
+      const slot = t.slotsBonus ? ` · *+${t.slotsBonus} slot de equipamento*` : '';
+      const extra = (t.special ? ` · *${especial(t.special)}*` : '') + slot;
       p(
         `| **${t.nome.replace(/^[^—]+— /, '')}** | ${t.custo}z | +${t.poderBonus} | ` +
           `${kws(t.keywords)}${extra} | *${t.build}* |`,
@@ -273,6 +274,7 @@ function transHTML(t) {
         <div class="stats">
           <span><em>+Poder</em><b>+${t.poderBonus}</b></span>
           ${t.special ? `<span><em>Especial</em><b>${esc(especial(t.special))}</b></span>` : ''}
+          ${t.slotsBonus ? `<span><em>Slots</em><b>+${t.slotsBonus}</b></span>` : ''}
         </div>
         ${k}
         ${t.combo ? `<p class="combo">${esc(t.combo.texto)}</p>` : ''}

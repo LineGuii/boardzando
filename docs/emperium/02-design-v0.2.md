@@ -102,7 +102,7 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 | **ELO X** | +X de Poder para cada **outro** personagem seu nesta sala. |
 | **SOLO X** | +X de Poder se este for o seu único personagem nesta sala. |
 | **OCULTO** | Não é revelado com os outros. Entra depois das Ordens. Ignora limite de sala. |
-| **DEVOÇÃO** | Quando outro personagem seu nesta sala sofreria baixa, este sofre no lugar. |
+| **DEVOÇÃO X** | Ele se joga na frente: cada baixa que ele leva conta por X, e os outros ficam de pé. Cai antes até do PROTEGER. |
 | **ANULAR** | Cancela uma palavra-chave **ou** um equipamento de um personagem inimigo. |
 | **RESTAURAR X** | No fim da rodada, mova X personagens da Enfermaria para a Reserva. |
 | **PILHAR X** | Se vencer, ganhe X zeny. Com X ≥ 3, ganhe 1 equipamento caído. |
@@ -172,7 +172,7 @@ se atrapalham. O caos precisa de teto.
 | Sábio Proteção de Solo | **COMBO Bruxo:** seu clã ignora toda a Muralha inimiga |
 | Templário Defensor | **COMBO Arcano:** seus Arcanos não sofrem baixa |
 | Bardo Canção | **COMBO Arcano:** seus Arcanos ganham +3 de Poder |
-| Odalisca Dança Lenta | **COMBO Bardo/Odalisca:** +4 de Poder — o dueto |
+| Odalisca Dança Lenta | **COMBO Bardo:** +4 de Poder — o dueto |
 | Cavaleiro Bola de Boliche | **COMBO Templário:** o maior clã inimigo fica PRESO |
 | Monge Corpo de Aço | **COMBO:** o maior clã inimigo fica PRESO |
 | Alquimista Boticário | **COMBO:** o maior clã inimigo fica EXPOSTO |
