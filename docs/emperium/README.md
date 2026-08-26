@@ -56,7 +56,7 @@ fim — são 6 desfechos por classe, 78 no total.
 (Thara Frog, Hydra, Ghostring…) e refino +0 a +3 com risco de quebrar.
 
 **4. Combos.** A linha que faz os personagens agirem como clã: algumas cartas **nomeiam
-outro personagem**. "COMBO Bruxo: sua facção ignora toda a Muralha inimiga." Só um combo
+outro personagem**. "COMBO Bruxo: seu clã ignora toda a Muralha inimiga." Só um combo
 dispara por sala, declarado no comprometimento.
 
 ### O castelo
@@ -83,6 +83,7 @@ castelo.
 | Documento | Para quem |
 |---|---|
 | **[Manual do Jogador](manual-do-jogador.md)** · [versão web](manual.html) | Quem vai jogar e precisa da regra exata. Referência completa. |
+| **[A Queda de Glast Heim](03-partida-narrada.md)** | Uma partida inteira narrada, quatro jogadores, seis rodadas — com baixas, combos, marcas, evolução, forja e o Emperium caindo duas vezes. O melhor jeito de ver as regras funcionando juntas. |
 | **[Tutorial](tutorial.html)** | Quem nunca jogou. Ensina pela primeira partida, com exemplo comentado. |
 | **[Design v0.2](02-design-v0.2.md)** · [versão web](design-v0.2.html) | Quem quer entender *por que* cada regra existe. O documento de design atual. |
 | [Design v0.1](01-design-v0.1.md) | Registro histórico. Mantém as tabelas completas das 26 bases e 39 evoluções. |

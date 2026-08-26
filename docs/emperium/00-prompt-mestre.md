@@ -229,9 +229,9 @@ Não copie estruturas; extraia o *princípio* e diga por que ele serve a este jo
   alvos, sem espiral de eliminação.
 - **Gloomhaven / Middara** — equipamento como identidade de personagem: o item
   não é +1, é uma mudança de como aquela unidade opera.
-- **Root / Chaos in the Old World** — assimetria: cada facção vence de um jeito
+- **Root / Chaos in the Old World** — assimetria: cada clã vence de um jeito
   diferente. Use com cuidado: seus clãs são simétricos por padrão, e a assimetria
-  deve emergir dos personagens recrutados e equipados, não de poderes fixos de facção.
+  deve emergir dos personagens recrutados e equipados, não de poderes fixos de clã.
 - **Nemesis / Dead of Winter** — tensão de mesa sem alianças formais.
 
 ---

@@ -75,7 +75,7 @@ interface FactionResultV {
 interface RoomResolutionV {
   slot: RoomSlot;
   tileId: string;
-  faccoes: FactionResultV[];
+  clas: FactionResultV[];
   controlador: string | null;
   controladorAnterior: string | null;
   semDisputa: boolean;
@@ -257,8 +257,8 @@ function Confronto({
   nomeDe: (id: string | null) => string;
   tileNome: string;
 }) {
-  const fora = res.faccoes.filter((f) => f.ordem === 'resguardo');
-  const lutando = res.faccoes.filter((f) => f.ordem !== 'resguardo');
+  const fora = res.clas.filter((f) => f.ordem === 'resguardo');
+  const lutando = res.clas.filter((f) => f.ordem !== 'resguardo');
   const ehEmperium = res.slot === 'emperium';
 
   return (

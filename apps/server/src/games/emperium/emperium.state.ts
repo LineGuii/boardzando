@@ -104,7 +104,9 @@ export interface FactionResult {
   venceu: boolean;
   /** Salas de Marcha Forcada percorridas; 0 = entrou pela linha de frente. */
   marcha: number;
-  /** Texto do combo que esta faccao disparou, se acendeu. */
+  /** Perdeu o bonus da propria Ordem por ter sido emboscado. */
+  emboscado: boolean;
+  /** Texto do combo que este cla disparou, se acendeu. */
   combo?: string;
   /** Marcas sofridas nesta sala. */
   marcas: ('exposto' | 'preso' | 'revelado')[];

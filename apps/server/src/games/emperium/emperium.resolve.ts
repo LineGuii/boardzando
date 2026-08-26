@@ -141,6 +141,8 @@ interface Faction {
   imuneMuralha: number;
   /** Salas de Marcha Forcada percorridas. */
   marcha: number;
+  /** Sofreu uma Emboscada: perdeu o bonus da propria Ordem. */
+  emboscado?: boolean;
   /** Bonus vindo da Ordem, separado porque a marca PRESO o remove. */
   bonusOrdem: number;
   /** O combo declarado por esta faccao nesta sala, se acendeu. */
@@ -588,6 +590,23 @@ export function resolveRoom(
     });
   }
 
+  // EMBOSCADA: e AQUI que "resolver antes" vira vantagem de verdade. Voce bateu
+  // antes de o inimigo formar, entao ninguem mais nesta sala recebe o bonus da
+  // propria Ordem. Sem isso, resolver primeiro nao tinha consequencia nenhuma —
+  // a sala resolvia mais cedo e nada mudava.
+  for (const emboscador of factions) {
+    if (emboscador.ordem !== 'emboscada') continue;
+    for (const outro of factions) {
+      // So o bonus POSITIVO. Emboscar impede o inimigo de atacar, nao desfaz a
+      // decisao dele de recuar — devolver o -2 do Resguardo premiaria quem se
+      // escondeu, que e o contrario do que a Emboscada deveria fazer.
+      if (outro === emboscador || outro.bonusOrdem <= 0) continue;
+      outro.poderBruto -= outro.bonusOrdem;
+      outro.bonusOrdem = 0;
+      outro.emboscado = true;
+    }
+  }
+
   // Pass 2 — combos e marcas, ANTES de Anular e Muralha: EXPOSTO zera a
   // Muralha do alvo e PRESO tira o bonus da Ordem dele.
   applyCombos(factions, (p) => state.clans[p]?.zeny ?? 0);
@@ -621,6 +640,7 @@ export function resolveRoom(
       baixas,
       venceu: vencedora === f,
       marcha: f.marcha,
+      emboscado: f.emboscado === true,
       combo: f.comboAtivo?.texto,
       marcas: [...f.marcas],
       cancelaEsgotar: f.cancelaEsgotar,
@@ -774,6 +794,7 @@ export function resolveEmperium(
       baixas,
       venceu: false,
       marcha: f.marcha,
+      emboscado: f.emboscado === true,
       combo: f.comboAtivo?.texto,
       marcas: [...f.marcas],
       cancelaEsgotar: f.cancelaEsgotar,

@@ -315,7 +315,7 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
     <div class="passo"><span class="n">1</span><div class="txt"><b class="tit">Revele</b>
       <p>Personagens, Ordens, combos declarados e consumíveis.</p></div></div>
     <div class="passo"><span class="n">2</span><div class="txt"><b class="tit">Entram os Oculto</b>
-      <p>A menos que a facção esteja <b>Revelada</b>.</p></div></div>
+      <p>A menos que o clã esteja <b>Revelado</b>.</p></div></div>
     <div class="passo"><span class="n">3</span><div class="txt"><b class="tit">Resolva o Rapto</b>
       <p>Antes de qualquer soma, porque arrancar alguém muda o cálculo de quem ficou. Se
       dois ou mais clãs declararem Rapto, <b>nenhum acontece</b>.</p></div></div>
@@ -324,16 +324,16 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
     <div class="passo"><span class="n">5</span><div class="txt"><b class="tit">Dispare os combos</b>
       <p>E aplique as marcas nos inimigos.</p></div></div>
     <div class="passo"><span class="n">6</span><div class="txt"><b class="tit">Aplique Anular</b>
-      <p>Cada uso cancela a maior Muralha de uma facção inimiga.</p></div></div>
+      <p>Cada uso cancela a maior Muralha de um clã inimigo.</p></div></div>
     <div class="passo"><span class="n">7</span><div class="txt"><b class="tit">Aplique Muralha</b>
-      <p>Cada Muralha X reduz o Poder de <b>cada</b> facção inimiga em X. Perfurar devolve
+      <p>Cada Muralha X reduz o Poder de <b>cada</b> clã inimigo em X. Perfurar devolve
       ponto a ponto. <b>A Muralha nunca empurra o Poder abaixo de zero.</b></p></div></div>
     <div class="passo"><span class="n">8</span><div class="txt"><b class="tit">O maior total controla</b>
       <p>Empate no topo: <b>ninguém controla</b>, e todos os empatados sofrem 1 baixa.</p></div></div>
     <div class="passo"><span class="n">9</span><div class="txt"><b class="tit">Baixas</b>
-      <p>Cada facção derrotada remove personagens cuja soma de <b>Poder de carta</b> (base +
+      <p>Cada clã derrotado remove personagens cuja soma de <b>Poder de carta</b> (base +
       evolução) alcance a <b>margem de derrota</b>. Escudar cai primeiro — a menos que a
-      facção esteja <b>Presa</b>. Depois, os de menor Poder de carta.</p>
+      clã esteja <b>Presa</b>. Depois, os de menor Poder de carta.</p>
       <p><b>Teto: metade dos seus personagens na sala, arredondado para cima.</b> Investida
       dá 1 baixa extra a quem perde; Resguardo cancela todas.</p></div></div>
     <div class="passo"><span class="n">10</span><div class="txt"><b class="tit">Espólio</b>
@@ -355,8 +355,80 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
     <div class="note warn">
       <span class="lbl">A regra que mais surpreende</span>
       <p>Se dois clãs <strong>atacantes</strong> comprometem na mesma sala, eles são
-      <strong>facções diferentes</strong>. Um controla e o outro sofre baixas — mesmo que
+      <strong>clãs diferentes</strong>. Um controla e o outro sofre baixas — mesmo que
       os dois tenham superado o defensor. <strong>Não existe atacar junto.</strong></p>
+    </div>
+  </div>
+
+  <h3 class="col" style="margin-top: var(--s5)">Exemplo completo de baixas</h3>
+  <div class="col stack" style="margin-bottom: var(--s3)">
+    <p>O passo 9 é o que mais confunde. Vamos por inteiro.
+       <strong>Pátio Aberto, rodada 4.</strong></p>
+  </div>
+
+  <div class="twrap" style="margin-bottom: var(--s3)">
+    <table>
+      <thead><tr><th>Ana — Ordem: Investida</th><th class="num">Poder de carta</th><th class="num">Poder na sala</th></tr></thead>
+      <tbody>
+        <tr><td>Templário Escudeiro <i>(Escudar)</i></td><td class="num">2</td><td class="num">2</td></tr>
+        <tr><td>Bruxo Jupitel <i>(Alcance)</i></td><td class="num">4</td><td class="num">5 <span style="color:var(--muted)">(+1 do Pátio)</span></td></tr>
+        <tr><td>Superaprendiz Teimoso</td><td class="num">2</td><td class="num">2</td></tr>
+        <tr><td><b>+3 da Investida</b></td><td class="num">—</td><td class="num"><b>Total 12</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="twrap" style="margin-bottom: var(--s3)">
+    <table>
+      <thead><tr><th>Bruno — Ordem: Cerco</th><th class="num">Poder de carta</th><th class="num">Poder na sala</th></tr></thead>
+      <tbody>
+        <tr><td>Monge Combo</td><td class="num">4</td><td class="num">4</td></tr>
+        <tr><td>Cavaleiro Bola de Boliche <i>(Elo 1)</i></td><td class="num">4</td><td class="num">5 <span style="color:var(--muted)">(+1 de Elo)</span></td></tr>
+        <tr><td><b>−1 do Cerco</b></td><td class="num">—</td><td class="num"><b>Total 8</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col stack" style="margin-bottom: var(--s3)">
+    <p>Ninguém tem Muralha, então os totais ficam de pé. <strong>Ana controla o Pátio, 12
+       a 8.</strong></p>
+    <p><strong>Margem de derrota = 12 − 8 = 4.</strong> Bruno remove personagens cuja soma
+       de <strong>Poder de carta</strong> alcance 4. Repare: conta o Poder de <em>carta</em>,
+       não o Poder que ele teve na sala — o Cavaleiro vale 4 aqui, não 5.</p>
+    <p>Nenhum dos dois tem Escudar, então vale a regra seguinte: <strong>os de menor Poder
+       de carta</strong>. Os dois têm 4, então Bruno escolhe. Ele entrega o
+       <strong>Monge</strong> e preserva o Cavaleiro, que tem 2 slots de equipamento.
+       Poder de carta 4 ≥ margem 4: <strong>uma baixa basta</strong>.</p>
+    <div class="note">
+      <span class="lbl">O teto</span>
+      <p>Bruno tinha 2 personagens na sala, então o máximo é <strong>1 baixa</strong> —
+      metade de 2, arredondado para cima. Mesmo que a margem fosse 20, cairia um só.</p>
+    </div>
+    <p>O Monge vai para a <strong>Enfermaria</strong> e perde a rodada seguinte inteira. O
+       Cavaleiro volta à Reserva normalmente.</p>
+  </div>
+
+  <h3 class="col">E se Bruno tivesse jogado outra Ordem?</h3>
+  <div class="twrap" style="margin-bottom: var(--s3)">
+    <table>
+      <thead><tr><th>Ordem de Bruno</th><th class="num">Poder</th><th class="num">Margem</th><th>Baixas</th></tr></thead>
+      <tbody>
+        <tr><td><b>Cerco</b> <span style="color:var(--muted)">(o que aconteceu)</span></td><td class="num">8</td><td class="num">4</td><td><b>1</b></td></tr>
+        <tr><td>Investida</td><td class="num">12</td><td class="num">0</td><td><b>Empate no topo</b> — 1 para cada lado</td></tr>
+        <tr><td>Resguardo</td><td class="num">7</td><td class="num">5</td><td><b>0</b> — Resguardo cancela</td></tr>
+        <tr><td>Emboscada <span style="color:var(--muted)">(única)</span></td><td class="num">11</td><td class="num">—</td><td>Ana perde os +3 e cai para 9: <b>a sala muda de dono</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col stack">
+    <p>Repare na última linha: a Emboscada não só dá +2 a Bruno como tira os +3 de Ana. Os
+       12 dela viram 9, os 8 dele viram 11. <strong>É o swing de 5 pontos.</strong></p>
+    <div class="note warn">
+      <span class="lbl">Quando há Escudar</span>
+      <p>Personagens com <strong>Escudar</strong> caem primeiro, obrigatoriamente — mesmo
+      sendo os mais baratos. Se o clã estiver <strong>Preso</strong>, o Escudar não funciona
+      e eles entram na fila normal, pelo Poder de carta como todo mundo.</p>
     </div>
   </div>
 </section>
@@ -393,18 +465,52 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
   <h2><span class="num">07</span>As quatro Ordens</h2>
   <div class="col stack" style="margin-bottom: var(--s3)">
     <p>As mesmas todas as rodadas. <strong>Cada uma vale uma vez por rodada</strong> — é o
-       que limita você a quatro salas.</p>
+       que limita você a quatro salas. Cada Ordem resolve um problema diferente.</p>
   </div>
-  <div class="twrap">
-    <table>
-      <thead><tr><th>Ordem</th><th>Efeito</th></tr></thead>
-      <tbody>
-        <tr><td><span class="kw">Investida</span></td><td>+3 de Poder. Se você perder a sala, sofra 1 baixa extra.</td></tr>
-        <tr><td><span class="kw">Cerco</span></td><td>Ignore o limite de personagens da sala. −1 de Poder.</td></tr>
-        <tr><td><span class="kw">Emboscada</span></td><td>Esta sala resolve antes de todas. <b>+2</b> se você for o único com Emboscada aqui; <b>−2</b> se houver outra.</td></tr>
-        <tr><td><span class="kw">Resguardo</span></td><td>−2 de Poder. Você <b>não sofre baixas</b> nesta sala. Ganhe 3 zeny.</td></tr>
-      </tbody>
-    </table>
+
+  <div class="passos" style="margin-bottom: var(--s3)">
+    <div class="passo"><span class="n">+3</span><div class="txt">
+      <b class="tit">Investida — para ganhar a sala</b>
+      <p>+3 de Poder. Se você perder a sala, sofra <b>1 baixa extra</b>.</p>
+      <p>É o maior bônus do jogo e o único com punição própria. Também é a Ordem mais
+      previsível — e por isso a mais vulnerável à Emboscada.</p>
+    </div></div>
+
+    <div class="passo"><span class="n">−1</span><div class="txt">
+      <b class="tit">Cerco — para levar mais gente do que cabe</b>
+      <p>Ignore o limite de personagens da sala. −1 de Poder.</p>
+      <p><b>Quase toda sala tem limite de 3 por clã</b> (o Corredor Estreito tem 2). As
+      únicas exceções são o <b>Pátio Aberto</b> e o <b>Salão do Trono</b>, sem limite
+      nenhum. O Cerco vale em cinco das sete salas: troca 1 de Poder por poder trazer o
+      quarto, o quinto, o exército inteiro.</p>
+    </div></div>
+
+    <div class="passo"><span class="n">+2</span><div class="txt">
+      <b class="tit">Emboscada — para desarmar quem ia atacar</b>
+      <p>Esta sala resolve antes de todas. +2 se você for o único com Emboscada aqui; −2 se
+      houver outra. E o principal: <b>todos os outros clãs desta sala perdem o bônus
+      positivo da Ordem deles</b>.</p>
+      <p>É aí que "resolver antes" vira vantagem de verdade — você bateu antes de eles
+      formarem. Uma Investida inimiga vira <b>+0</b> em vez de +3. O <b>−2 do Resguardo não
+      é devolvido</b>: emboscar impede o inimigo de atacar, não desfaz a decisão dele de
+      recuar.</p>
+    </div></div>
+
+    <div class="passo"><span class="n">−2</span><div class="txt">
+      <b class="tit">Resguardo — para sair inteiro</b>
+      <p>−2 de Poder. Você <b>não sofre baixas</b> nesta sala. Ganhe 3 zeny.</p>
+      <p>A Ordem de quem vai perder e sabe disso: mantém a sala disputada, obrigando o
+      inimigo a gastar gente lá, e sai sem baixa nenhuma com troco no bolso. Se por acaso
+      você tiver o maior Poder mesmo com o −2, <b>você controla a sala normalmente</b>.</p>
+    </div></div>
+  </div>
+
+  <div class="col">
+    <div class="note">
+      <span class="lbl">O swing de 5 pontos</span>
+      <p>Emboscada contra Investida é a maior troca do jogo: você ganha +2 <em>e</em> ele
+      perde +3. Uma sala que você perderia por 3 vira uma sala que você ganha por 2.</p>
+    </div>
   </div>
 </section>
 
@@ -415,36 +521,76 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
     <p>Algumas cartas trazem uma linha que <strong>nomeia outro personagem</strong>:</p>
     <div class="note combo">
       <span class="lbl">Anatomia</span>
-      <p><strong>COMBO Bruxo:</strong> sua facção ignora toda a Muralha inimiga.<br>
+      <p><strong>COMBO Bruxo:</strong> seu clã ignora toda a Muralha inimiga.<br>
       <span style="color:var(--muted); font-size:.88rem">acende se você tiver um Bruxo
       comprometido na mesma sala</span></p>
     </div>
     <p>O combo pode exigir uma <strong>classe</strong>, um <strong>Papel</strong>, ou nada.
        O portador nunca conta como o próprio companheiro.</p>
-    <p><strong>Só um combo dispara por facção por sala</strong>, declarado no
+    <p><strong>Só um combo dispara por clã por sala</strong>, declarado no
        comprometimento. Juntar cinco personagens não acumula cinco combos. Quando a evolução
        traz um combo, ele <strong>substitui</strong> o da base.</p>
   </div>
 
-  <h3 class="col">As três marcas</h3>
+  <h3 class="col">As três marcas — e como se usa</h3>
+  <div class="col stack" style="margin-bottom: var(--s3)">
+    <p><strong>Marca não é um recurso que você guarda.</strong> Você nunca "tem" marcas na
+       mão. Uma marca é o <em>efeito</em> de certos combos, e acontece sozinha quando aquele
+       combo dispara. O caminho completo é este:</p>
+  </div>
+
+  <div class="passos" style="margin-bottom: var(--s3)">
+    <div class="passo"><span class="n">1</span><div class="txt">
+      <p>Você <b>recruta</b> um personagem cujo combo aplica marca — o <b>Alquimista
+      Boticário</b>, por exemplo.</p></div></div>
+    <div class="passo"><span class="n">2</span><div class="txt">
+      <p>Você o <b>compromete numa sala</b>, junto de quem mais for.</p></div></div>
+    <div class="passo"><span class="n">3</span><div class="txt">
+      <p>Você <b>declara o combo dele</b> no comprometimento. Se declarar outro, o do
+      Boticário não dispara — só um por sala.</p></div></div>
+    <div class="passo"><span class="n">4</span><div class="txt">
+      <p>Na resolução, logo depois de somar o Poder, a marca cai <b>automaticamente no clã
+      inimigo de maior Poder daquela sala</b>. Você não escolhe o alvo.</p></div></div>
+    <div class="passo"><span class="n">5</span><div class="txt">
+      <p>A marca <b>muda a conta antes de decidir quem vence</b>, e some no fim da
+      resolução: vale só naquela sala, naquela rodada.</p></div></div>
+  </div>
+
+  <div class="col stack" style="margin-bottom: var(--s3)">
+    <h3>Exemplo de uso</h3>
+    <p>Você suspeita que a defensora vai segurar o <strong>Corredor Estreito</strong> com o
+       Bruxo Tempestade dela (Muralha 2) e um Templário Escudeiro. Você compromete ali o
+       <strong>Alquimista Boticário</strong> (Poder 1) e o <strong>Monge Combo</strong>
+       (Poder 4), joga <strong>Investida</strong> (+3) e <strong>declara o combo do
+       Boticário</strong>.</p>
+    <p>Na resolução o clã dela é o de maior Poder, então leva <strong>Exposto</strong>. A
+       Muralha 2 dela <strong>vira 0</strong>, e os seus 8 de Poder chegam inteiros em vez
+       de virarem 6.</p>
+    <div class="note combo">
+      <span class="lbl">A regra prática</span>
+      <p>O Boticário tem Poder 1 e não venceu nada sozinho — ele <strong>desarmou a defesa
+      para o Monge passar</strong>. Marca não ganha sala; <strong>marca faz o seu outro
+      personagem ganhar a sala</strong>.</p>
+    </div>
+  </div>
+
   <div class="col stack" style="margin-bottom: var(--s2)">
-    <p>Caem sempre na <strong>maior facção inimiga da sala</strong>, e valem só naquela
-       sala, naquela rodada.</p>
+    <p>Contra quem cada uma serve:</p>
   </div>
   <div class="twrap" style="margin-bottom: var(--s3)">
     <table>
-      <thead><tr><th>Marca</th><th>Efeito</th></tr></thead>
+      <thead><tr><th>Marca</th><th>Efeito</th><th>Serve contra</th></tr></thead>
       <tbody>
-        <tr><td><span class="mk">Exposto</span></td><td>A facção marcada perde <b>toda a Muralha</b>.</td></tr>
-        <tr><td><span class="mk">Preso</span></td><td>Perde o <b>bônus da Ordem</b> e <b>não pode usar Escudar</b>.</td></tr>
-        <tr><td><span class="mk">Revelado</span></td><td>Cancela <b>Oculto</b>: os personagens entram na revelação normal.</td></tr>
+        <tr><td><span class="mk">Exposto</span></td><td>O clã marcado perde <b>toda a Muralha</b>.</td><td>Bruxos, Sacerdotes Pneuma, Caçadores Armadilheiros — quem se defende reduzindo o seu Poder</td></tr>
+        <tr><td><span class="mk">Preso</span></td><td>Perde o <b>bônus positivo da Ordem</b> e <b>não pode usar Escudar</b>.</td><td>Quem veio de Investida, e quem trouxe um Templário Escudeiro para absorver baixas</td></tr>
+        <tr><td><span class="mk">Revelado</span></td><td>Cancela <b>Oculto</b>: os personagens entram na revelação normal.</td><td>Mercenários Furtivos e qualquer um com Traje de Sombras</td></tr>
       </tbody>
     </table>
   </div>
 
   <h3 class="col">Rapto</h3>
   <div class="col stack">
-    <p>Arranca <strong>1 personagem</strong> da maior facção inimiga — o de maior Poder de
+    <p>Arranca <strong>1 personagem</strong> do maior clã inimigo — o de maior Poder de
        carta. Ele volta à <strong>Reserva do dono, sem sofrer baixa</strong>. Resolve antes
        de somar Poder. Máximo de um por sala; se dois clãs declararem, nenhum acontece.</p>
   </div>
@@ -531,8 +677,8 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
       <thead><tr><th>Palavra-chave</th><th>Efeito</th></tr></thead>
       <tbody>
         <tr><td><span class="kw">Alcance</span></td><td>Só sofre baixa se você não tiver nenhum personagem com Escudar vivo nesta sala.</td></tr>
-        <tr><td><span class="kw">Escudar</span></td><td>Absorve as baixas da sua facção antes de qualquer outro personagem seu.</td></tr>
-        <tr><td><span class="kw">Muralha X</span></td><td>Reduz em X o Poder Total de <b>cada</b> facção inimiga nesta sala.</td></tr>
+        <tr><td><span class="kw">Escudar</span></td><td>Absorve as baixas da seu clã antes de qualquer outro personagem seu.</td></tr>
+        <tr><td><span class="kw">Muralha X</span></td><td>Reduz em X o Poder Total de <b>cada</b> clã inimigo nesta sala.</td></tr>
         <tr><td><span class="kw">Perfurar X</span></td><td>X pontos do Poder deste personagem ignoram a Muralha inimiga.</td></tr>
         <tr><td><span class="kw">Rajada X</span></td><td>+X de Poder, só na primeira rodada em que este personagem entra nesta sala.</td></tr>
         <tr><td><span class="kw">Elo X</span></td><td>+X de Poder para cada <b>outro</b> personagem seu nesta sala.</td></tr>
@@ -559,8 +705,8 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
     <table>
       <thead><tr><th>Sala fixa</th><th>Regra</th></tr></thead>
       <tbody>
-        <tr><td><b>Portão Principal</b></td><td>Sem limite, sem efeito. Sempre na sua linha de frente.</td></tr>
-        <tr><td><b>Salão do Trono</b></td><td>Limite 3 por facção. O dono do castelo tem <b>+2 de Poder</b> aqui.</td></tr>
+        <tr><td><b>Portão Principal</b></td><td><b>Limite 3</b> por clã. Sempre na sua linha de frente.</td></tr>
+        <tr><td><b>Salão do Trono</b></td><td><b>Sem limite.</b> O dono do castelo tem <b>+2 de Poder</b> aqui.</td></tr>
         <tr><td><b>Sala do Emperium</b></td><td>Não se disputa controle. Ver seção 10.</td></tr>
       </tbody>
     </table>
@@ -569,11 +715,11 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
     <table>
       <thead><tr><th>Ficha de ala</th><th>Regra</th></tr></thead>
       <tbody>
-        <tr><td><b>Corredor Estreito</b></td><td>Limite 2 personagens por facção.</td></tr>
-        <tr><td><b>Pátio Aberto</b></td><td>Personagens com Alcance têm +1 de Poder.</td></tr>
-        <tr><td><b>Ponte sobre o Fosso</b></td><td>Facções derrotadas não sofrem baixa: voltam à Reserva.</td></tr>
+        <tr><td><b>Corredor Estreito</b></td><td><b>Limite 2</b> por clã — todas as outras alas têm limite 3.</td></tr>
+        <tr><td><b>Pátio Aberto</b></td><td><b>Sem limite.</b> Personagens com Alcance têm +1 de Poder.</td></tr>
+        <tr><td><b>Ponte sobre o Fosso</b></td><td>Clãs derrotados não sofrem baixa: voltam à Reserva.</td></tr>
         <tr><td><b>Labirinto</b></td><td>Comprometer custa 1 zeny por personagem. Alcance não funciona.</td></tr>
-        <tr><td><b>Salão dos Guardiões</b></td><td>Guarnição de Poder 6 que combate todas as facções. Ninguém controla enquanto ela viver.</td></tr>
+        <tr><td><b>Salão dos Guardiões</b></td><td>Guarnição de Poder 6 que combate todos os clãs. Ninguém controla enquanto ela viver.</td></tr>
         <tr><td><b>Armazém</b></td><td>Quem controla ganha 4 zeny no fim da rodada.</td></tr>
         <tr><td><b>Forja</b></td><td>Quem controla faz 1 refino grátis e sem risco.</td></tr>
         <tr><td><b>Capela</b></td><td>Quem controla move 1 personagem da Enfermaria para a Reserva.</td></tr>
@@ -593,7 +739,7 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
     <div class="qa"><span class="q">Um combo dispara se o companheiro está em outra sala?</span>
       <span class="a">Não. Ele precisa estar comprometido <b>na mesma sala</b>.</span></div>
     <div class="qa"><span class="q">Posso declarar dois combos numa sala?</span>
-      <span class="a">Não. Um por facção por sala.</span></div>
+      <span class="a">Não. Um por clã por sala.</span></div>
     <div class="qa"><span class="q">A Muralha pode zerar o Poder de alguém?</span>
       <span class="a">Pode chegar a zero, nunca abaixo.</span></div>
     <div class="qa"><span class="q">Com Resguardo e o maior Poder, eu controlo a sala?</span>
@@ -601,7 +747,7 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
     <div class="qa"><span class="q">O raptado conta como baixa?</span>
       <span class="a">Não. Ele volta à Reserva intacto e pode ir para a batalha na rodada seguinte.</span></div>
     <div class="qa"><span class="q">Quem tem Esgotar e vence vai para a Enfermaria?</span>
-      <span class="a">Vai — a menos que um combo tenha cancelado o Esgotar da facção.</span></div>
+      <span class="a">Vai — a menos que um combo tenha cancelado o Esgotar do clã.</span></div>
     <div class="qa"><span class="q">Posso transcender e comprometer o mesmo personagem na mesma rodada?</span>
       <span class="a">Pode. O mercado acontece antes do comprometimento.</span></div>
     <div class="qa"><span class="q">Quem quebra o Emperium ataca de novo na rodada seguinte?</span>

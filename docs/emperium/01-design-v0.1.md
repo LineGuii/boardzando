@@ -113,8 +113,8 @@ Bases e Transcendências são compostas a partir desta lista. Nada de texto livr
 | Palavra-chave | Efeito |
 |---|---|
 | **ALCANCE** | Só sofre baixa se você não tiver nenhum personagem com ESCUDAR vivo nesta sala. |
-| **ESCUDAR** | Absorve as baixas da sua facção antes de qualquer outro personagem seu nesta sala. |
-| **MURALHA X** | Reduz em X o Poder Total de **cada** facção inimiga nesta sala. |
+| **ESCUDAR** | Absorve as baixas da seu clã antes de qualquer outro personagem seu nesta sala. |
+| **MURALHA X** | Reduz em X o Poder Total de **cada** clã inimigo nesta sala. |
 | **PERFURAR X** | X pontos do Poder deste personagem ignoram MURALHA inimiga. |
 | **RAJADA X** | +X de Poder, apenas na primeira rodada em que este personagem entra nesta sala. |
 | **ELO X** | +X de Poder para cada **outro** personagem seu nesta sala. |
@@ -123,7 +123,7 @@ Bases e Transcendências são compostas a partir desta lista. Nada de texto livr
 | **DEVOÇÃO** | Quando outro personagem seu nesta sala sofreria baixa, este sofre no lugar. |
 | **ANULAR** | Cancela uma palavra-chave **ou** um equipamento de um personagem inimigo nesta sala. |
 | **RESTAURAR X** | No fim da rodada, mova X personagens da sua Enfermaria para a Reserva. |
-| **PILHAR X** | Se sua facção vencer esta sala, ganhe X zeny. Com X ≥ 3, ganhe 1 equipamento caído em vez disso. |
+| **PILHAR X** | Se seu clã vencer esta sala, ganhe X zeny. Com X ≥ 3, ganhe 1 equipamento caído em vez disso. |
 | **ESGOTAR** | Após resolver, este personagem vai para a Enfermaria (venceu ou perdeu). |
 | **IMITAR** | Copia as palavras-chave de outro personagem revelado nesta sala. |
 
@@ -273,7 +273,7 @@ castelo**, sempre a custo zero. É a segunda perna da agência do defensor.
 **PORTÃO PRINCIPAL** — Sem limite de personagens. Sem efeito. É a rampa de entrada e é
 plana de propósito.
 
-**SALÃO DO TRONO** — Limite 3 personagens por facção. O dono do castelo tem **+2 de
+**SALÃO DO TRONO** — Limite 3 personagens por clã. O dono do castelo tem **+2 de
 Poder** aqui. Só quem controlou o Salão do Trono no fim da rodada anterior pode
 comprometer na Sala do Emperium.
 
@@ -285,11 +285,11 @@ Cada uma tem exatamente uma linha de regra, impressa na ficha.
 
 | # | Sala | Regra |
 |---|---|---|
-| 1 | **Corredor Estreito** | Limite 2 personagens por facção. |
+| 1 | **Corredor Estreito** | Limite 2 personagens por clã. |
 | 2 | **Pátio Aberto** | Personagens com ALCANCE têm +1 de Poder. |
-| 3 | **Ponte sobre o Fosso** | Facções derrotadas não sofrem baixa: voltam à Reserva. |
+| 3 | **Ponte sobre o Fosso** | Clãs derrotados não sofrem baixa: voltam à Reserva. |
 | 4 | **Labirinto** | Comprometer aqui custa 1 zeny por personagem. ALCANCE não funciona. |
-| 5 | **Salão dos Guardiões** | Guarnição de Poder 6 que combate todas as facções. Ninguém controla enquanto viva. |
+| 5 | **Salão dos Guardiões** | Guarnição de Poder 6 que combate todos os clãs. Ninguém controla enquanto viva. |
 | 6 | **Armazém** | Quem controla ganha 4 zeny no fim da rodada. |
 | 7 | **Forja** | Quem controla faz 1 refino grátis e sem risco no fim da rodada. |
 | 8 | **Capela** | Quem controla move 1 personagem da Enfermaria para a Reserva no fim da rodada. |
@@ -309,16 +309,15 @@ As salas resolvem **do Portão para dentro**: Portão → B1/C1 → B2/C2 → Sa
 Sala do Emperium. (Salas em paralelo resolvem na ordem que a mesa preferir; não
 interagem.)
 
-1. **Revelar** personagens e Ordens de todas as facções presentes.
+1. **Revelar** personagens e Ordens de todos os clãs presentes.
 2. **Entrar os OCULTO.**
-3. **Somar Poder Total** de cada facção: Poder das cartas + equipamento + refino +
+3. **Somar Poder Total** de cada clã: Poder das cartas + equipamento + refino +
    palavras-chave + Ordem.
-4. **Aplicar MURALHA**: cada MURALHA X reduz o total de *cada* facção inimiga em X.
+4. **Aplicar MURALHA**: cada MURALHA X reduz o total de *cada* clã inimigo em X.
    PERFURAR devolve pontos que a MURALHA tirou.
 5. **Aplicar ANULAR.**
-6. **Maior total controla a sala.** Empate no topo: ninguém controla, e todas as
-   facções empatadas sofrem 1 baixa.
-7. **Baixas.** Cada facção derrotada remove personagens cuja soma de Poder base
+6. **Maior total controla a sala.** Empate no topo: ninguém controla, e todos os clãs empatados sofrem 1 baixa.
+7. **Baixas.** Cada clã derrotado remove personagens cuja soma de Poder base
    alcance ou ultrapasse a **margem** (total do vencedor menos o seu). O dono escolhe
    quem cai. ESCUDAR cai primeiro, obrigatoriamente.
    **Teto de baixas: metade dos seus personagens na sala, arredondado para cima.**
@@ -327,16 +326,16 @@ interagem.)
 9. **Sobreviventes voltam à Reserva.** Baixas vão para a **Enfermaria** e retornam à
    Reserva no fim da rodada **seguinte** — perdem uma rodada inteira.
 
-### Por que facções inimigas entre si
+### Por que clãs inimigos entre si
 
-Se dois atacantes comprometem na mesma sala, **os dois estão em facções diferentes**.
+Se dois atacantes comprometem na mesma sala, **os dois estão em clãs diferentes**.
 Um deles vai controlar a sala e o outro sofre baixas, mesmo que ambos tenham superado
 o defensor. Não existe "atacar juntos". Isso é o que faz a premissa de "ninguém é
 aliado de ninguém" ser mecânica, e não só narrativa.
 
 ### Exemplo trabalhado
 
-**Rodada 4, Corredor Estreito (limite 2).** Três facções revelam.
+**Rodada 4, Corredor Estreito (limite 2).** Três clãs revelam.
 
 **Ana (atacante)** comprometeu:
 - *Arquimago — Nevasca* — Poder 4, MURALHA 4, ALCANCE. Equipado com **Cajado da
@@ -627,7 +626,7 @@ equipamento e as cartas de monstro continuam com ele.
 | Algoz — Veneno Mortal | Mercenário | 11z | +3 | PERFURAR 3 | Enchant Deadly Poison |
 | Desordeiro — Despojar Total | Arruaceiro | 10z | +2 | ANULAR, PILHAR 3 | Full Strip |
 | Desordeiro — Plágio | Arruaceiro | 10z | +2 | IMITAR | Plagiarism |
-| Desordeiro — Marcha Silenciosa | Arruaceiro | 12z | +2 | OCULTO · *anula a Marcha Forçada da facção* | Chase Walk |
+| Desordeiro — Marcha Silenciosa | Arruaceiro | 12z | +2 | OCULTO · *anula a Marcha Forçada do clã* | Chase Walk |
 | Mestre-Ferreiro — Carrocerada | Ferreiro | 11z | +4 | — | Cart Termination |
 | Mestre-Ferreiro — Fundição Suprema | Ferreiro | 9z | +1 | *refino sem quebra + 1 grátis por rodada* | Forja lendária |
 | Mestre-Ferreiro — Adrenalina Suprema | Ferreiro | 10z | +2 | ELO 2 | Adrenaline Rush |
@@ -638,7 +637,7 @@ equipamento e as cartas de monstro continuam com ele.
 | Sumo Sacerdote — Ressurreição | Sacerdote | 10z | +1 | RESTAURAR 2 | Resurrection |
 | Sumo Sacerdote — Julgamento | Sacerdote | 12z | +5 | — | Magnus Exorcismus |
 | Mestre — Punho de Asura | Monge | 14z | +7 | ESGOTAR | Asura Strike |
-| Mestre — Salto | Monge | 11z | +3 | *anula a Marcha Forçada da facção* | Body Relocation |
+| Mestre — Salto | Monge | 11z | +3 | *anula a Marcha Forçada do clã* | Body Relocation |
 | Mestre — Corpo de Aço Supremo | Monge | 10z | +1 | ESCUDAR · *não pode sofrer baixa* | Steel Body |
 | Atirador de Elite — Chuva de Flechas | Caçador | 12z | +5 | ALCANCE | Arrow Storm |
 | Atirador de Elite — Armadilha Suprema | Caçador | 10z | +2 | MURALHA 3 | Trap Research |
@@ -656,7 +655,7 @@ Ragnarok, e o jogo não finge que tem. Os três caminhos dele mantêm o nome
 proporcional. Ele não transcende — ele só insiste.
 
 **Nota sobre Salto e Marcha Silenciosa:** as duas anulam a penalidade de Marcha Forçada
-da **facção inteira**, não só do portador. Um só deles guia o grupo, e é isso que
+da **clã inteiro**, não só do portador. Um só deles guia o grupo, e é isso que
 transforma essas evoluções numa jogada estratégica em vez de mais um bônus de Poder:
 com um Mestre-Salto, mandar o clã direto para o Salão do Trono deixa de custar −6.
 
@@ -766,7 +765,7 @@ em vez de travado.
 turno em que ele só assiste. Ele é o jogador mais rico da mesa (+6 zeny/rodada) e
 ignora a regra de posicionamento dentro do próprio castelo, então tem liberdade tática
 que nenhum atacante tem. E a mesa **não consegue** se coordenar contra ele: dois
-atacantes na mesma sala são facções inimigas entre si, e o perdedor dos dois sofre
+atacantes na mesma sala são clãs inimigos entre si, e o perdedor dos dois sofre
 baixas mesmo tendo superado o defensor. Cercar junto é matematicamente pior do que
 cercar sozinho em salas diferentes.
 

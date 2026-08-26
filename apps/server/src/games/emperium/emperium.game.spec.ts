@@ -12,7 +12,13 @@ import {
 import { EmperiumGame } from './emperium.game';
 import { jogadorDoMercado } from './emperium.moves';
 import { resolveEmperium, resolveRoom, type RoomInput } from './emperium.resolve';
-import { ADJACENCY, ROOM_SLOTS, TOTAL_ROUNDS } from './emperium.rooms';
+import {
+  ADJACENCY,
+  FIXED_TILES,
+  ROOM_SLOTS,
+  TOTAL_ROUNDS,
+  WING_TILES,
+} from './emperium.rooms';
 import {
   MARCHA_PENALIDADE,
   allowedSlots,
@@ -479,6 +485,61 @@ describe('EmperiumGame — Transcendencia', () => {
   });
 });
 
+describe('EmperiumGame — as Ordens', () => {
+  it('quase toda sala tem limite — e por isso o Cerco vale a pena', () => {
+    // Sem limite quase universal, o Cerco so servia no Corredor Estreito.
+    const semLimite = [...WING_TILES, ...Object.values(FIXED_TILES)].filter((t) => t.limite === 0);
+    const nomes = semLimite.map((t) => t.nome).sort();
+    expect(nomes).toEqual(['Patio Aberto', 'Sala do Emperium', 'Salao do Trono']);
+  });
+
+  it('a EMBOSCADA cancela o bonus positivo da Ordem alheia', () => {
+    const emboscador = makeClan('ana', ['mon-combo']);
+    const investida = makeClan('bruno', ['mon-combo']);
+    const state = makeState({ ana: emboscador, bruno: investida }, { castleOwnerId: 'carla' });
+
+    const semEmboscada = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(emboscador), ordem: 'cerco', marcha: 0 } },
+      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(investida), ordem: 'investida', marcha: 0 } },
+    ]);
+    const comEmboscada = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(emboscador), ordem: 'emboscada', marcha: 0 } },
+      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(investida), ordem: 'investida', marcha: 0 } },
+    ]);
+
+    const brunoSem = semEmboscada.faccoes.find((f) => f.playerId === 'bruno')!;
+    const brunoCom = comEmboscada.faccoes.find((f) => f.playerId === 'bruno')!;
+    expect(brunoSem.poderBruto - brunoCom.poderBruto).toBe(3); // os +3 da Investida
+    expect(brunoCom.emboscado).toBe(true);
+  });
+
+  it('a EMBOSCADA nao devolve o -2 de quem se resguardou', () => {
+    const emboscador = makeClan('ana', ['mon-combo']);
+    const recuado = makeClan('bruno', ['mon-combo']);
+    const state = makeState({ ana: emboscador, bruno: recuado }, { castleOwnerId: 'carla' });
+    const res = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(emboscador), ordem: 'emboscada', marcha: 0 } },
+      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(recuado), ordem: 'resguardo', marcha: 0 } },
+    ]);
+    const bruno = res.faccoes.find((f) => f.playerId === 'bruno')!;
+    expect(bruno.poderBruto).toBe(4 - 2); // Monge 4, Resguardo -2 mantido
+    expect(bruno.emboscado).toBe(false);
+  });
+
+  it('duas Emboscadas se cancelam: ambas perdem o bonus', () => {
+    const ana = makeClan('ana', ['mon-combo']);
+    const bruno = makeClan('bruno', ['mon-combo']);
+    const state = makeState({ ana, bruno }, { castleOwnerId: 'carla' });
+    const res = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'emboscada', marcha: 0 } },
+      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'emboscada', marcha: 0 } },
+    ]);
+    // Com duas Emboscadas o bonus ja e -2 (nao exclusiva), entao nao ha bonus
+    // positivo para cancelar — as duas ficam com Poder 4 - 2 = 2.
+    for (const f of res.faccoes) expect(f.poderBruto).toBe(2);
+  });
+});
+
 describe('EmperiumGame — Combos', () => {
   /** Resolve uma sala com combos declarados. */
   function sala(
@@ -728,16 +789,20 @@ describe('EmperiumGame — resolucao de sala', () => {
     const de = (p: PlayerId) => res.faccoes.find((f) => f.playerId === p)!;
 
     // Ana: Tempestade 3 + Nevasca 2 + cajado 3 + refino 2 + Hydra 2
-    //      + Escudeiro 2 + investida 3 = 17.
+    //      + Escudeiro 2 + investida 3 = 17 — mas Bruno EMBOSCOU, e a Emboscada
+    //      cancela o bonus positivo da Ordem alheia: os +3 da Investida somem.
     // Bruno: Combo 4 + Asura 7 + emboscada 2 = 13.
     // Carla: Armadilheiro 2 + Suporte 1 + Assumptio 2 + ELO 2 - resguardo 2 = 5.
-    expect(de('ana').poderBruto).toBe(17);
+    //      O -2 do Resguardo NAO e devolvido: emboscar nao premia quem recuou.
+    expect(de('ana').poderBruto).toBe(14);
+    expect(de('ana').emboscado).toBe(true);
     expect(de('bruno').poderBruto).toBe(13);
     expect(de('carla').poderBruto).toBe(5);
+    expect(de('carla').emboscado).toBe(false);
 
     // Muralha: Carla tem 2; Ana tem 2 (base) + 2 (evolucao) = 4.
-    // Ana: 17-2=15. Bruno: 13-2-4=7. Carla: 5-4=1.
-    expect(de('ana').poderFinal).toBe(15);
+    // Ana: 14-2=12. Bruno: 13-2-4=7. Carla: 5-4=1.
+    expect(de('ana').poderFinal).toBe(12);
     expect(de('bruno').poderFinal).toBe(7);
     expect(de('carla').poderFinal).toBe(1);
     expect(res.controlador).toBe('ana');

@@ -22,7 +22,7 @@ a arma refinada — virava enchimento. O jogo aposentava seus veteranos. Agora a
 Transcendência é uma carta **empilhada sobre alguém que já é seu**.
 
 **3. Combos.** As palavras-chave da v0.1 eram todas aritmética *dentro* da própria
-facção: ELO soma por aliado, MURALHA subtrai do inimigo. Nenhuma perguntava **quem** está
+clã: ELO soma por aliado, MURALHA subtrai do inimigo. Nenhuma perguntava **quem** está
 do seu lado — só quantos. Um Monge ao lado de um Sábio valia o mesmo que ao lado de outro
 Monge. Agora personagens se nomeiam.
 
@@ -95,8 +95,8 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 | Palavra-chave | Efeito |
 |---|---|
 | **ALCANCE** | Só sofre baixa se você não tiver nenhum personagem com Escudar vivo nesta sala. |
-| **ESCUDAR** | Absorve as baixas da sua facção antes de qualquer outro personagem seu. |
-| **MURALHA X** | Reduz em X o Poder Total de **cada** facção inimiga nesta sala. |
+| **ESCUDAR** | Absorve as baixas da seu clã antes de qualquer outro personagem seu. |
+| **MURALHA X** | Reduz em X o Poder Total de **cada** clã inimigo nesta sala. |
 | **PERFURAR X** | X pontos do Poder deste personagem ignoram Muralha inimiga. |
 | **RAJADA X** | +X de Poder, apenas na primeira rodada em que este personagem entra nesta sala. |
 | **ELO X** | +X de Poder para cada **outro** personagem seu nesta sala. |
@@ -117,7 +117,7 @@ Toda carta tem **no máximo 2** palavras-chave, mais no máximo **um Combo**.
 
 ### O problema que resolve
 
-As palavras-chave são aritmética dentro da própria facção. Elas contam *quantos* aliados
+As palavras-chave são aritmética dentro da própria clã. Elas contam *quantos* aliados
 você tem, nunca *quais*. Por isso a Reserva parecia um saco de números em vez de um clã.
 
 ### A mecânica
@@ -132,7 +132,7 @@ nada — alguns são incondicionais. O portador nunca conta como o próprio comp
 
 ### O freio: um combo por sala
 
-**Só UM combo dispara por facção por sala, declarado no comprometimento.** Juntar cinco
+**Só UM combo dispara por clã por sala, declarado no comprometimento.** Juntar cinco
 personagens não acumula cinco combos.
 
 Isso não é burocracia, é o que impede a mudança de desfazer a anterior: combo puxa para
@@ -146,17 +146,17 @@ Isso precisa de um alvo persistente, e o conjunto é fechado em três:
 
 | Marca | Efeito | Origem |
 |---|---|---|
-| **EXPOSTO** | A facção marcada perde **toda a Muralha**. | Fogo grego quebrando armadura |
+| **EXPOSTO** | O clã marcado perde **toda a Muralha**. | Fogo grego quebrando armadura |
 | **PRESO** | Perde o bônus da Ordem e **não pode usar Escudar**. | Corpo Fechado + Dilema travando o alvo |
 | **REVELADO** | Cancela Oculto: entra na revelação normal. | Falcão do Sniper achando o Mercenário |
 
-Marcas sempre caem na **maior facção inimiga da sala**. O design deixaria a escolha ao
+Marcas sempre caem na **maior clã inimigo da sala**. O design deixaria a escolha ao
 jogador; a versão digital automatiza no alvo óbvio para não travar a resolução pedindo
 alvo a cada efeito.
 
 ### RAPTO
 
-Um efeito de combo à parte: **arranca 1 personagem da maior facção inimiga da sala**, e
+Um efeito de combo à parte: **arranca 1 personagem do maior clã inimigo da sala**, e
 ele volta à Reserva do dono **sem sofrer baixa**. É o Rapto do Arruaceiro criando o 1
 contra 1. O alvo é o de maior Poder de carta — o que um jogador escolheria.
 
@@ -169,17 +169,17 @@ se atrapalham. O caos precisa de teto.
 
 | Carta | Combo |
 |---|---|
-| Sábio Proteção de Solo | **COMBO Bruxo:** sua facção ignora toda a Muralha inimiga |
+| Sábio Proteção de Solo | **COMBO Bruxo:** seu clã ignora toda a Muralha inimiga |
 | Templário Defensor | **COMBO Arcano:** seus Arcanos não sofrem baixa |
 | Bardo Canção | **COMBO Arcano:** seus Arcanos ganham +3 de Poder |
 | Odalisca Dança Lenta | **COMBO Bardo/Odalisca:** +4 de Poder — o dueto |
-| Cavaleiro Bola de Boliche | **COMBO Templário:** a maior facção inimiga fica PRESA |
-| Monge Corpo de Aço | **COMBO:** a maior facção inimiga fica PRESA |
-| Alquimista Boticário | **COMBO:** a maior facção inimiga fica EXPOSTA |
-| Caçador Armadilheiro | **COMBO:** a maior facção inimiga fica REVELADA |
+| Cavaleiro Bola de Boliche | **COMBO Templário:** o maior clã inimigo fica PRESO |
+| Monge Corpo de Aço | **COMBO:** o maior clã inimigo fica PRESO |
+| Alquimista Boticário | **COMBO:** o maior clã inimigo fica EXPOSTO |
+| Caçador Armadilheiro | **COMBO:** o maior clã inimigo fica REVELADO |
 | Ferreiro Mercador | **COMBO:** +1 de Poder a cada 5 zeny no seu bolso |
 | Arruaceiro Gatuno | **COMBO Ágil:** RAPTO |
-| Sacerdote Suporte | **COMBO Vanguarda:** sua facção ignora a Marcha Forçada |
+| Sacerdote Suporte | **COMBO Vanguarda:** seu clã ignora a Marcha Forçada |
 | Mercenário Golpe Sônico | **COMBO Alquimista:** +4 de Poder — ele entra pela brecha |
 
 **Nas Transcendências** — mirabolantes, e algumas substituem o combo da base por uma
@@ -188,16 +188,16 @@ versão maior:
 | Evolução | Combo |
 |---|---|
 | Professor — Memorizar | **COMBO Monge:** ninguém seu vai à Enfermaria por Esgotar |
-| Criador — Demonstração Ácida | **COMBO:** a maior facção inimiga fica EXPOSTA **e** PRESA |
+| Criador — Demonstração Ácida | **COMBO:** o maior clã inimigo fica EXPOSTO **e** PRESA |
 | Mestre-Ferreiro — Carrocerada | **COMBO:** +1 de Poder a cada **3** zeny *(era 5 na base)* |
 | Paladino — Devoção | **COMBO Vanguarda:** se você perder, o vencedor também sofre 1 baixa |
 | Desordeiro — Marcha Silenciosa | **COMBO:** RAPTO |
-| Atirador de Elite — Olho de Falcão | **COMBO:** a maior facção inimiga fica REVELADA |
-| Menestrel/Cigana — Canção Longa | **COMBO Vanguarda:** sua facção ignora a Marcha Forçada |
-| Professor — Dissonância | **COMBO:** a maior facção inimiga fica PRESA |
+| Atirador de Elite — Olho de Falcão | **COMBO:** o maior clã inimigo fica REVELADO |
+| Menestrel/Cigana — Canção Longa | **COMBO Vanguarda:** seu clã ignora a Marcha Forçada |
+| Professor — Dissonância | **COMBO:** o maior clã inimigo fica PRESO |
 | Paladino — Corrente de Escudo | **COMBO Arcano:** seus Arcanos não sofrem baixa |
-| Mestre — Salto | **COMBO:** sua facção ignora a Marcha Forçada |
-| Arquimago — Ganbantein | **COMBO Sábio:** sua facção ignora toda a Muralha inimiga |
+| Mestre — Salto | **COMBO:** seu clã ignora a Marcha Forçada |
+| Arquimago — Ganbantein | **COMBO Sábio:** seu clã ignora toda a Muralha inimiga |
 | Criador — Homúnculo Superior | **COMBO:** +3 de Poder — o homúnculo luta junto |
 
 ### A jogada que melhor explica o sistema
@@ -205,7 +205,7 @@ versão maior:
 **Professor Memorizar + Mestre Punho de Asura na mesma sala.**
 
 O Asura tem ESGOTAR: dá +7 de Poder e vai para a Enfermaria, vencendo ou perdendo. O
-Combo do Professor cancela o Esgotar da facção inteira. Resultado: o Monge bate como um
+Combo do Professor cancela o Esgotar do clã inteiro. Resultado: o Monge bate como um
 caminhão **e continua na Reserva para a rodada seguinte.**
 
 Isso é literalmente o Professor devolvendo SP para o segundo Asura, e só é possível
@@ -300,11 +300,11 @@ O dono do castelo **não paga marcha nenhuma** dentro do próprio castelo.
 
 | Sala | Regra |
 |---|---|
-| Corredor Estreito | Limite 2 personagens por facção. |
+| Corredor Estreito | Limite 2 personagens por clã. |
 | Pátio Aberto | Personagens com Alcance têm +1 de Poder. |
-| Ponte sobre o Fosso | Facções derrotadas não sofrem baixa: voltam à Reserva. |
+| Ponte sobre o Fosso | Clãs derrotados não sofrem baixa: voltam à Reserva. |
 | Labirinto | Comprometer custa 1 zeny por personagem. Alcance não funciona. |
-| Salão dos Guardiões | Guarnição de Poder 6 que combate todas as facções. |
+| Salão dos Guardiões | Guarnição de Poder 6 que combate todos os clãs. |
 | Armazém | Quem controla ganha 4 zeny no fim da rodada. |
 | Forja | Quem controla faz 1 refino grátis e sem risco. |
 | Capela | Quem controla move 1 personagem da Enfermaria para a Reserva. |
@@ -323,21 +323,21 @@ As salas resolvem do Portão para dentro. Emboscada resolve antes de todas.
 2. **Entrar os Oculto** (a menos que estejam Revelados).
 3. **RAPTO** — antes de somar qualquer Poder, porque arrancar alguém muda o cálculo de
    quem ficou (ELO, SOLO).
-4. **Somar Poder** de cada facção: cartas + evolução + equipamento + refino +
+4. **Somar Poder** de cada clã: cartas + evolução + equipamento + refino +
    palavras-chave + Ordem − Marcha Forçada.
 5. **Disparar combos** e aplicar marcas.
 6. **Aplicar Anular**, depois **Muralha** (Perfurar devolve; Exposto zerou a do alvo).
 7. **Maior total controla a sala.** Empate no topo: ninguém controla, todos os empatados
    sofrem 1 baixa.
-8. **Baixas.** Cada facção derrotada remove personagens cuja soma de Poder de carta
-   alcance a **margem** de derrota. Escudar cai primeiro — a menos que a facção esteja
+8. **Baixas.** Cada clã derrotado remove personagens cuja soma de Poder de carta
+   alcance a **margem** de derrota. Escudar cai primeiro — a menos que o clã esteja
    Presa. Teto: metade dos personagens, arredondado para cima.
 9. **Espólio.** O vencedor pega 1 equipamento de um caído inimigo. Aplica Pilhar.
 10. **Sobreviventes voltam à Reserva.** Baixas vão à Enfermaria e perdem uma rodada.
 
-### Facções inimigas entre si
+### clãs inimigos entre si
 
-Se dois atacantes comprometem na mesma sala, **são facções diferentes**. Um controla e o
+Se dois atacantes comprometem na mesma sala, **são clãs diferentes**. Um controla e o
 outro sofre baixas, mesmo que ambos tenham superado o defensor. Não existe "atacar junto"
 — é o que faz a premissa de "ninguém é aliado" ser mecânica e não narrativa.
 
@@ -382,8 +382,23 @@ no máximo quatro salas.
 |---|---|
 | **INVESTIDA** | +3 de Poder. Se perder, 1 baixa extra. |
 | **CERCO** | Ignore o limite da sala. −1 de Poder. |
-| **EMBOSCADA** | Resolve antes de todas. +2 se for a única; −2 se houver outra. |
+| **EMBOSCADA** | Resolve antes de todas. +2 se for a única; −2 se houver outra. **Os outros clãs desta sala perdem o bônus positivo da Ordem deles.** |
 | **RESGUARDO** | −2 de Poder. Sem baixas. Ganhe 3 zeny. |
+
+> **Por que as duas do meio mudaram.** Duas das quatro Ordens eram difíceis de explicar
+> porque o benefício delas não existia de verdade.
+>
+> A **Emboscada** resolvia antes, e resolver antes **não tinha consequência mecânica
+> nenhuma** — a sala resolvia mais cedo e nada mudava. Agora "bater antes de eles formarem"
+> custa ao inimigo o bônus da Ordem: uma Investida vira +0 em vez de +3. Contra quem ia
+> atacar, é um **swing de 5 pontos** (você ganha +2, ele perde +3). O −2 do Resguardo *não*
+> é devolvido — emboscar impede o ataque, não desfaz o recuo.
+>
+> O **Cerco** ignorava o limite da sala, mas só o Corredor Estreito tinha limite: era uma
+> Ordem morta em seis das sete salas. Agora **quase toda sala tem limite 3 por clã**. As
+> duas exceções são deliberadas: o **Pátio Aberto** (a sala onde exército grande
+> simplesmente ganha) e o **Salão do Trono** (último degrau antes do Emperium, precisa
+> comportar um cerco de verdade dos dois lados). O Cerco passou a valer em cinco de sete.
 
 ---
 
@@ -485,7 +500,7 @@ Seis rodadas. Orçamento: ~13 min por rodada com 4 jogadores, ~78 minutos.
 | **Defensor rico demais** | Castelo nunca troca de dono | Baixe o bônus do castelo de +6 para +4 zeny |
 | **Rodada 6 decide tudo** | Jogadores ignoram as rodadas 1–3 | Glória por rodada 2 → 3, final 8 → 6 |
 | **Fase de mercado arrastada** | Mais de 5 min com 4 jogadores | 3 ações → 2, renda base 6 → 8 |
-| **Professor + Asura é dominante** | Toda partida termina nele | Faça o cancela-Esgotar valer para um personagem, não a facção |
+| **Professor + Asura é dominante** | Toda partida termina nele | Faça o cancela-Esgotar valer para um personagem, não o clã |
 
 ---
 
