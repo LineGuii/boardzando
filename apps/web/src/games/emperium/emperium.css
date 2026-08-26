@@ -18,6 +18,15 @@
   --ouro: #D8B45F;
   --combo: #9A7AD6;
 
+  /* Uma cor por CATEGORIA de sala, nunca por ficha: seis cores que o jogador
+     consegue guardar, contra quinze que viram ruido. */
+  --cat-espinha: #9FB4C0;
+  --cat-batalha: #E28C82;
+  --cat-resgate: #6FAE8F;
+  --cat-economia: #D8B45F;
+  --cat-passagem: #A98BE0;
+  --cat-vigilancia: #7C9FE0;
+
   --vanguarda: #B07B3C;
   --arcano: #5B82CE;
   --agil: #7CA34E;
@@ -192,6 +201,9 @@
   justify-content: center;
 }
 .emp-sala {
+  /* Largura fixa: as salas de uma fileira sao a mesma peca de tabuleiro, e
+     larguras diferentes por causa do texto deixavam a fileira desalinhada. */
+  flex: 0 0 200px;
   min-width: 168px;
   max-width: 200px;
   background: var(--pedra-alta);
@@ -1021,6 +1033,250 @@
 
 /* Sem movimento: basta desligar as animacoes — o estado em repouso ja e o
    resultado final, entao nada precisa ser redeclarado aqui. */
+
+/* ── Categoria da sala ─────────────────────────────────────
+ * A cor entra por --cat e a sala inteira se pinta a partir
+ * dela: faixa no topo, fundo lavado e o rotulo da categoria.
+ * Opaca de proposito — o fundo e chapado sobre a pedra, nao
+ * translucido, para a leitura nao depender do que ha atras.
+ * ========================================================= */
+.emp-sala[data-cat='espinha'] { --cat: var(--cat-espinha); }
+.emp-sala[data-cat='batalha'] { --cat: var(--cat-batalha); }
+.emp-sala[data-cat='resgate'] { --cat: var(--cat-resgate); }
+.emp-sala[data-cat='economia'] { --cat: var(--cat-economia); }
+.emp-sala[data-cat='passagem'] { --cat: var(--cat-passagem); }
+.emp-sala[data-cat='vigilancia'] { --cat: var(--cat-vigilancia); }
+
+.emp-sala[data-cat] {
+  position: relative;
+  border-top: 3px solid var(--cat);
+  border-radius: 4px 4px 3px 3px;
+  background: color-mix(in srgb, var(--cat) 9%, var(--pedra-alta));
+  text-align: left;
+}
+.emp-sala-cat {
+  font-size: 0.56rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: var(--cat, var(--tinta-fraca));
+}
+.emp-sala-regra {
+  font-size: 0.64rem;
+  line-height: 1.35;
+  color: var(--tinta-fraca);
+  margin-top: 3px;
+}
+/* O alvo continua ganhando o ciano do cristal: mirar vence a categoria. */
+.emp-sala.alvo[data-cat] {
+  background: var(--cristal-fundo);
+  border-color: var(--cristal);
+}
+/* Mirada a sala troca de fundo, entao o rotulo da categoria troca de cor
+   junto — vermelho de Batalha sobre o ciano do alvo nao lia bem. */
+.emp-sala.alvo[data-cat] .emp-sala-cat {
+  color: var(--cristal);
+}
+
+.emp-legenda {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 4px 16px;
+}
+.emp-legenda li[data-cat='espinha'] { --cat: var(--cat-espinha); }
+.emp-legenda li[data-cat='batalha'] { --cat: var(--cat-batalha); }
+.emp-legenda li[data-cat='resgate'] { --cat: var(--cat-resgate); }
+.emp-legenda li[data-cat='economia'] { --cat: var(--cat-economia); }
+.emp-legenda li[data-cat='passagem'] { --cat: var(--cat-passagem); }
+.emp-legenda li[data-cat='vigilancia'] { --cat: var(--cat-vigilancia); }
+.emp-legenda li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.64rem;
+  color: var(--tinta-fraca);
+}
+.emp-legenda-cor {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 2px;
+  background: var(--cat);
+  transform: translateY(1px);
+}
+.emp-legenda b {
+  color: var(--tinta);
+  font-size: 0.64rem;
+}
+.emp-legenda em {
+  font-style: normal;
+}
+
+/* ── Reserva de todos os clãs ──────────────────────────────
+ * Quem esta de pe no cla alheio e informacao publica. So o
+ * comprometimento e segredo, entao a lista fica sempre a vista.
+ * ========================================================= */
+.emp-reserva-mini {
+  list-style: none;
+  margin: 7px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.emp-reserva-mini li {
+  --papel: var(--tinta-fraca);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid color-mix(in srgb, var(--papel) 45%, transparent);
+  background: color-mix(in srgb, var(--papel) 14%, var(--pedra));
+  font-size: 0.6rem;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.emp-reserva-mini li[data-papel='vanguarda'] { --papel: var(--vanguarda); }
+.emp-reserva-mini li[data-papel='arcano'] { --papel: var(--arcano); }
+.emp-reserva-mini li[data-papel='agil'] { --papel: var(--agil); }
+.emp-reserva-mini li[data-papel='suporte'] { --papel: var(--suporte); }
+/* Na Enfermaria ele existe, mas nao conta nesta rodada. */
+.emp-reserva-mini li[data-local='enfermaria'] {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+.emp-reserva-mini li[data-local='comprometido'] {
+  border-style: dashed;
+}
+.emp-rm-nome {
+  color: var(--tinta);
+}
+.emp-rm-poder {
+  font-weight: 700;
+  color: var(--papel);
+}
+/* Marca de evolucao: o veterano que passou pelo Altar. */
+.emp-rm-evo {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ouro);
+}
+.emp-rm-vazio {
+  border: 0;
+  background: none;
+  color: var(--tinta-fraca);
+  font-style: italic;
+}
+
+/* ── O cristal levando pancada ─────────────────────────────
+ * Absorver e quieto, rachar treme, quebrar estilhaca. Sem
+ * fill-mode: o estado final e o estado em repouso, entao a
+ * aba em segundo plano nunca congela nada invisivel.
+ * ========================================================= */
+.emp-cristal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 2px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: var(--cristal-fundo);
+  border: 1px solid color-mix(in srgb, var(--cristal) 35%, transparent);
+}
+.emp-cristal-corpo {
+  position: relative;
+  width: 20px;
+  height: 26px;
+  flex: none;
+  background: linear-gradient(160deg, var(--cristal), #14666A);
+  clip-path: polygon(50% 0%, 100% 32%, 82% 100%, 18% 100%, 0% 32%);
+}
+.emp-cristal-corpo i {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 1px;
+  height: 0;
+  background: var(--pedra);
+  transform-origin: top center;
+  opacity: 0;
+}
+/* A rachadura NAO e animada de proposito. Uma animacao que comeca escondida
+   (from { height: 0 }) deixa o elemento invisivel para sempre quando a
+   linha do tempo nao anda — aba em segundo plano, painel sem compositor,
+   prefers-reduced-motion. O impacto fica por conta do tremor, cujo quadro
+   inicial JA e o estado de repouso. */
+.emp-cristal.rachou .emp-cristal-corpo i,
+.emp-cristal.quebrou .emp-cristal-corpo i {
+  height: 84%;
+  opacity: 0.85;
+}
+.emp-cristal-corpo i:nth-child(1) { transform: rotate(-16deg); }
+.emp-cristal-corpo i:nth-child(2) { transform: rotate(6deg); }
+.emp-cristal-corpo i:nth-child(3) { transform: rotate(24deg); }
+.emp-cristal.rachou .emp-cristal-corpo {
+  animation: emp-tremer 260ms ease-out;
+}
+.emp-cristal.quebrou {
+  background: var(--sangue-fundo);
+  border-color: var(--sangue);
+}
+.emp-cristal.quebrou .emp-cristal-corpo {
+  opacity: 0.35;
+  animation: emp-estilhacar 480ms ease-out;
+}
+.emp-cristal.absorveu .emp-cristal-corpo {
+  filter: saturate(0.5);
+}
+.emp-cristal-txt {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--cristal);
+}
+.emp-cristal.quebrou .emp-cristal-txt {
+  color: var(--sangue);
+}
+.emp-cristal.absorveu .emp-cristal-txt {
+  color: var(--tinta-fraca);
+  font-weight: 400;
+}
+
+@keyframes emp-tremer {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+/* Comeca e termina no repouso: opacity fica so na regra estatica, para o
+   quadro congelado nunca mentir sobre o estado do cristal. */
+@keyframes emp-estilhacar {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18) rotate(4deg); }
+  100% { transform: scale(0.86) rotate(-3deg); }
+}
+
+/* O cristal no tabuleiro racha junto, conforme os cubos entram. */
+.emp-sala.emperium[data-rachadura] .emp-sala-nome::after {
+  content: '';
+  display: block;
+  height: 2px;
+  margin-top: 4px;
+  border-radius: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--sangue) calc(var(--frac, 0) * 100%),
+    color-mix(in srgb, var(--cristal) 40%, transparent) 0
+  );
+}
+.emp-sala.emperium[data-rachadura='1'] { --frac: 0.2; }
+.emp-sala.emperium[data-rachadura='2'] { --frac: 0.4; }
+.emp-sala.emperium[data-rachadura='3'] { --frac: 0.6; }
+.emp-sala.emperium[data-rachadura='4'] { --frac: 0.85; }
+
 @media (prefers-reduced-motion: reduce) {
   .emp-board *,
   .emp-board *::before,
@@ -1037,6 +1293,7 @@
     gap: 8px;
   }
   .emp-sala {
+    flex: 1 1 138px;
     min-width: 138px;
   }
   .emp-card {

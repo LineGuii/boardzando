@@ -116,23 +116,64 @@ interface EmperiumView {
 
 /* ── Rótulos ─────────────────────────────────────────────────────────────── */
 
-const TILE_NOMES: Record<string, string> = {
-  'sala-portao': 'Portão Principal',
-  'sala-trono': 'Salão do Trono',
-  'sala-emperium': 'Sala do Emperium',
-  'sala-corredor': 'Corredor Estreito',
-  'sala-patio': 'Pátio Aberto',
-  'sala-ponte': 'Ponte sobre o Fosso',
-  'sala-labirinto': 'Labirinto',
-  'sala-guardioes': 'Salão dos Guardiões',
-  'sala-armazem': 'Armazém',
-  'sala-forja': 'Forja',
-  'sala-capela': 'Capela',
-  'sala-vigia': 'Torre de Vigia',
-  'sala-cripta': 'Cripta',
-  'sala-portal': 'Portal Rúnico',
-  'sala-terraco': 'Terraço',
+/**
+ * As categorias de sala.
+ *
+ * Sao SEIS, e nao quinze: uma cor por ficha daria um arco-iris em que nenhuma
+ * cor significa nada. Agrupadas por aquilo que a sala muda no seu turno, a cor
+ * vira informacao — voce bate o olho no castelo e ve onde se briga, onde se
+ * ganha dinheiro e por onde se anda.
+ */
+type CategoriaSala = 'espinha' | 'batalha' | 'resgate' | 'economia' | 'passagem' | 'vigilancia';
+
+const CATEGORIA_INFO: Record<CategoriaSala, { rotulo: string; oQueMuda: string }> = {
+  espinha: { rotulo: 'Espinha', oQueMuda: 'as três salas fixas — o caminho que todo castelo tem' },
+  batalha: { rotulo: 'Batalha', oQueMuda: 'muda como o combate resolve aqui' },
+  resgate: { rotulo: 'Resgate', oQueMuda: 'muda o que acontece com quem cai' },
+  economia: { rotulo: 'Economia', oQueMuda: 'paga quem controla, no fim da rodada' },
+  passagem: { rotulo: 'Passagem', oQueMuda: 'muda o preço de chegar até aqui' },
+  vigilancia: { rotulo: 'Vigilância', oQueMuda: 'enxerga ou barra quem entra' },
 };
+
+interface TileInfo {
+  nome: string;
+  regra: string;
+  cat: CategoriaSala;
+}
+
+/** Espelha `emperium.rooms.ts` — nome, regra impressa e categoria de cor. */
+const TILE_INFO: Record<string, TileInfo> = {
+  'sala-portao': {
+    nome: 'Portão Principal',
+    regra: 'Limite 3 por clã. Todo mundo sempre pode entrar por aqui.',
+    cat: 'espinha',
+  },
+  'sala-trono': { nome: 'Salão do Trono', regra: 'Sem limite. O dono do castelo tem +2 aqui.', cat: 'espinha' },
+  'sala-emperium': { nome: 'Sala do Emperium', regra: 'O cristal. Só se bate aqui com o caminho aberto.', cat: 'espinha' },
+  'sala-corredor': { nome: 'Corredor Estreito', regra: 'Limite 2 personagens por clã.', cat: 'batalha' },
+  'sala-patio': { nome: 'Pátio Aberto', regra: 'Personagens com Alcance têm +1 de Poder.', cat: 'batalha' },
+  'sala-terraco': { nome: 'Terraço', regra: 'Arcano tem Poder dobrado. Vanguarda tem −2 de Poder.', cat: 'batalha' },
+  'sala-ponte': { nome: 'Ponte sobre o Fosso', regra: 'Clãs derrotados não sofrem baixa: voltam à Reserva.', cat: 'resgate' },
+  'sala-cripta': { nome: 'Cripta', regra: 'Baixas aqui vão para a Reserva, não para a Enfermaria.', cat: 'resgate' },
+  'sala-armazem': { nome: 'Armazém', regra: 'Quem controla ganha 4 zeny no fim da rodada.', cat: 'economia' },
+  'sala-forja': { nome: 'Forja', regra: 'Quem controla faz 1 refino grátis e sem risco.', cat: 'economia' },
+  'sala-capela': { nome: 'Capela', regra: 'Quem controla tira 1 personagem da Enfermaria.', cat: 'economia' },
+  'sala-labirinto': { nome: 'Labirinto', regra: 'Custa 1 zeny por personagem. Alcance não funciona.', cat: 'passagem' },
+  'sala-portal': { nome: 'Portal Rúnico', regra: 'Ignore a Marcha Forçada para comprometer aqui.', cat: 'passagem' },
+  'sala-vigia': {
+    nome: 'Torre de Vigia',
+    regra: 'Quem controla espia os comprometimentos de 1 sala adjacente.',
+    cat: 'vigilancia',
+  },
+  'sala-guardioes': {
+    nome: 'Salão dos Guardiões',
+    regra: 'Guarnição de Poder 6 contra todos. Ninguém controla enquanto viva.',
+    cat: 'vigilancia',
+  },
+};
+
+const infoDaSala = (tileId: string): TileInfo =>
+  TILE_INFO[tileId] ?? { nome: tileId, regra: '', cat: 'espinha' };
 
 const ORDEM_INFO: Record<OrderId, { nome: string; efeito: string }> = {
   investida: { nome: 'Investida', efeito: '+3 Poder. Se perder, 1 baixa extra.' },
@@ -260,6 +301,7 @@ function Confronto({
   const fora = res.clas.filter((f) => f.ordem === 'resguardo');
   const lutando = res.clas.filter((f) => f.ordem !== 'resguardo');
   const ehEmperium = res.slot === 'emperium';
+  const danoTotal = Object.values(res.danoPorJogador ?? {}).reduce((n, d) => n + d, 0);
 
   return (
     <div className="emp-confronto" style={{ '--i': indice } as React.CSSProperties}>
@@ -267,6 +309,27 @@ function Confronto({
         <span className="emp-conf-sala">{tileNome}</span>
         {res.escudo !== undefined && <span className="emp-conf-escudo">escudo {res.escudo}</span>}
       </div>
+
+      {/* Bater no cristal precisa PARECER que bateu: o escudo absorve em
+          silencio, o dano racha, e a quebra estilhaca. */}
+      {ehEmperium && !res.semDisputa && (
+        <div
+          className={`emp-cristal ${res.emperiumQuebrado ? 'quebrou' : danoTotal > 0 ? 'rachou' : 'absorveu'}`}
+        >
+          <span className="emp-cristal-corpo" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="emp-cristal-txt">
+            {res.emperiumQuebrado
+              ? 'o Emperium estilhaçou'
+              : danoTotal > 0
+                ? `${danoTotal} de dano no cristal`
+                : 'o escudo absorveu tudo'}
+          </span>
+        </div>
+      )}
 
       {res.semDisputa ? (
         <div className="emp-conf-vazia">
@@ -538,6 +601,38 @@ export function EmperiumBoard() {
                   <b>{c.ordensRestantes}</b>
                 </span>
               </div>
+
+              {/* A reserva de TODOS fica a mostra: quem esta de pe no clã alheio
+                  e informacao publica, e e a leitura que decide onde atacar.
+                  So o comprometimento e segredo. */}
+              <ul className="emp-reserva-mini">
+                {Object.values(c.chars).map((inst) => {
+                  const def = CHARACTER_BY_ID.get(inst.defId);
+                  if (!def) return null;
+                  const tr = inst.transcendencia
+                    ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia)
+                    : undefined;
+                  const poder = def.poder + (tr?.poderBonus ?? 0);
+                  const titulo = tr ? `${def.nome} · ${tr.nome}` : def.nome;
+                  return (
+                    <li
+                      key={inst.instId}
+                      data-papel={def.papel}
+                      data-local={inst.local}
+                      title={`${titulo} — Poder ${poder}${
+                        inst.local === 'enfermaria' ? ' · na Enfermaria' : ''
+                      }${inst.local === 'comprometido' ? ' · comprometido' : ''}`}
+                    >
+                      <span className="emp-rm-nome">{def.classe}</span>
+                      <span className="emp-rm-poder">{poder}</span>
+                      {tr && <span className="emp-rm-evo" aria-hidden="true" />}
+                    </li>
+                  );
+                })}
+                {Object.keys(c.chars).length === 0 && (
+                  <li className="emp-rm-vazio">nenhum recrutado</li>
+                )}
+              </ul>
             </div>
           );
         })}
@@ -555,14 +650,24 @@ export function EmperiumBoard() {
                 const dist = view.distanciaMarcha?.[slot] ?? 0;
                 const custoMarcha = dist * (view.marchaPenalidade ?? 2);
                 const meuCommit = rascunho.find((c) => c.slot === slot);
+                const info = infoDaSala(r.tileId);
+                // O Emperium racha conforme os cubos entram: 0 a 4 estagios.
+                const rachadura =
+                  slot === 'emperium' && view.emperiumDurabilidade > 0
+                    ? Math.min(4, Math.floor((totalCubos / view.emperiumDurabilidade) * 5))
+                    : 0;
                 return (
                   <div
                     key={slot}
+                    data-cat={info.cat}
+                    data-rachadura={rachadura || undefined}
                     className={`emp-sala ${slot === 'emperium' ? 'emperium' : ''} ${
                       permitida ? 'permitida' : ''
                     } ${dist > 0 ? 'marcha' : ''} ${slotAlvo === slot ? 'alvo' : ''}`}
                   >
-                    <div className="emp-sala-nome">{TILE_NOMES[r.tileId] ?? r.tileId}</div>
+                    <div className="emp-sala-cat">{CATEGORIA_INFO[info.cat].rotulo}</div>
+                    <div className="emp-sala-nome">{info.nome}</div>
+                    {info.regra && <div className="emp-sala-regra">{info.regra}</div>}
                     {custoMarcha > 0 ? (
                       <div className="emp-sala-marcha" title={`Marcha Forçada: ${dist} sala(s) além da sua linha de frente`}>
                         marcha −{custoMarcha}
@@ -612,6 +717,17 @@ export function EmperiumBoard() {
               })}
           </div>
         ))}
+
+        {/* A cor da sala e uma legenda de verdade, entao ela vem escrita. */}
+        <ul className="emp-legenda">
+          {(Object.keys(CATEGORIA_INFO) as CategoriaSala[]).map((cat) => (
+            <li key={cat} data-cat={cat}>
+              <span className="emp-legenda-cor" aria-hidden="true" />
+              <b>{CATEGORIA_INFO[cat].rotulo}</b>
+              <em>{CATEGORIA_INFO[cat].oQueMuda}</em>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* ── Fase: Mercado ── */}
@@ -813,7 +929,7 @@ export function EmperiumBoard() {
                       .filter((s) => (view.rooms[s]?.guardioesDefensor ?? 0) > 0)
                       .map((s) => (
                         <option key={s} value={s}>
-                          {TILE_NOMES[view.rooms[s]!.tileId] ?? s} ({view.rooms[s]!.guardioesDefensor})
+                          {infoDaSala(view.rooms[s]!.tileId).nome} ({view.rooms[s]!.guardioesDefensor})
                         </option>
                       ))}
                   </select>
@@ -823,7 +939,7 @@ export function EmperiumBoard() {
                       .filter((s) => s !== guardiaoDe)
                       .map((s) => (
                         <option key={s} value={s}>
-                          {TILE_NOMES[view.rooms[s]!.tileId] ?? s}
+                          {infoDaSala(view.rooms[s]!.tileId).nome}
                         </option>
                       ))}
                   </select>
@@ -907,7 +1023,7 @@ export function EmperiumBoard() {
               <div className="emp-montagem">
                 <div>
                   <em>Sala</em>
-                  <b>{slotAlvo ? (TILE_NOMES[view.rooms[slotAlvo]!.tileId] ?? slotAlvo) : '—'}</b>
+                  <b>{slotAlvo ? (infoDaSala(view.rooms[slotAlvo]!.tileId).nome) : '—'}</b>
                 </div>
                 <div>
                   <em>Marcha</em>
@@ -988,7 +1104,7 @@ export function EmperiumBoard() {
                 <div className="emp-rascunho">
                   {rascunho.map((c, i) => (
                     <div key={i} className="emp-rascunho-item">
-                      <b>{TILE_NOMES[view.rooms[c.slot]!.tileId] ?? c.slot}</b>
+                      <b>{infoDaSala(view.rooms[c.slot]!.tileId).nome}</b>
                       <span>
                         {c.charInstIds.length} un. · {ORDEM_INFO[c.ordem].nome}
                       </span>
@@ -1034,7 +1150,7 @@ export function EmperiumBoard() {
                 res={r}
                 indice={i}
                 nomeDe={nomeDe}
-                tileNome={TILE_NOMES[r.tileId] ?? r.slot}
+                tileNome={infoDaSala(r.tileId).nome}
               />
             ))}
           </div>
