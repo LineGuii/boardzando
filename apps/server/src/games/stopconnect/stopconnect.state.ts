@@ -52,6 +52,8 @@ export interface StopConnectPending {
 export interface StopConnectOptions {
   /** Total que dispara o último turno (padrão 50). */
   targetScore: number;
+  /** Tempo (segundos) por turno; ao esgotar, passa a vez. 0 = sem limite. Padrão 120. */
+  turnSeconds: number;
 }
 
 export interface StopConnectState {

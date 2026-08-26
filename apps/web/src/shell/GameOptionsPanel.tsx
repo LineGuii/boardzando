@@ -76,8 +76,9 @@ export function GameOptionsPanel({
 
 interface StopConnectOptions {
   targetScore: 50 | 75 | 100;
+  turnSeconds: 0 | 60 | 120 | 180;
 }
-const STOPCONNECT_DEFAULT_OPTIONS: StopConnectOptions = { targetScore: 50 };
+const STOPCONNECT_DEFAULT_OPTIONS: StopConnectOptions = { targetScore: 50, turnSeconds: 120 };
 
 function StopConnectOptionsPanel({
   value,
@@ -86,6 +87,7 @@ function StopConnectOptionsPanel({
   value: StopConnectOptions;
   onChange: (next: StopConnectOptions) => void;
 }): JSX.Element {
+  const turnSeconds = value.turnSeconds ?? 120;
   return (
     <div className="shell-options-panel">
       <h3>Opções da partida (StopConnect) 🔤</h3>
@@ -97,9 +99,25 @@ function StopConnectOptionsPanel({
               key={n}
               type="button"
               className={`shell-options-btn ${value.targetScore === n ? 'active' : ''}`}
-              onClick={() => onChange({ targetScore: n })}
+              onClick={() => onChange({ ...value, targetScore: n })}
             >
               {n} {n === 50 ? '(padrão)' : n === 75 ? '(médio)' : '(longo)'}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="shell-options-field">
+        <label className="shell-label">Tempo por turno (passa a vez ao esgotar)</label>
+        <div className="shell-options-buttons">
+          {([60, 120, 180, 0] as const).map((n) => (
+            <button
+              key={n}
+              type="button"
+              className={`shell-options-btn ${turnSeconds === n ? 'active' : ''}`}
+              onClick={() => onChange({ ...value, turnSeconds: n })}
+            >
+              {n === 0 ? 'Sem limite' : `${n / 60} min`}
+              {n === 120 ? ' (padrão)' : ''}
             </button>
           ))}
         </div>

@@ -4,10 +4,11 @@ import { INVALID_MOVE } from '@boardzando/contracts';
 import { GamePlugin } from '../../core/registry/game-plugin.decorator';
 import { cellKey, placeableCells } from './stopconnect.board';
 import { buildLetterBag } from './stopconnect.letters';
-import { endTurn, judge, place, submitAnswers } from './stopconnect.moves';
+import { endTurn, judge, passTurn, place, submitAnswers } from './stopconnect.moves';
 import type {
   EndTurnPayload,
   JudgePayload,
+  PassTurnPayload,
   PlacePayload,
   SubmitAnswersPayload,
 } from './stopconnect.moves';
@@ -23,15 +24,20 @@ type StopConnectMovePayload =
   | PlacePayload
   | SubmitAnswersPayload
   | JudgePayload
-  | EndTurnPayload;
+  | EndTurnPayload
+  | PassTurnPayload;
 
-const DEFAULTS: StopConnectOptions = { targetScore: 50 };
+const DEFAULTS: StopConnectOptions = { targetScore: 50, turnSeconds: 120 };
+const TURN_SECONDS_CHOICES = [0, 60, 120, 180];
 
 function readOptions(raw: unknown): StopConnectOptions {
   const o = (raw ?? {}) as Partial<StopConnectOptions>;
   const t = o.targetScore;
   const targetScore = t === 50 || t === 75 || t === 100 ? t : DEFAULTS.targetScore;
-  return { targetScore };
+  const s = o.turnSeconds;
+  const turnSeconds =
+    typeof s === 'number' && TURN_SECONDS_CHOICES.includes(s) ? s : DEFAULTS.turnSeconds;
+  return { targetScore, turnSeconds };
 }
 
 /**
@@ -121,6 +127,7 @@ export class StopConnectGame
     submitAnswers,
     judge,
     endTurn,
+    passTurn,
   } as Record<
     string,
     (

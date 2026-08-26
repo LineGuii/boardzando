@@ -39,7 +39,7 @@ interface Cell {
   row: number;
 }
 interface StopConnectView {
-  options: { targetScore: number };
+  options: { targetScore: number; turnSeconds: number };
   order: string[];
   turnPlayerId: string;
   tiles: Record<string, BoardTileV>;
@@ -124,9 +124,35 @@ export function StopConnectBoard(): JSX.Element {
     if (view?.step !== 'place') setSelType(null);
   }, [view?.step]);
 
+  // ---- timer do turno ----
+  const turnSeconds = view?.options.turnSeconds ?? 0;
+  const timerOn =
+    turnSeconds > 0 && (view?.step === 'place' || view?.step === 'answer') && !view?.finished;
+  const [remaining, setRemaining] = useState(turnSeconds);
+  const passedRef = useRef(false);
+  // reinicia a contagem a cada novo turno (troca do jogador da vez)
+  useEffect(() => {
+    setRemaining(turnSeconds);
+    passedRef.current = false;
+  }, [view?.turnPlayerId, turnSeconds]);
+  // decrementa 1/s enquanto o turno está ativo (place/answer)
+  useEffect(() => {
+    if (!timerOn) return;
+    const id = setInterval(() => setRemaining((r) => (r > 0 ? r - 1 : 0)), 1000);
+    return () => clearInterval(id);
+  }, [timerOn, view?.turnPlayerId]);
+  // ao zerar, o jogador da vez passa automaticamente
+  useEffect(() => {
+    if (!view || !session || !socket || !timerOn) return;
+    if (view.turnPlayerId !== session.playerId || remaining > 0 || passedRef.current) return;
+    passedRef.current = true;
+    socket.emit('game:move', { roomId: session.roomId, type: 'passTurn', data: {} }, () => {});
+  }, [remaining, timerOn, view, session, socket]);
+
   if (!view || !session || !room) return <p>Aguardando estado...</p>;
   const me = session.playerId;
   const isMyTurn = view.turnPlayerId === me;
+  const canPlay = isMyTurn && view.step === 'place';
 
   const emit = (type: string, data: unknown): void => {
     socket?.emit('game:move', { roomId: session.roomId, type, data }, () => {});
@@ -170,6 +196,14 @@ export function StopConnectBoard(): JSX.Element {
           Stop<span>Connect</span>
         </div>
         <div className="sc-meta">
+          {timerOn && (
+            <span
+              className={`sc-chip sc-timer ${remaining <= 15 ? 'low' : ''}`}
+              title="Tempo restante do turno"
+            >
+              ⏱ {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
+            </span>
+          )}
           <span className="sc-chip">🎯 alvo {view.targetScore}</span>
           <span className="sc-chip">🔤 {view.letterCount} · 💬 {view.themeCount}</span>
           <button
@@ -222,15 +256,18 @@ export function StopConnectBoard(): JSX.Element {
         onPlace={doPlace}
       />
 
-      {/* mão do jogador da vez */}
-      {isMyTurn && view.step === 'place' && view.myHand && (
-        <div className="sc-hand">
-          <div className="sc-hand-label">Sua mão — escolha uma peça e um lugar:</div>
+      {/* mão do jogador — sempre visível; interativa só na sua vez ao colocar */}
+      {view.myHand && (
+        <div className={`sc-hand ${canPlay ? '' : 'idle'}`}>
+          <div className="sc-hand-label">
+            Sua mão{canPlay ? ' — escolha uma peça e um lugar:' : ':'}
+          </div>
           <div className="sc-hand-tiles">
             <button
               type="button"
               className={`sc-tile letter ${selType === 'letter' ? 'sel' : ''}`}
-              onClick={() => setSelType('letter')}
+              onClick={canPlay ? () => setSelType('letter') : undefined}
+              disabled={!canPlay}
             >
               <span className="sc-tile-letter">{view.myHand.letter.letter}</span>
               <span className="sc-tile-value">{view.myHand.letter.value}</span>
@@ -238,12 +275,13 @@ export function StopConnectBoard(): JSX.Element {
             <button
               type="button"
               className={`sc-tile theme ${selType === 'theme' ? 'sel' : ''}`}
-              onClick={() => setSelType('theme')}
+              onClick={canPlay ? () => setSelType('theme') : undefined}
+              disabled={!canPlay}
             >
               <span className="sc-tile-theme">{view.myHand.theme}</span>
             </button>
           </div>
-          {selType && (
+          {canPlay && selType && (
             <div className="sc-hand-hint">
               {placeCandidates.length > 0
                 ? `Clique numa célula destacada para colocar ${selType === 'letter' ? 'a Letra' : 'o Tema'}.`

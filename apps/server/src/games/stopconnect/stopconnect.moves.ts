@@ -24,6 +24,7 @@ export interface JudgePayload {
   verdict: Verdict;
 }
 export type EndTurnPayload = Record<string, never>;
+export type PassTurnPayload = Record<string, never>;
 
 function clone(state: StopConnectState): StopConnectState {
   return structuredClone(state);
@@ -172,19 +173,50 @@ export const endTurn: Move<StopConnectState, EndTurnPayload> = (state, ctx) => {
   else next.hands[ctx.actor]!.theme = drawTheme(next, ctx.random);
   next.pending = undefined;
   next.step = 'place';
+  advanceFinalTurns(next, ctx.actor);
+  // move normal: o engine avança para o próximo jogador (ordem circular = horário)
+  return next;
+};
 
-  // último turno: 1º a atingir o alvo dispara; os demais jogam mais uma vez cada
+/**
+ * Lógica do último turno (compartilhada por endTurn/passTurn): o 1º a atingir o
+ * alvo dispara; depois os demais jogam mais uma vez cada e o jogo encerra.
+ */
+function advanceFinalTurns(next: StopConnectState, actor: PlayerId): void {
   const target = next.options.targetScore;
   if (next.lastTurnBy === undefined) {
-    if ((next.scores[ctx.actor] ?? 0) >= target) {
-      next.lastTurnBy = ctx.actor;
+    if ((next.scores[actor] ?? 0) >= target) {
+      next.lastTurnBy = actor;
       next.finalTurnsRemaining = next.order.length - 1;
-      next.lastEvent = `${ctx.actor} atingiu ${target}! Último turno para os demais.`;
+      next.lastEvent = `${actor} atingiu ${target}! Último turno para os demais.`;
     }
   } else {
     next.finalTurnsRemaining = (next.finalTurnsRemaining ?? 0) - 1;
     if (next.finalTurnsRemaining <= 0) finishGame(next);
   }
-  // move normal: o engine avança para o próximo jogador (ordem circular = horário)
+}
+
+/**
+ * MOVE: passa a vez (o timer do turno estourou, ou o jogador desistiu da jogada).
+ * Válido durante 'place' ou 'answer'. Se já havia colocado uma peça, ela fica na
+ * mesa sem pontos e a mão reabastece. Não pontua. Só o jogador da vez.
+ */
+export const passTurn: Move<StopConnectState, PassTurnPayload> = (state, ctx) => {
+  if (state.finished) return INVALID_MOVE;
+  if (ctx.actor !== ctx.currentPlayer) return INVALID_MOVE;
+  if (state.step !== 'place' && state.step !== 'answer') return INVALID_MOVE;
+
+  const next = clone(state);
+  // se já colocou uma peça nesta vez (step 'answer'), reabastece o tipo jogado
+  if (next.step === 'answer' && next.pending) {
+    const kind = next.pending.placedKind;
+    if (kind === 'letter') next.hands[ctx.actor]!.letter = drawLetter(next, ctx.random);
+    else next.hands[ctx.actor]!.theme = drawTheme(next, ctx.random);
+  }
+  next.pending = undefined;
+  next.step = 'place';
+  next.lastEvent = `${ctx.actor} passou a vez (tempo esgotado)`;
+  advanceFinalTurns(next, ctx.actor);
+  // move normal: o engine avança para o próximo jogador
   return next;
 };

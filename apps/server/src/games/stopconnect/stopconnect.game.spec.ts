@@ -8,7 +8,7 @@ const P: PlayerId[] = ['a', 'b', 'c'];
 
 function makeState(over: Partial<StopConnectState> = {}): StopConnectState {
   return {
-    options: { targetScore: 50 },
+    options: { targetScore: 50, turnSeconds: 120 },
     order: [...P],
     tiles: {},
     cells: {},
@@ -183,6 +183,53 @@ describe('StopConnect — validações de move', () => {
     expect(() => m.applyMove('a', 'submitAnswers', { answers: ['só uma'] })).toThrow(
       InvalidMoveError,
     );
+  });
+});
+
+describe('StopConnect — passar a vez (timer)', () => {
+  it('passTurn em place: não pontua, passa a vez e o próximo começa em place', () => {
+    const s = withTiles(makeState(), [letterTile('L1', 0, 0, 'C', 2)]);
+    const m = seed(s, 'a');
+    m.applyMove('a', 'passTurn', {});
+    expect(m.snapshot.state.scores['a']).toBe(0);
+    expect(m.snapshot.state.step).toBe('place');
+    expect(m.snapshot.state.pending).toBeUndefined();
+    expect(m.snapshot.currentPlayer).toBe('b'); // vez avançou (horário)
+  });
+
+  it('passTurn em answer: a peça fica na mesa sem pontos e a mão reabastece', () => {
+    const s = withTiles(makeState(), [
+      letterTile('L1', 0, 0, 'C', 2),
+      letterTile('L2', 0, 2, 'B', 3),
+    ]);
+    const m = seed(s, 'a');
+    m.applyMove('a', 'place', { tileType: 'theme', col: 0, row: 1 }); // colocou tema
+    expect(m.snapshot.state.step).toBe('answer');
+    m.applyMove('a', 'passTurn', {});
+    expect(m.snapshot.state.scores['a']).toBe(0);
+    expect(m.snapshot.currentPlayer).toBe('b');
+    // a peça de tema colocada permanece na mesa
+    expect(
+      Object.values(m.snapshot.state.tiles).some(
+        (t) => t.kind === 'theme' && t.col === 0 && t.row === 1,
+      ),
+    ).toBe(true);
+  });
+
+  it('passar a vez durante o último turno consome a chance', () => {
+    const s = withTiles(makeState({ scores: { a: 60, b: 10, c: 20 }, lastTurnBy: 'a', finalTurnsRemaining: 1 }), [
+      letterTile('L1', 0, 0, 'C', 2),
+    ]);
+    const m = seed(s, 'c');
+    m.applyMove('c', 'passTurn', {});
+    expect(m.isOver).toBe(true);
+    expect(m.snapshot.gameover?.winner).toBe('a');
+  });
+
+  it('só o jogador da vez pode passar; não vale em julgamento', () => {
+    const s = withTiles(makeState(), [letterTile('L1', 0, 0, 'C', 2)]);
+    const m = seed(s, 'a');
+    expect(() => m.applyMove('b', 'passTurn', {})).toThrow(NotYourTurnError);
   });
 });
 
