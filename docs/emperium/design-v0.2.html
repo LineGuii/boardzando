@@ -106,10 +106,13 @@ ul.body, ol.body { padding-left: 1.15rem; display: flex; flex-direction: column;
 li::marker { color: var(--muted); }
 em.term { font-style: normal; font-weight: 700; color: var(--combo); }
 
-/* ── Changelog: defeito → correção ────────────────────── */
+/* ── Changelog: defeito → correção ─────────────────────────────────────────
+   O número fica numa coluna estreita e TODO o resto vive dentro de .corpo.
+   Sem esse wrapper, o auto-placement do grid jogava o primeiro .lado na
+   coluna de 2.2rem do número e espremia o texto em 35px. */
 .changes { display: flex; flex-direction: column; gap: var(--s3); }
 .change {
-  display: grid; grid-template-columns: 2.2rem 1fr 1fr; gap: var(--s3);
+  display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); gap: var(--s3);
   background: var(--surface); border: 1px solid var(--rule);
   border-radius: 3px; padding: var(--s3); box-shadow: var(--shadow);
 }
@@ -117,8 +120,13 @@ em.term { font-style: normal; font-weight: 700; color: var(--combo); }
   font-family: var(--display); font-weight: 800; font-size: 1.6rem;
   color: var(--combo); line-height: 1; font-variant-numeric: tabular-nums;
 }
-.change h3 { grid-column: 2 / -1; margin-bottom: var(--s2); }
-.change .lado { display: flex; flex-direction: column; gap: 5px; }
+.change .corpo { display: flex; flex-direction: column; gap: var(--s3); min-width: 0; }
+.change h3 { margin-bottom: 0; }
+.change .lados {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--s3) var(--s4);
+}
+.change .lado { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .change .rot {
   font-family: var(--bitmap); font-size: .55rem; letter-spacing: .09em;
   text-transform: uppercase;
@@ -207,8 +215,6 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
 
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 @media (max-width: 46rem) {
-  .change { grid-template-columns: 1.8rem 1fr; }
-  .change h3 { grid-column: 2; }
   .showcase { grid-template-columns: 1fr; }
   .sc-liga { transform: rotate(90deg); }
   .rung { grid-template-columns: 8rem 1fr 3rem; }
@@ -244,55 +250,67 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
   <div class="changes">
     <article class="change">
       <span class="n">1</span>
-      <h3>Marcha Forçada</h3>
-      <div class="lado">
-        <span class="rot mal">o defeito</span>
-        <p>A regra exigia adjacência estrita, então <strong>na rodada 1 o Portão era a única
-           sala legal para todo atacante</strong>. A decisão que o jogo diz ser central — onde
-           não colocar sua gente — não existia até a rodada 3, e o defensor, sabendo onde
-           todos estariam, só precisava empilhar tudo num lugar.</p>
-      </div>
-      <div class="lado">
-        <span class="rot bom">a correção</span>
-        <p>Toda sala é alcançável sempre; o que varia é o preço. Ir além da sua linha de
-           frente custa <strong>−2 de Poder por sala de distância</strong>. Sete destinos
-           desde o primeiro turno, e o defensor passa a ter que cobrir sete salas.</p>
-      </div>
+      <div class="corpo">
+        <h3>Marcha Forçada</h3>
+          <div class="lados">
+          <div class="lado">
+            <span class="rot mal">o defeito</span>
+            <p>A regra exigia adjacência estrita, então <strong>na rodada 1 o Portão era a única
+               sala legal para todo atacante</strong>. A decisão que o jogo diz ser central — onde
+               não colocar sua gente — não existia até a rodada 3, e o defensor, sabendo onde
+               todos estariam, só precisava empilhar tudo num lugar.</p>
+          </div>
+          <div class="lado">
+            <span class="rot bom">a correção</span>
+            <p>Toda sala é alcançável sempre; o que varia é o preço. Ir além da sua linha de
+               frente custa <strong>−2 de Poder por sala de distância</strong>. Sete destinos
+               desde o primeiro turno, e o defensor passa a ter que cobrir sete salas.</p>
+          </div>
+          </div>
+        </div>
     </article>
 
     <article class="change">
       <span class="n">2</span>
-      <h3>Transcendência virou evolução</h3>
-      <div class="lado">
-        <span class="rot mal">o defeito</span>
-        <p>Era um segundo baralho de <em>personagens</em>. Você comprava um Arquimago pronto
-           e o seu Bruxo — o que sobreviveu a quatro rodadas, com a arma refinada e a Carta
-           Hydra encaixada — virava enchimento. <strong>O jogo aposentava seus veteranos.</strong></p>
-      </div>
-      <div class="lado">
-        <span class="rot bom">a correção</span>
-        <p>A evolução é empilhada sobre alguém que já é seu: Poder e palavras-chave
-           <strong>somam</strong>, o equipamento fica. O veterano é <em>o próprio</em> que
-           vira Arquimago, e perdê-lo custa o recrutamento mais a evolução.</p>
-      </div>
+      <div class="corpo">
+        <h3>Transcendência virou evolução</h3>
+          <div class="lados">
+          <div class="lado">
+            <span class="rot mal">o defeito</span>
+            <p>Era um segundo baralho de <em>personagens</em>. Você comprava um Arquimago pronto
+               e o seu Bruxo — o que sobreviveu a quatro rodadas, com a arma refinada e a Carta
+               Hydra encaixada — virava enchimento. <strong>O jogo aposentava seus veteranos.</strong></p>
+          </div>
+          <div class="lado">
+            <span class="rot bom">a correção</span>
+            <p>A evolução é empilhada sobre alguém que já é seu: Poder e palavras-chave
+               <strong>somam</strong>, o equipamento fica. O veterano é <em>o próprio</em> que
+               vira Arquimago, e perdê-lo custa o recrutamento mais a evolução.</p>
+          </div>
+          </div>
+        </div>
     </article>
 
     <article class="change">
       <span class="n">3</span>
-      <h3>Combos</h3>
-      <div class="lado">
-        <span class="rot mal">o defeito</span>
-        <p>As palavras-chave eram todas aritmética <em>dentro</em> da própria facção. Elo soma
-           por aliado, Muralha subtrai do inimigo — nenhuma perguntava <strong>quem</strong>
-           está do seu lado, só quantos. Um Monge ao lado de um Sábio valia o mesmo que ao
-           lado de outro Monge.</p>
-      </div>
-      <div class="lado">
-        <span class="rot bom">a correção</span>
-        <p>Algumas cartas ganharam uma linha que <strong>nomeia outro personagem</strong>. A
-           Reserva deixou de ser um saco de números e virou um clã, e nada disso passa por
-           equipamento.</p>
-      </div>
+      <div class="corpo">
+        <h3>Combos</h3>
+          <div class="lados">
+          <div class="lado">
+            <span class="rot mal">o defeito</span>
+            <p>As palavras-chave eram todas aritmética <em>dentro</em> da própria facção. Elo soma
+               por aliado, Muralha subtrai do inimigo — nenhuma perguntava <strong>quem</strong>
+               está do seu lado, só quantos. Um Monge ao lado de um Sábio valia o mesmo que ao
+               lado de outro Monge.</p>
+          </div>
+          <div class="lado">
+            <span class="rot bom">a correção</span>
+            <p>Algumas cartas ganharam uma linha que <strong>nomeia outro personagem</strong>. A
+               Reserva deixou de ser um saco de números e virou um clã, e nada disso passa por
+               equipamento.</p>
+          </div>
+          </div>
+        </div>
     </article>
   </div>
 </section>
