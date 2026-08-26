@@ -212,6 +212,34 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
     'confirmarComprometimento',
   ] as const;
 
+  /**
+   * O monte de bruços da mesa fisica, traduzido.
+   *
+   * No jogo de mesa voce ve o adversario largar tres cartas viradas no
+   * Corredor com um estandarte por cima: a contagem e o destino sao publicos,
+   * a identidade e a Ordem nao. Esconder tambem a contagem exigiria biombo, e
+   * o biombo custa uma transferencia de cartas por rodada — foi o motivo de o
+   * fisico assumir esse vazamento, e o digital acompanha para que as duas
+   * versoes se joguem igual.
+   *
+   * Efeito colateral bem-vindo: com a contagem a vista, o limite da sala se
+   * fiscaliza sozinho na hora, em vez de virar surpresa na revelacao.
+   */
+  private montesPublicos(
+    state: EmperiumState,
+    viewer: PlayerId,
+  ): Record<string, { slot: string; quantidade: number }[]> {
+    const out: Record<string, { slot: string; quantidade: number }[]> = {};
+    for (const p of state.order) {
+      if (p === viewer) continue;
+      out[p] = (state.commitments[p] ?? []).map((c) => ({
+        slot: c.slot,
+        quantidade: c.charInstIds.length,
+      }));
+    }
+    return out;
+  }
+
   endIf(state: EmperiumState): GameOverResult | void {
     if (!state.finished) return;
     const ranking = [...state.order].sort(
@@ -276,6 +304,10 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
       meusComprometimentos: state.commitments[viewer] ?? [],
       confirmados: state.confirmados,
       todosComprometimentos: emComprometimento ? undefined : state.commitments,
+      // Os montes de bruços, como na mesa: da para ver QUANTAS cartas foram
+      // para QUAL sala, e nada mais. Quem sao, sob que Ordem, com que combo,
+      // com que consumivel e para onde o Oculto vai continuam virados.
+      montes: this.montesPublicos(state, viewer),
       salasPermitidas: allowedSlots(state, viewer),
       // Marcha Forcada: 0 = entrada normal, >0 = -2 de Poder por sala.
       distanciaMarcha: slotDistances(state, viewer),

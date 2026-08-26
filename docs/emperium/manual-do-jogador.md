@@ -86,21 +86,51 @@ livre.
 
 Você pode **passar a vez** a qualquer momento, abrindo mão das ações restantes.
 
-### Fase 3 — Comprometimento *(simultâneo e secreto)*
+### Fase 3 — Comprometimento *(simultâneo)*
 
-Ao mesmo tempo que todo mundo, coloque **de bruços** em até **quatro salas**:
+Ao mesmo tempo que todo mundo, você monta até **quatro esquadrões**. Para cada um:
 
-- os **personagens** que vão (da sua Reserva — quem está na Enfermaria não pode ir);
-- **uma Ordem** por sala, e cada Ordem só serve uma vez por rodada;
-- opcionalmente, **um combo declarado** — o personagem cujo combo vai disparar;
-- opcionalmente, **um consumível**.
+1. Ponha um **estandarte de bruços** na sala — ele é a sua Ordem, virada.
+2. Empilhe **embaixo dele**, de bruços, as **cartas dos personagens** que vão.
+   Saem da sua Reserva; quem está na Enfermaria não pode ir. O equipamento viaja
+   enfiado sob a carta.
+3. Se quiser declarar um **combo**, a carta do portador entra **girada 90°**.
+4. Se quiser jogar um **consumível**, ele entra **atravessado** no monte.
+5. Empilhe sobre o estandarte um **chevron por sala de Marcha Forçada** (−2 cada).
+6. Se mandar um **Oculto**, você pode enfiar sob o estandarte uma **ficha de Sombra**
+   de bruços com a letra da sala vizinha para onde ele vai escorregar.
 
-> **Você tem 4 Ordens, então no máximo 4 salas.** Espalhar significa gastar Resguardo
-> onde você queria Investida. É o aperto central do jogo.
+> **Você tem 4 estandartes, um de cada Ordem — então no máximo 4 salas, e cada Ordem
+> só uma vez.** Não é uma regra para decorar: é o que você tem na mão. Espalhar
+> significa gastar Resguardo onde você queria Investida, e esse é o aperto central
+> do jogo.
+
+**O Oculto fica no monte junto com o resto do grupo**, sem nenhuma diferença de
+posicionamento — nada na mesa denuncia que ele pretende sair dali. Quem carrega o
+destino é a ficha virada.
+
+#### O que os outros veem enquanto você monta
+
+Eles veem **quantas cartas** você pôs e **em qual sala** — e nada além disso. Quem
+são, sob qual Ordem, com que combo, com que consumível e para onde a Sombra aponta
+ficam no verso até a revelação.
+
+Isso é de propósito. O cerco não é invisível: você vê a guilda inimiga entrar na
+sala, o que você não sabe é quão forte ela é. E ajuda na prática — se alguém puser a
+quarta carta num Corredor de três, a mesa vê na hora, em vez de a jogada ilegal
+aparecer só na revelação. **A versão digital mostra exatamente a mesma coisa.**
 
 ### Fase 4 — Revelação e resolução
 
-Vire tudo. As salas resolvem **do Portão para dentro**; salas onde alguém jogou
+Virem tudo ao mesmo tempo e abram os montes em leque.
+
+**Primeiro, as infiltrações**, todas juntas, antes de qualquer sala resolver: se você
+mandou um Oculto com ficha de Sombra e o seu clã **não** foi REVELADO naquela sala,
+ele muda para a sala da ficha **sem pagar Marcha Forçada** e luta lá **sem Ordem
+nenhuma** — entrou pela sombra, não numa formação. Se foi REVELADO, a ficha vira do
+mesmo jeito e não acontece nada: ele fica e briga onde estava.
+
+Depois, as salas resolvem **do Portão para dentro**; salas onde alguém jogou
 **Emboscada** resolvem antes de todas.
 
 ### Fase 5 — Fim de rodada
@@ -151,7 +181,9 @@ Siga esta ordem exata.
 
 **1. Revele** personagens, Ordens, combos declarados e consumíveis.
 
-**2. Entram os OCULTO** — a menos que o clã esteja **Revelado**.
+**2. Resolva as INFILTRAÇÕES.** Todo Oculto com ficha de Sombra cuja clã não
+esteja **REVELADA** muda para a sala da ficha, **sem pagar Marcha Forçada**, e passa a
+lutar lá **sem Ordem nenhuma**. Acontece antes de qualquer sala resolver.
 
 **3. Resolva o RAPTO**, se houver. Acontece antes de qualquer soma, porque arrancar
 alguém muda o cálculo de quem ficou. Se **dois ou mais** clãs declararem Rapto na mesma
@@ -489,9 +521,9 @@ metade do exército.
 | **RAJADA X** | +X de Poder, só na primeira rodada em que este personagem entra nesta sala. |
 | **ELO X** | +X de Poder para cada **outro** personagem seu nesta sala. |
 | **SOLO X** | +X de Poder se este for o seu único personagem nesta sala. |
-| **OCULTO** | Não é revelado com os outros; entra depois das Ordens. Ignora o limite da sala. |
+| **OCULTO** | Na revelação, se o seu clã não estiver REVELADO, ele pode escorregar para uma sala vizinha — sem pagar marcha — e luta lá sem Ordem. |
 | **DEVOÇÃO X** | Ele se joga na frente: cada baixa que ele leva conta por X, e os outros ficam de pé. Cai antes até do PROTEGER. |
-| **ANULAR** | Cancela uma palavra-chave **ou** um equipamento de um personagem inimigo. |
+| **ANULAR** | Cancela a **maior palavra-chave inimiga da sala**, qualquer que seja. Não se anula um ANULAR. |
 | **RESTAURAR X** | No fim da rodada, mova X personagens da Enfermaria para a Reserva. |
 | **PILHAR X** | Se vencer, ganhe X zeny. Com X ≥ 3, ganhe 1 equipamento caído. |
 | **ESGOTAR** | Após resolver, vai para a Enfermaria — tendo vencido ou perdido. |

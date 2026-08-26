@@ -71,8 +71,8 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 
 | Qtd | Componente |
 |---|---|
-| 52 | Cartas de Personagem base (26 variações × 2 cópias) |
-| 39 | Cartas de Transcendência (13 classes × 3 caminhos) |
+| 84 | Cartas de Personagem base (42 variações × 2 cópias) |
+| 42 | Cartas de Transcendência (14 classes × 3 caminhos) |
 | 30 | Cartas de Equipamento (12 armas, 10 armaduras, 8 acessórios) |
 | 20 | Cartas de Monstro (10 tipos × 2) |
 | 24 | Cartas de Consumível (8 tipos × 3) |
@@ -80,7 +80,9 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 | 3 | Fichas fixas: Portão Principal, Salão do Trono, Sala do Emperium |
 | 9 | Fichas de Marca (3 Exposto, 3 Preso, 3 Revelado) |
 | 5 | Painéis de jogador (Reserva / Enfermaria / trilha de zeny) |
-| 20 | Fichas de Ordem (4 por jogador × 5) |
+| 20 | Estandartes de Ordem (4 por jogador × 5) — ver seção 17 |
+| 15 | Chevrons de Marcha Forçada (3 por jogador) |
+| 10 | Fichas de Sombra (2 por jogador) |
 | 5 | Conjuntos de 20 cubos de cor |
 | 12 | Fichas de Guardião |
 | 1 | Trilha de Glória (0–40) + 5 marcadores |
@@ -103,7 +105,7 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 | **SOLO X** | +X de Poder se este for o seu único personagem nesta sala. |
 | **OCULTO** | Não é revelado com os outros. Entra depois das Ordens. Ignora limite de sala. |
 | **DEVOÇÃO X** | Ele se joga na frente: cada baixa que ele leva conta por X, e os outros ficam de pé. Cai antes até do PROTEGER. |
-| **ANULAR** | Cancela uma palavra-chave **ou** um equipamento de um personagem inimigo. |
+| **ANULAR** | Cancela a **maior palavra-chave inimiga da sala**, qualquer que seja. Não se anula um ANULAR. |
 | **RESTAURAR X** | No fim da rodada, mova X personagens da Enfermaria para a Reserva. |
 | **PILHAR X** | Se vencer, ganhe X zeny. Com X ≥ 3, ganhe 1 equipamento caído. |
 | **ESGOTAR** | Após resolver, este personagem vai para a Enfermaria — vencendo ou perdendo. |
@@ -481,7 +483,9 @@ pátio e ninguém entraria no castelo.
 
 1. **Renda** — simultânea.
 2. **Mercado** — ordem inversa de Glória, 3 ações cada.
-3. **Comprometimento** — simultâneo e secreto: personagens, Ordem e combo por sala.
+3. **Comprometimento** — simultâneo: personagens, Ordem, combo, consumível e
+   infiltração por sala, tudo de bruços. A contagem de cada monte e a sala são
+   públicas; o resto fica no verso. Ver **seção 17**.
 4. **Revelação e resolução** — sala por sala, do Portão para dentro.
 5. **Fim de rodada** — renda de salas, Glória, Enfermaria, avança a trilha.
 
@@ -489,7 +493,105 @@ Seis rodadas. Orçamento: ~13 min por rodada com 4 jogadores, ~78 minutos.
 
 ---
 
-## 17. Riscos e alavancas
+## 17. O comprometimento na mesa
+
+Esta é a fase que mais pode quebrar no jogo físico, porque ela carrega muita
+informação de uma vez e precisa ficar escondida até a revelação. Vale listar o
+que uma rodada tem que guardar em segredo:
+
+1. **Quais personagens** vão para **qual sala** — até 4 salas
+2. **Qual Ordem** em cada sala, e cada Ordem só uma vez por rodada
+3. **Qual combo** você declara, com o portador nomeado — no máximo um por sala
+4. **Qual consumível** você joga de bruços
+5. As **salas de Marcha Forçada**, congeladas no momento da declaração
+6. **O destino da infiltração** do seu Oculto
+
+### Os Estandartes
+
+Cada jogador tem **4 estandartes** na cor do clã, um por Ordem. Frente: o
+símbolo da Ordem. Verso: o brasão do clã, igual nos quatro.
+
+No comprometimento você põe um estandarte **de bruços** na sala que quer atacar
+e coloca as **cartas dos personagens de bruços embaixo dele**. As cartas viajam
+com o equipamento enfiado por baixo, então o veterano equipado se move como uma
+peça só — mandar o seu Cavaleiro para o corredor é um gesto, não uma anotação.
+
+O que faz esse sistema valer a pena é que **o componente aplica a regra
+sozinho**: você tem exatamente um estandarte de cada Ordem, então "cada Ordem
+uma vez por rodada" e "no máximo 4 salas por rodada" deixam de ser regras para
+decorar e viram uma limitação da sua mão. Ninguém precisa fiscalizar.
+
+As outras cinco decisões pegam carona sem quase nenhum componente novo:
+
+| Decisão | Como se declara |
+|---|---|
+| **Combo** | A carta do portador entra no monte **girada 90°** |
+| **Consumível** | Entra de bruços **atravessado** no monte, para não se confundir com personagem |
+| **Marcha Forçada** | Chevrons (−2 cada) empilhados **sobre o estandarte** ao colocar |
+| **Infiltração do Oculto** | Uma **ficha de Sombra** de bruços sob o estandarte, com a letra da sala de destino |
+
+### A ficha de Sombra
+
+Cada sala do castelo tem uma **letra impressa** na ficha. Ao comprometer um
+Oculto, você pode enfiar sob o estandarte uma ficha de Sombra de bruços com a
+letra da sala vizinha para onde ele vai escorregar.
+
+**O Oculto fica no monte junto com o grupo, sem nenhuma diferença de
+posicionamento.** Nada na mesa denuncia que ele pretende sair dali — se
+denunciasse, a infiltração deixaria de ser infiltração. É a ficha virada que
+carrega o destino, e ela só é lida na revelação.
+
+Na revelação, se o seu clã **não** foi REVELADO naquela sala, a ficha vira e o
+Oculto muda de sala **sem pagar Marcha Forçada**, e luta lá sem Ordem nenhuma —
+ele entrou pela sombra, não numa formação. Se foi REVELADO — pelo Caçador
+Falcoeiro, pelo Olho de Falcão, pelos Óculos do Caçador, pelo Horong ou por um
+combo de REVELADO —, a ficha vira do mesmo jeito e não acontece nada: ele fica
+e briga onde estava.
+
+### A revelação
+
+Todos viram os estandartes ao mesmo tempo e abrem os montes em leque. Resolvem
+as salas na ordem impressa nas fichas, com a ressalva de que **qualquer sala com
+um estandarte de Emboscada resolve antes**. As infiltrações acontecem todas
+juntas, logo depois de virar e antes de a primeira sala resolver.
+
+### O que fica à vista de propósito
+
+Com os montes na mesa, todo mundo vê **quantas cartas** você mandou e **para
+onde** — só não vê **quem**, **sob qual Ordem**, **com que combo**, **com que
+consumível** nem **para onde a Sombra aponta**.
+
+Esconder também a contagem exigiria um biombo por jogador, e o biombo custa uma
+transferência de cinco a oito cartas por jogador por rodada, seis rodadas — é aí
+que os 90 minutos viram 120. O vazamento é o preço de manter a fase rápida, e
+ele é defensável: o cerco de verdade não é invisível. Você vê a guilda inimiga
+entrar na sala; o que você não sabe é quão forte ela é e o que ela vai fazer.
+
+Dois efeitos colaterais bem-vindos. Primeiro, **os limites de sala se fiscalizam
+sozinhos**: se alguém colocar a quarta carta num Corredor de três, a mesa vê na
+hora, em vez de a ilegalidade virar surpresa na revelação. Segundo, a **Torre de
+Vigia continua valendo**, porque o que ela espia é o *conteúdo* dos montes, não
+a existência deles.
+
+**A versão digital segue exatamente esta regra**, e por este motivo: as duas
+precisam se jogar igual, senão quem aprende numa desaprende na outra. Durante a
+fase simultânea o tabuleiro mostra o monte de cada rival — cartas de verso
+empilhadas, com a contagem e o nome do clã — e nada mais.
+
+### Componentes que esta fase acrescenta
+
+| Qtd | Componente |
+|---|---|
+| 20 | Estandartes (4 Ordens × 5 jogadores), verso com o brasão do clã |
+| 15 | Chevrons de Marcha (3 por jogador) |
+| 10 | Fichas de Sombra (2 por jogador), com as letras das salas |
+
+As fichas de sala passam a ter uma **letra impressa** (A a G) para a ficha de
+Sombra poder apontar.
+
+---
+
+## 18. Riscos e alavancas
 
 | Risco | Sinal no playtest | Alavanca |
 |---|---|---|
@@ -504,7 +606,7 @@ Seis rodadas. Orçamento: ~13 min por rodada com 4 jogadores, ~78 minutos.
 
 ---
 
-## 18. Roteiro de playtest
+## 19. Roteiro de playtest
 
 Quatro jogadores, Modo 3, alas: Corredor Estreito, Salão dos Guardiões, Armazém, Torre de
 Vigia. Anote:
@@ -525,7 +627,7 @@ imparcial do próprio jogo.
 
 ---
 
-## 19. Estado da implementação
+## 20. Estado da implementação
 
 O jogo roda como plugin do Boardzando em `apps/server/src/games/emperium/`, com tabuleiro
 em `apps/web/src/games/emperium/`. **197 testes**, incluindo o exemplo trabalhado da § 8

@@ -969,6 +969,42 @@ describe('EmperiumGame — informacao oculta', () => {
     expect(clans['bruno']!['consumiveis']).toBeUndefined();
     expect(clans['bruno']!['consumiveisCount']).toBeDefined();
   });
+
+  it('mostra os montes de bruços alheios: quantas cartas e onde, e so isso', () => {
+    const match = newMatch();
+    for (let guard = 0; guard < 40; guard++) {
+      const s = match.snapshot.state;
+      if (s.step !== 'mercado') break;
+      const p = jogadorDoMercado(s);
+      if (!p) break;
+      match.applyMove(p, 'passarMercado', { type: 'passarMercado' });
+    }
+
+    const antes = match.snapshot.state;
+    const doBruno = Object.values(antes.clans['bruno']!.chars)
+      .filter((c) => c.local === 'reserva')
+      .map((c) => c.instId);
+    match.applyMove('bruno', 'confirmarComprometimento', {
+      type: 'confirmarComprometimento',
+      commitments: [{ slot: 'portao', charInstIds: doBruno, ordem: 'emboscada' }],
+    });
+
+    const view = new EmperiumGame().playerView(
+      match.snapshot.state,
+      { ...match.snapshot, actor: 'ana' } as never,
+      'ana',
+    ) as Record<string, unknown>;
+
+    const montes = view['montes'] as Record<string, { slot: string; quantidade: number }[]>;
+    // Ana ve o monte do Bruno: sala e contagem.
+    expect(montes['bruno']).toEqual([{ slot: 'portao', quantidade: doBruno.length }]);
+    // E nao ve o proprio monte por aqui — esse vem por meusComprometimentos.
+    expect(montes['ana']).toBeUndefined();
+    // O que esta no verso continua no verso: nenhum instId, nenhuma Ordem.
+    const cru = JSON.stringify(montes['bruno']);
+    expect(cru).not.toContain('emboscada');
+    for (const id of doBruno) expect(cru).not.toContain(id);
+  });
 });
 
 describe('EmperiumGame — partida completa', () => {

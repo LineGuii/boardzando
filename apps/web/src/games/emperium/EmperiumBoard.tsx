@@ -101,6 +101,8 @@ interface EmperiumView {
   altarAberto: boolean;
   jogadorDoMercado: string | null;
   meusComprometimentos: CommitmentV[];
+  /** Os montes de bruços dos OUTROS clãs: sala e quantidade, nada mais. */
+  montes?: Record<string, { slot: RoomSlot; quantidade: number }[]>;
   confirmados: string[];
   salasPermitidas: RoomSlot[];
   distanciaMarcha: Record<string, number>;
@@ -516,6 +518,16 @@ export function EmperiumBoard() {
 
   const totalCubos = Object.values(view.emperiumCubos).reduce((a, b) => a + b, 0);
 
+  /** Quem largou monte de bruços nesta sala, e com quantas cartas. */
+  const montesDaSala = (slot: RoomSlot) => {
+    const out: { playerId: string; quantidade: number }[] = [];
+    for (const [playerId, montes] of Object.entries(view.montes ?? {})) {
+      const m = montes.find((x) => x.slot === slot);
+      if (m && m.quantidade > 0) out.push({ playerId, quantidade: m.quantidade });
+    }
+    return out;
+  };
+
   /* ── Layout do castelo ── */
   const linear = !view.slots.includes('c1');
   const fileiras: RoomSlot[][] = linear
@@ -700,6 +712,27 @@ export function EmperiumBoard() {
                     {meuCommit && (
                       <div className="emp-sala-commit">
                         {meuCommit.charInstIds.length} un. · {ORDEM_INFO[meuCommit.ordem].nome}
+                      </div>
+                    )}
+
+                    {/* Os montes de bruços dos rivais, como na mesa: dá para
+                        contar as cartas e ver a sala, e mais nada. */}
+                    {montesDaSala(slot).length > 0 && (
+                      <div className="emp-montes">
+                        {montesDaSala(slot).map(({ playerId, quantidade }) => (
+                          <span
+                            key={playerId}
+                            className="emp-monte"
+                            title={`${nomeDe(playerId)} comprometeu ${quantidade} de bruços aqui`}
+                          >
+                            <span className="emp-monte-cartas" aria-hidden="true">
+                              {Array.from({ length: Math.min(quantidade, 5) }, (_, k) => (
+                                <i key={k} />
+                              ))}
+                            </span>
+                            {nomeDe(playerId)} {quantidade}
+                          </span>
+                        ))}
                       </div>
                     )}
                     {view.step === 'comprometimento' && !jaConfirmei && permitida && (

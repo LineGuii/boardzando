@@ -253,6 +253,43 @@
   flex-direction: column;
   gap: 1px;
 }
+/* ── Montes de bruços ──────────────────────────────────────
+ * O que a mesa fisica deixa ver do comprometimento alheio:
+ * a pilha de cartas viradas e o tamanho dela. Nome, Ordem,
+ * combo e consumivel continuam no verso.
+ * ========================================================= */
+.emp-montes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+.emp-monte {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6rem;
+  color: var(--tinta-fraca);
+}
+.emp-monte-cartas {
+  display: inline-flex;
+}
+/* Cartas de verso, sobrepostas como um monte de verdade. */
+.emp-monte-cartas i {
+  width: 7px;
+  height: 10px;
+  border-radius: 1px;
+  border: 1px solid var(--pedra-borda);
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--pedra) 0 2px,
+    var(--pedra-alta) 2px 4px
+  );
+}
+.emp-monte-cartas i + i {
+  margin-left: -3px;
+}
+
 .emp-sala-commit {
   margin-top: 5px;
   font-size: 0.68rem;
