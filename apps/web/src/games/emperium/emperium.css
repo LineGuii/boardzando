@@ -1697,3 +1697,53 @@
     gap: 2px;
   }
 }
+
+/* ── Termos do jogo ────────────────────────────────────────
+ * Reserva, Ordem, Sala, Emperium, Enfermaria e companhia
+ * ganham sempre o mesmo icone e a mesma cor, em qualquer
+ * lugar do tabuleiro. A cor vem do token do termo; o icone
+ * herda currentColor e acompanha o tema.
+ *
+ * A cor NUNCA e o unico portador do significado: a palavra
+ * continua escrita e o svg e aria-hidden. Quem nao distingue
+ * as cores le exatamente a mesma informacao.
+ * ========================================================= */
+.emp-termo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28em;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--termo);
+}
+.emp-termo[data-cor='ouro'] { --termo: var(--ouro); }
+.emp-termo[data-cor='cristal'] { --termo: var(--cristal); }
+.emp-termo[data-cor='sangue'] { --termo: var(--sangue); }
+.emp-termo[data-cor='combo'] { --termo: var(--combo); }
+.emp-termo[data-cor='tinta'] { --termo: var(--tinta); }
+.emp-termo[data-cor='tinta-fraca'] { --termo: var(--tinta-fraca); }
+
+.emp-termo-icone {
+  flex: none;
+  /* Alinhado pela base do texto, e nao pelo meio: o icone senta na
+     linha junto com a palavra em vez de flutuar acima dela. */
+  transform: translateY(0.12em);
+}
+
+/* Nos rotulos de estatistica (Gloria, Zeny, Reserva...) o icone entra
+   junto do texto em versalete, e a cor fica com o numero embaixo. */
+.emp-header em .emp-termo-icone,
+.emp-clan-stats em .emp-termo-icone,
+.emp-montagem em .emp-termo-icone {
+  margin-right: 0.34em;
+  transform: translateY(0.14em);
+  opacity: 0.85;
+}
+
+/* Em prosa corrida o termo nao precisa de negrito extra: ele ja se
+   destaca pelo icone e pela cor, e negrito demais vira ruido. */
+.emp-dica .emp-termo,
+.emp-gloss-nota .emp-termo,
+.emp-legenda-nota .emp-termo {
+  font-weight: 600;
+}

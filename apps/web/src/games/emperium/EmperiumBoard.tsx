@@ -16,6 +16,7 @@ import {
   type Marca,
 } from '@boardzando/contracts';
 import { useGame } from '../../net/store';
+import { IconeTermo, Termo } from './termos';
 import { GameChat } from '../../shell/GameChat';
 import './emperium.css';
 
@@ -287,7 +288,7 @@ function Glossario(): JSX.Element {
 
           <p className="emp-gloss-nota">
             O <b>X</b> é o número impresso na carta: <b>MURALHA 2</b> reduz 2. Palavras-chave
-            do mesmo clã <b>somam</b>.
+            do mesmo <Termo nome="cla" /> <b>somam</b>.
           </p>
 
           {kws.length > 0 && (
@@ -308,8 +309,10 @@ function Glossario(): JSX.Element {
             <>
               <h4>Marcas</h4>
               <p className="emp-gloss-nota">
-                Marcas vêm de <b>combos</b> e caem sempre sobre o <b>clã inimigo de maior
-                Poder</b> da sala. Duram só aquela sala, naquela rodada.
+                <Termo nome="marca" texto="Marcas" /> vêm de{' '}
+                <Termo nome="combo" texto="combos" /> e caem sempre sobre o clã inimigo de maior{' '}
+                <Termo nome="poder" /> da <Termo nome="sala" />. Duram só aquela sala, naquela
+                rodada.
               </p>
               <dl className="emp-gloss-lista marcas">
                 {marcas.map((m) => (
@@ -501,7 +504,8 @@ function Confronto({
                 </span>
                 {f.combo && (
                   <span className="emp-lut-combo" title={f.combo}>
-                    ⚡ {f.combo.replace(/^COMBO[^:]*:\s*/, '')}
+                    <IconeTermo nome="combo" tam={11} />{' '}
+                    {f.combo.replace(/^COMBO[^:]*:\s*/, '')}
                   </span>
                 )}
                 <span className="emp-lut-poder">
@@ -522,12 +526,13 @@ function Confronto({
                   )}
                   {f.marcas?.map((m) => (
                     <span key={m} className="emp-lut-marca">
-                      {m}
+                      <IconeTermo nome="marca" tam={11} /> {m}
                     </span>
                   ))}
                   {f.baixas.length > 0 && (
                     <span className="emp-lut-baixa">
-                      {f.baixas.length} {f.baixas.length === 1 ? 'baixa' : 'baixas'}
+                      <IconeTermo nome="baixa" tam={11} /> {f.baixas.length}{' '}
+                      {f.baixas.length === 1 ? 'baixa' : 'baixas'}
                     </span>
                   )}
                   {ehEmperium && dano > 0 && <span className="emp-lut-dano">{dano} de dano</span>}
@@ -706,7 +711,7 @@ export function EmperiumBoard() {
       {/* ── Cabeçalho ── */}
       <header className="emp-header">
         <div className="emp-round">
-          <em>Rodada</em>
+          <em><IconeTermo nome="rodada" />Rodada</em>
           <b>
             {view.round}
             <span>/6</span>
@@ -722,7 +727,7 @@ export function EmperiumBoard() {
           </b>
         </div>
         <div className="emp-emperium">
-          <em>Emperium</em>
+          <em><IconeTermo nome="emperium" />Emperium</em>
           <div className="emp-durab">
             <div
               className="emp-durab-fill"
@@ -737,7 +742,11 @@ export function EmperiumBoard() {
           <em>Escudo base</em>
           <b>{view.escudoBase}</b>
         </div>
-        {view.altarAberto && <span className="emp-trans">Altar aberto</span>}
+        {view.altarAberto && (
+          <span className="emp-trans">
+            <IconeTermo nome="altar" /> Altar aberto
+          </span>
+        )}
 
         {/* Os dois conceitos visuais, lado a lado para comparar em partida. */}
         <div className="emp-temas" role="group" aria-label="Conceito visual">
@@ -776,23 +785,23 @@ export function EmperiumBoard() {
               </div>
               <div className="emp-clan-stats">
                 <span>
-                  <em>Glória</em>
+                  <em><IconeTermo nome="gloria" />Glória</em>
                   <b>{c.gloria}</b>
                 </span>
                 <span>
-                  <em>Zeny</em>
+                  <em><IconeTermo nome="zeny" />Zeny</em>
                   <b>{c.zeny}z</b>
                 </span>
                 <span>
-                  <em>Reserva</em>
+                  <em><IconeTermo nome="reserva" />Reserva</em>
                   <b>{reserva}</b>
                 </span>
                 <span>
-                  <em>Enfermaria</em>
+                  <em><IconeTermo nome="enfermaria" />Enfermaria</em>
                   <b>{enfermaria}</b>
                 </span>
                 <span>
-                  <em>Ordens</em>
+                  <em><IconeTermo nome="ordem" />Ordens</em>
                   <b>{c.ordensRestantes}</b>
                 </span>
               </div>
@@ -836,7 +845,7 @@ export function EmperiumBoard() {
       {/* ── Castelo ── */}
       <section className="emp-castelo">
         <div className="emp-secao-aba">
-          <span aria-hidden="true">🏰</span> Castelo
+          <IconeTermo nome="sala" tam={11} /> Castelo
         </div>
         {/* Duas colunas: as salas ocupam a largura que precisam e a legenda
             preenche a faixa vazia à direita, em vez de empurrar tudo para baixo. */}
@@ -901,7 +910,12 @@ export function EmperiumBoard() {
                     </div>
                     {(r.guardioesDefensor > 0 || r.guarnicaoFixa > 0) && (
                       <div className="emp-sala-guarda">
-                        {r.guardioesDefensor > 0 && `${r.guardioesDefensor} guardião(ões)`}
+                        {r.guardioesDefensor > 0 && (
+                          <>
+                            <IconeTermo nome="guardiao" tam={11} /> {r.guardioesDefensor}{' '}
+                            {r.guardioesDefensor === 1 ? 'guardião' : 'guardiões'}
+                          </>
+                        )}
                         {r.guarnicaoFixa > 0 && ` guarnição ${r.guarnicaoFixa}`}
                       </div>
                     )}
@@ -972,7 +986,7 @@ export function EmperiumBoard() {
       {view.step === 'mercado' && (
         <section className="emp-painel mercado">
           <div className="emp-secao-aba">
-            <span aria-hidden="true">⚖️</span> Mercado
+            <IconeTermo nome="zeny" tam={11} /> Mercado
           </div>
           <h3>
             Mercado — {minhaVezMercado ? 'sua vez' : `vez de ${nomeDe(view.jogadorDoMercado)}`}
@@ -1216,7 +1230,7 @@ export function EmperiumBoard() {
       {view.step === 'comprometimento' && (
         <section className="emp-painel reserva">
           <div className="emp-secao-aba">
-            <span aria-hidden="true">⚔️</span> Reserva e comprometimento
+            <IconeTermo nome="reserva" tam={11} /> Reserva e comprometimento
           </div>
           <h3>
             Comprometimento — {jaConfirmei ? 'aguardando os outros clãs' : 'monte sua investida'}
@@ -1228,17 +1242,20 @@ export function EmperiumBoard() {
           {!jaConfirmei && (
             <>
               <p className="emp-dica">
-                Escolha personagens da Reserva, uma sala e uma Ordem. Você tem 4 Ordens e cada uma
+                Escolha personagens da <Termo nome="reserva" />, uma <Termo nome="sala" /> e uma{' '}
+                <Termo nome="ordem" />. Você tem 4 Ordens e cada uma
                 só vale uma vez por rodada — comprometer em quatro salas significa gastar Resguardo
                 onde você queria Investida.
               </p>
               <p className="emp-dica">
                 <b>Toda sala do castelo é alcançável.</b> Ir além da sua linha de frente é uma{' '}
-                <b>Marcha Forçada</b>: você chega disperso, a −{view.marchaPenalidade ?? 2} de Poder
-                por sala de distância. Tomar uma sala aproxima a linha e barateia a próxima.
+                <Termo nome="marcha" />: −{view.marchaPenalidade ?? 2} de <Termo nome="poder" />
+                por sala de distância. Tomar uma sala aproxima a linha e barateia a próxima. — <i>O grupo se desorganizou para ir o mais rápido possível marchando para frente</i>
               </p>
 
-              <h4>Sua Reserva</h4>
+              <h4>
+                <IconeTermo nome="reserva" /> Sua Reserva
+              </h4>
               <div className="emp-fileira-cartas">
                 {disponiveis.map((c) => {
                   const def = CHARACTER_BY_ID.get(c.defId);
@@ -1266,11 +1283,11 @@ export function EmperiumBoard() {
 
               <div className="emp-montagem">
                 <div>
-                  <em>Sala</em>
+                  <em><IconeTermo nome="sala" />Sala</em>
                   <b>{slotAlvo ? (infoDaSala(view.rooms[slotAlvo]!.tileId).nome) : '—'}</b>
                 </div>
                 <div>
-                  <em>Marcha</em>
+                  <em><IconeTermo nome="marcha" />Marcha</em>
                   <b className={slotAlvo && (view.distanciaMarcha?.[slotAlvo] ?? 0) > 0 ? 'penal' : ''}>
                     {!slotAlvo
                       ? '—'
@@ -1337,7 +1354,8 @@ export function EmperiumBoard() {
                   </b>{' '}
                   e você selecionou {selecionados.length}. Tire{' '}
                   {selecionados.length - limiteDoAlvo}, ou mande sob a Ordem{' '}
-                  <b>Cerco</b> — é a única que ignora o limite, ao custo de −1 de Poder.
+                  <b>Cerco</b> — é a única <Termo nome="ordem" texto="Ordem" /> que ignora o
+                  limite, ao custo de −1 de <Termo nome="poder" />.
                 </p>
               )}
 
@@ -1411,7 +1429,7 @@ export function EmperiumBoard() {
       {view.ultimaResolucao && view.ultimaResolucao.length > 0 && (
         <section className="emp-painel resolucao">
           <div className="emp-secao-aba">
-            <span aria-hidden="true">🔥</span> Resolução
+            <IconeTermo nome="poder" tam={11} /> Resolução
           </div>
           <h3>
             O portão se abriu
