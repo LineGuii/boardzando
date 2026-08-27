@@ -1406,3 +1406,40 @@ describe('EmperiumGame — quem e o dono do castelo', () => {
     expect(abrir(undefined).log[0]).toContain('sorteado');
   });
 });
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+describe('EmperiumGame — PRESO nao premia quem se resguardou', () => {
+  it('so tira o bonus POSITIVO da Ordem, como a Emboscada', () => {
+    // Monge Corpo de Aco: COMBO -> o maior cla inimigo fica PRESO.
+    const carrasco = () => makeClan('ana', ['mon-aco', 'cav-bb', 'cav-bb']);
+    const alvo = () => makeClan('bruno', ['mon-combo']);
+
+    const state = (c: Clan, b: Clan) =>
+      makeState({ ana: c, bruno: b }, { tileId: 'sala-corredor', castleOwnerId: 'carla' });
+
+    const rodar = (ordemDoAlvo: OrderId, comCombo: boolean) => {
+      const c = carrasco();
+      const b = alvo();
+      const res = resolveRoom(state(c, b), 'b1', [
+        {
+          playerId: 'ana',
+          commitment: {
+            slot: 'b1',
+            charInstIds: ids(c),
+            ordem: 'cerco',
+            marcha: 0,
+            combo: comCombo ? ids(c)[0] : undefined,
+          },
+        },
+        { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(b), ordem: ordemDoAlvo, marcha: 0 } },
+      ]);
+      return res.clas.find((f) => f.playerId === 'bruno')!;
+    };
+
+    // Investida: PRESO tira os +3.
+    expect(rodar('investida', false).poderBruto - rodar('investida', true).poderBruto).toBe(3);
+    // Resguardo: o -2 dele NAO e devolvido. Marcar nao pode fortalecer o alvo.
+    expect(rodar('resguardo', true).poderBruto).toBe(rodar('resguardo', false).poderBruto);
+  });
+});

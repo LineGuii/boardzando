@@ -399,7 +399,10 @@ function applyCombos(factions: Faction[], zenyDe: (p: PlayerId) => number): void
   // Consequencias das marcas.
   for (const f of factions) {
     if (f.marcas.has('exposto')) f.muralha = 0;
-    if (f.marcas.has('preso')) {
+    if (f.marcas.has('preso') && f.bonusOrdem > 0) {
+      // So o bonus POSITIVO, pelo mesmo motivo da Emboscada: prender quem
+      // estava se resguardando devolvia o -2 dele: marcar o inimigo o
+      // deixava mais forte.
       f.poderBruto -= f.bonusOrdem;
       f.bonusOrdem = 0;
     }

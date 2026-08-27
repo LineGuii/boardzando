@@ -3,11 +3,17 @@ import {
   CHARACTER_BY_ID,
   CONSUMABLE_BY_ID,
   EQUIP_BY_ID,
+  KEYWORD_DESC,
+  KEYWORD_LABEL,
+  MARCA_DESC,
+  MARCA_LABEL,
   TRANSCENDENCIA_BY_ID,
   caminhosDaClasse,
   rotuloKeyword,
   type CharacterDef,
   type Keyword,
+  type KeywordName,
+  type Marca,
 } from '@boardzando/contracts';
 import { useGame } from '../../net/store';
 import { GameChat } from '../../shell/GameChat';
@@ -228,6 +234,101 @@ function lerTema(): Tema {
     /* sem localStorage (modo privado): usa o padrão */
   }
   return TEMA_PADRAO;
+}
+
+/* ── Glossário ───────────────────────────────────────────────────────────── */
+
+/**
+ * As 15 palavras-chave e as 3 marcas, com o que cada uma faz.
+ *
+ * Comeca fechado: quem ja sabe nao precisa ver isso toda rodada. Mas fica a um
+ * clique de distancia dentro do proprio tabuleiro, porque a alternativa e
+ * abrir o manual num segundo monitor — e ninguem faz isso no meio de uma
+ * partida. O texto vem dos contratos, o mesmo que o manual usa.
+ */
+function Glossario(): JSX.Element {
+  const [aberto, setAberto] = useState(false);
+  const [busca, setBusca] = useState('');
+
+  const alvo = busca.trim().toLowerCase();
+  const casa = (rotulo: string, desc: string) =>
+    alvo === '' || rotulo.toLowerCase().includes(alvo) || desc.toLowerCase().includes(alvo);
+
+  const kws = (Object.keys(KEYWORD_LABEL) as KeywordName[]).filter((k) =>
+    casa(KEYWORD_LABEL[k], KEYWORD_DESC[k]),
+  );
+  const marcas = (Object.keys(MARCA_LABEL) as Marca[]).filter((m) =>
+    casa(MARCA_LABEL[m], MARCA_DESC[m]),
+  );
+
+  return (
+    <section className={`emp-glossario ${aberto ? 'aberto' : ''}`}>
+      <button
+        type="button"
+        className="emp-gloss-toggle"
+        onClick={() => setAberto((v) => !v)}
+        aria-expanded={aberto}
+      >
+        <span className="emp-gloss-seta" aria-hidden="true">
+          {aberto ? '▾' : '▸'}
+        </span>
+        <span className="emp-gloss-titulo">📜 Glossário — palavras-chave e marcas</span>
+        <span className="emp-gloss-contagem">15 + 3</span>
+      </button>
+
+      {aberto && (
+        <div className="emp-gloss-corpo">
+          <input
+            className="emp-gloss-busca"
+            placeholder="Filtrar por nome ou efeito…"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
+
+          <p className="emp-gloss-nota">
+            O <b>X</b> é o número impresso na carta: <b>MURALHA 2</b> reduz 2. Palavras-chave
+            do mesmo clã <b>somam</b>.
+          </p>
+
+          {kws.length > 0 && (
+            <>
+              <h4>Palavras-chave</h4>
+              <dl className="emp-gloss-lista">
+                {kws.map((k) => (
+                  <div key={k}>
+                    <dt>{KEYWORD_LABEL[k]}</dt>
+                    <dd>{KEYWORD_DESC[k]}</dd>
+                  </div>
+                ))}
+              </dl>
+            </>
+          )}
+
+          {marcas.length > 0 && (
+            <>
+              <h4>Marcas</h4>
+              <p className="emp-gloss-nota">
+                Marcas vêm de <b>combos</b> e caem sempre sobre o <b>clã inimigo de maior
+                Poder</b> da sala. Duram só aquela sala, naquela rodada.
+              </p>
+              <dl className="emp-gloss-lista marcas">
+                {marcas.map((m) => (
+                  <div key={m}>
+                    <dt>{MARCA_LABEL[m]}</dt>
+                    <dd>{MARCA_DESC[m]}</dd>
+                  </div>
+                ))}
+              </dl>
+            </>
+          )}
+
+          {kws.length === 0 && marcas.length === 0 && (
+            <p className="emp-vazio">Nada com “{busca}”.</p>
+          )}
+        </div>
+      )}
+    </section>
+  );
 }
 
 /* ── Carta de personagem ─────────────────────────────────────────────────── */
@@ -571,6 +672,18 @@ export function EmperiumBoard() {
       /* preferência não persiste, mas a partida continua */
     }
   };
+
+  /**
+   * O limite da sala mirada e o que ele significa para a selecao atual.
+   *
+   * O limite existia so no servidor: voce montava cinco personagens, mirava o
+   * Corredor, clicava em confirmar e o move voltava recusado sem explicacao.
+   * Agora a conta aparece antes.
+   */
+  const limiteDoAlvo = slotAlvo ? infoDaSala(view.rooms[slotAlvo]!.tileId).limite : 0;
+  const cercoLevanta = ordemAlvo === 'cerco';
+  const estouraLimite =
+    limiteDoAlvo > 0 && !cercoLevanta && selecionados.length > limiteDoAlvo;
 
   /** Quem largou monte de bruços nesta sala, e com quantas cartas. */
   const montesDaSala = (slot: RoomSlot) => {
@@ -1168,7 +1281,22 @@ export function EmperiumBoard() {
                 </div>
                 <div>
                   <em>Selecionados</em>
-                  <b>{selecionados.length}</b>
+                  <b className={estouraLimite ? 'penal' : ''}>{selecionados.length}</b>
+                </div>
+                <div>
+                  <em>Cabem aqui</em>
+                  <b
+                    className={estouraLimite ? 'penal' : ''}
+                    title="Personagens por clã nesta sala. O Cerco ignora o limite."
+                  >
+                    {!slotAlvo
+                      ? '—'
+                      : limiteDoAlvo === 0
+                        ? 'sem limite'
+                        : cercoLevanta
+                          ? `${limiteDoAlvo} · Cerco ignora`
+                          : `${selecionados.length}/${limiteDoAlvo}`}
+                  </b>
                 </div>
                 <div className="emp-ordens">
                   {(['investida', 'cerco', 'emboscada', 'resguardo'] as OrderId[]).map((o) => (
@@ -1187,12 +1315,31 @@ export function EmperiumBoard() {
                 <button
                   type="button"
                   className="emp-btn"
-                  disabled={!slotAlvo || !ordemAlvo || selecionados.length === 0}
+                  disabled={
+                    !slotAlvo || !ordemAlvo || selecionados.length === 0 || estouraLimite
+                  }
+                  title={
+                    estouraLimite
+                      ? `${infoDaSala(view.rooms[slotAlvo as RoomSlot]!.tileId).nome} comporta ${limiteDoAlvo} por clã. Tire ${selecionados.length - limiteDoAlvo} ou use a Ordem Cerco.`
+                      : undefined
+                  }
                   onClick={adicionarAoRascunho}
                 >
                   Adicionar investida
                 </button>
               </div>
+
+              {estouraLimite && (
+                <p className="emp-dica alerta">
+                  <b>
+                    {infoDaSala(view.rooms[slotAlvo as RoomSlot]!.tileId).nome} comporta{' '}
+                    {limiteDoAlvo} por clã
+                  </b>{' '}
+                  e você selecionou {selecionados.length}. Tire{' '}
+                  {selecionados.length - limiteDoAlvo}, ou mande sob a Ordem{' '}
+                  <b>Cerco</b> — é a única que ignora o limite, ao custo de −1 de Poder.
+                </p>
+              )}
 
               {/* Só UM combo dispara por sala — você declara qual. */}
               {combosDisponiveis.length > 0 && (
@@ -1307,6 +1454,8 @@ export function EmperiumBoard() {
           </div>
         </section>
       )}
+
+      <Glossario />
 
       <section className="emp-log">
         {view.log.slice(-14).map((l, i) => (

@@ -588,3 +588,50 @@ export const DONO_MODO_ROTULO: Readonly<Record<DonoDoCasteloModo, string>> = {
   anfitriao: 'Quem abriu a sala',
   escolhido: 'Eu escolho',
 };
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * GLOSSARIO — o que cada palavra-chave e cada marca faz
+ *
+ * Fica nos contratos, e nao no tabuleiro, porque a mesma frase precisa valer
+ * no jogo, no manual e no catalogo de cartas. Texto de regra duplicado em tres
+ * lugares e texto de regra que diverge.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+export const KEYWORD_DESC: Readonly<Record<KeywordName, string>> = {
+  alcance:
+    'Ataca de longe: só sofre baixa se você não tiver nenhum personagem com PROTEGER (ou DEVOÇÃO) vivo nesta sala.',
+  proteger: 'Absorve as baixas do seu clã antes de qualquer outro personagem seu.',
+  muralha:
+    'Reduz em X o Poder Total de CADA clã inimigo desta sala. Acumula: duas Muralhas 2 do seu clã viram 4 em cima de cada inimigo.',
+  perfurar: 'X pontos do Poder deste personagem ignoram a Muralha inimiga.',
+  rajada: '+X de Poder, só na primeira rodada em que este personagem entra nesta sala.',
+  elo: '+X de Poder para cada OUTRO personagem seu nesta sala.',
+  solo: '+X de Poder se este for o seu único personagem nesta sala.',
+  oculto:
+    'Na revelação, se o seu clã não estiver REVELADO, ele escorrega para uma sala vizinha sem pagar Marcha Forçada — e luta lá sem Ordem nenhuma.',
+  devocao:
+    'Ele se joga na frente: cada baixa que ele leva conta por X, e os outros ficam de pé. Cai antes até do PROTEGER.',
+  anular:
+    'Cancela a MAIOR palavra-chave inimiga da sala, qualquer que seja. Não se anula um ANULAR.',
+  restaurar: 'No fim da rodada, mova X personagens da Enfermaria para a Reserva.',
+  pilhar: 'Se vencer a sala, ganhe X zeny. Com X ≥ 3, ganhe também 1 equipamento caído.',
+  esgotar: 'Depois de resolver, vai para a Enfermaria — tendo vencido ou perdido.',
+  imitar:
+    'Copia até X palavras-chave do inimigo de maior Poder de carta nesta sala. Resolve ANTES do ANULAR, então copia o que ainda está de pé.',
+  mover: 'Encurta a Marcha Forçada em até X salas — você paga só o que passar disso.',
+};
+
+export const MARCA_LABEL: Readonly<Record<Marca, string>> = {
+  exposto: 'EXPOSTO',
+  preso: 'PRESO',
+  revelado: 'REVELADO',
+};
+
+export const MARCA_DESC: Readonly<Record<Marca, string>> = {
+  exposto:
+    'O clã marcado perde TODA a Muralha, não importa quantos personagens a carregavam. É o remédio contra uma parede empilhada — o ANULAR só corta a de um.',
+  preso:
+    'O clã marcado perde o bônus positivo da Ordem e não consegue usar PROTEGER nem DEVOÇÃO: travado, ninguém cobre ninguém. Quem se resguardou não ganha nada com isso — o −2 dele não é devolvido.',
+  revelado:
+    'O clã marcado perde OCULTO: o infiltrado fica preso na sala de origem e briga onde estava.',
+};

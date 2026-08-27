@@ -25,11 +25,11 @@
   --pedra-veio: rgba(139, 110, 60, 0.07);
   --tinta: #2B2114;
   --tinta-fraca: #6B5B3E;
-  --cristal: #0C6F68;
+  --cristal: #0A5F59;
   --cristal-fundo: #C9E4E0;
   --sangue: #8F2A1E;
   --sangue-fundo: #F0D6D0;
-  --ouro: #8A6212;
+  --ouro: #6F4E0D;
   --ouro-claro: #C9A227;
   --combo: #5E3B96;
   --fundo: linear-gradient(180deg, #F3EAD3 0%, #E4D7B4 100%);
@@ -1582,4 +1582,118 @@
   box-shadow:
     inset 3px 0 0 var(--ouro),
     inset 0 0 0 1px color-mix(in srgb, var(--cristal) 22%, transparent);
+}
+
+/* ── Glossário ─────────────────────────────────────────────
+ * Fechado por padrao: quem ja sabe nao ve. Aberto, e uma
+ * lista de definicoes com o rotulo alinhado a esquerda, que
+ * e como se le uma referencia — nao como se le prosa.
+ * ========================================================= */
+.emp-glossario {
+  border: 1px solid var(--pedra-borda);
+  border-radius: 4px;
+  background: var(--pedra);
+  overflow: hidden;
+}
+.emp-gloss-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 13px;
+  border: 0;
+  background: none;
+  color: var(--tinta);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+.emp-gloss-toggle:hover {
+  background: var(--pedra-alta);
+}
+.emp-gloss-seta {
+  font-size: 0.6rem;
+  color: var(--tinta-fraca);
+}
+.emp-gloss-titulo {
+  flex: 1;
+  font-family: var(--titulo);
+}
+.emp-gloss-contagem {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--ouro);
+  font-variant-numeric: tabular-nums;
+}
+.emp-gloss-corpo {
+  padding: 0 13px 13px;
+  border-top: 1px solid var(--pedra-borda);
+}
+.emp-gloss-busca {
+  width: 100%;
+  margin: 11px 0 9px;
+  padding: 6px 9px;
+  border-radius: 3px;
+  border: 1px solid var(--pedra-borda);
+  background: var(--pedra-alta);
+  color: var(--tinta);
+  font-family: inherit;
+  font-size: 0.72rem;
+}
+.emp-gloss-busca:focus {
+  outline: none;
+  border-color: var(--cristal);
+}
+.emp-gloss-nota {
+  margin: 0 0 9px;
+  font-size: 0.66rem;
+  line-height: 1.45;
+  color: var(--tinta-fraca);
+}
+.emp-gloss-lista {
+  margin: 0 0 4px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 7px 18px;
+}
+.emp-gloss-lista > div {
+  display: grid;
+  grid-template-columns: 6.2rem minmax(0, 1fr);
+  gap: 9px;
+  align-items: baseline;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--pedra-borda);
+}
+.emp-gloss-lista dt {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--cristal);
+}
+.emp-gloss-lista.marcas dt {
+  color: var(--sangue);
+}
+.emp-gloss-lista dd {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--tinta-fraca);
+}
+
+/* Aviso de limite estourado no comprometimento. */
+.emp-dica.alerta {
+  border-left: 3px solid var(--sangue);
+  background: var(--sangue-fundo);
+  padding: 7px 10px;
+  border-radius: 0 3px 3px 0;
+  color: var(--tinta);
+}
+
+@media (max-width: 560px) {
+  .emp-gloss-lista > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
 }
