@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   CHARACTER_BY_ID,
   CONSUMABLE_BY_ID,
@@ -7,6 +7,7 @@ import {
   KEYWORD_LABEL,
   MARCA_DESC,
   MARCA_LABEL,
+  MONSTER_BY_ID,
   TRANSCENDENCIA_BY_ID,
   caminhosDaClasse,
   rotuloKeyword,
@@ -343,6 +344,8 @@ function CharCard({
   selecionado,
   onClick,
   compacto,
+  detalhado,
+  onZoom,
 }: {
   def: CharacterDef;
   inst?: CharInstanceV;
@@ -350,6 +353,10 @@ function CharCard({
   selecionado?: boolean;
   onClick?: () => void;
   compacto?: boolean;
+  /** Abre as cartas de monstro encaixadas pelo nome, em vez de só contá-las. */
+  detalhado?: boolean;
+  /** Amplia a carta. Vira lupa no canto quando a carta já tem outro clique. */
+  onZoom?: () => void;
 }) {
   const equipsPoder =
     inst && clan
@@ -362,17 +369,48 @@ function CharCard({
 
   const trans = inst?.transcendencia ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia) : undefined;
 
+  // Sem outra acao, a propria carta amplia — é o gesto óbvio no celular.
+  // Com acao (selecionar no comprometimento), a lupa fica num canto para não
+  // roubar o toque de quem está montando a investida.
+  const acao = onClick ?? onZoom;
+  const precisaLupa = Boolean(onZoom) && Boolean(onClick);
+
   return (
     <button
       type="button"
       className={`emp-card ${selecionado ? 'sel' : ''} ${compacto ? 'compacto' : ''} ${
         trans ? 'transcendido' : ''
-      }`}
+      } ${detalhado ? 'detalhado' : ''}`}
       data-papel={def.papel}
-      onClick={onClick}
-      disabled={!onClick}
+      onClick={acao}
+      disabled={!acao}
     >
       <span className="emp-card-band" />
+      {precisaLupa && (
+        <span
+          className="emp-card-lupa"
+          role="button"
+          tabIndex={0}
+          aria-label={`Ampliar ${def.nome}`}
+          title="Ampliar"
+          onClick={(e) => {
+            e.stopPropagation();
+            onZoom?.();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.stopPropagation();
+              onZoom?.();
+            }
+          }}
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <circle cx="7" cy="7" r="4.6" />
+            <path d="M10.4 10.4 14 14M7 4.8v4.4M4.8 7h4.4" />
+          </svg>
+        </span>
+      )}
       {trans && <span className="emp-card-forma">{trans.forma}</span>}
       <span className="emp-card-nome">{def.nome}</span>
       <span className="emp-card-cls">{def.classe}</span>
@@ -415,7 +453,18 @@ function CharCard({
               <span key={id} className="emp-equip">
                 {eqDef.nome}
                 {eq.refino > 0 && <b> +{eq.refino}</b>}
-                {eq.encaixadas.length > 0 && <i> ◈{eq.encaixadas.length}</i>}
+                {eq.encaixadas.length > 0 &&
+                  (detalhado ? (
+                    <i>
+                      {' '}
+                      ◈{' '}
+                      {eq.encaixadas
+                        .map((mc) => MONSTER_BY_ID.get(mc)?.nome ?? mc)
+                        .join(', ')}
+                    </i>
+                  ) : (
+                    <i> ◈{eq.encaixadas.length}</i>
+                  ))}
               </span>
             );
           })}
@@ -426,6 +475,46 @@ function CharCard({
       )}
       {!compacto && <span className="emp-card-build">{trans ? trans.build : def.build}</span>}
     </button>
+  );
+}
+
+/* ── Carta ampliada ──────────────────────────────────────────────────────── */
+
+/**
+ * A carta em tamanho de leitura, sobre um véu.
+ *
+ * No desktop a carta já cresce sozinha ao passar o mouse (ver `.emp-card` no
+ * CSS), o que resolve a leitura rápida sem clique nenhum. Mas hover não existe
+ * no celular, então lá o toque abre isto — com botão de fechar, véu clicável e
+ * Esc, porque um jogador que abriu por engano precisa de mais de uma saída.
+ */
+function CartaAmpliada({
+  inst,
+  clan,
+  onFechar,
+}: {
+  inst: CharInstanceV;
+  clan: ClanV;
+  onFechar: () => void;
+}): JSX.Element | null {
+  const def = CHARACTER_BY_ID.get(inst.defId);
+  if (!def) return null;
+
+  return (
+    <div
+      className="emp-zoom-veu"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${def.nome}, ampliada`}
+      onClick={onFechar}
+    >
+      <div className="emp-zoom-palco" onClick={(e) => e.stopPropagation()}>
+        <CharCard def={def} inst={inst} clan={clan} detalhado />
+        <button type="button" className="emp-btn ghost emp-zoom-fechar" onClick={onFechar} autoFocus>
+          Fechar
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -577,6 +666,22 @@ export function EmperiumBoard() {
   const socket = useGame((s) => s.socket);
 
   const [tema, setTema] = useState<Tema>(lerTema);
+  /** playerId do clã com o elenco aberto. Um por vez: dois abertos empurram
+   *  o castelo para fora da tela, que é o que o painel existe para evitar. */
+  const [elencoAberto, setElencoAberto] = useState<string | null>(null);
+  /** A carta ampliada. Ver <CartaAmpliada>. */
+  const [zoom, setZoom] = useState<{ inst: CharInstanceV; clan: ClanV } | null>(null);
+
+  // Esc fecha a carta ampliada — é o que a tecla faz em qualquer diálogo.
+  useEffect(() => {
+    if (!zoom) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setZoom(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [zoom]);
+
   const [selecionados, setSelecionados] = useState<string[]>([]);
   const [slotAlvo, setSlotAlvo] = useState<RoomSlot | ''>('');
   const [ordemAlvo, setOrdemAlvo] = useState<OrderId | ''>('');
@@ -809,6 +914,16 @@ export function EmperiumBoard() {
               {/* A reserva de TODOS fica a mostra: quem esta de pe no clã alheio
                   e informacao publica, e e a leitura que decide onde atacar.
                   So o comprometimento e segredo. */}
+              <button
+                type="button"
+                className="emp-elenco-toggle"
+                onClick={() => setElencoAberto((v) => (v === p ? null : p))}
+                aria-expanded={elencoAberto === p}
+              >
+                <span aria-hidden="true">{elencoAberto === p ? '▾' : '▸'}</span>
+                {elencoAberto === p ? 'fechar o elenco' : 'ver o elenco completo'}
+              </button>
+
               <ul className="emp-reserva-mini">
                 {Object.values(c.chars).map((inst) => {
                   const def = CHARACTER_BY_ID.get(inst.defId);
@@ -837,6 +952,55 @@ export function EmperiumBoard() {
                   <li className="emp-rm-vazio">nenhum recrutado</li>
                 )}
               </ul>
+
+              {/* Reserva e Enfermaria na MESMA lista: são o mesmo elenco, e
+                  separá-los em duas abas obrigava a ir e voltar para contar
+                  quem estará de pé na rodada seguinte. Quem está na
+                  Enfermaria entra deitado, como carta virada na mesa. */}
+              {elencoAberto === p && (
+                <div className="emp-elenco">
+                  {Object.values(c.chars).map((inst) => {
+                    const def = CHARACTER_BY_ID.get(inst.defId);
+                    if (!def) return null;
+                    return (
+                      <div
+                        key={inst.instId}
+                        className="emp-elenco-slot"
+                        data-local={inst.local}
+                      >
+                        <CharCard
+                          def={def}
+                          inst={inst}
+                          clan={c}
+                          detalhado
+                          onZoom={() => setZoom({ inst, clan: c })}
+                        />
+                        <span className="emp-elenco-estado">
+                          {inst.local === 'enfermaria' && (
+                            <>
+                              <IconeTermo nome="enfermaria" tam={11} /> Enfermaria
+                              {inst.voltaNaRodada ? ` · volta na ${inst.voltaNaRodada}` : ''}
+                            </>
+                          )}
+                          {inst.local === 'comprometido' && (
+                            <>
+                              <IconeTermo nome="ordem" tam={11} /> comprometido
+                            </>
+                          )}
+                          {inst.local === 'reserva' && (
+                            <>
+                              <IconeTermo nome="reserva" tam={11} /> de pé
+                            </>
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {Object.keys(c.chars).length === 0 && (
+                    <p className="emp-vazio">Nenhum personagem recrutado ainda.</p>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
@@ -1267,6 +1431,7 @@ export function EmperiumBoard() {
                       inst={c}
                       clan={meuClan}
                       compacto
+                      onZoom={() => meuClan && setZoom({ inst: c, clan: meuClan })}
                       selecionado={selecionados.includes(c.instId)}
                       onClick={() =>
                         setSelecionados((s) =>
@@ -1471,6 +1636,10 @@ export function EmperiumBoard() {
             })}
           </div>
         </section>
+      )}
+
+      {zoom && (
+        <CartaAmpliada inst={zoom.inst} clan={zoom.clan} onFechar={() => setZoom(null)} />
       )}
 
       <Glossario />

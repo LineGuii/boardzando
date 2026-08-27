@@ -1747,3 +1747,241 @@
 .emp-legenda-nota .emp-termo {
   font-weight: 600;
 }
+
+/* ── Elenco expandido ──────────────────────────────────────
+ * Reserva e Enfermaria na MESMA lista, porque sao o mesmo
+ * elenco: separa-los em duas abas obrigava a ir e voltar
+ * para contar quem estaria de pe na rodada seguinte.
+ *
+ * As cartas tem TAMANHO FIXO aqui de proposito. Sem isso a
+ * de 90 graus nao teria como reservar espaco — girar um
+ * elemento nao muda o espaco que ele ocupa no fluxo, entao
+ * o vizinho passaria por cima dele. Com medida conhecida, o
+ * slot da Enfermaria simplesmente troca largura por altura.
+ * O que nao couber se le no zoom, que e para isso que ele existe.
+ * ========================================================= */
+
+.emp-elenco-toggle {
+  margin-top: 7px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--tinta-fraca);
+  font-family: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.emp-elenco-toggle:hover {
+  color: var(--cristal);
+}
+
+.emp-elenco {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--pedra-borda);
+}
+
+.emp-elenco-slot {
+  --carta-l: 150px;
+  --carta-a: 210px;
+  position: relative;
+  width: var(--carta-l);
+  height: calc(var(--carta-a) + 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.emp-elenco-slot .emp-card {
+  width: var(--carta-l);
+  height: var(--carta-a);
+  overflow: hidden;
+}
+
+.emp-elenco-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--tinta-fraca);
+  white-space: nowrap;
+}
+
+/* Enfermaria: a carta deita, como carta virada na mesa. O slot troca as
+   medidas para reservar o espaco que a carta girada realmente ocupa. */
+.emp-elenco-slot[data-local='enfermaria'] {
+  width: var(--carta-a);
+  height: calc(var(--carta-l) + 16px);
+}
+.emp-elenco-slot[data-local='enfermaria'] .emp-card {
+  transform: rotate(90deg);
+  transform-origin: center;
+  /* Depois de girar, o proprio elemento continua ocupando 150x210; o
+     translate recentra o desenho dentro do slot 210x150. */
+  margin: calc((var(--carta-l) - var(--carta-a)) / 2) calc((var(--carta-a) - var(--carta-l)) / 2);
+  opacity: 0.72;
+}
+.emp-elenco-slot[data-local='enfermaria'] .emp-elenco-estado {
+  color: var(--sangue);
+}
+.emp-elenco-slot[data-local='comprometido'] .emp-card {
+  border-style: dashed;
+}
+
+/* ── Zoom ──────────────────────────────────────────────────
+ * No ponteiro fino a carta cresce sozinha ao passar o mouse:
+ * leitura instantanea, zero clique. Onde nao ha hover — o
+ * celular — o toque abre o veu, que traz botao de fechar.
+ * ========================================================= */
+@media (hover: hover) and (pointer: fine) {
+  .emp-elenco-slot .emp-card:hover,
+  .emp-elenco-slot .emp-card:focus-visible {
+    transform: scale(1.45);
+    z-index: 30;
+    overflow: visible;
+    height: auto;
+    min-height: var(--carta-a);
+    box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.7);
+  }
+  /* A carta deitada endireita ao ampliar: ninguem le de lado. */
+  .emp-elenco-slot[data-local='enfermaria'] .emp-card:hover,
+  .emp-elenco-slot[data-local='enfermaria'] .emp-card:focus-visible {
+    transform: rotate(0deg) scale(1.45);
+    opacity: 1;
+  }
+  .emp-fileira-cartas .emp-card:hover,
+  .emp-fileira-cartas .emp-card:focus-visible {
+    transform: scale(1.28);
+    z-index: 30;
+    box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.7);
+  }
+  .emp-card {
+    transition: transform 130ms ease-out, box-shadow 130ms ease-out;
+  }
+}
+
+/* O contentor nao pode cortar a carta ampliada. */
+.emp-elenco,
+.emp-fileira-cartas {
+  overflow: visible;
+}
+
+/* Lupa: so aparece quando a carta ja tem outro clique. */
+.emp-card-lupa {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  border: 1px solid var(--pedra-borda);
+  background: var(--pedra);
+  color: var(--tinta-fraca);
+  cursor: zoom-in;
+  z-index: 2;
+}
+.emp-card-lupa svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.emp-card-lupa:hover,
+.emp-card-lupa:focus-visible {
+  color: var(--cristal);
+  border-color: var(--cristal);
+}
+/* No ponteiro fino a carta ja cresce no hover, entao a lupa so aparece
+   quando ela e realmente necessaria: ao focar pelo teclado. */
+@media (hover: hover) and (pointer: fine) {
+  .emp-card-lupa {
+    opacity: 0;
+  }
+  .emp-card:hover .emp-card-lupa,
+  .emp-card-lupa:focus-visible {
+    opacity: 1;
+  }
+}
+
+.emp-zoom-veu {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 6, 10, 0.72);
+  backdrop-filter: blur(2px);
+}
+.emp-zoom-palco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-height: 100%;
+}
+.emp-zoom-palco .emp-card {
+  width: min(78vw, 320px);
+  height: auto;
+  cursor: default;
+  font-size: 1.05rem;
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.85);
+}
+.emp-zoom-fechar {
+  min-width: 140px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emp-card {
+    transition: none !important;
+  }
+}
+
+/* ── Alvos de toque ────────────────────────────────────────
+ * Onde nao ha ponteiro fino, o dedo precisa de area: 20px de
+ * lupa e 31px de botao passam no mouse e falham no polegar.
+ * ========================================================= */
+@media (hover: none), (pointer: coarse) {
+  /* Alvo de 44px, que e o minimo confortavel para o polegar, mas com o
+     desenho pequeno: um quadradinho de 44px no canto comeria um quarto da
+     carta. A area invisivel e grande; o icone continua discreto. */
+  .emp-card-lupa {
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: none;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 6px 6px 0 0;
+  }
+  .emp-card-lupa svg {
+    width: 18px;
+    height: 18px;
+  }
+  .emp-zoom-fechar {
+    min-height: 46px;
+    font-size: 0.95rem;
+  }
+  /* No celular a carta ampliada ganha a largura util da tela. */
+  .emp-zoom-palco .emp-card {
+    width: min(88vw, 340px);
+  }
+}
