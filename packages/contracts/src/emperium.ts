@@ -553,3 +553,38 @@ export function buildConsumableDeck(): string[] {
 export function buildEquipmentDeck(): string[] {
   return EQUIPMENT.flatMap((e) => [e.id, e.id]);
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * OPCOES DA PARTIDA — quem defende o castelo
+ *
+ * Defender e o papel mais dificil e mais assimetrico do jogo: um contra
+ * todos, com renda maior e o Salao do Trono a favor. Sortear e o padrao
+ * porque e o mais justo com uma mesa que ainda esta aprendendo, mas quem ja
+ * conhece o jogo costuma querer decidir — o veterano defendendo contra tres
+ * novatos, ou o anfitriao assumindo o papel que exige mais atencao.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+export type DonoDoCasteloModo = 'sorteio' | 'anfitriao' | 'escolhido';
+
+export interface EmperiumOptions {
+  /**
+   * Como o dono do castelo e definido no comeco da partida.
+   *
+   * - `sorteio`: a fortaleza cai para quem o destino escolher.
+   * - `anfitriao`: quem abriu a sala defende.
+   * - `escolhido`: o anfitriao aponta o defensor em `donoDoCasteloId`.
+   */
+  donoDoCastelo: DonoDoCasteloModo;
+  /** So vale com `donoDoCastelo: 'escolhido'`. Um playerId da sala. */
+  donoDoCasteloId?: string;
+}
+
+export const EMPERIUM_DEFAULT_OPTIONS: EmperiumOptions = {
+  donoDoCastelo: 'sorteio',
+};
+
+export const DONO_MODO_ROTULO: Readonly<Record<DonoDoCasteloModo, string>> = {
+  sorteio: 'Sorteio',
+  anfitriao: 'Quem abriu a sala',
+  escolhido: 'Eu escolho',
+};

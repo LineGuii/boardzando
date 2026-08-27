@@ -1,8 +1,21 @@
-import type { HuesOptions } from '@boardzando/contracts';
-import { HUES_DEFAULT_OPTIONS } from '@boardzando/contracts';
+import type { EmperiumOptions, HuesOptions } from '@boardzando/contracts';
+import {
+  DONO_MODO_ROTULO,
+  EMPERIUM_DEFAULT_OPTIONS,
+  HUES_DEFAULT_OPTIONS,
+} from '@boardzando/contracts';
+import { useGame } from '../net/store';
 
 /** Games que expoem um painel de opcoes (para a UI decidir se oferece "trocar"). */
-const GAMES_WITH_OPTIONS = new Set(['hues', 'ito', 'pato', 'manada', 'flip7', 'stopconnect']);
+const GAMES_WITH_OPTIONS = new Set([
+  'hues',
+  'ito',
+  'pato',
+  'manada',
+  'flip7',
+  'stopconnect',
+  'emperium',
+]);
 
 /** Este jogo tem opcoes configuraveis? (usado no reinicio com troca de setup) */
 export function gameHasOptions(gameId: string): boolean {
@@ -23,6 +36,14 @@ export function GameOptionsPanel({
   value: unknown;
   onChange: (next: unknown) => void;
 }): JSX.Element | null {
+  if (gameId === 'emperium') {
+    return (
+      <EmperiumOptionsPanel
+        value={(value ?? EMPERIUM_DEFAULT_OPTIONS) as EmperiumOptions}
+        onChange={onChange as (v: EmperiumOptions) => void}
+      />
+    );
+  }
   if (gameId === 'hues') {
     return (
       <HuesOptionsPanel
@@ -171,6 +192,97 @@ interface ManadaOptions {
   targetCows: 5 | 8 | 11;
 }
 const MANADA_DEFAULT_OPTIONS: ManadaOptions = { targetCows: 8 };
+
+/**
+ * Quem defende o castelo.
+ *
+ * Defender e o papel mais assimetrico do jogo — um contra todos, com renda
+ * maior e o Salao do Trono a favor — entao quem senta na cadeira importa.
+ * Sortear e o padrao por ser o mais justo com uma mesa que esta aprendendo;
+ * quem ja conhece costuma querer decidir.
+ *
+ * "Quem abriu a sala" e resolvido AQUI para um playerId concreto, porque o
+ * cliente sabe quem e o host e o servidor nao — la o `setup` so recebe a
+ * lista de jogadores. O servidor confere se o id esta mesmo na mesa e cai no
+ * sorteio se nao estiver.
+ */
+function EmperiumOptionsPanel({
+  value,
+  onChange,
+}: {
+  value: EmperiumOptions;
+  onChange: (next: EmperiumOptions) => void;
+}): JSX.Element {
+  const room = useGame((s) => s.room);
+  const jogadores = room?.players ?? [];
+  const hostId = room?.hostId;
+  const nomeDoHost = jogadores.find((j) => j.id === hostId)?.name;
+
+  const escolher = (modo: EmperiumOptions['donoDoCastelo']) => {
+    if (modo === 'sorteio') return onChange({ donoDoCastelo: 'sorteio' });
+    if (modo === 'anfitriao') {
+      return onChange({ donoDoCastelo: 'anfitriao', donoDoCasteloId: hostId });
+    }
+    // "Eu escolho" ja entra com alguem selecionado, para nao ficar num estado
+    // pela metade que cairia no sorteio sem o host perceber.
+    onChange({
+      donoDoCastelo: 'escolhido',
+      donoDoCasteloId: value.donoDoCasteloId ?? jogadores[0]?.id,
+    });
+  };
+
+  return (
+    <div className="shell-options-panel">
+      <h3>Opções da partida (Guerra do Emperium) 🏰</h3>
+      <div className="shell-options-field">
+        <label className="shell-label">Quem é o dono do castelo</label>
+        <div className="shell-options-buttons">
+          {(['sorteio', 'anfitriao', 'escolhido'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              className={`shell-options-btn ${value.donoDoCastelo === m ? 'active' : ''}`}
+              onClick={() => escolher(m)}
+            >
+              {m === 'sorteio' && '🎲 '}
+              {m === 'anfitriao' && '👑 '}
+              {m === 'escolhido' && '🫵 '}
+              {DONO_MODO_ROTULO[m]}
+            </button>
+          ))}
+        </div>
+
+        {value.donoDoCastelo === 'escolhido' && (
+          <div className="shell-options-buttons" style={{ marginTop: 8 }}>
+            {jogadores.map((j) => (
+              <button
+                key={j.id}
+                type="button"
+                className={`shell-options-btn ${value.donoDoCasteloId === j.id ? 'active' : ''}`}
+                onClick={() => onChange({ donoDoCastelo: 'escolhido', donoDoCasteloId: j.id })}
+              >
+                {j.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <p className="shell-hint">
+          {value.donoDoCastelo === 'sorteio' &&
+            'A fortaleza cai para quem o destino escolher — ninguém sabe até a partida começar.'}
+          {value.donoDoCastelo === 'anfitriao' &&
+            `${nomeDoHost ?? 'Quem abriu a sala'} defende. É o papel que exige mais atenção: um contra todos.`}
+          {value.donoDoCastelo === 'escolhido' &&
+            'Aponte quem senta na cadeira. Bom para pôr o veterano da mesa para defender contra os novatos.'}
+        </p>
+        <p className="shell-hint">
+          O defensor começa com mais zeny, um personagem a mais, guardiões nas salas
+          internas e +2 no Salão do Trono — mas joga sozinho contra todo mundo.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function ManadaOptionsPanel({
   value,

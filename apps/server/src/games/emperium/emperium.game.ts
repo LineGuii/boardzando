@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import type { GameContext, GameDefinition, GameOverResult, PlayerId } from '@boardzando/contracts';
-import { INVALID_MOVE } from '@boardzando/contracts';
+import {
+  EMPERIUM_DEFAULT_OPTIONS,
+  INVALID_MOVE,
+  type DonoDoCasteloModo,
+  type EmperiumOptions,
+} from '@boardzando/contracts';
 import { GamePlugin } from '../../core/registry/game-plugin.decorator';
 import {
   DECK_I,
@@ -45,6 +50,35 @@ import {
   type RoomState,
 } from './emperium.state';
 
+/** Como o defensor foi definido, para o log da rodada 1 dizer. */
+const MOTIVO: Readonly<Record<DonoDoCasteloModo, string>> = {
+  sorteio: 'sorteado',
+  anfitriao: 'abriu a sala',
+  escolhido: 'escolhido pelo anfitriao',
+};
+
+/**
+ * Sanitiza `setupData` num EmperiumOptions valido.
+ *
+ * O cliente resolve "anfitriao" para um playerId concreto antes de enviar, e
+ * o servidor so confia no id se ele estiver mesmo na mesa. Um id ausente,
+ * invalido ou de alguem que saiu antes do start cai no sorteio — a partida
+ * comeca de qualquer jeito, porque nao ha ninguem para perguntar aqui.
+ */
+function readOptions(raw: unknown, jogadores: readonly PlayerId[]): EmperiumOptions {
+  const o = (raw ?? {}) as Partial<EmperiumOptions>;
+  const modo: DonoDoCasteloModo =
+    o.donoDoCastelo === 'anfitriao' || o.donoDoCastelo === 'escolhido'
+      ? o.donoDoCastelo
+      : EMPERIUM_DEFAULT_OPTIONS.donoDoCastelo;
+
+  if (modo === 'sorteio') return { donoDoCastelo: 'sorteio' };
+
+  const id = typeof o.donoDoCasteloId === 'string' ? o.donoDoCasteloId : undefined;
+  if (!id || !jogadores.includes(id)) return { donoDoCastelo: 'sorteio' };
+  return { donoDoCastelo: modo, donoDoCasteloId: id };
+}
+
 /**
  * Guerra do Emperium — board game original inspirado na War of Emperium do
  * Ragnarok Online. Cla rivais cercam um castelo; quem quebra o Emperium o toma,
@@ -65,14 +99,15 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
   readonly minPlayers = 3;
   readonly maxPlayers = 5;
 
-  setup(ctx: GameContext): EmperiumState {
+  setup(ctx: GameContext, setupData?: unknown): EmperiumState {
     const rng = ctx.random;
     const order = [...ctx.players];
     const atacantes = Math.min(4, Math.max(2, order.length - 1));
     const scaling = SCALING[atacantes] ?? SCALING[3]!;
 
-    // O defensor e sorteado entre os jogadores.
-    const defenderId = rng.pick(order);
+    // Quem defende o castelo. Ver `EmperiumOptions` nos contratos.
+    const options = readOptions(setupData, order);
+    const defenderId = options.donoDoCasteloId ?? rng.pick(order);
 
     const slots: RoomSlot[] = scaling.linear ? [...LINEAR_SLOTS] : [...ROOM_SLOTS];
     const adjacency = scaling.linear ? LINEAR_ADJACENCY : ADJACENCY;
@@ -157,7 +192,9 @@ export class EmperiumGame implements GameDefinition<EmperiumState, EmperiumMoveP
       confirmados: [],
       emperiumCubos: {},
       emperiumDurabilidade: scaling.durabilidade,
-      log: [`${defenderId} defende o castelo. Os demais atacam.`],
+      log: [
+        `${defenderId} defende o castelo (${MOTIVO[options.donoDoCastelo]}). Os demais atacam.`,
+      ],
       ultimaResolucao: null,
       finished: false,
       nextInstId,

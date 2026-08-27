@@ -1303,3 +1303,56 @@ describe('EmperiumGame — MURALHA acumula', () => {
     expect(r.de('ana').poderFinal).toBe(0);
   });
 });
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+describe('EmperiumGame — quem e o dono do castelo', () => {
+  const abrir = (options?: unknown, seed = 7) =>
+    GameInstance.create(new EmperiumGame(), PLAYERS, seed, options).snapshot.state;
+
+  it('sem opcao nenhuma, sorteia — e o sorteio e reprodutivel pela seed', () => {
+    const a = abrir(undefined, 11);
+    const b = abrir(undefined, 11);
+    expect(PLAYERS).toContain(a.defenderId);
+    expect(a.defenderId).toBe(b.defenderId);
+  });
+
+  it('respeita o defensor escolhido', () => {
+    const s = abrir({ donoDoCastelo: 'escolhido', donoDoCasteloId: 'dora' });
+    expect(s.defenderId).toBe('dora');
+    expect(s.castleOwnerId).toBe('dora');
+  });
+
+  it('o defensor escolhido comeca com as vantagens do dono', () => {
+    const s = abrir({ donoDoCastelo: 'escolhido', donoDoCasteloId: 'carla' });
+    // A renda da rodada 1 ja entrou no setup, entao o que importa e a
+    // VANTAGEM do dono sobre os atacantes, nao o numero absoluto.
+    expect(s.clans['carla']!.zeny).toBeGreaterThan(s.clans['ana']!.zeny);
+    expect(Object.keys(s.clans['carla']!.chars)).toHaveLength(3);
+    expect(Object.keys(s.clans['ana']!.chars)).toHaveLength(2);
+    // Todas as salas fora o Emperium comecam sob controle dele.
+    for (const slot of s.slots) {
+      if (slot === 'emperium') continue;
+      expect(s.rooms[slot]!.controlador).toBe('carla');
+    }
+  });
+
+  it('id de quem nao esta na mesa cai no sorteio, sem quebrar o start', () => {
+    const s = abrir({ donoDoCastelo: 'escolhido', donoDoCasteloId: 'fantasma' });
+    expect(PLAYERS).toContain(s.defenderId);
+    expect(s.log[0]).toContain('sorteado');
+  });
+
+  it('modo anfitriao usa o id que o cliente resolveu', () => {
+    const s = abrir({ donoDoCastelo: 'anfitriao', donoDoCasteloId: 'bruno' });
+    expect(s.defenderId).toBe('bruno');
+    expect(s.log[0]).toContain('abriu a sala');
+  });
+
+  it('o log da rodada 1 diz por que aquele jogador defende', () => {
+    expect(abrir({ donoDoCastelo: 'escolhido', donoDoCasteloId: 'dora' }).log[0]).toContain(
+      'escolhido pelo anfitriao',
+    );
+    expect(abrir(undefined).log[0]).toContain('sorteado');
+  });
+});
