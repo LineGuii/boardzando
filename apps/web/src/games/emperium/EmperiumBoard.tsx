@@ -186,6 +186,45 @@ const ORDEM_INFO: Record<OrderId, { nome: string; efeito: string }> = {
 
 const kwLabel = (k: Keyword): string => rotuloKeyword(k);
 
+/* ── Os dois conceitos visuais ───────────────────────────────────────────── */
+
+/**
+ * Duas leituras do mesmo mundo, para escolher uma e descartar a outra.
+ *
+ * "Pergaminho" é a carta de guilda: pergaminho envelhecido, tinta sépia, ouro
+ * folheado e granada — a paleta das janelas do Ragnarok clássico e de um
+ * documento medieval. "Cerco" é o castelo à noite: pedra ameixa quase preta,
+ * tocha, brasa e o brilho frio do Emperium.
+ *
+ * As duas guardam o ciano do cristal, que é a identidade do jogo, e as duas
+ * puxam ouro para a Glória e vermelho para o sangue.
+ */
+type Tema = 'pergaminho' | 'cerco';
+
+const TEMAS: Record<Tema, { nome: string; descricao: string }> = {
+  pergaminho: {
+    nome: 'Pergaminho',
+    descricao: 'Carta de guilda: pergaminho, tinta sépia, ouro folheado e granada',
+  },
+  cerco: {
+    nome: 'Cerco',
+    descricao: 'O castelo à noite: pedra escura, tocha, brasa e o brilho do cristal',
+  },
+};
+
+const TEMA_PADRAO: Tema = 'cerco';
+const TEMA_CHAVE = 'emperium:tema';
+
+function lerTema(): Tema {
+  try {
+    const v = window.localStorage.getItem(TEMA_CHAVE);
+    if (v === 'pergaminho' || v === 'cerco') return v;
+  } catch {
+    /* sem localStorage (modo privado): usa o padrão */
+  }
+  return TEMA_PADRAO;
+}
+
 /* ── Carta de personagem ─────────────────────────────────────────────────── */
 
 function CharCard({
@@ -426,6 +465,7 @@ export function EmperiumBoard() {
   const room = useGame((s) => s.room);
   const socket = useGame((s) => s.socket);
 
+  const [tema, setTema] = useState<Tema>(lerTema);
   const [selecionados, setSelecionados] = useState<string[]>([]);
   const [slotAlvo, setSlotAlvo] = useState<RoomSlot | ''>('');
   const [ordemAlvo, setOrdemAlvo] = useState<OrderId | ''>('');
@@ -518,6 +558,15 @@ export function EmperiumBoard() {
 
   const totalCubos = Object.values(view.emperiumCubos).reduce((a, b) => a + b, 0);
 
+  const trocarTema = (t: Tema) => {
+    setTema(t);
+    try {
+      window.localStorage.setItem(TEMA_CHAVE, t);
+    } catch {
+      /* preferência não persiste, mas a partida continua */
+    }
+  };
+
   /** Quem largou monte de bruços nesta sala, e com quantas cartas. */
   const montesDaSala = (slot: RoomSlot) => {
     const out: { playerId: string; quantidade: number }[] = [];
@@ -535,7 +584,7 @@ export function EmperiumBoard() {
     : [['emperium'], ['trono'], ['b2', 'c2'], ['b1', 'c1'], ['portao']];
 
   return (
-    <div className="emp-board">
+    <div className="emp-board" data-tema={tema}>
       {/* ── Cabeçalho ── */}
       <header className="emp-header">
         <div className="emp-round">
@@ -571,6 +620,22 @@ export function EmperiumBoard() {
           <b>{view.escudoBase}</b>
         </div>
         {view.altarAberto && <span className="emp-trans">Altar aberto</span>}
+
+        {/* Os dois conceitos visuais, lado a lado para comparar em partida. */}
+        <div className="emp-temas" role="group" aria-label="Conceito visual">
+          {(Object.keys(TEMAS) as Tema[]).map((t) => (
+            <button
+              key={t}
+              type="button"
+              className={`emp-tema-btn ${tema === t ? 'ativo' : ''}`}
+              onClick={() => trocarTema(t)}
+              title={TEMAS[t].descricao}
+              aria-pressed={tema === t}
+            >
+              {TEMAS[t].nome}
+            </button>
+          ))}
+        </div>
       </header>
 
       {/* ── Clãs ── */}
@@ -652,6 +717,13 @@ export function EmperiumBoard() {
 
       {/* ── Castelo ── */}
       <section className="emp-castelo">
+        <div className="emp-secao-aba">
+          <span aria-hidden="true">🏰</span> Castelo
+        </div>
+        {/* Duas colunas: as salas ocupam a largura que precisam e a legenda
+            preenche a faixa vazia à direita, em vez de empurrar tudo para baixo. */}
+        <div className="emp-castelo-grid">
+        <div className="emp-fileiras">
         {fileiras.map((fileira, i) => (
           <div key={i} className="emp-fileira">
             {fileira
@@ -750,22 +822,34 @@ export function EmperiumBoard() {
               })}
           </div>
         ))}
+        </div>
 
         {/* A cor da sala e uma legenda de verdade, entao ela vem escrita. */}
-        <ul className="emp-legenda">
-          {(Object.keys(CATEGORIA_INFO) as CategoriaSala[]).map((cat) => (
-            <li key={cat} data-cat={cat}>
-              <span className="emp-legenda-cor" aria-hidden="true" />
-              <b>{CATEGORIA_INFO[cat].rotulo}</b>
-              <em>{CATEGORIA_INFO[cat].oQueMuda}</em>
-            </li>
-          ))}
-        </ul>
+        <aside className="emp-legenda-painel">
+          <h4>As salas por categoria</h4>
+          <ul className="emp-legenda">
+            {(Object.keys(CATEGORIA_INFO) as CategoriaSala[]).map((cat) => (
+              <li key={cat} data-cat={cat}>
+                <span className="emp-legenda-cor" aria-hidden="true" />
+                <b>{CATEGORIA_INFO[cat].rotulo}</b>
+                <em>{CATEGORIA_INFO[cat].oQueMuda}</em>
+              </li>
+            ))}
+          </ul>
+          <p className="emp-legenda-nota">
+            A cor diz o que a sala muda no seu turno — não que sala é. Seis grupos, não
+            quinze fichas.
+          </p>
+        </aside>
+        </div>
       </section>
 
       {/* ── Fase: Mercado ── */}
       {view.step === 'mercado' && (
-        <section className="emp-painel">
+        <section className="emp-painel mercado">
+          <div className="emp-secao-aba">
+            <span aria-hidden="true">⚖️</span> Mercado
+          </div>
           <h3>
             Mercado — {minhaVezMercado ? 'sua vez' : `vez de ${nomeDe(view.jogadorDoMercado)}`}
             {minhaVezMercado && (
@@ -1006,7 +1090,10 @@ export function EmperiumBoard() {
 
       {/* ── Fase: Comprometimento ── */}
       {view.step === 'comprometimento' && (
-        <section className="emp-painel">
+        <section className="emp-painel reserva">
+          <div className="emp-secao-aba">
+            <span aria-hidden="true">⚔️</span> Reserva e comprometimento
+          </div>
           <h3>
             Comprometimento — {jaConfirmei ? 'aguardando os outros clãs' : 'monte sua investida'}
             <span className="emp-acoes">
@@ -1164,7 +1251,10 @@ export function EmperiumBoard() {
 
       {/* ── Última resolução ── */}
       {view.ultimaResolucao && view.ultimaResolucao.length > 0 && (
-        <section className="emp-painel">
+        <section className="emp-painel resolucao">
+          <div className="emp-secao-aba">
+            <span aria-hidden="true">🔥</span> Resolução
+          </div>
           <h3>
             O portão se abriu
             <button

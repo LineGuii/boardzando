@@ -322,15 +322,71 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Aberto ganha teto de altura; fechado e so a barra do cabecalho. */
+.game-chat.aberto {
   max-height: 320px;
 }
 
 .game-chat-header {
-  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 14px;
   background: #f1ece1;
+  border: 0;
+  font-family: inherit;
   font-weight: 700;
   font-size: 13px;
   color: #6b5f4e;
+  cursor: pointer;
+  text-align: left;
+}
+
+.game-chat-header:hover {
+  background: #eae3d5;
+}
+
+.game-chat-seta {
+  font-size: 10px;
+  color: #a0937c;
+}
+
+.game-chat-titulo {
+  flex: 1;
+}
+
+/* Badge de nao lidas: o motivo de o chat poder ficar fechado sem prejuizo. */
+.game-chat-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #d4332b;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ja lidas: contagem discreta, so para nao parecer vazio. */
+.game-chat-contagem {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a0937c;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-chat-corpo {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
 }
 
 .game-chat-messages {
@@ -585,6 +641,79 @@ body {
   background: #e7f7ec;
   border-color: #2d932d;
   color: #2d932d;
+}
+
+/* ---- Cabecalho recolhido (durante a partida) ----
+ * Uma barra so, com o ID e os avatares. O suficiente para saber onde voce
+ * esta e quem esta junto, sem gastar a altura que o tabuleiro quer. */
+
+.shell-room-card.recolhido {
+  padding: 0;
+  overflow: hidden;
+}
+
+.shell-room-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.shell-room-toggle:hover {
+  background: #faf7f0;
+}
+
+.shell-room-seta {
+  font-size: 10px;
+  color: #a0937c;
+}
+
+.shell-room-mini-id {
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-size: 12px;
+  color: #6b5f4e;
+  background: #f6f1e6;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+
+.shell-room-mini-players {
+  display: flex;
+  flex: 1;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.shell-room-mini-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d4332b, #f59e0b);
+  color: white;
+  font-weight: 800;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.shell-room-mini-avatar.offline {
+  opacity: 0.4;
+}
+
+.shell-room-mini-hint {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #a0937c;
 }
 
 /* ---- Lista de jogadores ---- */

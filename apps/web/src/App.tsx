@@ -653,6 +653,51 @@ function RoomHeader({
 }): JSX.Element {
   const room = useGame((s) => s.room);
   const session = useGame((s) => s.session);
+  /**
+   * Durante a partida o cabecalho comeca RECOLHIDO. Ele existe para montar a
+   * sala — ID, convite, quem entrou — e nada disso importa depois que o jogo
+   * comecou; aberto, ele empurrava o tabuleiro para fora da primeira tela.
+   * No lobby continua aberto, porque ali ele e a tela.
+   */
+  const jogando = room?.status === 'playing';
+  const [aberto, setAberto] = useState(!jogando);
+
+  // Comecou a partida: recolhe. Voltou ao lobby: abre de novo.
+  useEffect(() => {
+    setAberto(!jogando);
+  }, [jogando]);
+
+  const jogadores = room?.players ?? [];
+
+  if (jogando && !aberto) {
+    return (
+      <div className="shell-room-card recolhido">
+        <button
+          type="button"
+          className="shell-room-toggle"
+          onClick={() => setAberto(true)}
+          aria-expanded={false}
+          title="Mostrar ID da sala, convite e jogadores"
+        >
+          <span className="shell-room-seta" aria-hidden="true">▸</span>
+          <span className="shell-room-mini-id">{roomId}</span>
+          <span className="shell-room-mini-players">
+            {jogadores.map((p) => (
+              <span
+                key={p.id}
+                className={`shell-room-mini-avatar ${p.connected ? '' : 'offline'}`}
+                style={p.color ? { background: p.color } : undefined}
+                title={p.name}
+              >
+                {p.name[0] ?? '?'}
+              </span>
+            ))}
+          </span>
+          <span className="shell-room-mini-hint">sala</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="shell-room-card">
@@ -674,6 +719,16 @@ function RoomHeader({
                 icon="🔗"
               />
             </>
+          )}
+          {jogando && (
+            <button
+              type="button"
+              className="shell-copy-btn"
+              title="Recolher o cabeçalho"
+              onClick={() => setAberto(false)}
+            >
+              ▴ Recolher
+            </button>
           )}
           <button
             type="button"

@@ -1,47 +1,140 @@
 /* =========================================================
  * Guerra do Emperium.
- * A casca do Boardzando e clara e quente; o tabuleiro e um
- * painel de pedra escura, deliberadamente em contraste: o
- * jogador entrou no castelo. Acento ciano = o cristal.
+ *
+ * Dois conceitos visuais, medievais e fantasticos, ligados
+ * pelo mesmo vocabulario: OURO para a Gloria e a riqueza,
+ * VERMELHO para o calor da batalha, e o CIANO do cristal
+ * como unica nota fria — a coisa pela qual se briga.
+ * Troque em .emp-board[data-tema].
  * ========================================================= */
 
-.emp-board {
-  --pedra: #131A1E;
-  --pedra-alta: #1B242A;
-  --pedra-borda: #2C3941;
-  --tinta: #E4E9EB;
-  --tinta-fraca: #93A0A7;
-  --cristal: #3CD4CC;
-  --cristal-fundo: #10393A;
-  --sangue: #D9756B;
-  --sangue-fundo: #47211D;
-  --ouro: #D8B45F;
-  --combo: #9A7AD6;
+/* ── Os dois conceitos ─────────────────────────────────────
+ * PERGAMINHO — a carta de guilda: pergaminho envelhecido,
+ *   tinta sepia, ouro folheado e granada. E a paleta das
+ *   janelas do Ragnarok classico e de um documento medieval.
+ * CERCO — o castelo a noite: pedra ameixa quase preta, luz de
+ *   tocha, brasa e o brilho frio do Emperium.
+ * As duas guardam o ciano do cristal, que e a identidade do
+ * jogo, ouro para a Gloria e vermelho para o sangue.
+ * ========================================================= */
 
-  /* Uma cor por CATEGORIA de sala, nunca por ficha: seis cores que o jogador
-     consegue guardar, contra quinze que viram ruido. */
-  --cat-espinha: #9FB4C0;
+.emp-board[data-tema='pergaminho'] {
+  --pedra: #E6D9BB;
+  --pedra-alta: #F6EFDD;
+  --pedra-borda: #BFA97C;
+  --pedra-veio: rgba(139, 110, 60, 0.07);
+  --tinta: #2B2114;
+  --tinta-fraca: #6B5B3E;
+  --cristal: #0C6F68;
+  --cristal-fundo: #C9E4E0;
+  --sangue: #8F2A1E;
+  --sangue-fundo: #F0D6D0;
+  --ouro: #8A6212;
+  --ouro-claro: #C9A227;
+  --combo: #5E3B96;
+  --fundo: linear-gradient(180deg, #F3EAD3 0%, #E4D7B4 100%);
+  --sombra: 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 18px -10px rgba(70, 52, 20, 0.5);
+
+  --cat-espinha: #4C5960;
+  --cat-batalha: #8F2A1E;
+  --cat-resgate: #246144;
+  --cat-economia: #78550F;
+  --cat-passagem: #563790;
+  --cat-vigilancia: #204A85;
+
+  --aba-tinta: #F6EFDD;
+
+  --vanguarda: #6E4718;
+  --arcano: #204A85;
+  --agil: #3B6522;
+  --suporte: #78325A;
+}
+
+.emp-board[data-tema='cerco'] {
+  --pedra: #16121A;
+  --pedra-alta: #221B27;
+  --pedra-borda: #3C3043;
+  --pedra-veio: rgba(232, 184, 73, 0.05);
+  --tinta: #F1E7D5;
+  --tinta-fraca: #A5937D;
+  --cristal: #4ADFD3;
+  --cristal-fundo: #103F3E;
+  --sangue: #E36A5C;
+  --sangue-fundo: #4A1B16;
+  --ouro: #E8B849;
+  --ouro-claro: #F5D68A;
+  --combo: #B98CE8;
+  --fundo: linear-gradient(180deg, #1D1723 0%, #120E16 100%);
+  --sombra: 0 1px 0 rgba(255, 255, 255, 0.04), 0 10px 26px -14px rgba(0, 0, 0, 0.9);
+
+  --cat-espinha: #A9B6BE;
   --cat-batalha: #E28C82;
-  --cat-resgate: #6FAE8F;
-  --cat-economia: #D8B45F;
-  --cat-passagem: #A98BE0;
-  --cat-vigilancia: #7C9FE0;
+  --cat-resgate: #77BC98;
+  --cat-economia: #E8B849;
+  --cat-passagem: #B99BE8;
+  --cat-vigilancia: #7FA6E8;
 
-  --vanguarda: #B07B3C;
-  --arcano: #5B82CE;
-  --agil: #7CA34E;
-  --suporte: #B06A97;
+  --aba-tinta: #16121A;
 
+  --vanguarda: #C9924A;
+  --arcano: #6E96DC;
+  --agil: #8DB55F;
+  --suporte: #C77CA8;
+}
+
+.emp-board {
   display: flex;
   flex-direction: column;
   gap: 14px;
   padding: 18px;
   border-radius: 14px;
-  background: linear-gradient(180deg, #161E23 0%, #101619 100%);
+  background: var(--fundo);
   border: 1px solid var(--pedra-borda);
   color: var(--tinta);
   font-size: 14px;
   line-height: 1.5;
+  /* Titulos com capitulares inscricionais: e o que da o tom de placa de
+     bronze e carta de conquista sem custar legibilidade nos numeros, que
+     seguem na fonte do sistema. */
+  --titulo: 'Cinzel', 'Georgia', serif;
+}
+
+/* Ouro de verdade tem brilho: um filete claro atravessando o metal. */
+.emp-dourado {
+  background: linear-gradient(100deg, var(--ouro) 0%, var(--ouro-claro) 45%, var(--ouro) 70%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── Seletor de conceito ──────────────────────────────────── */
+.emp-temas {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  align-self: flex-start;
+}
+.emp-tema-btn {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--pedra-borda);
+  background: var(--pedra-alta);
+  color: var(--tinta-fraca);
+  font-family: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.emp-tema-btn:hover {
+  color: var(--tinta);
+  border-color: var(--ouro);
+}
+.emp-tema-btn.ativo {
+  background: var(--ouro);
+  border-color: var(--ouro);
+  color: var(--pedra);
 }
 
 .emp-board h3,
@@ -49,6 +142,11 @@
   margin: 0 0 8px;
   font-weight: 700;
   letter-spacing: -0.01em;
+}
+.emp-board h3 {
+  font-family: var(--titulo);
+  font-weight: 800;
+  letter-spacing: 0.01em;
 }
 .emp-board h3 {
   font-size: 1.05rem;
@@ -145,10 +243,12 @@
 }
 .emp-clan.dono {
   border-color: var(--cristal);
-  box-shadow: inset 0 0 0 1px rgba(60, 212, 204, 0.2);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cristal) 22%, transparent);
 }
+/* "Voce" nao precisa de outro fundo: precisa de destaque. Um filete de ouro
+   marca o seu cla sem sair da paleta do tema. */
 .emp-clan.eu {
-  background: #1F2A30;
+  box-shadow: inset 3px 0 0 var(--ouro);
 }
 .emp-clan-nome {
   font-weight: 700;
@@ -169,8 +269,8 @@
   font-weight: 700;
 }
 .emp-tag.ok {
-  background: #23401F;
-  color: #9ED27E;
+  background: color-mix(in srgb, var(--agil) 22%, var(--pedra));
+  color: var(--agil);
 }
 .emp-clan-stats {
   display: flex;
@@ -184,15 +284,65 @@
 
 /* ── Castelo ───────────────────────────────────────────── */
 
+/* ── As tres identidades ───────────────────────────────────
+ * CASTELO e pedra: fundo mais fundo, borda grossa, veio de
+ * cantaria e cantos vivos. MERCADO e pergaminho: superficie
+ * clara e filete de ouro. RESERVA e acampamento: superficie
+ * media e filete de sangue. Cada um se anuncia por uma aba.
+ * ========================================================= */
+
 .emp-castelo {
+  position: relative;
+  padding: 26px 16px 16px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 62px,
+      var(--pedra-veio) 62px 63px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 44px,
+      var(--pedra-veio) 44px 45px
+    ),
+    var(--pedra);
+  border: 2px solid var(--pedra-borda);
+  border-radius: 4px;
+  box-shadow: var(--sombra);
+}
+
+/* Salas a esquerda, legenda ocupando a faixa que sobrava a direita. */
+.emp-castelo-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(196px, 250px);
+  gap: 18px;
+  align-items: start;
+}
+.emp-fileiras {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 14px;
-  background: var(--pedra);
-  border: 1px solid var(--pedra-borda);
-  border-radius: 8px;
+  min-width: 0;
+}
+
+/* Aba de identificacao: quem e esta secao, em uma palavra. */
+.emp-secao-aba {
+  position: absolute;
+  top: -1px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 12px 3px;
+  border-radius: 0 0 5px 5px;
+  background: var(--pedra-borda);
+  color: var(--tinta);
+  font-family: var(--titulo);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 .emp-fileira {
   display: flex;
@@ -213,7 +363,7 @@
   text-align: center;
 }
 .emp-sala.permitida {
-  border-color: #4A6B62;
+  border-color: color-mix(in srgb, var(--cristal) 45%, var(--pedra-borda));
 }
 .emp-sala.alvo {
   border-color: var(--cristal);
@@ -443,7 +593,7 @@
   padding: 11px;
   border: 1px solid var(--combo);
   border-radius: 5px;
-  background: rgba(154, 122, 214, 0.06);
+  background: color-mix(in srgb, var(--combo) 8%, transparent);
 }
 .emp-combos-rot {
   display: block;
@@ -481,7 +631,7 @@
 }
 .emp-combo-op.sel {
   border-color: var(--combo);
-  background: rgba(154, 122, 214, 0.16);
+  background: color-mix(in srgb, var(--combo) 18%, transparent);
 }
 .emp-combo-op.apagado {
   opacity: 0.5;
@@ -522,7 +672,7 @@
 
 .emp-card.transcendido {
   border-color: var(--ouro);
-  box-shadow: inset 0 0 0 1px rgba(216, 180, 95, 0.16);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ouro) 20%, transparent);
 }
 .emp-card-forma {
   font-family: inherit;
@@ -538,7 +688,7 @@
   color: var(--ouro);
 }
 .emp-chip.asc {
-  background: rgba(216, 180, 95, 0.16);
+  background: color-mix(in srgb, var(--ouro) 20%, transparent);
   color: var(--ouro);
 }
 
@@ -550,7 +700,7 @@
   padding: 11px;
   border: 1px solid var(--ouro);
   border-radius: 5px;
-  background: rgba(216, 180, 95, 0.05);
+  background: color-mix(in srgb, var(--ouro) 8%, transparent);
 }
 .emp-altar-alvo {
   background: var(--pedra);
@@ -663,10 +813,50 @@
 /* ── Paineis e controles ───────────────────────────────── */
 
 .emp-painel {
+  position: relative;
   background: var(--pedra);
   border: 1px solid var(--pedra-borda);
   border-radius: 8px;
   padding: 14px;
+}
+/* Com aba, o painel abre espaco para ela no topo. */
+.emp-painel.mercado,
+.emp-painel.reserva,
+.emp-painel.resolucao {
+  padding-top: 26px;
+  border-radius: 4px;
+}
+
+/* MERCADO — pergaminho aberto sobre a mesa: mais claro que o
+   castelo, com filete de ouro em cima. Aqui se gasta dinheiro. */
+.emp-painel.mercado {
+  background: var(--pedra-alta);
+  border-top: 3px solid var(--ouro);
+}
+.emp-painel.mercado .emp-secao-aba {
+  background: var(--ouro);
+  color: var(--aba-tinta);
+  top: -3px;
+}
+
+/* RESERVA — o acampamento antes do assalto: filete de sangue. */
+.emp-painel.reserva {
+  border-top: 3px solid var(--sangue);
+}
+.emp-painel.reserva .emp-secao-aba {
+  background: var(--sangue);
+  color: var(--aba-tinta);
+  top: -3px;
+}
+
+/* RESOLUCAO — o que aconteceu: o ciano do cristal. */
+.emp-painel.resolucao {
+  border-top: 3px solid var(--cristal);
+}
+.emp-painel.resolucao .emp-secao-aba {
+  background: var(--cristal);
+  color: var(--aba-tinta);
+  top: -3px;
 }
 .emp-acoes {
   font-size: 0.68rem;
@@ -936,7 +1126,7 @@
    repouso abaixo SAO o resultado final — as keyframes terminam neles. */
 .emp-lutador.venceu {
   border-color: var(--cristal);
-  box-shadow: 0 0 7px 0 rgba(60, 212, 204, 0.28);
+  box-shadow: 0 0 7px 0 color-mix(in srgb, var(--cristal) 30%, transparent);
   animation-name: emp-avanca, emp-brilha;
   animation-duration: 620ms, 520ms;
   animation-delay: var(--atraso), calc(var(--atraso) + 420ms);
@@ -963,7 +1153,7 @@
   margin: -23px 0 0 -23px;
   border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(60, 212, 204, 0.5) 45%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, color-mix(in srgb, var(--cristal) 50%, transparent) 45%, transparent 70%);
   opacity: 0;
   animation: emp-impacto 460ms ease-out;
   animation-delay: calc(var(--atraso) + 380ms);
@@ -975,9 +1165,9 @@
   100% { transform: translateX(0); opacity: 1; }
 }
 @keyframes emp-brilha {
-  0%   { box-shadow: 0 0 0 0 rgba(60, 212, 204, 0); }
-  40%  { box-shadow: 0 0 16px 2px rgba(60, 212, 204, 0.55); }
-  100% { box-shadow: 0 0 7px 0 rgba(60, 212, 204, 0.28); }
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cristal) 0%, transparent); }
+  40%  { box-shadow: 0 0 16px 2px color-mix(in srgb, var(--cristal) 55%, transparent); }
+  100% { box-shadow: 0 0 7px 0 color-mix(in srgb, var(--cristal) 30%, transparent); }
 }
 @keyframes emp-recua {
   0%   { transform: translateX(0) rotate(0deg); opacity: 1; }
@@ -1114,14 +1304,36 @@
 .emp-sala.alvo[data-cat] .emp-sala-cat {
   color: var(--cristal);
 }
+/* E a regra sobe de tom: sobre o fundo do alvo a tinta fraca cai abaixo de 4.5. */
+.emp-sala.alvo[data-cat] .emp-sala-regra {
+  color: color-mix(in srgb, var(--tinta) 72%, var(--tinta-fraca));
+}
 
+.emp-legenda-painel {
+  border: 1px solid var(--pedra-borda);
+  border-radius: 4px;
+  background: var(--pedra-alta);
+  padding: 11px 13px;
+}
+.emp-legenda-painel h4 {
+  margin: 0 0 8px;
+  font-family: var(--titulo);
+}
+.emp-legenda-nota {
+  margin: 10px 0 0;
+  padding-top: 9px;
+  border-top: 1px solid var(--pedra-borda);
+  font-size: 0.6rem;
+  line-height: 1.45;
+  color: var(--tinta-fraca);
+}
 .emp-legenda {
   list-style: none;
-  margin: 14px 0 0;
+  margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 4px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 .emp-legenda li[data-cat='espinha'] { --cat: var(--cat-espinha); }
 .emp-legenda li[data-cat='batalha'] { --cat: var(--cat-batalha); }
@@ -1130,11 +1342,16 @@
 .emp-legenda li[data-cat='passagem'] { --cat: var(--cat-passagem); }
 .emp-legenda li[data-cat='vigilancia'] { --cat: var(--cat-vigilancia); }
 .emp-legenda li {
-  display: flex;
+  display: grid;
+  grid-template-columns: 10px 1fr;
   align-items: baseline;
-  gap: 6px;
+  gap: 2px 7px;
   font-size: 0.64rem;
   color: var(--tinta-fraca);
+}
+.emp-legenda li em {
+  grid-column: 2;
+  line-height: 1.35;
 }
 .emp-legenda-cor {
   width: 10px;
@@ -1336,4 +1553,22 @@
   .emp-card {
     width: 148px;
   }
+}
+
+
+/* Em tela estreita a legenda volta para baixo das salas. */
+@media (max-width: 860px) {
+  .emp-castelo-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.emp-board[data-tema='pergaminho'] .emp-reserva-mini li {
+  background: var(--pedra-alta);
+}
+
+.emp-clan.dono.eu {
+  box-shadow:
+    inset 3px 0 0 var(--ouro),
+    inset 0 0 0 1px color-mix(in srgb, var(--cristal) 22%, transparent);
 }
