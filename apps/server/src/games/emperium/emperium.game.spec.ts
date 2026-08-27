@@ -753,13 +753,15 @@ describe('EmperiumGame — Combos', () => {
     expect(r.de('bruno').combo).toContain('3 zeny');
   });
 
-  it('nenhuma carta tem combo sem texto, e o texto comeca com COMBO', () => {
+  it('todo combo tem texto, e o texto comeca com COMBO ou ESPECIAL', () => {
     const todos = [
       ...DECK_I.filter((c) => c.combo).map((c) => c.combo!),
       ...TRANSCENDENCIAS.filter((t) => t.combo).map((t) => t.combo!),
     ];
     expect(todos.length).toBeGreaterThanOrEqual(20);
-    for (const c of todos) expect(c.texto.startsWith('COMBO')).toBe(true);
+    // ESPECIAL e o prefixo dos efeitos que NAO exigem companheiro; COMBO, dos
+    // que exigem. Os dois sao validos.
+    for (const c of todos) expect(/^(COMBO|ESPECIAL)/.test(c.texto)).toBe(true);
   });
 });
 
@@ -846,23 +848,23 @@ describe('EmperiumGame — resolucao de sala', () => {
     // Ana: Tempestade 3 + Nevasca 2 + cajado 3 + refino 2 + Hydra 2
     //      + Escudeiro 2 + investida 3 = 17 — mas Bruno EMBOSCOU, e a Emboscada
     //      cancela o bonus positivo da Ordem alheia: os +3 da Investida somem.
-    // Bruno: Combo 4 + Asura 7 + emboscada 2 = 13.
+    // Bruno: Combo 4 + Asura 8 + emboscada 2 = 14.
     // Carla: Armadilheiro 2 + Suporte 1 + Assumptio 2 + ELO 2 - resguardo 2 = 5.
     //      O -2 do Resguardo NAO e devolvido: emboscar nao premia quem recuou.
     expect(de('ana').poderBruto).toBe(14);
     expect(de('ana').emboscado).toBe(true);
-    expect(de('bruno').poderBruto).toBe(13);
+    expect(de('bruno').poderBruto).toBe(14);
     expect(de('carla').poderBruto).toBe(5);
     expect(de('carla').emboscado).toBe(false);
 
     // Muralha: Carla tem 2; Ana tem 2 (base) + 2 (evolucao) = 4.
-    // Ana: 14-2=12. Bruno: 13-2-4=7. Carla: 5-4=1.
+    // Ana: 14-2=12. Bruno: 14-2-4=8. Carla: 5-4=1.
     expect(de('ana').poderFinal).toBe(12);
-    expect(de('bruno').poderFinal).toBe(7);
+    expect(de('bruno').poderFinal).toBe(8);
     expect(de('carla').poderFinal).toBe(1);
     expect(res.controlador).toBe('ana');
 
-    // Bruno perde por 6 e so tem o Mestre: ele cai.
+    // Bruno perde por 4 e so tem o Mestre: ele cai.
     expect(de('bruno').baixas).toEqual(ids(bruno));
 
     // Resguardo cancela as baixas de Carla.

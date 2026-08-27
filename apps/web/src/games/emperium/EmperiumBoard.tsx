@@ -17,7 +17,14 @@ import {
   type Marca,
 } from '@boardzando/contracts';
 import { useGame } from '../../net/store';
-import { IconeTermo, Termo } from './termos';
+import {
+  FAMILIA_ROTULO,
+  IconeChave,
+  IconeTermo,
+  Termo,
+  familiaDe,
+  type FamiliaChave,
+} from './termos';
 import { GameChat } from '../../shell/GameChat';
 import './emperium.css';
 
@@ -292,13 +299,27 @@ function Glossario(): JSX.Element {
             do mesmo <Termo nome="cla" /> <b>somam</b>.
           </p>
 
+          {/* A cor do chip é da FAMÍLIA, não da palavra: quinze cores seriam o
+              mesmo arco-íris que evitamos nas salas. O ícone é que identifica. */}
+          <ul className="emp-familias">
+            {(Object.keys(FAMILIA_ROTULO) as FamiliaChave[]).map((f) => (
+              <li key={f} data-familia={f}>
+                <span className="emp-familia-cor" aria-hidden="true" />
+                {FAMILIA_ROTULO[f]}
+              </li>
+            ))}
+          </ul>
+
           {kws.length > 0 && (
             <>
               <h4>Palavras-chave</h4>
               <dl className="emp-gloss-lista">
                 {kws.map((k) => (
-                  <div key={k}>
-                    <dt>{KEYWORD_LABEL[k]}</dt>
+                  <div key={k} data-familia={familiaDe(k)}>
+                    <dt>
+                      <IconeChave nome={k} tam={12} />
+                      {KEYWORD_LABEL[k]}
+                    </dt>
                     <dd>{KEYWORD_DESC[k]}</dd>
                   </div>
                 ))}
@@ -317,8 +338,11 @@ function Glossario(): JSX.Element {
               </p>
               <dl className="emp-gloss-lista marcas">
                 {marcas.map((m) => (
-                  <div key={m}>
-                    <dt>{MARCA_LABEL[m]}</dt>
+                  <div key={m} data-familia="marca">
+                    <dt>
+                      <IconeChave nome={m} tam={12} />
+                      {MARCA_LABEL[m]}
+                    </dt>
                     <dd>{MARCA_DESC[m]}</dd>
                   </div>
                 ))}
@@ -432,12 +456,19 @@ function CharCard({
       {(def.keywords.length > 0 || (trans?.keywords.length ?? 0) > 0) && (
         <span className="emp-kws">
           {def.keywords.map((k) => (
-            <span key={k.kw} className="emp-chip">
+            <span key={k.kw} className="emp-chip" data-familia={familiaDe(k.kw)}>
+              <IconeChave nome={k.kw} />
               {kwLabel(k)}
             </span>
           ))}
           {trans?.keywords.map((k) => (
-            <span key={`tr-${k.kw}`} className="emp-chip asc" title="Ganha na Transcendência">
+            <span
+              key={`tr-${k.kw}`}
+              className="emp-chip asc"
+              data-familia={familiaDe(k.kw)}
+              title="Ganha na Transcendência"
+            >
+              <IconeChave nome={k.kw} />
               {kwLabel(k)}
             </span>
           ))}
@@ -615,7 +646,7 @@ function Confronto({
                   )}
                   {f.marcas?.map((m) => (
                     <span key={m} className="emp-lut-marca">
-                      <IconeTermo nome="marca" tam={11} /> {m}
+                      <IconeChave nome={m} /> {m}
                     </span>
                   ))}
                   {f.baixas.length > 0 && (
@@ -1295,7 +1326,12 @@ export function EmperiumBoard() {
                               <span className="emp-caminho-ganho">
                                 {t.poderBonus > 0 && <b>+{t.poderBonus} Poder</b>}
                                 {t.keywords.map((k) => (
-                                  <span key={k.kw} className="emp-chip asc">
+                                  <span
+                                    key={k.kw}
+                                    className="emp-chip asc"
+                                    data-familia={familiaDe(k.kw)}
+                                  >
+                                    <IconeChave nome={k.kw} />
                                     {kwLabel(k)}
                                   </span>
                                 ))}

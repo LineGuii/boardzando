@@ -44,6 +44,12 @@
 
   --aba-tinta: #F6EFDD;
 
+  --fam-defesa: #17405E;
+  --fam-ataque: #732B12;
+  --fam-posicao: #1D4A2B;
+  --fam-manobra: #422B6D;
+  --fam-marca: #6F2017;
+
   --vanguarda: #6E4718;
   --arcano: #204A85;
   --agil: #3B6522;
@@ -75,6 +81,12 @@
   --cat-vigilancia: #7FA6E8;
 
   --aba-tinta: #16121A;
+
+  --fam-defesa: #6FB0DE;
+  --fam-ataque: #E8926A;
+  --fam-posicao: #7CC08D;
+  --fam-manobra: #B79BE8;
+  --fam-marca: #E36A5C;
 
   --vanguarda: #C9924A;
   --arcano: #6E96DC;
@@ -547,16 +559,39 @@
   gap: 4px;
   flex-wrap: wrap;
 }
+/* ── Palavras-chave e marcas ───────────────────────────────
+ * O ICONE identifica a palavra; a COR diz a familia. Quinze
+ * cores distintas seriam o arco-iris que evitamos nas salas —
+ * ninguem guarda quinze, e cor que ninguem guarda e ruido.
+ * Com cinco familias, bate o olho na carta e ve se aquele
+ * personagem defende, ataca, se posiciona ou manobra.
+ *
+ * O nome continua escrito no chip: cor e icone REFORCAM, e
+ * nunca sao o unico caminho para a informacao.
+ * ========================================================= */
 .emp-chip {
+  --fam: var(--cristal);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-size: 0.55rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 700;
   padding: 3px 5px;
   border-radius: 2px;
-  background: var(--cristal-fundo);
-  color: var(--cristal);
+  background: color-mix(in srgb, var(--fam) 16%, var(--pedra));
+  color: var(--fam);
   white-space: nowrap;
+}
+.emp-chip[data-familia='defesa'] { --fam: var(--fam-defesa); }
+.emp-chip[data-familia='ataque'] { --fam: var(--fam-ataque); }
+.emp-chip[data-familia='posicao'] { --fam: var(--fam-posicao); }
+.emp-chip[data-familia='manobra'] { --fam: var(--fam-manobra); }
+.emp-chip[data-familia='marca'] { --fam: var(--fam-marca); }
+
+.emp-chave-icone {
+  flex: none;
 }
 .emp-equips {
   display: flex;
@@ -1984,4 +2019,57 @@
   .emp-zoom-palco .emp-card {
     width: min(88vw, 340px);
   }
+}
+
+/* Verbete do glossário na cor da própria família. */
+.emp-gloss-lista > div[data-familia='defesa'] { --fam: var(--fam-defesa); }
+.emp-gloss-lista > div[data-familia='ataque'] { --fam: var(--fam-ataque); }
+.emp-gloss-lista > div[data-familia='posicao'] { --fam: var(--fam-posicao); }
+.emp-gloss-lista > div[data-familia='manobra'] { --fam: var(--fam-manobra); }
+.emp-gloss-lista > div[data-familia='marca'] { --fam: var(--fam-marca); }
+.emp-gloss-lista dt {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--fam, var(--cristal));
+}
+.emp-gloss-lista.marcas dt {
+  color: var(--fam, var(--sangue));
+}
+
+/* Legenda das cinco famílias. */
+.emp-familias {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 3px 16px;
+}
+.emp-familias li[data-familia='defesa'] { --fam: var(--fam-defesa); }
+.emp-familias li[data-familia='ataque'] { --fam: var(--fam-ataque); }
+.emp-familias li[data-familia='posicao'] { --fam: var(--fam-posicao); }
+.emp-familias li[data-familia='manobra'] { --fam: var(--fam-manobra); }
+.emp-familias li[data-familia='marca'] { --fam: var(--fam-marca); }
+.emp-familias li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.62rem;
+  color: var(--tinta-fraca);
+}
+.emp-familia-cor {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-radius: 2px;
+  background: var(--fam);
+  transform: translateY(1px);
+}
+
+/* A marca na resolução usa a cor da família também. */
+.emp-lut-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }

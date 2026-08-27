@@ -185,47 +185,38 @@ export const DECK_I: readonly CharacterDef[] = [
 
   { id: 'bru-tempestade', nome: 'Bruxo Tempestade', classe: 'Bruxo', deck: 1, custo: 7, poder: 3, papel: 'arcano', slots: 1, keywords: [kw('muralha', 2), kw('alcance')], build: 'Storm Gust' },
   { id: 'bru-jupitel', nome: 'Bruxo Jupitel', classe: 'Bruxo', deck: 1, custo: 5, poder: 4, papel: 'arcano', slots: 1, keywords: [kw('alcance')], build: 'Jupitel / Napalm' },
-
   { id: 'bru-conjurador', nome: 'Bruxo Conjurador', classe: 'Bruxo', deck: 1, custo: 7, poder: 2, papel: 'arcano', slots: 1, keywords: [kw('muralha', 1)], build: 'Precast' , combo: comClasse('Bardo', 'COMBO Bardo: +5 de Poder — a canção sustenta a conjuração.', { tipo: 'poder', x: 5 })},
 
   { id: 'sab-solo', nome: 'Sábio Proteção de Solo', classe: 'Sábio', deck: 1, custo: 6, poder: 2, papel: 'arcano', slots: 1, keywords: [kw('anular')], build: 'Land Protection' , combo: comClasse('Bruxo', 'COMBO Bruxo: seus personagens ignoram toda a Muralha inimiga.', { tipo: 'perfurar-total' })},
   { id: 'sab-encantador', nome: 'Sábio Encantador', classe: 'Sábio', deck: 1, custo: 5, poder: 2, papel: 'arcano', slots: 2, keywords: [kw('elo', 1)], build: 'Endow' },
-
   { id: 'sab-petrificador', nome: 'Sábio Petrificador', classe: 'Sábio', deck: 1, custo: 6, poder: 3, papel: 'arcano', slots: 1, keywords: [kw('muralha', 1)], build: 'Stone Curse' , combo: sozinho('COMBO: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
 
   { id: 'mer-sonico', nome: 'Mercenário Golpe Sônico', classe: 'Mercenário', deck: 1, custo: 6, poder: 3, papel: 'agil', slots: 1, keywords: [kw('rajada', 3)], build: 'Sonic Blow' , combo: comClasse('Alquimista', 'COMBO Alquimista: +4 de Poder — ele entra pela brecha.', { tipo: 'poder', x: 4 })},
   { id: 'mer-furtivo', nome: 'Mercenário Furtivo', classe: 'Mercenário', deck: 1, custo: 7, poder: 2, papel: 'agil', slots: 1, keywords: [kw('oculto')], build: 'Cloaking' },
-
   { id: 'mer-katar', nome: 'Mercenário Katar', classe: 'Mercenário', deck: 1, custo: 6, poder: 4, papel: 'agil', slots: 1, keywords: [kw('perfurar', 2)], build: 'Katar crítico' },
 
   { id: 'arr-gatuno', nome: 'Arruaceiro Gatuno', classe: 'Arruaceiro', deck: 1, custo: 5, poder: 2, papel: 'agil', slots: 1, keywords: [kw('pilhar', 2)], build: 'Steal' , combo: comPapel('agil', 'COMBO Agil: RAPTO — arranque 1 inimigo da sala.', { tipo: 'rapto' })},
   { id: 'arr-saqueador', nome: 'Arruaceiro Saqueador', classe: 'Arruaceiro', deck: 1, custo: 6, poder: 3, papel: 'agil', slots: 1, keywords: [kw('anular')], build: 'Strip' },
-
   { id: 'arr-batedor', nome: 'Arruaceiro Batedor', classe: 'Arruaceiro', deck: 1, custo: 5, poder: 3, papel: 'agil', slots: 1, keywords: [kw('rajada', 2)], build: 'Back Stab' },
 
   { id: 'fer-forjador', nome: 'Ferreiro Forjador', classe: 'Ferreiro', deck: 1, custo: 5, poder: 2, papel: 'vanguarda', slots: 2, keywords: [], build: 'Forja', special: 'forja' },
   { id: 'fer-mercador', nome: 'Ferreiro Mercador', classe: 'Ferreiro', deck: 1, custo: 4, poder: 1, papel: 'vanguarda', slots: 1, keywords: [kw('pilhar', 3)], build: 'Overcharge' , combo: sozinho('COMBO: +1 de Poder a cada 5 zeny no seu bolso.', { tipo: 'poder-por-zeny', cada: 5 })},
-
   { id: 'fer-perfeicao', nome: 'Ferreiro Perfeição de Armas', classe: 'Ferreiro', deck: 1, custo: 6, poder: 2, papel: 'vanguarda', slots: 2, keywords: [kw('perfurar', 2)], build: 'Weapon Perfection' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seus personagens ignoram toda a Muralha inimiga.', { tipo: 'perfurar-total' })},
 
   { id: 'alq-homunculo', nome: 'Alquimista Homúnculo', classe: 'Alquimista', deck: 1, custo: 6, poder: 2, papel: 'suporte', slots: 1, keywords: [kw('elo', 1)], build: 'Bio-ethics' },
   { id: 'alq-boticario', nome: 'Alquimista Boticário', classe: 'Alquimista', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('restaurar', 1)], build: 'Potion Pitcher' , combo: sozinho('COMBO: o maior clã inimigo fica EXPOSTO.', { tipo: 'marca', marca: 'exposto' })},
-
   { id: 'alq-fogogrego', nome: 'Alquimista Fogo Grego', classe: 'Alquimista', deck: 1, custo: 6, poder: 3, papel: 'suporte', slots: 1, keywords: [kw('perfurar', 2)], build: 'Fogo grego' , combo: comPapel('arcano', 'COMBO Arcano: +4 de Poder — o fogo pega no que o mago acendeu.', { tipo: 'poder', x: 4 })},
 
   { id: 'sac-suporte', nome: 'Sacerdote Suporte', classe: 'Sacerdote', deck: 1, custo: 6, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('elo', 2)], build: 'Full Support' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seu clã ganha MOVER 1.', { tipo: 'mover', x: 1 })},
   { id: 'sac-pneuma', nome: 'Sacerdote Pneuma', classe: 'Sacerdote', deck: 1, custo: 6, poder: 2, papel: 'suporte', slots: 1, keywords: [kw('muralha', 2)], build: 'Pneuma / Safety Wall' },
-
   { id: 'sac-batalha', nome: 'Sacerdote de Batalha', classe: 'Sacerdote', deck: 1, custo: 5, poder: 3, papel: 'suporte', slots: 2, keywords: [kw('solo', 2)], build: 'Battle Priest' },
 
   { id: 'mon-combo', nome: 'Monge Combo', classe: 'Monge', deck: 1, custo: 6, poder: 4, papel: 'vanguarda', slots: 1, keywords: [], build: 'Chain Combo' },
-  { id: 'mon-aco', nome: 'Monge Corpo de Aço', classe: 'Monge', deck: 1, custo: 5, poder: 0, papel: 'vanguarda', slots: 2, keywords: [kw('proteger'), kw('esgotar')], build: 'Steel Body' , combo: sozinho('COMBO: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
+  { id: 'mon-aco', nome: 'Monge Corpo de Aço', classe: 'Monge', deck: 1, custo: 5, poder: 0, papel: 'vanguarda', slots: 2, keywords: [kw('proteger'), kw('esgotar')], build: 'Steel Body' , combo: sozinho('ESPECIAL: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
+  { id: 'mon-dilema', nome: 'Monge Disparar Esferas', classe: 'Monge', deck: 1, custo: 6, poder: 2, papel: 'vanguarda', slots: 1, keywords: [kw('perfurar', 3)], build: 'Investigate' },
 
-  { id: 'mon-dilema', nome: 'Monge Dilema', classe: 'Monge', deck: 1, custo: 6, poder: 2, papel: 'vanguarda', slots: 1, keywords: [kw('perfurar', 3)], build: 'Investigate' },
-
-  { id: 'cac-armadilheiro', nome: 'Caçador Armadilheiro', classe: 'Caçador', deck: 1, custo: 6, poder: 2, papel: 'agil', slots: 1, keywords: [kw('muralha', 2)], build: 'Trapper' , combo: sozinho('COMBO: o maior clã inimigo fica REVELADO.', { tipo: 'marca', marca: 'revelado' })},
-  { id: 'cac-tiroduplo', nome: 'Caçador Tiro Duplo', classe: 'Caçador', deck: 1, custo: 6, poder: 4, papel: 'agil', slots: 1, keywords: [kw('alcance')], build: 'Double Strafe' },
-
+  { id: 'cac-armadilheiro', nome: 'Caçador Armadilheiro', classe: 'Caçador', deck: 1, custo: 6, poder: 2, papel: 'agil', slots: 1, keywords: [kw('muralha', 2)], build: 'Trapper' , combo: sozinho('ESPECIAL: o maior clã inimigo fica REVELADO.', { tipo: 'marca', marca: 'revelado' })},
+  { id: 'cac-tiroduplo', nome: 'Caçador Rajada de Flechas', classe: 'Caçador', deck: 1, custo: 6, poder: 4, papel: 'agil', slots: 1, keywords: [kw('alcance')], build: 'Double Strafe' },
   { id: 'cac-falcoeiro', nome: 'Caçador Falcoeiro', classe: 'Caçador', deck: 1, custo: 6, poder: 2, papel: 'agil', slots: 1, keywords: [kw('alcance')], build: 'Falcão / Blitz Beat', special: 'revela-oculto' },
 
   { id: 'bar-cancao', nome: 'Bardo Canção', classe: 'Bardo', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('elo', 2)], build: 'Canções de grupo' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos ganham +3 de Poder.', { tipo: 'rajada-papel', papel: 'arcano', x: 3 })},
@@ -238,7 +229,7 @@ export const DECK_I: readonly CharacterDef[] = [
 
   { id: 'sup-teimoso', nome: 'Superaprendiz Teimoso', classe: 'Superaprendiz', deck: 1, custo: 3, poder: 1, papel: 'agil', slots: 3, keywords: [], build: 'Sobrevivência teimosa', special: 'teimoso' },
   { id: 'sup-sorte', nome: 'Superaprendiz Sortudo', classe: 'Superaprendiz', deck: 1, custo: 4, poder: 1, papel: 'agil', slots: 1, keywords: [kw('solo', 3)], build: 'Sorte de principiante' },
-  { id: 'sup-improvisado', nome: 'Superaprendiz Improvisado', classe: 'Superaprendiz', deck: 1, custo: 4, poder: 2, papel: 'suporte', slots: 2, keywords: [kw('imitar', 2)], build: 'Faz de tudo' },
+  { id: 'sup-improvisado', nome: 'Superaprendiz Improvisado', classe: 'Superaprendiz', deck: 1, custo: 4, poder: 2, papel: 'suporte', slots: 2, keywords: [kw('imitar', 1)], build: 'Faz de tudo' },
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -278,6 +269,7 @@ export interface TranscendenceDef {
   readonly slotsBonus?: number;
   readonly special?:
     | 'forja-suprema'
+    | 'forja'
     | 'ensemble'
     | 'marionete'
     | 'imortal'
@@ -337,9 +329,9 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   { id: 'tr-sac-julgamento', nome: 'Sumo Sacerdote — Julgamento', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 12, poderBonus: 5, keywords: [], build: 'Magnus Exorcismus' },
 
   // Monge
-  { id: 'tr-mon-asura', nome: 'Mestre — Punho de Asura', classe: 'Monge', forma: 'Mestre', custo: 14, poderBonus: 7, keywords: [kw('esgotar')], build: 'Asura Strike' },
+  { id: 'tr-mon-asura', nome: 'Mestre — Punho de Asura', classe: 'Monge', forma: 'Mestre', custo: 14, poderBonus: 8, keywords: [kw('esgotar')], build: 'Asura Strike' },
   { id: 'tr-mon-salto', nome: 'Mestre — Salto', classe: 'Monge', forma: 'Mestre', custo: 11, poderBonus: 3, keywords: [kw('mover', 2)], build: 'Body Relocation' },
-  { id: 'tr-mon-aco', nome: 'Mestre — Corpo de Aço Supremo', classe: 'Monge', forma: 'Mestre', custo: 10, poderBonus: 1, keywords: [kw('proteger')], build: 'Steel Body', special: 'imortal' },
+  { id: 'tr-mon-aco', nome: 'Mestre — Corpo de Aço e Dilema', classe: 'Monge', forma: 'Mestre', custo: 10, poderBonus: 1, keywords: [kw('proteger')], build: 'Steel Body', special: 'imortal' },
 
   // Caçador
   { id: 'tr-cac-flechas', nome: 'Atirador de Elite — Chuva de Flechas', classe: 'Caçador', forma: 'Atirador de Elite', custo: 12, poderBonus: 5, keywords: [kw('alcance')], build: 'Arrow Storm' },

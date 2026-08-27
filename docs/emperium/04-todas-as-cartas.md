@@ -241,15 +241,15 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Monge Combo** | 6z | 4 | 1.5 | Vanguarda | ◇ | — | *Chain Combo* |
 | **Monge Corpo de Aço** | 5z | 0 | — | Vanguarda | ◇◇ | PROTEGER · ESGOTAR | *Steel Body* |
-| **Monge Dilema** | 6z | 2 | 3.0 | Vanguarda | ◇ | PERFURAR 3 | *Investigate* |
+| **Monge Disparar Esferas** | 6z | 2 | 3.0 | Vanguarda | ◇ | PERFURAR 3 | *Investigate* |
 
-- **Monge Corpo de Aço** — COMBO: o maior clã inimigo fica PRESO.
+- **Monge Corpo de Aço** — ESPECIAL: o maior clã inimigo fica PRESO.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
-| **Punho de Asura** | 14z | +7 | ESGOTAR | *Asura Strike* |
+| **Punho de Asura** | 14z | +8 | ESGOTAR | *Asura Strike* |
 | **Salto** | 11z | +3 | MOVER 2 | *Body Relocation* |
-| **Corpo de Aço Supremo** | 10z | +1 | PROTEGER · *não pode sofrer baixa* | *Steel Body* |
+| **Corpo de Aço e Dilema** | 10z | +1 | PROTEGER · *não pode sofrer baixa* | *Steel Body* |
 
 > **Anotações:**
 
@@ -258,10 +258,10 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | Base | Custo | Poder | z/P | Papel | Slots | Palavras-chave | Build |
 |---|---|---|---|---|---|---|---|
 | **Caçador Armadilheiro** | 6z | 2 | 3.0 | Ágil | ◇ | MURALHA 2 | *Trapper* |
-| **Caçador Tiro Duplo** | 6z | 4 | 1.5 | Ágil | ◇ | ALCANCE | *Double Strafe* |
+| **Caçador Rajada de Flechas** | 6z | 4 | 1.5 | Ágil | ◇ | ALCANCE | *Double Strafe* |
 | **Caçador Falcoeiro** | 6z | 2 | 3.0 | Ágil | ◇ | ALCANCE | *Falcão / Blitz Beat* |
 
-- **Caçador Armadilheiro** — COMBO: o maior clã inimigo fica REVELADO.
+- **Caçador Armadilheiro** — ESPECIAL: o maior clã inimigo fica REVELADO.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
@@ -320,7 +320,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Superaprendiz Teimoso** | 3z | 1 | 3.0 | Ágil | ◇◇◇ | — | *Sobrevivência teimosa* |
 | **Superaprendiz Sortudo** | 4z | 1 | 4.0 | Ágil | ◇ | SOLO 3 | *Sorte de principiante* |
-| **Superaprendiz Improvisado** | 4z | 2 | 2.0 | Suporte | ◇◇ | IMITAR 2 | *Faz de tudo* |
+| **Superaprendiz Improvisado** | 4z | 2 | 2.0 | Suporte | ◇◇ | IMITAR 1 | *Faz de tudo* |
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|

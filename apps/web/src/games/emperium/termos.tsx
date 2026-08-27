@@ -247,3 +247,240 @@ export function Termo({
     </span>
   );
 }
+
+/* ── Palavras-chave e marcas ───────────────────────────────────────────────
+ *
+ * Mesmo tratamento dos termos, com uma diferença deliberada: o ÍCONE é único
+ * por palavra, mas a COR é da família. Dezoito cores distintas seriam o mesmo
+ * arco-íris que evitamos nas salas do castelo — ninguém guarda dezoito, e cor
+ * que ninguém guarda não é informação, é ruído. Cinco famílias, sim: bate o
+ * olho num personagem e vê se ele defende, ataca, se posiciona ou manobra.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+export type FamiliaChave = 'defesa' | 'ataque' | 'posicao' | 'manobra' | 'marca';
+
+export const FAMILIA_ROTULO: Readonly<Record<FamiliaChave, string>> = {
+  defesa: 'Defesa — segura a linha e absorve baixa',
+  ataque: 'Ataque — coloca Poder na mesa',
+  posicao: 'Posição — muda onde e como você chega',
+  manobra: 'Manobra — mexe no que o outro trouxe, ou no depois',
+  marca: 'Marca — o que você faz ao clã inimigo',
+};
+
+/* ── Ícones das palavras-chave ── */
+
+const escudo = (
+  <>
+    <path d="M8 1.8 13.2 3.6v4.8c0 2.9-2.2 4.8-5.2 5.8-3-1-5.2-2.9-5.2-5.8V3.6L8 1.8Z" />
+  </>
+);
+
+const parede = (
+  <>
+    <path d="M1.8 4.2h12.4M1.8 8h12.4M1.8 11.8h12.4" />
+    <path d="M1.8 3.4v9.2M14.2 3.4v9.2" />
+    <path d="M5.6 4.2V8M10.4 4.2V8M8 8v3.8" />
+  </>
+);
+
+/** Devoção: um escudo na frente do outro — ele leva no lugar. */
+const doisEscudos = (
+  <>
+    <path d="M5.4 2.4 9.4 3.8v3.6c0 2.2-1.7 3.6-4 4.4-2.3-.8-4-2.2-4-4.4V3.8l4-1.4Z" />
+    <path d="M10.6 4.6l4 1.4v3.6c0 2.2-1.7 3.6-4 4.4-1.3-.5-2.4-1.1-3.1-2" />
+  </>
+);
+
+/** Alcance: a flecha que vem de longe. */
+const flecha = (
+  <>
+    <path d="M1.6 14.4 13.6 2.4" />
+    <path d="M9.6 2.4h4v4" />
+    <path d="M1.6 9.2v5.2h5.2" />
+  </>
+);
+
+/** Perfurar: a ponta que atravessa a placa. */
+const lanca = (
+  <>
+    <path d="M1.6 8h12.8" />
+    <path d="M10.6 4.6 14.4 8l-3.8 3.4" />
+    <path d="M6 3.2v9.6" />
+  </>
+);
+
+/** Rajada: o golpe que só vale na chegada. */
+const rajadaIcone = (
+  <>
+    <path d="M2 5h7M2 8h5M2 11h7" />
+    <path d="M10.4 3.6 14.4 8l-4 4.4" />
+  </>
+);
+
+/** Elo: a corrente que liga um ao outro. */
+const corrente = (
+  <>
+    <path d="M6.8 9.2 5.2 10.8a2.3 2.3 0 0 1-3.2-3.2l1.6-1.6" />
+    <path d="M9.2 6.8l1.6-1.6a2.3 2.3 0 0 1 3.2 3.2l-1.6 1.6" />
+    <path d="M5.8 10.2l4.4-4.4" />
+  </>
+);
+
+/** Solo: um só, e um círculo de ninguém em volta. */
+const sozinhoIcone = (
+  <>
+    <circle cx="8" cy="8" r="6.2" strokeDasharray="2 2.2" />
+    <circle cx="8" cy="6" r="1.8" />
+    <path d="M5 12.2c0-1.7 1.3-2.8 3-2.8s3 1.1 3 2.8" />
+  </>
+);
+
+/** Oculto: o olho fechado, riscado. */
+const olhoRiscado = (
+  <>
+    <path d="M1.6 8s2.6-4.2 6.4-4.2S14.4 8 14.4 8s-2.6 4.2-6.4 4.2S1.6 8 1.6 8Z" />
+    <circle cx="8" cy="8" r="1.8" />
+    <path d="M2.4 13.6 13.6 2.4" />
+  </>
+);
+
+/** Revelado: o mesmo olho, agora aberto. */
+const olhoAberto = (
+  <>
+    <path d="M1.6 8s2.6-4.2 6.4-4.2S14.4 8 14.4 8s-2.6 4.2-6.4 4.2S1.6 8 1.6 8Z" />
+    <circle cx="8" cy="8" r="1.8" />
+  </>
+);
+
+/** Anular: a runa cortada. */
+const proibido = (
+  <>
+    <circle cx="8" cy="8" r="6" />
+    <path d="M3.8 3.8 12.2 12.2" />
+  </>
+);
+
+/** Imitar: a carta copiada. */
+const copia = (
+  <>
+    <rect x="1.8" y="1.8" width="8.4" height="10.4" rx="1.2" />
+    <path d="M5.8 14.2h7.2a1.2 1.2 0 0 0 1.2-1.2V5.4" />
+  </>
+);
+
+/** Restaurar: quem caiu volta. */
+const voltar = (
+  <>
+    <path d="M2.6 8a5.4 5.4 0 1 1 1.6 3.8" />
+    <path d="M1.4 8h2.4M2.6 5.6V8" />
+    <path d="M8 5.2v3.2l2.2 1.4" />
+  </>
+);
+
+/** Pilhar: o saco que sai da sala. */
+const saco = (
+  <>
+    <path d="M6 1.8h4l-1.2 2.4H7.2L6 1.8Z" />
+    <path d="M7.2 4.2c-2.6 1-4.4 3.2-4.4 5.8 0 2.6 2.3 4.2 5.2 4.2s5.2-1.6 5.2-4.2c0-2.6-1.8-4.8-4.4-5.8" />
+  </>
+);
+
+/** Esgotar: a chama que se apaga. */
+const chamaApagada = (
+  <>
+    <path d="M8 14.2c2.4 0 4-1.6 4-3.8 0-2.8-4-4.4-4-8.6-2.6 2.4-4 4.6-4 8.6 0 2.2 1.6 3.8 4 3.8Z" />
+    <path d="M2.4 13.6 13.6 2.4" />
+  </>
+);
+
+/** Mover: o avanço que não custa marcha. */
+const avancar = (
+  <>
+    <path d="M1.6 8h9.6" />
+    <path d="M7.8 4.6 11.2 8l-3.4 3.4" />
+    <path d="M13.4 3.6v8.8" />
+  </>
+);
+
+/** Exposto: a armadura rachada. */
+const escudoRachado = (
+  <>
+    <path d="M8 1.8 13.2 3.6v4.8c0 2.9-2.2 4.8-5.2 5.8-3-1-5.2-2.9-5.2-5.8V3.6L8 1.8Z" />
+    <path d="M8.8 3.8 6.6 7.6h3l-2 4.2" />
+  </>
+);
+
+/** Preso: o grilhão. */
+const grilhao = (
+  <>
+    <circle cx="4.6" cy="11" r="3" />
+    <circle cx="11.4" cy="11" r="3" />
+    <path d="M4.6 8V5.2a3.4 3.4 0 0 1 6.8 0V8" />
+  </>
+);
+
+interface ChaveDef {
+  familia: FamiliaChave;
+  icone: JSX.Element;
+}
+
+export const KEYWORD_CHAVE: Readonly<Record<string, ChaveDef>> = {
+  proteger: { familia: 'defesa', icone: escudo },
+  muralha: { familia: 'defesa', icone: parede },
+  devocao: { familia: 'defesa', icone: doisEscudos },
+
+  alcance: { familia: 'ataque', icone: flecha },
+  perfurar: { familia: 'ataque', icone: lanca },
+  rajada: { familia: 'ataque', icone: rajadaIcone },
+
+  elo: { familia: 'posicao', icone: corrente },
+  solo: { familia: 'posicao', icone: sozinhoIcone },
+  oculto: { familia: 'posicao', icone: olhoRiscado },
+  mover: { familia: 'posicao', icone: avancar },
+
+  anular: { familia: 'manobra', icone: proibido },
+  imitar: { familia: 'manobra', icone: copia },
+  restaurar: { familia: 'manobra', icone: voltar },
+  pilhar: { familia: 'manobra', icone: saco },
+  esgotar: { familia: 'manobra', icone: chamaApagada },
+};
+
+export const MARCA_CHAVE: Readonly<Record<string, ChaveDef>> = {
+  exposto: { familia: 'marca', icone: escudoRachado },
+  preso: { familia: 'marca', icone: grilhao },
+  revelado: { familia: 'marca', icone: olhoAberto },
+};
+
+/** O ícone de uma palavra-chave ou marca. Decorativo, como os dos termos. */
+export function IconeChave({
+  nome,
+  tam = 11,
+}: {
+  nome: string;
+  tam?: number;
+}): JSX.Element | null {
+  const d = KEYWORD_CHAVE[nome] ?? MARCA_CHAVE[nome];
+  if (!d) return null;
+  return (
+    <svg
+      className="emp-chave-icone"
+      width={tam}
+      height={tam}
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {d.icone}
+    </svg>
+  );
+}
+
+/** A família de uma palavra-chave ou marca, para pintar o chip. */
+export function familiaDe(nome: string): FamiliaChave | undefined {
+  return (KEYWORD_CHAVE[nome] ?? MARCA_CHAVE[nome])?.familia;
+}
