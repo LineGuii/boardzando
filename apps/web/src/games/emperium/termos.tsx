@@ -257,13 +257,20 @@ export function Termo({
  * olho num personagem e vê se ele defende, ataca, se posiciona ou manobra.
  * ────────────────────────────────────────────────────────────────────────── */
 
-export type FamiliaChave = 'defesa' | 'ataque' | 'posicao' | 'manobra' | 'marca';
+export type FamiliaChave =
+  | 'defesa'
+  | 'ataque'
+  | 'posicao'
+  | 'manobra'
+  | 'defeito'
+  | 'marca';
 
 export const FAMILIA_ROTULO: Readonly<Record<FamiliaChave, string>> = {
   defesa: 'Defesa — segura a linha e absorve baixa',
   ataque: 'Ataque — coloca Poder na mesa',
   posicao: 'Posição — muda onde e como você chega',
   manobra: 'Manobra — mexe no que o outro trouxe, ou no depois',
+  defeito: 'Defeito — ruim para quem carrega, e por isso é isca de ANULAR',
   marca: 'Marca — o que você faz ao clã inimigo',
 };
 
@@ -419,6 +426,32 @@ const grilhao = (
   </>
 );
 
+/** Frágil: a rachadura no elo mais fraco. */
+const trincado = (
+  <>
+    <path d="M3.4 2.2h9.2v11.6H3.4z" />
+    <path d="M9 2.2 6.6 6.4h2.8L7 13.8" />
+  </>
+);
+
+/** Berserk: a fúria que não aceita ser coberta. */
+const furia = (
+  <>
+    <path d="M8 1.6 4.4 6.8h3L5.6 14.4l6-8.2H8.4l1.8-4.6H8Z" />
+    <path d="M1.8 4.4 3.4 6M14.2 4.4 12.6 6" />
+  </>
+);
+
+/** Maldição: o crânio da praga — perda pura. */
+const praga = (
+  <>
+    <path d="M8 1.8c3 0 5 2.2 5 5 0 1.8-.8 3-1.8 3.8v2.2H4.8v-2.2C3.8 9.8 3 8.6 3 6.8c0-2.8 2-5 5-5Z" />
+    <circle cx="6.2" cy="7" r="1.1" />
+    <circle cx="9.8" cy="7" r="1.1" />
+    <path d="M6.6 12.8v-2M9.4 12.8v-2" />
+  </>
+);
+
 interface ChaveDef {
   familia: FamiliaChave;
   icone: JSX.Element;
@@ -443,6 +476,11 @@ export const KEYWORD_CHAVE: Readonly<Record<string, ChaveDef>> = {
   restaurar: { familia: 'manobra', icone: voltar },
   pilhar: { familia: 'manobra', icone: saco },
   esgotar: { familia: 'manobra', icone: chamaApagada },
+
+  // As RUINS: existem para dar risco ao ANULAR e ao IMITAR.
+  fragil: { familia: 'defeito', icone: trincado },
+  berserk: { familia: 'defeito', icone: furia },
+  maldicao: { familia: 'defeito', icone: praga },
 };
 
 export const MARCA_CHAVE: Readonly<Record<string, ChaveDef>> = {

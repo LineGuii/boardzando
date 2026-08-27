@@ -4,6 +4,7 @@ import {
   ALTAR_RODADA,
   CHARACTER_BY_ID,
   EQUIP_BY_ID,
+  MONSTER_BY_ID,
   TRANSCENDENCIA_BY_ID,
 } from './emperium.cards';
 import {
@@ -473,6 +474,57 @@ function validarComprometimento(
     if (c.consumivel && !clan.consumiveis.includes(c.consumivel)) return false;
     // O portador do combo declarado precisa estar comprometido nesta sala.
     if (c.combo && !c.charInstIds.includes(c.combo)) return false;
+    /*
+     * ANULAR e obrigatorio e apontado.
+     *
+     * Quem traz um personagem com ANULAR nesta sala TEM de dizer em quem vai
+     * usar: um personagem do elenco de outro cla (elenco e publico) e uma
+     * palavra-chave dele. Nao ha a opcao de segurar o Anular para depois — a
+     * escolha e obrigatoria mesmo quando a unica coisa plausivel de anular for
+     * uma palavra-chave RUIM, cujo cancelamento ajuda o alvo.
+     *
+     * O acerto nao e garantido: se o alvo nao veio para esta sala, o Anular se
+     * perde. Isso e de proposito, e e o que transformou o Anular de acerto
+     * certo em aposta.
+     */
+    const quantosAnular = c.charInstIds.reduce((n, id) => {
+      const inst = clan.chars[id];
+      const def = inst ? CHARACTER_BY_ID.get(inst.defId) : undefined;
+      if (!def) return n;
+      const tr = inst?.transcendencia ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia) : undefined;
+      const temNaBase = def.keywords.some((k) => k.kw === 'anular');
+      const temNaEvo = tr?.keywords.some((k) => k.kw === 'anular') ?? false;
+      return n + (temNaBase || temNaEvo ? 1 : 0);
+    }, 0);
+    const anulares = c.anulares ?? [];
+    if (anulares.length !== quantosAnular) return false;
+    for (const a of anulares) {
+      if (!c.charInstIds.includes(a.charInstId)) return false;
+      // O alvo precisa ser de OUTRO cla, e existir.
+      const dono = state.order.find((outro) => state.clans[outro]?.chars[a.alvoInstId]);
+      if (!dono || dono === p) return false;
+      const alvoInst = state.clans[dono]!.chars[a.alvoInstId]!;
+      const alvoDef = CHARACTER_BY_ID.get(alvoInst.defId);
+      if (!alvoDef) return false;
+      const alvoTr = alvoInst.transcendencia
+        ? TRANSCENDENCIA_BY_ID.get(alvoInst.transcendencia)
+        : undefined;
+      const temA = [...alvoDef.keywords, ...(alvoTr?.keywords ?? [])].some(
+        (k) => k.kw === a.keyword,
+      );
+      // Equipamento e carta de monstro tambem dao palavra-chave: aceita se o
+      // alvo puder te-la por qualquer caminho.
+      const porEquipe = alvoInst.equips.some((eqId) => {
+        const eq = state.clans[dono]!.equips[eqId];
+        const eqDef = eq ? EQUIP_BY_ID.get(eq.defId) : undefined;
+        if (eqDef?.keywords.some((k) => k.kw === a.keyword)) return true;
+        return (eq?.encaixadas ?? []).some((mcId: string) =>
+          MONSTER_BY_ID.get(mcId)?.keywords.some((k) => k.kw === a.keyword),
+        );
+      });
+      if (!temA && !porEquipe) return false;
+    }
+
     // Infiltracao: so um OCULTO daqui, e so para uma sala vizinha em jogo.
     if (c.infiltrar) {
       const { charInstId, destino } = c.infiltrar;

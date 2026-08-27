@@ -75,6 +75,7 @@ interface CommitmentV {
   ordem: OrderId;
   combo?: string;
   consumivel?: string;
+  anulares?: { charInstId: string; alvoInstId: string; keyword: string }[];
 }
 interface FactionResultV {
   playerId: string | null;
@@ -205,6 +206,25 @@ const ORDEM_INFO: Record<OrderId, { nome: string; efeito: string }> = {
 };
 
 const kwLabel = (k: Keyword): string => rotuloKeyword(k);
+
+/** Espelha ANULAVEIS do motor. As RUINS estao dentro: anula-las ajuda o alvo. */
+const RUINS_UI: readonly string[] = ['esgotar', 'fragil', 'berserk', 'maldicao'];
+
+const ANULAVEIS_UI: readonly string[] = [
+  'muralha',
+  'perfurar',
+  'rajada',
+  'elo',
+  'solo',
+  'proteger',
+  'devocao',
+  'restaurar',
+  'pilhar',
+  'esgotar',
+  'fragil',
+  'berserk',
+  'maldicao',
+];
 
 /* ── Os dois conceitos visuais ───────────────────────────────────────────── */
 
@@ -724,6 +744,8 @@ export function EmperiumBoard() {
   const [guardiaoPara, setGuardiaoPara] = useState<string>('');
   const [altarAlvo, setAltarAlvo] = useState<string>('');
   const [comboAlvo, setComboAlvo] = useState<string>('');
+  /** A mira de cada ANULAR selecionado: instId do meu -> alvo + palavra-chave. */
+  const [miras, setMiras] = useState<Record<string, { alvoInstId: string; keyword: string }>>({});
 
   const nomeDe = useMemo(() => {
     const mapa = new Map<string, string>();
@@ -764,9 +786,10 @@ export function EmperiumBoard() {
     const trans = inst.transcendencia ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia) : undefined;
     const combo = trans?.combo ?? def.combo;
     if (!combo) return [];
+    // ESPECIAL nao se declara: ele dispara so por o personagem estar na sala.
+    if (combo.exige.tipo === 'nenhum') return [];
     const exige = combo.exige;
     const acende =
-      exige.tipo === 'nenhum' ||
       selecionados.some((outroId) => {
         if (outroId === instId) return false;
         const o = meuClan?.chars[outroId];
@@ -775,6 +798,65 @@ export function EmperiumBoard() {
         return exige.tipo === 'classe' ? od.classe === exige.valor : od.papel === exige.valor;
       });
     return [{ instId, def, combo, acende }];
+  });
+
+  /**
+   * Os ANULAR entre os selecionados. Cada um TEM de apontar um alvo: um
+   * personagem de outro clã e uma palavra-chave dele. O elenco alheio é
+   * público, mas o comprometimento não — então você aponta no escuro, e o
+   * Anular se perde se aquela pessoa não vier para esta sala.
+   */
+  const anularadores = selecionados.flatMap((instId) => {
+    const inst = meuClan?.chars[instId];
+    const def = inst ? CHARACTER_BY_ID.get(inst.defId) : undefined;
+    if (!inst || !def) return [];
+    const tr = inst.transcendencia ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia) : undefined;
+    const tem =
+      def.keywords.some((k) => k.kw === 'anular') ||
+      (tr?.keywords.some((k) => k.kw === 'anular') ?? false);
+    return tem ? [{ instId, def }] : [];
+  });
+
+  /** Todo alvo possível: personagem inimigo + cada palavra-chave anulável dele. */
+  const alvosDeAnular = view.order.flatMap((outro) => {
+    if (outro === me) return [];
+    const clan = view.clans[outro];
+    if (!clan) return [];
+    return Object.values(clan.chars).flatMap((inst) => {
+      const def = CHARACTER_BY_ID.get(inst.defId);
+      if (!def) return [];
+      const tr = inst.transcendencia ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia) : undefined;
+      const kws = new Map<string, number | undefined>();
+      for (const k of [...def.keywords, ...(tr?.keywords ?? [])]) kws.set(k.kw, k.x);
+      for (const eqId of inst.equips) {
+        const eq = clan.equips[eqId];
+        const eqDef = eq ? EQUIP_BY_ID.get(eq.defId) : undefined;
+        for (const k of eqDef?.keywords ?? []) kws.set(k.kw, k.x);
+      }
+      return [...kws.entries()]
+        .filter(([k]) => ANULAVEIS_UI.includes(k))
+        .map(([k, x]) => ({
+          dono: outro,
+          alvoInstId: inst.instId,
+          nome: def.nome,
+          keyword: k,
+          rotulo: x === undefined ? KEYWORD_LABEL[k as KeywordName] : `${KEYWORD_LABEL[k as KeywordName]} ${x}`,
+        }));
+    });
+  });
+
+  /** Falta apontar algum ANULAR? Enquanto faltar, a investida não entra. */
+  const anularSemMira = anularadores.some((a) => !miras[a.instId]);
+
+  /** Os ESPECIAIS dos selecionados: disparam sem declaração, todos juntos. */
+  const especiaisAtivos = selecionados.flatMap((instId) => {
+    const inst = meuClan?.chars[instId];
+    const def = inst ? CHARACTER_BY_ID.get(inst.defId) : undefined;
+    if (!inst || !def) return [];
+    const tr = inst.transcendencia ? TRANSCENDENCIA_BY_ID.get(inst.transcendencia) : undefined;
+    const combo = tr?.combo ?? def.combo;
+    if (!combo || combo.exige.tipo !== 'nenhum') return [];
+    return [{ instId, def, combo }];
   });
 
   const adicionarAoRascunho = () => {
@@ -786,6 +868,11 @@ export function EmperiumBoard() {
         charInstIds: selecionados,
         ordem: ordemAlvo,
         combo: comboAlvo || undefined,
+        anulares: anularadores.map((a) => ({
+          charInstId: a.instId,
+          alvoInstId: miras[a.instId]!.alvoInstId,
+          keyword: miras[a.instId]!.keyword,
+        })),
       },
     ]);
     setSelecionados([]);
@@ -1534,7 +1621,11 @@ export function EmperiumBoard() {
                   type="button"
                   className="emp-btn"
                   disabled={
-                    !slotAlvo || !ordemAlvo || selecionados.length === 0 || estouraLimite
+                    !slotAlvo ||
+                    !ordemAlvo ||
+                    selecionados.length === 0 ||
+                    estouraLimite ||
+                    anularSemMira
                   }
                   title={
                     estouraLimite
@@ -1560,11 +1651,81 @@ export function EmperiumBoard() {
                 </p>
               )}
 
+              {/* ANULAR aponta, e apontar é obrigatório. */}
+              {anularadores.length > 0 && (
+                <div className="emp-miras">
+                  <span className="emp-combos-rot">
+                    <IconeChave nome="anular" /> Mire cada ANULAR — obrigatório
+                  </span>
+                  <p className="emp-dica">
+                    Você nomeia alguém do elenco inimigo (que é público) e uma palavra-chave
+                    dele. <b>Se essa pessoa não vier para esta sala, o Anular se perde.</b> E
+                    cuidado: cancelar uma palavra-chave <b>ruim</b> devolve Poder ao inimigo.
+                  </p>
+                  {anularadores.map((a) => (
+                    <div key={a.instId} className="emp-mira">
+                      <b>{a.def.nome}</b>
+                      <select
+                        className="emp-select"
+                        value={
+                          miras[a.instId]
+                            ? `${miras[a.instId]!.alvoInstId}|${miras[a.instId]!.keyword}`
+                            : ''
+                        }
+                        onChange={(e) => {
+                          const [alvoInstId, keyword] = e.target.value.split('|');
+                          setMiras((m) =>
+                            alvoInstId && keyword
+                              ? { ...m, [a.instId]: { alvoInstId, keyword } }
+                              : Object.fromEntries(
+                                  Object.entries(m).filter(([k]) => k !== a.instId),
+                                ),
+                          );
+                        }}
+                      >
+                        <option value="">— escolha o alvo —</option>
+                        {alvosDeAnular.map((alvo) => (
+                          <option
+                            key={`${alvo.alvoInstId}|${alvo.keyword}`}
+                            value={`${alvo.alvoInstId}|${alvo.keyword}`}
+                          >
+                            {nomeDe(alvo.dono)} · {alvo.nome} — {alvo.rotulo}
+                            {RUINS_UI.includes(alvo.keyword) ? ' (ruim para ele!)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                  {alvosDeAnular.length === 0 && (
+                    <p className="emp-vazio">
+                      Nenhum inimigo tem palavra-chave anulável ainda.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* ESPECIAL não se declara: mostra o que vai acontecer sozinho. */}
+              {especiaisAtivos.length > 0 && (
+                <div className="emp-especiais">
+                  <span className="emp-combos-rot">
+                    Especiais — disparam sozinhos, sem declarar
+                  </span>
+                  <div className="emp-especiais-lista">
+                    {especiaisAtivos.map(({ instId, def, combo }) => (
+                      <span key={instId} className="emp-especial-item">
+                        <b>{def.nome}</b>
+                        <span>{combo.texto.replace(/^ESPECIAL:\s*/, '')}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Só UM combo dispara por sala — você declara qual. */}
               {combosDisponiveis.length > 0 && (
                 <div className="emp-combos">
                   <span className="emp-combos-rot">
-                    Combo desta investida — só um dispara
+                    <IconeTermo nome="combo" /> Combo desta investida — só um dispara
                   </span>
                   <div className="emp-combos-lista">
                     <button

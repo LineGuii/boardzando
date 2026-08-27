@@ -37,7 +37,17 @@ export type KeywordName =
   | 'esgotar'
   | 'imitar'
   /** Ignora X salas de Marcha Forcada. Vale para o cla inteiro na sala. */
-  | 'mover';
+  | 'mover'
+  /* ── As palavras-chave RUINS ────────────────────────────────────────────
+   * Existem para dar risco ao ANULAR e ao IMITAR, que escolhem alvo por
+   * tamanho do numero e nao por utilidade: um X grande e ruim vira isca.
+   * ─────────────────────────────────────────────────────────────────────── */
+  /** Cai antes dos outros. O oposto de PROTEGER. */
+  | 'fragil'
+  /** +X de Poder, e ninguem consegue cobri-lo: e sempre a primeira baixa. */
+  | 'berserk'
+  /** -X de Poder. Pura perda — e por isso a melhor isca para o Anular. */
+  | 'maldicao';
 
 /** Palavra-chave com seu valor X (ausente quando a keyword nao usa X). */
 export interface Keyword {
@@ -65,6 +75,9 @@ export const KEYWORD_LABEL: Readonly<Record<KeywordName, string>> = {
   esgotar: 'ESGOTAR',
   imitar: 'IMITAR',
   mover: 'MOVER',
+  fragil: 'FRÁGIL',
+  berserk: 'BERSERK',
+  maldicao: 'MALDIÇÃO',
 };
 
 /** Texto pronto de uma palavra-chave, com o X quando houver. */
@@ -113,6 +126,11 @@ const kw = (name: KeywordName, x?: number): Keyword => (x === undefined ? { kw: 
  * Freio: **so UM combo dispara por cla por sala**, declarado no
  * comprometimento. Juntar cinco personagens nao acumula cinco combos — senao
  * a mesa volta a empilhar todo mundo numa sala so.
+ *
+ * ESPECIAL e a excecao, e o nome importa: quando `exige.tipo === 'nenhum'` o
+ * efeito nao combina com ninguem — chamar aquilo de "combo" era estranho. Ele
+ * dispara SOZINHO, sem declaracao, como a forja do Ferreiro, e NAO gasta o
+ * combo da sala. Em troca, e sempre o mesmo efeito: nao ha o que escolher.
  * ───────────────────────────────────────────────────────────────────────── */
 
 /** Marcas aplicadas a uma cla inimiga. Conjunto fechado, so tres. */
@@ -189,7 +207,7 @@ export const DECK_I: readonly CharacterDef[] = [
 
   { id: 'sab-solo', nome: 'Sábio Proteção de Solo', classe: 'Sábio', deck: 1, custo: 6, poder: 2, papel: 'arcano', slots: 1, keywords: [kw('anular')], build: 'Land Protection' , combo: comClasse('Bruxo', 'COMBO Bruxo: seus personagens ignoram toda a Muralha inimiga.', { tipo: 'perfurar-total' })},
   { id: 'sab-encantador', nome: 'Sábio Encantador', classe: 'Sábio', deck: 1, custo: 5, poder: 2, papel: 'arcano', slots: 2, keywords: [kw('elo', 1)], build: 'Endow' },
-  { id: 'sab-petrificador', nome: 'Sábio Petrificador', classe: 'Sábio', deck: 1, custo: 6, poder: 3, papel: 'arcano', slots: 1, keywords: [kw('muralha', 1)], build: 'Stone Curse' , combo: sozinho('COMBO: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
+  { id: 'sab-petrificador', nome: 'Sábio Petrificador', classe: 'Sábio', deck: 1, custo: 6, poder: 3, papel: 'arcano', slots: 1, keywords: [kw('muralha', 1)], build: 'Stone Curse' , combo: sozinho('ESPECIAL: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
 
   { id: 'mer-sonico', nome: 'Mercenário Golpe Sônico', classe: 'Mercenário', deck: 1, custo: 6, poder: 3, papel: 'agil', slots: 1, keywords: [kw('rajada', 3)], build: 'Sonic Blow' , combo: comClasse('Alquimista', 'COMBO Alquimista: +4 de Poder — ele entra pela brecha.', { tipo: 'poder', x: 4 })},
   { id: 'mer-furtivo', nome: 'Mercenário Furtivo', classe: 'Mercenário', deck: 1, custo: 7, poder: 2, papel: 'agil', slots: 1, keywords: [kw('oculto')], build: 'Cloaking' },
@@ -200,11 +218,11 @@ export const DECK_I: readonly CharacterDef[] = [
   { id: 'arr-batedor', nome: 'Arruaceiro Batedor', classe: 'Arruaceiro', deck: 1, custo: 5, poder: 3, papel: 'agil', slots: 1, keywords: [kw('rajada', 2)], build: 'Back Stab' },
 
   { id: 'fer-forjador', nome: 'Ferreiro Forjador', classe: 'Ferreiro', deck: 1, custo: 5, poder: 2, papel: 'vanguarda', slots: 2, keywords: [], build: 'Forja', special: 'forja' },
-  { id: 'fer-mercador', nome: 'Ferreiro Mercador', classe: 'Ferreiro', deck: 1, custo: 4, poder: 1, papel: 'vanguarda', slots: 1, keywords: [kw('pilhar', 3)], build: 'Overcharge' , combo: sozinho('COMBO: +1 de Poder a cada 5 zeny no seu bolso.', { tipo: 'poder-por-zeny', cada: 5 })},
+  { id: 'fer-mercador', nome: 'Ferreiro Mercador', classe: 'Ferreiro', deck: 1, custo: 4, poder: 1, papel: 'vanguarda', slots: 1, keywords: [kw('pilhar', 3)], build: 'Overcharge' , combo: sozinho('ESPECIAL: +1 de Poder a cada 5 zeny no seu bolso.', { tipo: 'poder-por-zeny', cada: 5 })},
   { id: 'fer-perfeicao', nome: 'Ferreiro Perfeição de Armas', classe: 'Ferreiro', deck: 1, custo: 6, poder: 2, papel: 'vanguarda', slots: 2, keywords: [kw('perfurar', 2)], build: 'Weapon Perfection' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seus personagens ignoram toda a Muralha inimiga.', { tipo: 'perfurar-total' })},
 
   { id: 'alq-homunculo', nome: 'Alquimista Homúnculo', classe: 'Alquimista', deck: 1, custo: 6, poder: 2, papel: 'suporte', slots: 1, keywords: [kw('elo', 1)], build: 'Bio-ethics' },
-  { id: 'alq-boticario', nome: 'Alquimista Boticário', classe: 'Alquimista', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('restaurar', 1)], build: 'Potion Pitcher' , combo: sozinho('COMBO: o maior clã inimigo fica EXPOSTO.', { tipo: 'marca', marca: 'exposto' })},
+  { id: 'alq-boticario', nome: 'Alquimista Boticário', classe: 'Alquimista', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('restaurar', 1)], build: 'Potion Pitcher' , combo: sozinho('ESPECIAL: o maior clã inimigo fica EXPOSTO.', { tipo: 'marca', marca: 'exposto' })},
   { id: 'alq-fogogrego', nome: 'Alquimista Fogo Grego', classe: 'Alquimista', deck: 1, custo: 6, poder: 3, papel: 'suporte', slots: 1, keywords: [kw('perfurar', 2)], build: 'Fogo grego' , combo: comPapel('arcano', 'COMBO Arcano: +4 de Poder — o fogo pega no que o mago acendeu.', { tipo: 'poder', x: 4 })},
 
   { id: 'sac-suporte', nome: 'Sacerdote Suporte', classe: 'Sacerdote', deck: 1, custo: 6, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('elo', 2)], build: 'Full Support' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seu clã ganha MOVER 1.', { tipo: 'mover', x: 1 })},
@@ -216,7 +234,7 @@ export const DECK_I: readonly CharacterDef[] = [
   { id: 'mon-dilema', nome: 'Monge Disparar Esferas', classe: 'Monge', deck: 1, custo: 6, poder: 2, papel: 'vanguarda', slots: 1, keywords: [kw('perfurar', 3)], build: 'Investigate' },
 
   { id: 'cac-armadilheiro', nome: 'Caçador Armadilheiro', classe: 'Caçador', deck: 1, custo: 6, poder: 2, papel: 'agil', slots: 1, keywords: [kw('muralha', 2)], build: 'Trapper' , combo: sozinho('ESPECIAL: o maior clã inimigo fica REVELADO.', { tipo: 'marca', marca: 'revelado' })},
-  { id: 'cac-tiroduplo', nome: 'Caçador Rajada de Flechas', classe: 'Caçador', deck: 1, custo: 6, poder: 4, papel: 'agil', slots: 1, keywords: [kw('alcance')], build: 'Double Strafe' },
+  { id: 'cac-tiroduplo', nome: 'Caçador Rajada de Flechas', classe: 'Caçador', deck: 1, custo: 6, poder: 5, papel: 'agil', slots: 1, keywords: [kw('alcance'), kw('fragil')], build: 'Double Strafe' },
   { id: 'cac-falcoeiro', nome: 'Caçador Falcoeiro', classe: 'Caçador', deck: 1, custo: 6, poder: 2, papel: 'agil', slots: 1, keywords: [kw('alcance')], build: 'Falcão / Blitz Beat', special: 'revela-oculto' },
 
   { id: 'bar-cancao', nome: 'Bardo Canção', classe: 'Bardo', deck: 1, custo: 5, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('elo', 2)], build: 'Canções de grupo' , combo: comPapel('arcano', 'COMBO Arcano: seus Arcanos ganham +3 de Poder.', { tipo: 'rajada-papel', papel: 'arcano', x: 3 })},
@@ -285,7 +303,7 @@ export interface TranscendenceDef {
 export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   // Cavaleiro
   { id: 'tr-cav-espiral', nome: 'Lorde dos Cavaleiros — Espiral', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 11, poderBonus: 3, keywords: [kw('perfurar', 4)], build: 'Spiral Pierce' },
-  { id: 'tr-cav-berserk', nome: 'Lorde dos Cavaleiros — Fúria Berserk', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 12, poderBonus: 5, keywords: [kw('esgotar')], build: 'Berserk' },
+  { id: 'tr-cav-berserk', nome: 'Lorde dos Cavaleiros — Fúria Berserk', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 12, poderBonus: 0, keywords: [kw('berserk', 5)], build: 'Berserk' },
   { id: 'tr-cav-montaria', nome: 'Lorde dos Cavaleiros — Montaria', classe: 'Cavaleiro', forma: 'Lorde dos Cavaleiros', custo: 13, poderBonus: 2, keywords: [kw('mover', 4)], build: 'Peco-Peco de guerra' },
 
   // Templário
@@ -299,28 +317,28 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   { id: 'tr-bru-ganbantein', nome: 'Arquimago — Ganbantein', classe: 'Bruxo', forma: 'Arquimago', custo: 9, poderBonus: 1, keywords: [kw('anular')], build: 'Ganbantein' , combo: comClasse('Sábio', 'COMBO Sábio: seus personagens ignoram toda a Muralha inimiga.', { tipo: 'perfurar-total' })},
 
   // Sábio
-  { id: 'tr-sab-dissonancia', nome: 'Professor — Dissonância', classe: 'Sábio', forma: 'Professor', custo: 10, poderBonus: 2, keywords: [kw('anular')], build: 'Dispell' , combo: sozinho('COMBO: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
+  { id: 'tr-sab-dissonancia', nome: 'Professor — Dissonância', classe: 'Sábio', forma: 'Professor', custo: 10, poderBonus: 2, keywords: [kw('anular')], build: 'Dispell' , combo: sozinho('ESPECIAL: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
   { id: 'tr-sab-duplocast', nome: 'Professor — Duplo Cast', classe: 'Sábio', forma: 'Professor', custo: 11, poderBonus: 4, keywords: [], build: 'Double Casting' },
   { id: 'tr-sab-memorizar', nome: 'Professor — Memorizar', classe: 'Sábio', forma: 'Professor', custo: 10, poderBonus: 2, keywords: [kw('imitar')], build: 'Memorize' , combo: comClasse('Monge', 'COMBO Monge: ninguém seu vai à Enfermaria por Esgotar.', { tipo: 'cancela-esgotar' })},
 
   // Mercenário
   { id: 'tr-mer-rompealma', nome: 'Algoz — Rompe-Alma', classe: 'Mercenário', forma: 'Algoz', custo: 12, poderBonus: 5, keywords: [kw('rajada', 2)], build: 'Soul Breaker' },
   { id: 'tr-mer-presa', nome: 'Algoz — Presa Sombria', classe: 'Mercenário', forma: 'Algoz', custo: 10, poderBonus: 2, keywords: [kw('oculto')], build: 'Grimtooth' },
-  { id: 'tr-mer-veneno', nome: 'Algoz — Veneno Mortal', classe: 'Mercenário', forma: 'Algoz', custo: 11, poderBonus: 3, keywords: [kw('perfurar', 3)], build: 'Enchant Deadly Poison' },
+  { id: 'tr-mer-veneno', nome: 'Algoz — Veneno Mortal', classe: 'Mercenário', forma: 'Algoz', custo: 11, poderBonus: 5, keywords: [kw('perfurar', 3), kw('maldicao', 2)], build: 'Enchant Deadly Poison' },
 
   // Arruaceiro
   { id: 'tr-arr-despojar', nome: 'Desordeiro — Despojar Total', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 10, poderBonus: 2, keywords: [kw('anular'), kw('pilhar', 3)], build: 'Full Strip' },
   { id: 'tr-arr-plagio', nome: 'Desordeiro — Plágio', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 10, poderBonus: 2, keywords: [kw('imitar')], build: 'Plagiarism' },
-  { id: 'tr-arr-silenciosa', nome: 'Desordeiro — Marcha Silenciosa', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 12, poderBonus: 2, keywords: [kw('oculto'), kw('mover', 2)], build: 'Chase Walk' , combo: sozinho('COMBO: RAPTO — arranque 1 inimigo da sala.', { tipo: 'rapto' })},
+  { id: 'tr-arr-silenciosa', nome: 'Desordeiro — Marcha Silenciosa', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 12, poderBonus: 2, keywords: [kw('oculto'), kw('mover', 2)], build: 'Chase Walk' , combo: sozinho('ESPECIAL: RAPTO — arranque 1 inimigo da sala.', { tipo: 'rapto' })},
 
   // Ferreiro
-  { id: 'tr-fer-carrocerada', nome: 'Mestre-Ferreiro — Carrocerada', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 11, poderBonus: 4, keywords: [], build: 'Cart Termination' , combo: sozinho('COMBO: +1 de Poder a cada 3 zeny no seu bolso.', { tipo: 'poder-por-zeny', cada: 3 })},
+  { id: 'tr-fer-carrocerada', nome: 'Mestre-Ferreiro — Carrocerada', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 11, poderBonus: 4, keywords: [], build: 'Cart Termination' , combo: sozinho('ESPECIAL: +1 de Poder a cada 3 zeny no seu bolso.', { tipo: 'poder-por-zeny', cada: 3 })},
   { id: 'tr-fer-fundicao', nome: 'Mestre-Ferreiro — Fundição Suprema', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 9, poderBonus: 1, keywords: [], build: 'Forja lendária', special: 'forja-suprema' },
   { id: 'tr-fer-adrenalina', nome: 'Mestre-Ferreiro — Adrenalina Suprema', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 10, poderBonus: 2, keywords: [kw('elo', 2)], build: 'Adrenaline Rush' },
 
   // Alquimista
-  { id: 'tr-alq-acida', nome: 'Criador — Demonstração Ácida', classe: 'Alquimista', forma: 'Criador', custo: 12, poderBonus: 4, keywords: [kw('perfurar', 4)], build: 'Acid Demonstration' , combo: sozinho('COMBO: o maior clã inimigo fica EXPOSTO e PRESO.', { tipo: 'marca', marca: 'exposto' })},
-  { id: 'tr-alq-homunculo', nome: 'Criador — Homúnculo Superior', classe: 'Alquimista', forma: 'Criador', custo: 11, poderBonus: 3, keywords: [kw('elo', 2)], build: 'Homunculus S' , combo: sozinho('COMBO: +3 de Poder — o homúnculo luta junto.', { tipo: 'poder', x: 3 })},
+  { id: 'tr-alq-acida', nome: 'Criador — Demonstração Ácida', classe: 'Alquimista', forma: 'Criador', custo: 12, poderBonus: 4, keywords: [kw('perfurar', 4)], build: 'Acid Demonstration' , combo: sozinho('ESPECIAL: o maior clã inimigo fica EXPOSTO e PRESO.', { tipo: 'marca', marca: 'exposto' })},
+  { id: 'tr-alq-homunculo', nome: 'Criador — Homúnculo Superior', classe: 'Alquimista', forma: 'Criador', custo: 11, poderBonus: 3, keywords: [kw('elo', 2)], build: 'Homunculus S' , combo: sozinho('ESPECIAL: +3 de Poder — o homúnculo luta junto.', { tipo: 'poder', x: 3 })},
   { id: 'tr-alq-esferas', nome: 'Criador — Bomba de Esferas', classe: 'Alquimista', forma: 'Criador', custo: 10, poderBonus: 1, keywords: [kw('muralha', 3)], build: 'Sphere Mine' },
 
   // Sacerdote
@@ -329,14 +347,14 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   { id: 'tr-sac-julgamento', nome: 'Sumo Sacerdote — Julgamento', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 12, poderBonus: 5, keywords: [], build: 'Magnus Exorcismus' },
 
   // Monge
-  { id: 'tr-mon-asura', nome: 'Mestre — Punho de Asura', classe: 'Monge', forma: 'Mestre', custo: 14, poderBonus: 8, keywords: [kw('esgotar')], build: 'Asura Strike' },
+  { id: 'tr-mon-asura', nome: 'Mestre — Punho de Asura', classe: 'Monge', forma: 'Mestre', custo: 14, poderBonus: 11, keywords: [kw('esgotar'), kw('maldicao', 3)], build: 'Asura Strike' },
   { id: 'tr-mon-salto', nome: 'Mestre — Salto', classe: 'Monge', forma: 'Mestre', custo: 11, poderBonus: 3, keywords: [kw('mover', 2)], build: 'Body Relocation' },
   { id: 'tr-mon-aco', nome: 'Mestre — Corpo de Aço e Dilema', classe: 'Monge', forma: 'Mestre', custo: 10, poderBonus: 1, keywords: [kw('proteger')], build: 'Steel Body', special: 'imortal' },
 
   // Caçador
   { id: 'tr-cac-flechas', nome: 'Atirador de Elite — Chuva de Flechas', classe: 'Caçador', forma: 'Atirador de Elite', custo: 12, poderBonus: 5, keywords: [kw('alcance')], build: 'Arrow Storm' },
   { id: 'tr-cac-armadilha', nome: 'Atirador de Elite — Armadilha Suprema', classe: 'Caçador', forma: 'Atirador de Elite', custo: 10, poderBonus: 2, keywords: [kw('muralha', 3)], build: 'Trap Research' },
-  { id: 'tr-cac-falcao', nome: 'Atirador de Elite — Olho de Falcão', classe: 'Caçador', forma: 'Atirador de Elite', custo: 10, poderBonus: 2, keywords: [kw('anular')], build: 'Falcon Assault', special: 'revela-oculto' , combo: sozinho('COMBO: o maior clã inimigo fica REVELADO.', { tipo: 'marca', marca: 'revelado' })},
+  { id: 'tr-cac-falcao', nome: 'Atirador de Elite — Olho de Falcão', classe: 'Caçador', forma: 'Atirador de Elite', custo: 10, poderBonus: 2, keywords: [kw('anular')], build: 'Falcon Assault', special: 'revela-oculto' , combo: sozinho('ESPECIAL: o maior clã inimigo fica REVELADO.', { tipo: 'marca', marca: 'revelado' })},
 
   // Bardo — o Ensemble mora aqui, e so acende com uma Odalisca do lado.
   { id: 'tr-bar-ensemble', nome: 'Menestrel — Ensemble', classe: 'Bardo', forma: 'Menestrel', custo: 9, poderBonus: 2, keywords: [], build: 'Ensemble', special: 'ensemble' },
@@ -345,7 +363,7 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
 
   // Odalisca
   { id: 'tr-oda-marionete', nome: 'Cigana — Marionete', classe: 'Odalisca', forma: 'Cigana', custo: 11, poderBonus: 0, keywords: [], build: 'Marionette Control', special: 'marionete' },
-  { id: 'tr-oda-tarot', nome: 'Cigana — Tarô do Destino', classe: 'Odalisca', forma: 'Cigana', custo: 11, poderBonus: 2, keywords: [kw('anular')], build: 'Tarot Card of Fate' , combo: sozinho('COMBO: o maior clã inimigo fica EXPOSTO.', { tipo: 'marca', marca: 'exposto' })},
+  { id: 'tr-oda-tarot', nome: 'Cigana — Tarô do Destino', classe: 'Odalisca', forma: 'Cigana', custo: 11, poderBonus: 2, keywords: [kw('anular')], build: 'Tarot Card of Fate' , combo: sozinho('ESPECIAL: o maior clã inimigo fica EXPOSTO.', { tipo: 'marca', marca: 'exposto' })},
   { id: 'tr-oda-ritmo', nome: 'Cigana — Ritmo Hipnótico', classe: 'Odalisca', forma: 'Cigana', custo: 10, poderBonus: 2, keywords: [kw('muralha', 3)], build: 'Slow Grace ampliado' },
 
   // Superaprendiz — nao transcende. So insiste, e fica barato.
@@ -419,6 +437,7 @@ export const EQUIPMENT: readonly EquipDef[] = [
   { id: 'eq-bastarda', nome: 'Espada Bastarda', kind: 'arma', papeis: ['vanguarda'], custo: 5, poder: 2, keywords: [], encaixes: 1 },
   { id: 'eq-lanca', nome: 'Lança de Cavalaria', kind: 'arma', papeis: ['vanguarda'], custo: 6, poder: 2, keywords: [kw('perfurar', 1)], encaixes: 1 },
   { id: 'eq-machado', nome: 'Machado de Guerra', kind: 'arma', papeis: ['vanguarda'], custo: 7, poder: 4, keywords: [], encaixes: 1, special: 'penalidade-escudar' },
+  { id: 'eq-lamina-maldita', nome: 'Lâmina Maldita', kind: 'arma', papeis: [], custo: 6, poder: 7, keywords: [kw('maldicao', 4)], encaixes: 1 },
   { id: 'eq-cajado', nome: 'Cajado da Tempestade', kind: 'arma', papeis: ['arcano'], custo: 6, poder: 3, keywords: [], encaixes: 1 },
   { id: 'eq-grimorio', nome: 'Grimório', kind: 'arma', papeis: ['arcano'], custo: 5, poder: 1, keywords: [kw('muralha', 1)], encaixes: 1 },
   { id: 'eq-varinha', nome: 'Varinha de Anulação', kind: 'arma', papeis: ['arcano'], custo: 7, poder: 1, keywords: [kw('anular')], encaixes: 0 },
@@ -604,13 +623,18 @@ export const KEYWORD_DESC: Readonly<Record<KeywordName, string>> = {
   devocao:
     'Ele se joga na frente: cada baixa que ele leva conta por X, e os outros ficam de pé. Cai antes até do PROTEGER.',
   anular:
-    'Cancela a MAIOR palavra-chave inimiga da sala, qualquer que seja. Não se anula um ANULAR.',
+    'Você aponta UM personagem inimigo e UMA palavra-chave dele, junto do comprometimento. Se ele não vier para a sala, o Anular se perde. Apontar é obrigatório — e cancelar uma palavra-chave ruim devolve Poder ao inimigo.',
   restaurar: 'No fim da rodada, mova X personagens da Enfermaria para a Reserva.',
   pilhar: 'Se vencer a sala, ganhe X zeny. Com X ≥ 3, ganhe também 1 equipamento caído.',
   esgotar: 'Depois de resolver, vai para a Enfermaria — tendo vencido ou perdido.',
   imitar:
-    'Copia até X palavras-chave do inimigo de maior Poder de carta nesta sala. Resolve ANTES do ANULAR, então copia o que ainda está de pé.',
+    'Copia até X palavras-chave do inimigo de maior Poder de carta nesta sala — as maiores primeiro, inclusive as RUINS. Resolve ANTES do ANULAR.',
   mover: 'Encurta a Marcha Forçada em até X salas — você paga só o que passar disso.',
+  fragil:
+    'Cai antes dos outros do seu clã — só PROTEGER e DEVOÇÃO conseguem passar na frente dele.',
+  berserk:
+    '+X de Poder, e ninguém consegue cobri-lo: é sempre a primeira baixa do seu clã, antes de qualquer PROTEGER ou DEVOÇÃO.',
+  maldicao: '−X de Poder deste personagem. Pura perda.',
 };
 
 export const MARCA_LABEL: Readonly<Record<Marca, string>> = {

@@ -12,6 +12,7 @@ import {
 import { EmperiumGame } from './emperium.game';
 import { jogadorDoMercado } from './emperium.moves';
 import {
+  ANULAVEIS,
   aplicarInfiltracoes,
   resolveEmperium,
   resolveRoom,
@@ -648,18 +649,20 @@ describe('EmperiumGame — Combos', () => {
     expect(declarandoSabio.de('ana').combo).not.toContain('zeny');
   });
 
-  it('EXPOSTO zera a Muralha do alvo', () => {
-    // Alquimista Boticario: COMBO -> a maior cla inimiga fica EXPOSTA.
-    const ana = makeClan('ana', ['alq-boticario', 'mon-combo']);
-    const carla = makeClan('carla', ['bru-tempestade', 'bru-tempestade']); // MURALHA 4
-    const semCombo = sala({ ana, carla }, {});
-    const comCombo = sala({ ana, carla }, { ana: { combo: ids(ana)[0] } });
+  it('EXPOSTO zera a Muralha do alvo — e dispara sem ser declarado', () => {
+    // Alquimista Boticario: ESPECIAL -> a maior cla inimiga fica EXPOSTA.
+    // Como ESPECIAL nao se declara, o controle e a PRESENCA dele na sala.
+    const sem = makeClan('ana', ['mon-combo', 'mon-combo']);
+    const com = makeClan('ana', ['alq-boticario', 'mon-combo']);
+    const parede = () => makeClan('carla', ['bru-tempestade', 'bru-tempestade']); // MURALHA 4
 
-    const perdaSem = semCombo.de('ana').poderBruto - semCombo.de('ana').poderFinal;
-    const perdaCom = comCombo.de('ana').poderBruto - comCombo.de('ana').poderFinal;
-    expect(perdaSem).toBeGreaterThan(0);
-    expect(perdaCom).toBe(0);
-    expect(comCombo.de('carla').marcas).toContain('exposto');
+    const semEle = sala({ ana: sem, carla: parede() }, {});
+    // Nenhuma declaracao: o ESPECIAL acende so por ele estar ali.
+    const comEle = sala({ ana: com, carla: parede() }, {});
+
+    expect(semEle.de('ana').poderBruto - semEle.de('ana').poderFinal).toBeGreaterThan(0);
+    expect(comEle.de('ana').poderBruto - comEle.de('ana').poderFinal).toBe(0);
+    expect(comEle.de('carla').marcas).toContain('exposto');
   });
 
   it('PRESO tira o bonus da Ordem e o Proteger do alvo', () => {
@@ -739,18 +742,15 @@ describe('EmperiumGame — Combos', () => {
   });
 
   it('a evolucao substitui o combo da base quando traz um', () => {
-    // Mestre-Ferreiro Carrocerada: +1 a cada 3 zeny (a base era a cada 5).
-    const base = makeClan('ana', ['fer-mercador']);
-    base.zeny = 30;
-    const evoluido = makeClan('bruno', ['fer-mercador']);
-    evoluido.zeny = 30;
-    transcenderTeste(evoluido, ids(evoluido)[0]!, 'tr-fer-carrocerada');
-    const r = sala(
-      { ana: base, bruno: evoluido },
-      { ana: { combo: ids(base)[0] }, bruno: { combo: ids(evoluido)[0] } },
-    );
-    expect(r.de('ana').combo).toContain('5 zeny');
-    expect(r.de('bruno').combo).toContain('3 zeny');
+    // Arruaceiro Gatuno: COMBO Agil -> RAPTO. Marcha Silenciosa (evolucao)
+    // troca por um ESPECIAL de RAPTO, que dispara sem declaracao nenhuma.
+    const ana = makeClan('ana', ['arr-gatuno']);
+    transcenderTeste(ana, ids(ana)[0]!, 'tr-arr-silenciosa');
+    const carla = makeClan('carla', ['mon-combo', 'mon-combo']);
+
+    // Sem declarar nada: o ESPECIAL da evolucao acende sozinho e rapta.
+    const r = sala({ ana, carla }, {});
+    expect(r.res.raptados).toHaveLength(1);
   });
 
   it('todo combo tem texto, e o texto comeca com COMBO ou ESPECIAL', () => {
@@ -1131,12 +1131,23 @@ const GLORIA_MINIMA_DONO = 18;
 describe('EmperiumGame — v0.3: Alcance, Anular, Imitar e infiltracao', () => {
   function duelo(
     clans: Record<PlayerId, Clan>,
-    opts: { tileId?: string; castleOwnerId?: PlayerId } = {},
+    opts: {
+      tileId?: string;
+      castleOwnerId?: PlayerId;
+      /** ANULAR apontados, por jogador. */
+      anulares?: Record<PlayerId, { charInstId: string; alvoInstId: string; keyword: string }[]>;
+    } = {},
   ) {
     const state = makeState(clans, { tileId: opts.tileId ?? 'sala-patio', ...opts });
     const inputs: RoomInput[] = Object.keys(clans).map((p) => ({
       playerId: p,
-      commitment: { slot: 'b1', charInstIds: ids(clans[p]!), ordem: 'cerco' as OrderId, marcha: 0 },
+      commitment: {
+        slot: 'b1',
+        charInstIds: ids(clans[p]!),
+        ordem: 'cerco' as OrderId,
+        marcha: 0,
+        anulares: opts.anulares?.[p],
+      },
     }));
     const res = resolveRoom(state, 'b1', inputs);
     return { res, de: (p: PlayerId) => res.clas.find((f) => f.playerId === p)! };
@@ -1161,17 +1172,63 @@ describe('EmperiumGame — v0.3: Alcance, Anular, Imitar e infiltracao', () => {
     expect(duelo({ ana, bruno }).de('ana').baixas).toContain(ids(ana)[0]);
   });
 
-  it('ANULAR corta a maior palavra-chave inimiga, nao so a Muralha', () => {
+  it('ANULAR cancela a palavra-chave APONTADA, e nao a maior da sala', () => {
     // Tres Cavaleiros Bola de Boliche: ELO 1 cada, +2 de Poder por cabeca.
     const alvo = () => makeClan('carla', ['cav-bb', 'cav-bb', 'cav-bb']);
-    // Bruxo Jupitel: so ALCANCE, nenhuma Muralha e nenhum Anular.
     const semAnular = duelo({ carla: alvo(), ana: makeClan('ana', ['bru-jupitel']) });
-    // Sabio Protecao de Solo: ANULAR, e tambem sem Muralha nenhuma.
-    const comAnular = duelo({ carla: alvo(), ana: makeClan('ana', ['sab-solo']) });
 
-    // Nenhum dos dois lados tem Muralha, entao a unica diferenca possivel no
-    // Poder da Carla e o ELO que o Anular arrancou de um dos Cavaleiros.
+    const carla = alvo();
+    const ana = makeClan('ana', ['sab-solo']);
+    const comAnular = duelo(
+      { carla, ana },
+      {
+        anulares: {
+          ana: [{ charInstId: ids(ana)[0]!, alvoInstId: ids(carla)[0]!, keyword: 'elo' }],
+        },
+      },
+    );
+
+    // Nenhum dos dois lados tem Muralha: a unica diferenca e o ELO arrancado
+    // do Cavaleiro que a Ana APONTOU.
     expect(comAnular.de('carla').poderFinal).toBe(semAnular.de('carla').poderFinal - 2);
+  });
+
+  it('ANULAR sem alvo na sala se perde — e o preco de apostar no escuro', () => {
+    const carla = makeClan('carla', ['cav-bb', 'cav-bb', 'cav-bb']);
+    const ana = makeClan('ana', ['sab-solo']);
+    // Aponta alguem que existe no elenco da Carla mas NAO veio a esta sala.
+    const foraDaSala = 'carla-99';
+    const r = duelo(
+      { carla, ana },
+      { anulares: { ana: [{ charInstId: ids(ana)[0]!, alvoInstId: foraDaSala, keyword: 'elo' }] } },
+    );
+    const semNada = duelo({ carla: makeClan('carla', ['cav-bb', 'cav-bb', 'cav-bb']), ana: makeClan('ana', ['sab-solo']) });
+    expect(r.de('carla').poderFinal).toBe(semNada.de('carla').poderFinal);
+  });
+
+  it('anular uma palavra-chave RUIM DEVOLVE Poder ao inimigo — a armadilha', () => {
+    // Algoz Veneno Mortal: PERFURAR 3 e MALDICAO 2.
+    const isca = () => {
+      const c = makeClan('carla', ['mer-furtivo']);
+      transcenderTeste(c, ids(c)[0]!, 'tr-mer-veneno');
+      return c;
+    };
+
+    const semAnular = duelo({ carla: isca(), ana: makeClan('ana', ['bru-jupitel']) });
+
+    const carla = isca();
+    const ana = makeClan('ana', ['sab-solo']);
+    const mordeuAIsca = duelo(
+      { carla, ana },
+      {
+        anulares: {
+          ana: [{ charInstId: ids(ana)[0]!, alvoInstId: ids(carla)[0]!, keyword: 'maldicao' }],
+        },
+      },
+    );
+
+    // Cancelar a MALDICAO 2 devolveu 2 de Poder a quem a carregava.
+    expect(mordeuAIsca.de('carla').poderBruto).toBe(semAnular.de('carla').poderBruto + 2);
   });
 
   it('nao se anula um ANULAR: dois Sabios frente a frente mantem os dois', () => {
@@ -1267,9 +1324,9 @@ describe('EmperiumGame — v0.3 fase 2: Devocao e o dueto', () => {
 
   it('DEVOCAO absorve a margem no lugar dos outros e cai sozinho', () => {
     // Templario Redentor: DEVOCAO 2. Ele cai, e leva o dobro de margem com ele.
-    const comDevoto = makeClan('ana', ['tem-redentor', 'cac-tiroduplo', 'sup-teimoso']);
+    const comDevoto = makeClan('ana', ['tem-redentor', 'bru-jupitel', 'sup-teimoso']);
     // Mesmo grupo, mas o tanque nao tem DEVOCAO: mais gente cai.
-    const semDevoto = makeClan('ana', ['tem-escudeiro', 'cac-tiroduplo', 'sup-teimoso']);
+    const semDevoto = makeClan('ana', ['tem-escudeiro', 'bru-jupitel', 'sup-teimoso']);
     // Margem 3: o PROTEGER comum (Poder de carta 2) nao cobre sozinho, o
     // DEVOCAO 2 (2 x 2 = 4) cobre.
     const rolo = () => makeClan('bruno', ['cav-bb', 'cav-bb']);
@@ -1413,27 +1470,21 @@ describe('EmperiumGame — quem e o dono do castelo', () => {
 
 describe('EmperiumGame — PRESO nao premia quem se resguardou', () => {
   it('so tira o bonus POSITIVO da Ordem, como a Emboscada', () => {
-    // Monge Corpo de Aco: COMBO -> o maior cla inimigo fica PRESO.
-    const carrasco = () => makeClan('ana', ['mon-aco', 'cav-bb', 'cav-bb']);
+    // Monge Corpo de Aco: ESPECIAL -> o maior cla inimigo fica PRESO. Como
+    // ESPECIAL nao se declara, o controle e a presenca dele na sala.
+    const comCarrasco = () => makeClan('ana', ['mon-aco', 'cav-bb', 'cav-bb']);
+    const semCarrasco = () => makeClan('ana', ['mon-combo', 'cav-bb', 'cav-bb']);
     const alvo = () => makeClan('bruno', ['mon-combo']);
 
-    const state = (c: Clan, b: Clan) =>
-      makeState({ ana: c, bruno: b }, { tileId: 'sala-corredor', castleOwnerId: 'carla' });
-
-    const rodar = (ordemDoAlvo: OrderId, comCombo: boolean) => {
-      const c = carrasco();
+    const rodar = (ordemDoAlvo: OrderId, comPreso: boolean) => {
+      const c = comPreso ? comCarrasco() : semCarrasco();
       const b = alvo();
-      const res = resolveRoom(state(c, b), 'b1', [
-        {
-          playerId: 'ana',
-          commitment: {
-            slot: 'b1',
-            charInstIds: ids(c),
-            ordem: 'cerco',
-            marcha: 0,
-            combo: comCombo ? ids(c)[0] : undefined,
-          },
-        },
+      const state = makeState({ ana: c, bruno: b }, {
+        tileId: 'sala-corredor',
+        castleOwnerId: 'carla',
+      });
+      const res = resolveRoom(state, 'b1', [
+        { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(c), ordem: 'cerco', marcha: 0 } },
         { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(b), ordem: ordemDoAlvo, marcha: 0 } },
       ]);
       return res.clas.find((f) => f.playerId === 'bruno')!;
@@ -1443,5 +1494,105 @@ describe('EmperiumGame — PRESO nao premia quem se resguardou', () => {
     expect(rodar('investida', false).poderBruto - rodar('investida', true).poderBruto).toBe(3);
     // Resguardo: o -2 dele NAO e devolvido. Marcar nao pode fortalecer o alvo.
     expect(rodar('resguardo', true).poderBruto).toBe(rodar('resguardo', false).poderBruto);
+  });
+});
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+describe('EmperiumGame — as palavras-chave ruins', () => {
+  function duelo(clans: Record<PlayerId, Clan>) {
+    const state = makeState(clans, { tileId: 'sala-corredor' });
+    const inputs: RoomInput[] = Object.keys(clans).map((p) => ({
+      playerId: p,
+      commitment: { slot: 'b1', charInstIds: ids(clans[p]!), ordem: 'cerco' as OrderId, marcha: 0 },
+    }));
+    const res = resolveRoom(state, 'b1', inputs);
+    return { res, de: (p: PlayerId) => res.clas.find((f) => f.playerId === p)! };
+  }
+
+  it('MALDICAO tira Poder de quem a carrega', () => {
+    // Algoz Veneno Mortal: +5 de evolucao, MALDICAO 2.
+    const com = makeClan('ana', ['mer-furtivo']);
+    transcenderTeste(com, ids(com)[0]!, 'tr-mer-veneno');
+    // Presa Sombria: +2, sem maldicao. A diferenca de evolucao e 3.
+    const sem = makeClan('ana', ['mer-furtivo']);
+    transcenderTeste(sem, ids(sem)[0]!, 'tr-mer-presa');
+    const alvo = () => makeClan('bruno', ['mon-combo']);
+
+    const a = duelo({ ana: com, bruno: alvo() }).de('ana').poderBruto;
+    const b = duelo({ ana: sem, bruno: alvo() }).de('ana').poderBruto;
+    // +5 -2 contra +2: a diferenca liquida e 1, e nao os 3 de Poder impresso.
+    expect(a - b).toBe(1);
+  });
+
+  it('BERSERK cai primeiro, mesmo com PROTEGER e DEVOCAO na sala', () => {
+    const ana = makeClan('ana', ['cav-bb', 'tem-escudeiro', 'tem-redentor']);
+    transcenderTeste(ana, ids(ana)[0]!, 'tr-cav-berserk');
+    const bruno = makeClan('bruno', ['cav-bb', 'cav-bb', 'cav-bb', 'cav-bb']);
+
+    const baixas = duelo({ ana, bruno }).de('ana').baixas;
+    // O berserker vem antes do devoto e do protetor.
+    expect(baixas[0]).toBe(ids(ana)[0]);
+  });
+
+  it('FRAGIL cai antes do resto — mas quem cobre passa na frente dele', () => {
+    // Cacador Rajada de Flechas: ALCANCE e FRAGIL.
+    const semTanque = makeClan('ana', ['cac-tiroduplo', 'mon-combo']);
+    const bruno = () => makeClan('bruno', ['cav-bb', 'cav-bb', 'cav-bb']);
+
+    // Sozinho, o fragil e o primeiro a cair.
+    expect(duelo({ ana: semTanque, bruno: bruno() }).de('ana').baixas[0]).toBe(ids(semTanque)[0]);
+
+    // Com um PROTEGER vivo, o ALCANCE dele nem entra na fila de baixas.
+    const comTanque = makeClan('ana', ['cac-tiroduplo', 'tem-escudeiro']);
+    const r = duelo({ ana: comTanque, bruno: bruno() });
+    expect(r.de('ana').baixas).not.toContain(ids(comTanque)[0]);
+    expect(r.de('ana').baixas).toContain(ids(comTanque)[1]);
+  });
+
+  it('as ruins sao anulaveis — e e isso que faz o Anular poder dar errado', () => {
+    for (const k of ['esgotar', 'fragil', 'berserk', 'maldicao']) {
+      expect(ANULAVEIS).toContain(k);
+    }
+  });
+});
+
+describe('EmperiumGame — ESPECIAL dispara sozinho', () => {
+  it('todo efeito que nao exige companheiro se chama ESPECIAL', () => {
+    const todos = [
+      ...DECK_I.filter((c) => c.combo).map((c) => c.combo!),
+      ...TRANSCENDENCIAS.filter((t) => t.combo).map((t) => t.combo!),
+    ];
+    for (const c of todos) {
+      if (c.exige.tipo === 'nenhum') expect(c.texto.startsWith('ESPECIAL')).toBe(true);
+      else expect(c.texto.startsWith('COMBO')).toBe(true);
+    }
+  });
+
+  it('o ESPECIAL nao gasta o combo declarado da sala', () => {
+    // Alquimista Boticario (ESPECIAL: EXPOSTO) + Sabio Protecao de Solo
+    // (COMBO Bruxo) + um Bruxo para o combo acender. Os dois acendem juntos.
+    const ana = makeClan('ana', ['alq-boticario', 'sab-solo', 'bru-jupitel']);
+    const carla = makeClan('carla', ['bru-tempestade', 'bru-tempestade']);
+    const state = makeState({ ana, carla }, { tileId: 'sala-patio' });
+    const res = resolveRoom(state, 'b1', [
+      {
+        playerId: 'ana',
+        commitment: {
+          slot: 'b1',
+          charInstIds: ids(ana),
+          ordem: 'cerco',
+          marcha: 0,
+          combo: ids(ana)[1],
+          anulares: [{ charInstId: ids(ana)[1]!, alvoInstId: ids(carla)[0]!, keyword: 'muralha' }],
+        },
+      },
+      { playerId: 'carla', commitment: { slot: 'b1', charInstIds: ids(carla), ordem: 'cerco', marcha: 0 } },
+    ]);
+    const de = (p: PlayerId) => res.clas.find((f) => f.playerId === p)!;
+    // O COMBO declarado aparece no resultado...
+    expect(de('ana').combo).toContain('COMBO Bruxo');
+    // ...e o ESPECIAL do Boticario tambem valeu, sem ter sido declarado.
+    expect(de('carla').marcas).toContain('exposto');
   });
 });

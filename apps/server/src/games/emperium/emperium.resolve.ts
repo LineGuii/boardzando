@@ -157,6 +157,8 @@ interface Faction {
   bonusOrdem: number;
   /** O combo declarado por esta cla nesta sala, se acendeu. */
   comboAtivo?: Combo;
+  /** Os ESPECIAIS do grupo, que disparam sem declaracao. */
+  especiais: Combo[];
   /** Marcas que esta cla esta sofrendo. */
   marcas: Set<Marca>;
   /** Efeitos de combo aplicados a esta cla. */
@@ -240,6 +242,18 @@ function factionPower(
     if (has('solo') && n === 1) {
       p += val('solo');
       c.bonusAplicado.set('solo', val('solo'));
+    }
+    // BERSERK X: +X de Poder, pago com a propria pele — ver pickCasualties.
+    if (has('berserk')) {
+      p += val('berserk');
+      c.bonusAplicado.set('berserk', val('berserk'));
+    }
+    // MALDICAO X: -X, pura perda. E por isso que ela e a melhor isca do jogo:
+    // o ANULAR inimigo que a cancelar esta DEVOLVENDO Poder ao dono.
+    if (has('maldicao')) {
+      p -= val('maldicao');
+      // Negativo de proposito: se alguem anular a Maldicao, o Poder volta.
+      c.bonusAplicado.set('maldicao', -val('maldicao'));
     }
     // RAJADA X: so na primeira rodada deste personagem nesta sala.
     if (has('rajada')) {
@@ -332,6 +346,7 @@ function factionPower(
     marcha,
     penalidadeMarcha,
     bonusOrdem,
+    especiais: [],
     marcas: new Set<Marca>(),
     cancelaEsgotar: false,
     troco: false,
@@ -349,8 +364,8 @@ function factionPower(
  */
 function applyCombos(factions: Faction[], zenyDe: (p: PlayerId) => number): void {
   for (const f of factions) {
-    const c = f.comboAtivo;
-    if (!c) continue;
+    // O COMBO declarado mais TODOS os ESPECIAIS do grupo.
+    for (const c of [...(f.comboAtivo ? [f.comboAtivo] : []), ...f.especiais]) {
     const e = c.efeito;
     switch (e.tipo) {
       case 'poder':
@@ -394,6 +409,7 @@ function applyCombos(factions: Faction[], zenyDe: (p: PlayerId) => number): void
         // Resolvido antes, na montagem das clas.
         break;
     }
+    }
   }
 
   // Consequencias das marcas.
@@ -431,8 +447,11 @@ function maiorInimiga(factions: readonly Faction[], eu: Faction): Faction | null
  * revelado nao tem o que cancelar, e quem nao foi nao esta na conta),
  * **imitar** (resolve antes e ja copiou) e **mover** (a marcha ja aconteceu:
  * cancelar o passo depois de dado nao desfaz o caminho).
+ *
+ * As palavras-chave RUINS estao dentro de proposito: sao elas que fazem o
+ * Anular poder dar errado.
  */
-const ANULAVEIS: readonly KeywordName[] = [
+export const ANULAVEIS: readonly KeywordName[] = [
   'muralha',
   'perfurar',
   'rajada',
@@ -442,45 +461,62 @@ const ANULAVEIS: readonly KeywordName[] = [
   'devocao',
   'restaurar',
   'pilhar',
+  // As RUINS entram: e o que torna o Anular uma decisao em vez de um acerto.
+  // Cancelar uma delas AJUDA o inimigo, e escolher e obrigatorio.
+  'esgotar',
+  'fragil',
+  'berserk',
+  'maldicao',
 ];
 
 /**
- * ANULAR cancela a MAIOR palavra-chave inimiga da sala — nao so Muralha.
+ * ANULAR cancela a palavra-chave que VOCE apontou, num personagem inimigo que
+ * VOCE nomeou — declarado junto do comprometimento, de brucos.
  *
- * "Maior" e por valor de X, e keywords sem X (PROTEGER, DEVOCAO) contam como 1.
- * A regra e automatica de proposito: escolher alvo exigiria pausar a resolucao,
- * e a fase foi feita simultanea justamente para nao ter downtime. Sendo
- * deterministica, da para o jogador calcular o alvo olhando a mesa antes de
- * comprometer.
+ * Deixou de ser automatico de proposito. Enquanto a regra era "cancela a maior
+ * da sala", o Anular era um acerto garantido e sem decisao: bastava trazer um.
+ * Agora ele e uma APOSTA, e a aposta e feita no escuro, porque o
+ * comprometimento inimigo e secreto — voce nomeia alguem do elenco dele
+ * (que e publico) e torce para que aquela pessoa esteja mesmo nesta sala.
+ *
+ * Errou o alvo, o Anular se perde. E como as palavras-chave RUINS tambem sao
+ * anulaveis, acertar tambem pode ser um erro: cancelar a MALDICAO 4 do inimigo
+ * devolve 4 de Poder a ele. Escolher continua sendo obrigatorio.
  */
-function applyAnular(factions: Faction[]): void {
-  for (const f of factions) {
-    for (let i = 0; i < f.temAnular; i++) {
-      let melhor: { alvo: Faction; c: CharCompute; kw: KeywordName; x: number } | null = null;
+function applyAnular(factions: Faction[], alvos: readonly AnularDeclarado[]): void {
+  for (const d of alvos) {
+    const minha = factions.find((f) => f.playerId === d.playerId);
+    if (!minha || minha.temAnular <= 0) continue;
 
-      for (const outra of factions) {
-        if (outra === f) continue;
-        for (const c of outra.chars) {
-          if (c.imuneAnular) continue;
-          for (const kwName of ANULAVEIS) {
-            const x = c.keywords.get(kwName);
-            if (x === undefined || x <= 0) continue;
-            if (!melhor || x > melhor.x) melhor = { alvo: outra, c, kw: kwName, x };
-          }
-        }
+    // O alvo precisa estar NESTA sala, num cla que nao seja o seu.
+    let alvoF: Faction | undefined;
+    let alvoC: CharCompute | undefined;
+    for (const outra of factions) {
+      if (outra === minha) continue;
+      const c = outra.chars.find((x) => x.instId === d.alvoInstId);
+      if (c) {
+        alvoF = outra;
+        alvoC = c;
+        break;
       }
+    }
+    // Nao veio, ou e imune: o Anular foi gasto a toa. E o preco do palpite.
+    if (!alvoF || !alvoC || alvoC.imuneAnular) continue;
+    if (!ANULAVEIS.includes(d.keyword)) continue;
 
-      if (!melhor) break;
-      melhor.c.keywords.delete(melhor.kw);
-      // Muralha e Perfurar ja foram somados no cla; desfaz o total tambem.
-      if (melhor.kw === 'muralha') melhor.alvo.muralha = Math.max(0, melhor.alvo.muralha - melhor.x);
-      if (melhor.kw === 'perfurar') melhor.alvo.perfurar = Math.max(0, melhor.alvo.perfurar - melhor.x);
-      // ELO, SOLO, RAJADA e o bonus de sala ja entraram no Poder: devolve.
-      const jaSomado = melhor.c.bonusAplicado.get(melhor.kw) ?? 0;
-      if (jaSomado > 0) {
-        melhor.alvo.poderBruto -= jaSomado;
-        melhor.c.bonusAplicado.delete(melhor.kw);
-      }
+    const x = alvoC.keywords.get(d.keyword);
+    if (x === undefined || x <= 0) continue;
+
+    alvoC.keywords.delete(d.keyword);
+    if (d.keyword === 'muralha') alvoF.muralha = Math.max(0, alvoF.muralha - x);
+    if (d.keyword === 'perfurar') alvoF.perfurar = Math.max(0, alvoF.perfurar - x);
+    // Devolve o que a palavra-chave ja tinha somado. Para as RUINS o valor
+    // gravado e negativo, entao cancelar uma Maldicao DEVOLVE Poder ao alvo —
+    // que e exatamente a armadilha.
+    const jaSomado = alvoC.bonusAplicado.get(d.keyword) ?? 0;
+    if (jaSomado !== 0) {
+      alvoF.poderBruto -= jaSomado;
+      alvoC.bonusAplicado.delete(d.keyword);
     }
   }
 }
@@ -550,6 +586,13 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
   // PRESO tira o PROTEGER do alvo: travado, ele nao consegue cobrir ninguem.
   const preso = f.marcas.has('preso');
   const ehProtetor = (c: CharCompute) => !preso && c.keywords.has('proteger');
+  // BERSERK nao pode ser coberto: ele vai na frente de TODO mundo, inclusive
+  // de quem estava se oferecendo para levar no lugar dele.
+  const ehBerserk = (c: CharCompute) => c.keywords.has('berserk');
+  // FRAGIL cai antes do resto — mas DEPOIS de quem se poe na frente. Quem
+  // trouxe um tanque consegue proteger o fragil, e essa e a graca: o defeito
+  // tem contra-jogo em vez de ser so uma penalidade.
+  const ehFragil = (c: CharCompute) => c.keywords.has('fragil');
   // DEVOCAO X: ele se joga na frente. Cada baixa que ele leva vale por X, entao
   // um Paladino com DEVOCAO 2 sozinho absorve o que derrubaria dois dos seus.
   // PRESO tambem o trava: quem nao se move nao cobre ninguem.
@@ -569,17 +612,37 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
     // Combo COBRIR: o tanque provocando enquanto o bruxo conjura.
     if (f.protegePapel && c.def.papel === f.protegePapel) return false;
     // ALCANCE protegido por quem esta na frente.
-    if (c.keywords.has('alcance') && temProtetorVivo && !ehProtetor(c) && devocaoDe(c) === 0)
+    // ALCANCE protegido por quem esta na frente. O proprio protetor e o devoto
+    // nao se protegem; o BERSERK tambem nao, porque ele cai primeiro de todos.
+    if (
+      c.keywords.has('alcance') &&
+      temProtetorVivo &&
+      !ehProtetor(c) &&
+      devocaoDe(c) === 0 &&
+      !ehBerserk(c)
+    )
       return false;
     return true;
   });
 
   // Protetores caem primeiro. Se o cla estiver PRESO eles nao cobrem ninguem e
   // entram na fila normal, pelo Poder de carta como todo mundo.
-  const devotos = elegiveis.filter((c) => devocaoDe(c) > 0);
-  const protetores = elegiveis.filter((c) => devocaoDe(c) === 0 && ehProtetor(c));
+  // A ESCADA DE BAIXAS, de cima para baixo:
+  //   BERSERK  — ninguem o cobre, nem quem quer
+  //   DEVOCAO  — se poe na frente e absorve por X
+  //   PROTEGER — cai antes dos demais
+  //   FRAGIL   — o elo fraco, se ninguem estiver na frente
+  //   o resto  — por Poder de carta crescente
+  const berserkers = elegiveis.filter(ehBerserk);
+  const devotos = elegiveis.filter((c) => !ehBerserk(c) && devocaoDe(c) > 0);
+  const protetores = elegiveis.filter(
+    (c) => !ehBerserk(c) && devocaoDe(c) === 0 && ehProtetor(c),
+  );
+  const frageis = elegiveis.filter(
+    (c) => !ehBerserk(c) && devocaoDe(c) === 0 && !ehProtetor(c) && ehFragil(c),
+  );
   const resto = elegiveis
-    .filter((c) => devocaoDe(c) === 0 && !ehProtetor(c))
+    .filter((c) => !ehBerserk(c) && devocaoDe(c) === 0 && !ehProtetor(c) && !ehFragil(c))
     .sort((a, b) => {
       // Amuleto de Ferro: nunca e a primeira baixa.
       const aAmu = a.equipSpecials.has('nunca-primeira-baixa') ? 1 : 0;
@@ -588,9 +651,7 @@ function pickCasualties(f: Faction, margem: number, round: number): string[] {
       return a.poderCarta - b.poderCarta;
     });
 
-  // Devoto primeiro: ele leva a baixa NO LUGAR do outro, entao entra na frente
-  // ate do PROTEGER, que so cai antes dos demais.
-  const fila = [...devotos, ...protetores, ...resto];
+  const fila = [...berserkers, ...devotos, ...protetores, ...frageis, ...resto];
   const caidos: string[] = [];
   let acumulado = 0;
   for (const c of fila) {
@@ -615,14 +676,44 @@ export interface RoomInput {
   commitment: Commitment;
 }
 
-/** O combo declarado no comprometimento, se o portador esta la e ele acende. */
+/** Um ANULAR apontado: quem anula, em quem, e qual palavra-chave. */
+interface AnularDeclarado {
+  playerId: PlayerId;
+  alvoInstId: string;
+  keyword: KeywordName;
+}
+
+/**
+ * O COMBO declarado no comprometimento, se o portador esta la e ele acende.
+ *
+ * ESPECIAL (`exige.tipo === 'nenhum'`) NAO entra aqui: ele dispara sozinho,
+ * sem declaracao, e nao gasta o combo da sala. Ver `especiaisDe`.
+ */
 function comboDeclarado(chars: readonly CharCompute[], declarado?: string): Combo | undefined {
   if (!declarado) return undefined;
   const portador = chars.find((c) => c.instId === declarado);
   if (!portador) return undefined;
   const c = comboDe(portador);
-  if (!c || !comboAcende(portador, chars, c)) return undefined;
+  if (!c || c.exige.tipo === 'nenhum') return undefined;
+  if (!comboAcende(portador, chars, c)) return undefined;
   return c;
+}
+
+/**
+ * Os ESPECIAIS do grupo: efeitos que nao pedem companheiro nenhum, entao nao
+ * ha o que declarar — disparam como a forja do Ferreiro, so por estarem la.
+ *
+ * Chamar aquilo de "combo" era estranho: nao se combina com ninguem. Em troca
+ * de nao precisar de declaracao, o ESPECIAL e sempre o mesmo efeito — nao ha
+ * escolha, e essa e a diferenca dele para o COMBO.
+ */
+function especiaisDe(chars: readonly CharCompute[]): Combo[] {
+  const out: Combo[] = [];
+  for (const c of chars) {
+    const combo = comboDe(c);
+    if (combo && combo.exige.tipo === 'nenhum') out.push(combo);
+  }
+  return out;
 }
 
 /**
@@ -632,9 +723,11 @@ function comboDeclarado(chars: readonly CharCompute[], declarado?: string): Comb
  * faria. No maximo um rapto por sala: o caos precisa de teto.
  */
 function aplicarRaptos(grupos: { input: RoomInput; chars: CharCompute[] }[]): string[] {
+  // O RAPTO vem do COMBO declarado ou de um ESPECIAL, que dispara sozinho.
   const raptores = grupos.filter((g) => {
-    const c = comboDeclarado(g.chars, g.input.commitment.combo);
-    return c?.efeito.tipo === 'rapto';
+    const declarado = comboDeclarado(g.chars, g.input.commitment.combo);
+    if (declarado?.efeito.tipo === 'rapto') return true;
+    return especiaisDe(g.chars).some((c) => c.efeito.tipo === 'rapto');
   });
   if (raptores.length === 0) return [];
 
@@ -790,6 +883,7 @@ export function resolveRoom(
       g.input.commitment.marcha ?? 0,
     );
     f.comboAtivo = comboDeclarado(g.chars, g.input.commitment.combo);
+    f.especiais = especiaisDe(g.chars);
     factions.push(f);
   }
 
@@ -809,6 +903,7 @@ export function resolveRoom(
       marcha: 0,
       penalidadeMarcha: 0,
       bonusOrdem: 0,
+      especiais: [],
       marcas: new Set<Marca>(),
       cancelaEsgotar: false,
       troco: false,
@@ -838,7 +933,18 @@ export function resolveRoom(
   applyCombos(factions, (p) => state.clans[p]?.zeny ?? 0);
   // IMITAR antes de ANULAR: copia o que ainda esta de pe, depois o Anular corta.
   applyImitar(factions);
-  applyAnular(factions);
+  // Os ANULAR apontados por cada cla nesta sala, na ordem de jogo.
+  const anulares: AnularDeclarado[] = [];
+  for (const g of grupos) {
+    for (const d of g.input.commitment.anulares ?? []) {
+      anulares.push({
+        playerId: g.input.playerId,
+        alvoInstId: d.alvoInstId,
+        keyword: d.keyword as KeywordName,
+      });
+    }
+  }
+  applyAnular(factions, anulares);
   applyMuralha(factions);
 
   const maior = factions.reduce((m, f) => Math.max(m, f.poderFinal), -Infinity);

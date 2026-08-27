@@ -40,9 +40,9 @@ segunda olhada.
 | Bases com combo | 19 de 42 |
 | Transcendências com combo | 12 de 42 |
 | Custo das bases | 3–7 zeny |
-| Poder das bases | 0–4 |
+| Poder das bases | 0–5 |
 | Custo das evoluções | 7–14 zeny |
-| Equipamentos | 30 |
+| Equipamentos | 31 |
 | Cartas de monstro | 11 tipos |
 | Consumíveis | 8 tipos |
 
@@ -67,7 +67,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
 | **Espiral** | 11z | +3 | PERFURAR 4 | *Spiral Pierce* |
-| **Fúria Berserk** | 12z | +5 | ESGOTAR | *Berserk* |
+| **Fúria Berserk** | 12z | +0 | BERSERK 5 | *Berserk* |
 | **Montaria** | 13z | +2 | MOVER 4 | *Peco-Peco de guerra* |
 
 > **Anotações:**
@@ -123,7 +123,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Sábio Petrificador** | 6z | 3 | 2.0 | Arcano | ◇ | MURALHA 1 | *Stone Curse* |
 
 - **Sábio Proteção de Solo** — COMBO Bruxo: seus personagens ignoram toda a Muralha inimiga.
-- **Sábio Petrificador** — COMBO: o maior clã inimigo fica PRESO.
+- **Sábio Petrificador** — ESPECIAL: o maior clã inimigo fica PRESO.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
@@ -131,7 +131,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Duplo Cast** | 11z | +4 | — | *Double Casting* |
 | **Memorizar** | 10z | +2 | IMITAR | *Memorize* |
 
-- **Dissonância** — COMBO: o maior clã inimigo fica PRESO.
+- **Dissonância** — ESPECIAL: o maior clã inimigo fica PRESO.
 - **Memorizar** — COMBO Monge: ninguém seu vai à Enfermaria por Esgotar.
 
 > **Anotações:**
@@ -150,7 +150,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|
 | **Rompe-Alma** | 12z | +5 | RAJADA 2 | *Soul Breaker* |
 | **Presa Sombria** | 10z | +2 | OCULTO | *Grimtooth* |
-| **Veneno Mortal** | 11z | +3 | PERFURAR 3 | *Enchant Deadly Poison* |
+| **Veneno Mortal** | 11z | +5 | PERFURAR 3 · MALDIÇÃO 2 | *Enchant Deadly Poison* |
 
 > **Anotações:**
 
@@ -170,7 +170,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Plágio** | 10z | +2 | IMITAR | *Plagiarism* |
 | **Marcha Silenciosa** | 12z | +2 | OCULTO · MOVER 2 | *Chase Walk* |
 
-- **Marcha Silenciosa** — COMBO: RAPTO — arranque 1 inimigo da sala.
+- **Marcha Silenciosa** — ESPECIAL: RAPTO — arranque 1 inimigo da sala.
 
 > **Anotações:**
 
@@ -182,7 +182,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Ferreiro Mercador** | 4z | 1 | 4.0 | Vanguarda | ◇ | PILHAR 3 | *Overcharge* |
 | **Ferreiro Perfeição de Armas** | 6z | 2 | 3.0 | Vanguarda | ◇◇ | PERFURAR 2 | *Weapon Perfection* |
 
-- **Ferreiro Mercador** — COMBO: +1 de Poder a cada 5 zeny no seu bolso.
+- **Ferreiro Mercador** — ESPECIAL: +1 de Poder a cada 5 zeny no seu bolso.
 - **Ferreiro Perfeição de Armas** — COMBO Vanguarda: seus personagens ignoram toda a Muralha inimiga.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
@@ -191,7 +191,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Fundição Suprema** | 9z | +1 | — · *refino sem quebra e 1 grátis por rodada* | *Forja lendária* |
 | **Adrenalina Suprema** | 10z | +2 | ELO 2 | *Adrenaline Rush* |
 
-- **Carrocerada** — COMBO: +1 de Poder a cada 3 zeny no seu bolso.
+- **Carrocerada** — ESPECIAL: +1 de Poder a cada 3 zeny no seu bolso.
 
 > **Anotações:**
 
@@ -203,7 +203,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Alquimista Boticário** | 5z | 1 | 5.0 | Suporte | ◇ | RESTAURAR 1 | *Potion Pitcher* |
 | **Alquimista Fogo Grego** | 6z | 3 | 2.0 | Suporte | ◇ | PERFURAR 2 | *Fogo grego* |
 
-- **Alquimista Boticário** — COMBO: o maior clã inimigo fica EXPOSTO.
+- **Alquimista Boticário** — ESPECIAL: o maior clã inimigo fica EXPOSTO.
 - **Alquimista Fogo Grego** — COMBO Arcano: +4 de Poder — o fogo pega no que o mago acendeu.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
@@ -212,8 +212,8 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Homúnculo Superior** | 11z | +3 | ELO 2 | *Homunculus S* |
 | **Bomba de Esferas** | 10z | +1 | MURALHA 3 | *Sphere Mine* |
 
-- **Demonstração Ácida** — COMBO: o maior clã inimigo fica EXPOSTO e PRESO.
-- **Homúnculo Superior** — COMBO: +3 de Poder — o homúnculo luta junto.
+- **Demonstração Ácida** — ESPECIAL: o maior clã inimigo fica EXPOSTO e PRESO.
+- **Homúnculo Superior** — ESPECIAL: +3 de Poder — o homúnculo luta junto.
 
 > **Anotações:**
 
@@ -247,7 +247,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
-| **Punho de Asura** | 14z | +8 | ESGOTAR | *Asura Strike* |
+| **Punho de Asura** | 14z | +11 | ESGOTAR · MALDIÇÃO 3 | *Asura Strike* |
 | **Salto** | 11z | +3 | MOVER 2 | *Body Relocation* |
 | **Corpo de Aço e Dilema** | 10z | +1 | PROTEGER · *não pode sofrer baixa* | *Steel Body* |
 
@@ -258,7 +258,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | Base | Custo | Poder | z/P | Papel | Slots | Palavras-chave | Build |
 |---|---|---|---|---|---|---|---|
 | **Caçador Armadilheiro** | 6z | 2 | 3.0 | Ágil | ◇ | MURALHA 2 | *Trapper* |
-| **Caçador Rajada de Flechas** | 6z | 4 | 1.5 | Ágil | ◇ | ALCANCE | *Double Strafe* |
+| **Caçador Rajada de Flechas** | 6z | 5 | 1.2 | Ágil | ◇ | ALCANCE · FRÁGIL | *Double Strafe* |
 | **Caçador Falcoeiro** | 6z | 2 | 3.0 | Ágil | ◇ | ALCANCE | *Falcão / Blitz Beat* |
 
 - **Caçador Armadilheiro** — ESPECIAL: o maior clã inimigo fica REVELADO.
@@ -269,7 +269,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Armadilha Suprema** | 10z | +2 | MURALHA 3 | *Trap Research* |
 | **Olho de Falcão** | 10z | +2 | ANULAR · *Revela Oculto inimigo na sala* | *Falcon Assault* |
 
-- **Olho de Falcão** — COMBO: o maior clã inimigo fica REVELADO.
+- **Olho de Falcão** — ESPECIAL: o maior clã inimigo fica REVELADO.
 
 > **Anotações:**
 
@@ -310,7 +310,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Tarô do Destino** | 11z | +2 | ANULAR | *Tarot Card of Fate* |
 | **Ritmo Hipnótico** | 10z | +2 | MURALHA 3 | *Slow Grace ampliado* |
 
-- **Tarô do Destino** — COMBO: o maior clã inimigo fica EXPOSTO.
+- **Tarô do Destino** — ESPECIAL: o maior clã inimigo fica EXPOSTO.
 
 > **Anotações:**
 
@@ -341,6 +341,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | **Espada Bastarda** | Vanguarda | 5z | +2 | ◈ | — | — |
 | **Lança de Cavalaria** | Vanguarda | 6z | +2 | ◈ | PERFURAR 1 | — |
 | **Machado de Guerra** | Vanguarda | 7z | +4 | ◈ | — | −1 se o portador tiver PROTEGER |
+| **Lâmina Maldita** | qualquer | 6z | +7 | ◈ | MALDIÇÃO 4 | — |
 | **Cajado da Tempestade** | Arcano | 6z | +3 | ◈ | — | — |
 | **Grimório** | Arcano | 5z | +1 | ◈ | MURALHA 1 | — |
 | **Varinha de Anulação** | Arcano | 7z | +1 | — | ANULAR | — |

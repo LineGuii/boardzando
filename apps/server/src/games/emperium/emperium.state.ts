@@ -93,6 +93,16 @@ export interface Commitment {
    */
   infiltrar?: { charInstId: string; destino: RoomSlot };
   /**
+   * Os ANULAR desta sala, apontados de brucos junto do comprometimento.
+   *
+   * Voce nomeia UM personagem do elenco inimigo (que e publico) e UMA palavra-
+   * chave dele. Se aquela pessoa nao veio para esta sala, o Anular se perde —
+   * e o preco de apostar no escuro. Declarar e obrigatorio: quem traz um
+   * ANULAR tem que apontar, mesmo que o unico alvo plausivel seja uma palavra-
+   * chave RUIM, cujo cancelamento AJUDA o inimigo.
+   */
+  anulares?: { charInstId: string; alvoInstId: string; keyword: string }[];
+  /**
    * Grupo criado pela infiltracao, nao pelo jogador: luta sem Ordem nenhuma.
    * O infiltrado entrou pela sombra, nao numa formacao.
    */

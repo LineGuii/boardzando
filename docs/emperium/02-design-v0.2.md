@@ -92,7 +92,7 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 
 ---
 
-## 4. A gramática — 15 palavras-chave
+## 4. A gramática — 18 palavras-chave
 
 | Palavra-chave | Efeito |
 |---|---|
@@ -105,12 +105,15 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 | **SOLO X** | +X de Poder se este for o seu único personagem nesta sala. |
 | **OCULTO** | Na revelação, se o seu clã não estiver REVELADO, ele pode escorregar para uma sala vizinha — sem pagar marcha — e luta lá sem Ordem. |
 | **DEVOÇÃO X** | Ele se joga na frente: cada baixa que ele leva conta por X, e os outros ficam de pé. Cai antes até do PROTEGER. |
-| **ANULAR** | Cancela a **maior palavra-chave inimiga da sala**, qualquer que seja. Não se anula um ANULAR. |
+| **ANULAR** | Você aponta UM personagem inimigo e UMA palavra-chave dele, junto do comprometimento. Se ele não vier para a sala, o Anular se perde. Apontar é obrigatório — e cancelar uma palavra-chave ruim devolve Poder ao inimigo. |
 | **RESTAURAR X** | No fim da rodada, mova X personagens da Enfermaria para a Reserva. |
 | **PILHAR X** | Se vencer, ganhe X zeny. Com X ≥ 3, ganhe 1 equipamento caído. |
 | **ESGOTAR** | Após resolver, este personagem vai para a Enfermaria — vencendo ou perdendo. |
 | **IMITAR X** | Copia até X palavras-chave do personagem inimigo de maior Poder de carta nesta sala. Resolve **antes** do ANULAR. |
 | **MOVER X** | Encurta a Marcha Forçada em até X salas — você paga só o que passar disso. |
+| **FRÁGIL** | Cai antes dos outros do seu clã — só PROTEGER e DEVOÇÃO conseguem passar na frente dele. |
+| **BERSERK X** | +X de Poder, e ninguém consegue cobri-lo: é sempre a primeira baixa do seu clã. |
+| **MALDIÇÃO X** | −X de Poder deste personagem. Pura perda. |
 
 Toda carta tem **no máximo 2** palavras-chave, mais no máximo **um Combo**.
 

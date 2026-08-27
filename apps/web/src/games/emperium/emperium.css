@@ -48,6 +48,7 @@
   --fam-ataque: #732B12;
   --fam-posicao: #1D4A2B;
   --fam-manobra: #422B6D;
+  --fam-defeito: #6B4A0C;
   --fam-marca: #6F2017;
 
   --vanguarda: #6E4718;
@@ -86,6 +87,7 @@
   --fam-ataque: #E8926A;
   --fam-posicao: #7CC08D;
   --fam-manobra: #B79BE8;
+  --fam-defeito: #D9A441;
   --fam-marca: #E36A5C;
 
   --vanguarda: #C9924A;
@@ -588,6 +590,7 @@
 .emp-chip[data-familia='ataque'] { --fam: var(--fam-ataque); }
 .emp-chip[data-familia='posicao'] { --fam: var(--fam-posicao); }
 .emp-chip[data-familia='manobra'] { --fam: var(--fam-manobra); }
+.emp-chip[data-familia='defeito'] { --fam: var(--fam-defeito); }
 .emp-chip[data-familia='marca'] { --fam: var(--fam-marca); }
 
 .emp-chave-icone {
@@ -2026,6 +2029,7 @@
 .emp-gloss-lista > div[data-familia='ataque'] { --fam: var(--fam-ataque); }
 .emp-gloss-lista > div[data-familia='posicao'] { --fam: var(--fam-posicao); }
 .emp-gloss-lista > div[data-familia='manobra'] { --fam: var(--fam-manobra); }
+.emp-gloss-lista > div[data-familia='defeito'] { --fam: var(--fam-defeito); }
 .emp-gloss-lista > div[data-familia='marca'] { --fam: var(--fam-marca); }
 .emp-gloss-lista dt {
   display: flex;
@@ -2050,6 +2054,7 @@
 .emp-familias li[data-familia='ataque'] { --fam: var(--fam-ataque); }
 .emp-familias li[data-familia='posicao'] { --fam: var(--fam-posicao); }
 .emp-familias li[data-familia='manobra'] { --fam: var(--fam-manobra); }
+.emp-familias li[data-familia='defeito'] { --fam: var(--fam-defeito); }
 .emp-familias li[data-familia='marca'] { --fam: var(--fam-marca); }
 .emp-familias li {
   display: flex;
@@ -2072,4 +2077,68 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
+}
+
+/* ── Mira do ANULAR e lista de ESPECIAIS ───────────────────
+ * O Anular deixou de acertar sozinho: agora e uma aposta que
+ * voce faz no escuro, e a UI precisa deixar isso claro antes
+ * de o jogador confirmar — inclusive o aviso de que anular
+ * uma palavra-chave RUIM ajuda o inimigo.
+ * ========================================================= */
+.emp-miras,
+.emp-especiais {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--pedra-borda);
+  background: var(--pedra-alta);
+}
+.emp-miras {
+  border-left: 3px solid var(--fam-manobra);
+}
+.emp-especiais {
+  border-left: 3px solid var(--ouro);
+}
+.emp-mira {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 7px;
+}
+.emp-mira b {
+  font-size: 0.72rem;
+  min-width: 9rem;
+}
+.emp-select {
+  flex: 1;
+  min-width: 15rem;
+  padding: 5px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--pedra-borda);
+  background: var(--pedra);
+  color: var(--tinta);
+  font-family: inherit;
+  font-size: 0.72rem;
+}
+.emp-select:focus {
+  outline: none;
+  border-color: var(--cristal);
+}
+.emp-especiais-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 7px;
+}
+.emp-especial-item {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.68rem;
+  color: var(--tinta-fraca);
+}
+.emp-especial-item b {
+  color: var(--ouro);
+  min-width: 9rem;
 }
