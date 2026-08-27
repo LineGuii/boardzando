@@ -586,6 +586,23 @@ Não. Ele precisa estar comprometido **na mesma sala**.
 **Posso declarar dois combos numa sala?**
 Não. Um por clã por sala.
 
+**A Muralha acumula? Dois personagens meus com Muralha somam?**
+Somam, sim — e em duas direções.
+
+**Dentro do seu clã:** dois Bruxos Tempestade com MURALHA 2 cada dão **MURALHA 4**, e
+esse 4 é subtraído do Poder Total de **cada** clã inimigo da sala, separadamente. Não é
+4 dividido entre eles: é 4 em cima de cada um.
+
+**Entre clãs inimigos:** se dois adversários seus trouxerem MURALHA 2 cada, você leva
+**−4**, porque você soma a Muralha de todos os outros clãs da sala. Numa sala com três
+clãs, cada um calcula a própria redução somando os outros dois — a Muralha nunca reduz o
+Poder de quem a trouxe.
+
+Duas coisas cancelam Muralha, e vale saber a diferença. **EXPOSTO zera a Muralha do clã
+inteiro**, não importa quantos personagens a estavam carregando. **ANULAR corta a de um
+personagem só**, e ainda por cima só se ela for a maior palavra-chave inimiga da sala.
+Contra uma parede empilhada, Exposto é o remédio; Anular é um arranhão.
+
 **A Muralha pode zerar o Poder de alguém?**
 Pode chegar a zero, nunca abaixo.
 

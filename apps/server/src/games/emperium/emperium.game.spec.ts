@@ -1253,3 +1253,53 @@ describe('EmperiumGame — v0.3 fase 2: Devocao e o dueto', () => {
     expect(CHARACTER_BY_ID.get('sup-sorte')?.classe).toBe('Superaprendiz');
   });
 });
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+describe('EmperiumGame — MURALHA acumula', () => {
+  function duelo(clans: Record<PlayerId, Clan>) {
+    const state = makeState(clans, { tileId: 'sala-corredor' });
+    const inputs: RoomInput[] = Object.keys(clans).map((p) => ({
+      playerId: p,
+      commitment: { slot: 'b1', charInstIds: ids(clans[p]!), ordem: 'cerco' as OrderId, marcha: 0 },
+    }));
+    const res = resolveRoom(state, 'b1', inputs);
+    return { res, de: (p: PlayerId) => res.clas.find((f) => f.playerId === p)! };
+  }
+
+  it('duas MURALHAS do mesmo clã somam contra cada inimigo', () => {
+    // Bruxo Tempestade tem MURALHA 2. Dois deles = 4 de reducao.
+    const um = duelo({
+      ana: makeClan('ana', ['bru-tempestade']),
+      bruno: makeClan('bruno', ['mon-combo', 'mon-combo']),
+    });
+    const dois = duelo({
+      ana: makeClan('ana', ['bru-tempestade', 'bru-tempestade']),
+      bruno: makeClan('bruno', ['mon-combo', 'mon-combo']),
+    });
+    const b1 = um.de('bruno');
+    const b2 = dois.de('bruno');
+    expect(b1.poderBruto).toBe(b2.poderBruto); // o Bruno nao mudou
+    expect(b1.poderBruto - b1.poderFinal).toBe(2);
+    expect(b2.poderBruto - b2.poderFinal).toBe(4);
+  });
+
+  it('as MURALHAS de clãs inimigos DIFERENTES tambem somam sobre voce', () => {
+    const r = duelo({
+      ana: makeClan('ana', ['mon-combo', 'mon-combo']),
+      bruno: makeClan('bruno', ['bru-tempestade']),
+      carla: makeClan('carla', ['bru-tempestade']),
+    });
+    const a = r.de('ana');
+    // Duas Muralhas 2, de dois clas distintos: 4 a menos.
+    expect(a.poderBruto - a.poderFinal).toBe(4);
+  });
+
+  it('a MURALHA nunca leva o Poder abaixo de zero', () => {
+    const r = duelo({
+      ana: makeClan('ana', ['sup-teimoso']), // Poder 1
+      bruno: makeClan('bruno', ['bru-tempestade', 'bru-tempestade', 'bru-tempestade']),
+    });
+    expect(r.de('ana').poderFinal).toBe(0);
+  });
+});

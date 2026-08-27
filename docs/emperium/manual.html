@@ -123,7 +123,10 @@ td .mk { font-family: var(--bitmap); font-size: .62rem; letter-spacing: .05em;
   text-transform: uppercase; color: var(--muted); display: block; margin-bottom: var(--s1); }
 
 /* ── FAQ ──────────────────────────────────────────────── */
-.faq { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: var(--s2); }
+/* align-items: start para o card de resposta longa nao esticar os vizinhos
+   curtos da mesma linha, deixando caixas com metade de vazio. */
+.faq { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  gap: var(--s2); align-items: start; }
 .qa { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px;
   padding: var(--s3); min-width: 0; }
 .qa .q { font-weight: 700; font-size: .88rem; display: block; margin-bottom: 3px; }
@@ -750,6 +753,16 @@ footer { border-top: 1px solid var(--rule); padding-top: var(--s3);
       <span class="a">Não. Ele precisa estar comprometido <b>na mesma sala</b>.</span></div>
     <div class="qa"><span class="q">Posso declarar dois combos numa sala?</span>
       <span class="a">Não. Um por clã por sala.</span></div>
+    <div class="qa"><span class="q">A Muralha acumula? Dois personagens meus com Muralha somam?</span>
+      <span class="a">Somam, e em duas direções. <b>Dentro do seu clã:</b> dois Bruxos Tempestade com
+      Muralha 2 cada dão <b>Muralha 4</b>, e esse 4 sai do Poder Total de <b>cada</b> clã inimigo da
+      sala, separadamente — não é 4 dividido entre eles, é 4 em cima de cada um.
+      <b>Entre clãs inimigos:</b> se dois adversários trouxerem Muralha 2 cada, você leva <b>−4</b>,
+      porque você soma a Muralha de todos os outros clãs. Numa sala com três clãs, cada um soma os
+      outros dois — e a Muralha nunca reduz o Poder de quem a trouxe.
+      Para derrubar uma parede empilhada, <b>Exposto zera a Muralha do clã inteiro</b>, enquanto
+      <b>Anular corta a de um personagem só</b> e ainda por cima só se ela for a maior palavra-chave
+      inimiga da sala: Exposto é o remédio, Anular é um arranhão.</span></div>
     <div class="qa"><span class="q">A Muralha pode zerar o Poder de alguém?</span>
       <span class="a">Pode chegar a zero, nunca abaixo.</span></div>
     <div class="qa"><span class="q">Com Resguardo e o maior Poder, eu controlo a sala?</span>
