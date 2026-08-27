@@ -71,6 +71,13 @@ export type RoomEffect =
  */
 export const LIMITE_PADRAO = 3;
 
+/**
+ * O teto das duas salas amplas. Elas nao sao mais ilimitadas: o Patio e o
+ * Trono continuam sendo onde cabe mais gente, mas com um teto, para o Cerco
+ * — a unica Ordem que ignora limite — ter uso em qualquer lugar do castelo.
+ */
+export const LIMITE_AMPLO = 4;
+
 export interface RoomTileDef {
   readonly id: string;
   readonly nome: string;
@@ -83,7 +90,7 @@ export interface RoomTileDef {
 /** As 12 fichas de ala. Quatro entram em jogo por partida. */
 export const WING_TILES: readonly RoomTileDef[] = [
   { id: 'sala-corredor', nome: 'Corredor Estreito', regra: 'Limite 2 personagens por clã.', effect: 'limite2', limite: 2 },
-  { id: 'sala-patio', nome: 'Pátio Aberto', regra: 'Personagens com Alcance têm +1 de Poder.', effect: 'bonus-alcance', limite: 0 },
+  { id: 'sala-patio', nome: 'Pátio Aberto', regra: 'Limite 4 por clã. Personagens com Alcance têm +1 de Poder.', effect: 'bonus-alcance', limite: LIMITE_AMPLO },
   { id: 'sala-ponte', nome: 'Ponte sobre o Fosso', regra: 'Clãs derrotados não sofrem baixa: voltam à Reserva.', effect: 'sem-baixa', limite: LIMITE_PADRAO },
   { id: 'sala-labirinto', nome: 'Labirinto', regra: 'Comprometer aqui custa 1 zeny por personagem. Alcance não funciona.', effect: 'pedagio-sem-alcance', limite: LIMITE_PADRAO },
   { id: 'sala-guardioes', nome: 'Salão dos Guardiões', regra: 'Guarnição de Poder 6 que combate todos os clãs. Ninguém controla enquanto viva.', effect: 'guarnicao6', limite: LIMITE_PADRAO },
@@ -108,9 +115,9 @@ export const FIXED_TILES: Readonly<Record<'portao' | 'trono' | 'emperium', RoomT
   trono: {
     id: 'sala-trono',
     nome: 'Salão do Trono',
-    regra: 'Sem limite. O dono do castelo tem +2 de Poder aqui.',
+    regra: 'Limite 4 por clã. O dono do castelo tem +2 de Poder aqui.',
     effect: 'nenhum',
-    limite: 0,
+    limite: LIMITE_AMPLO,
   },
   emperium: {
     id: 'sala-emperium',

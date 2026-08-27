@@ -33,7 +33,7 @@ As quatro alas sorteadas:
 ```
               [SALA DO EMPERIUM]  durabilidade 14
                       |
-              [SALÃO DO TRONO]    sem limite · defensora +2
+              [SALÃO DO TRONO]    limite 4 · defensora +2
                 /            \
           [FORJA]            [TERRAÇO]
              |                    |

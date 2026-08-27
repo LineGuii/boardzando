@@ -304,7 +304,7 @@ O dono do castelo **não paga marcha nenhuma** dentro do próprio castelo.
 | Sala | Regra |
 |---|---|
 | Corredor Estreito | Limite 2 personagens por clã. |
-| Pátio Aberto | Personagens com Alcance têm +1 de Poder. |
+| Pátio Aberto | Limite 4 por clã. Personagens com Alcance têm +1 de Poder. |
 | Ponte sobre o Fosso | Clãs derrotados não sofrem baixa: voltam à Reserva. |
 | Labirinto | Comprometer custa 1 zeny por personagem. Alcance não funciona. |
 | Salão dos Guardiões | Guarnição de Poder 6 que combate todos os clãs. |
@@ -398,10 +398,15 @@ no máximo quatro salas.
 > é devolvido — emboscar impede o ataque, não desfaz o recuo.
 >
 > O **Cerco** ignorava o limite da sala, mas só o Corredor Estreito tinha limite: era uma
-> Ordem morta em seis das sete salas. Agora **quase toda sala tem limite 3 por clã**. As
-> duas exceções são deliberadas: o **Pátio Aberto** (a sala onde exército grande
-> simplesmente ganha) e o **Salão do Trono** (último degrau antes do Emperium, precisa
-> comportar um cerco de verdade dos dois lados). O Cerco passou a valer em cinco de sete.
+> Ordem morta em seis das sete salas. Agora **toda sala tem teto**, e o Cerco vale em toda
+> parte. A escala tem três degraus deliberados: **2** no Corredor Estreito, a sala que pune
+> número bruto; **3** na maioria; **4** no **Pátio Aberto** (onde exército grande ganha) e
+> no **Salão do Trono** (último degrau antes do Emperium, que precisa comportar um cerco
+> de verdade dos dois lados).
+>
+> A **Sala do Emperium** é a única sem teto, e isso é o clímax do jogo: o assalto final é
+> para mandar tudo o que restou. Um limite ali achataria o desfecho e favoreceria o
+> defensor, que já tem o escudo absorvendo em ordem crescente.
 
 ---
 

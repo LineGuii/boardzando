@@ -141,41 +141,46 @@ interface TileInfo {
   nome: string;
   regra: string;
   cat: CategoriaSala;
+  /** Personagens por clã. 0 = sem limite. Espelha `RoomTileDef.limite`. */
+  limite: number;
 }
 
 /** Espelha `emperium.rooms.ts` — nome, regra impressa e categoria de cor. */
 const TILE_INFO: Record<string, TileInfo> = {
   'sala-portao': {
     nome: 'Portão Principal',
-    regra: 'Limite 3 por clã. Todo mundo sempre pode entrar por aqui.',
+    regra: 'Todo mundo sempre pode entrar por aqui.',
     cat: 'espinha',
+    limite: 3,
   },
-  'sala-trono': { nome: 'Salão do Trono', regra: 'Sem limite. O dono do castelo tem +2 aqui.', cat: 'espinha' },
-  'sala-emperium': { nome: 'Sala do Emperium', regra: 'O cristal. Só se bate aqui com o caminho aberto.', cat: 'espinha' },
-  'sala-corredor': { nome: 'Corredor Estreito', regra: 'Limite 2 personagens por clã.', cat: 'batalha' },
-  'sala-patio': { nome: 'Pátio Aberto', regra: 'Personagens com Alcance têm +1 de Poder.', cat: 'batalha' },
-  'sala-terraco': { nome: 'Terraço', regra: 'Arcano tem Poder dobrado. Vanguarda tem −2 de Poder.', cat: 'batalha' },
-  'sala-ponte': { nome: 'Ponte sobre o Fosso', regra: 'Clãs derrotados não sofrem baixa: voltam à Reserva.', cat: 'resgate' },
-  'sala-cripta': { nome: 'Cripta', regra: 'Baixas aqui vão para a Reserva, não para a Enfermaria.', cat: 'resgate' },
-  'sala-armazem': { nome: 'Armazém', regra: 'Quem controla ganha 4 zeny no fim da rodada.', cat: 'economia' },
-  'sala-forja': { nome: 'Forja', regra: 'Quem controla faz 1 refino grátis e sem risco.', cat: 'economia' },
-  'sala-capela': { nome: 'Capela', regra: 'Quem controla tira 1 personagem da Enfermaria.', cat: 'economia' },
-  'sala-labirinto': { nome: 'Labirinto', regra: 'Custa 1 zeny por personagem. Alcance não funciona.', cat: 'passagem' },
-  'sala-portal': { nome: 'Portal Rúnico', regra: 'Ignore a Marcha Forçada para comprometer aqui.', cat: 'passagem' },
+  'sala-trono': { nome: 'Salão do Trono', regra: 'O dono do castelo tem +2 aqui.', cat: 'espinha', limite: 4 },
+  'sala-emperium': { nome: 'Sala do Emperium', regra: 'O cristal. Mande tudo: o assalto final não tem teto.', cat: 'espinha', limite: 0 },
+  'sala-corredor': { nome: 'Corredor Estreito', regra: 'A sala que pune número bruto.', cat: 'batalha', limite: 2 },
+  'sala-patio': { nome: 'Pátio Aberto', regra: 'Personagens com Alcance têm +1 de Poder.', cat: 'batalha', limite: 4 },
+  'sala-terraco': { nome: 'Terraço', regra: 'Arcano tem Poder dobrado. Vanguarda tem −2 de Poder.', cat: 'batalha', limite: 3 },
+  'sala-ponte': { nome: 'Ponte sobre o Fosso', regra: 'Clãs derrotados não sofrem baixa: voltam à Reserva.', cat: 'resgate', limite: 3 },
+  'sala-cripta': { nome: 'Cripta', regra: 'Baixas aqui vão para a Reserva, não para a Enfermaria.', cat: 'resgate', limite: 3 },
+  'sala-armazem': { nome: 'Armazém', regra: 'Quem controla ganha 4 zeny no fim da rodada.', cat: 'economia', limite: 3 },
+  'sala-forja': { nome: 'Forja', regra: 'Quem controla faz 1 refino grátis e sem risco.', cat: 'economia', limite: 3 },
+  'sala-capela': { nome: 'Capela', regra: 'Quem controla tira 1 personagem da Enfermaria.', cat: 'economia', limite: 3 },
+  'sala-labirinto': { nome: 'Labirinto', regra: 'Custa 1 zeny por personagem. Alcance não funciona.', cat: 'passagem', limite: 3 },
+  'sala-portal': { nome: 'Portal Rúnico', regra: 'Ignore a Marcha Forçada para comprometer aqui.', cat: 'passagem', limite: 3 },
   'sala-vigia': {
     nome: 'Torre de Vigia',
     regra: 'Quem controla espia os comprometimentos de 1 sala adjacente.',
     cat: 'vigilancia',
+    limite: 3,
   },
   'sala-guardioes': {
     nome: 'Salão dos Guardiões',
     regra: 'Guarnição de Poder 6 contra todos. Ninguém controla enquanto viva.',
     cat: 'vigilancia',
+    limite: 3,
   },
 };
 
 const infoDaSala = (tileId: string): TileInfo =>
-  TILE_INFO[tileId] ?? { nome: tileId, regra: '', cat: 'espinha' };
+  TILE_INFO[tileId] ?? { nome: tileId, regra: '', cat: 'espinha', limite: 3 };
 
 const ORDEM_INFO: Record<OrderId, { nome: string; efeito: string }> = {
   investida: { nome: 'Investida', efeito: '+3 Poder. Se perder, 1 baixa extra.' },
@@ -751,6 +756,12 @@ export function EmperiumBoard() {
                   >
                     <div className="emp-sala-cat">{CATEGORIA_INFO[info.cat].rotulo}</div>
                     <div className="emp-sala-nome">{info.nome}</div>
+                    <div
+                      className="emp-sala-limite"
+                      title="Quantos personagens cada clã pode comprometer aqui. O Cerco ignora o limite."
+                    >
+                      {info.limite > 0 ? `máx. ${info.limite} por clã` : 'sem limite'}
+                    </div>
                     {info.regra && <div className="emp-sala-regra">{info.regra}</div>}
                     {custoMarcha > 0 ? (
                       <div className="emp-sala-marcha" title={`Marcha Forçada: ${dist} sala(s) além da sua linha de frente`}>

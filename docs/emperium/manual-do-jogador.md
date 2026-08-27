@@ -338,12 +338,14 @@ isso a mais vulnerável à Emboscada.
 
 **Ignore o limite de personagens da sala. −1 de Poder.**
 
-**Quase toda sala tem limite de 3 por clã** (o Corredor Estreito tem 2). As únicas
-exceções são o **Pátio Aberto** e o **Salão do Trono**, que não têm limite nenhum.
+**Toda sala do castelo tem limite, com uma única exceção.** A maioria é **3 por clã**.
+O **Corredor Estreito** é mais apertado, **2**. O **Pátio Aberto** e o **Salão do Trono**
+são as salas amplas, **4**. E a **Sala do Emperium** não tem teto nenhum: o assalto final
+é para mandar tudo.
 
-Então o Cerco vale em cinco das sete salas: ele troca 1 de Poder por poder trazer o quarto,
-o quinto, o exército inteiro. Num Corredor Estreito com limite 2, é a diferença entre
-mandar dois e mandar cinco.
+Então o Cerco vale em toda parte, e não em duas salas: ele troca 1 de Poder por poder
+trazer o quarto, o quinto, o exército inteiro. Num Corredor Estreito com limite 2, é a
+diferença entre mandar dois e mandar cinco.
 
 ### EMBOSCADA — para desarmar quem ia atacar
 
@@ -538,8 +540,8 @@ Quatro entram em jogo por partida.
 
 | Sala | Regra |
 |---|---|
-| **Corredor Estreito** | **Limite 2** por clã (todas as outras alas têm limite 3). |
-| **Pátio Aberto** | **Sem limite.** Personagens com Alcance têm +1 de Poder. |
+| **Corredor Estreito** | **Limite 2** por clã — a sala que pune número bruto. |
+| **Pátio Aberto** | **Limite 4** por clã. Personagens com Alcance têm +1 de Poder. |
 | **Ponte sobre o Fosso** | Clãs derrotados não sofrem baixa: voltam à Reserva. |
 | **Labirinto** | Comprometer custa 1 zeny por personagem. Alcance não funciona. |
 | **Salão dos Guardiões** | Guarnição de Poder 6 que combate todos os clãs. Ninguém controla enquanto ela viver. |
@@ -555,9 +557,10 @@ Quatro entram em jogo por partida.
 
 **Portão Principal** — limite 3 por clã. Sempre na sua linha de frente.
 
-**Salão do Trono** — **sem limite**. O dono do castelo tem **+2 de Poder** aqui.
+**Salão do Trono** — **limite 4** por clã. O dono do castelo tem **+2 de Poder** aqui.
 
-**Sala do Emperium** — não se disputa controle. Ver § 10.
+**Sala do Emperium** — **sem limite**: o assalto final não tem teto. Não se disputa
+controle. Ver § 10.
 
 ---
 

@@ -20,7 +20,9 @@ import {
 import {
   ADJACENCY,
   FIXED_TILES,
+  LIMITE_PADRAO,
   ROOM_SLOTS,
+  TILE_BY_ID,
   TOTAL_ROUNDS,
   WING_TILES,
 } from './emperium.rooms';
@@ -491,11 +493,59 @@ describe('EmperiumGame — Transcendencia', () => {
 });
 
 describe('EmperiumGame — as Ordens', () => {
-  it('quase toda sala tem limite — e por isso o Cerco vale a pena', () => {
+  it('so a Sala do Emperium fica sem limite — e por isso o Cerco vale a pena', () => {
     // Sem limite quase universal, o Cerco so servia no Corredor Estreito.
     const semLimite = [...WING_TILES, ...Object.values(FIXED_TILES)].filter((t) => t.limite === 0);
-    const nomes = semLimite.map((t) => t.nome).sort();
-    expect(nomes).toEqual(['Pátio Aberto', 'Sala do Emperium', 'Salão do Trono']);
+    expect(semLimite.map((t) => t.nome)).toEqual(['Sala do Emperium']);
+  });
+
+  it('3 e o limite da maioria; 2 no Corredor e 4 nas duas salas amplas', () => {
+    const porLimite = new Map<number, string[]>();
+    for (const t of [...WING_TILES, ...Object.values(FIXED_TILES)]) {
+      porLimite.set(t.limite, [...(porLimite.get(t.limite) ?? []), t.nome].sort());
+    }
+    expect(porLimite.get(2)).toEqual(['Corredor Estreito']);
+    expect(porLimite.get(4)).toEqual(['Pátio Aberto', 'Salão do Trono']);
+    expect(porLimite.get(0)).toEqual(['Sala do Emperium']);
+    // A maioria: as onze restantes.
+    expect(porLimite.get(LIMITE_PADRAO)).toHaveLength(11);
+  });
+
+  it('o limite barra o comprometimento, e o Cerco atravessa', () => {
+    const match = newMatch();
+    for (let guard = 0; guard < 40; guard++) {
+      const st = match.snapshot.state;
+      if (st.step !== 'mercado') break;
+      const p = jogadorDoMercado(st);
+      if (!p) break;
+      match.applyMove(p, 'passarMercado', { type: 'passarMercado' });
+    }
+    const st = match.snapshot.state;
+    // O defensor comeca com 3 personagens: cabe no Portao (3), nao no Corredor (2).
+    const dono = st.castleOwnerId;
+    const meus = Object.values(st.clans[dono]!.chars)
+      .filter((c) => c.local === 'reserva')
+      .map((c) => c.instId);
+    expect(meus.length).toBeGreaterThanOrEqual(3);
+
+    const salaDeDois = st.slots.find(
+      (sl) => TILE_BY_ID.get(st.rooms[sl]!.tileId)?.limite === 2,
+    );
+    if (!salaDeDois) return; // o Corredor nao entrou nesta partida
+
+    expect(() =>
+      match.applyMove(dono, 'confirmarComprometimento', {
+        type: 'confirmarComprometimento',
+        commitments: [{ slot: salaDeDois, charInstIds: meus.slice(0, 3), ordem: 'investida' }],
+      }),
+    ).toThrow(InvalidMoveError);
+
+    // Com Cerco, os mesmos tres passam.
+    match.applyMove(dono, 'confirmarComprometimento', {
+      type: 'confirmarComprometimento',
+      commitments: [{ slot: salaDeDois, charInstIds: meus.slice(0, 3), ordem: 'cerco' }],
+    });
+    expect(match.snapshot.state.confirmados).toContain(dono);
   });
 
   it('a EMBOSCADA cancela o bonus positivo da Ordem alheia', () => {
