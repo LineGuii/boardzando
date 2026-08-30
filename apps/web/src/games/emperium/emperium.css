@@ -49,6 +49,7 @@
   --fam-posicao: #1D4A2B;
   --fam-manobra: #422B6D;
   --fam-defeito: #6B4A0C;
+  --fam-cristal: #074B45;
   --fam-marca: #6F2017;
 
   --vanguarda: #6E4718;
@@ -88,6 +89,7 @@
   --fam-posicao: #7CC08D;
   --fam-manobra: #B79BE8;
   --fam-defeito: #D9A441;
+  --fam-cristal: #4ADFD3;
   --fam-marca: #E36A5C;
 
   --vanguarda: #C9924A;
@@ -591,6 +593,7 @@
 .emp-chip[data-familia='posicao'] { --fam: var(--fam-posicao); }
 .emp-chip[data-familia='manobra'] { --fam: var(--fam-manobra); }
 .emp-chip[data-familia='defeito'] { --fam: var(--fam-defeito); }
+.emp-chip[data-familia='cristal'] { --fam: var(--fam-cristal); }
 .emp-chip[data-familia='marca'] { --fam: var(--fam-marca); }
 
 .emp-chave-icone {
@@ -2030,6 +2033,7 @@
 .emp-gloss-lista > div[data-familia='posicao'] { --fam: var(--fam-posicao); }
 .emp-gloss-lista > div[data-familia='manobra'] { --fam: var(--fam-manobra); }
 .emp-gloss-lista > div[data-familia='defeito'] { --fam: var(--fam-defeito); }
+.emp-gloss-lista > div[data-familia='cristal'] { --fam: var(--fam-cristal); }
 .emp-gloss-lista > div[data-familia='marca'] { --fam: var(--fam-marca); }
 .emp-gloss-lista dt {
   display: flex;
@@ -2055,6 +2059,7 @@
 .emp-familias li[data-familia='posicao'] { --fam: var(--fam-posicao); }
 .emp-familias li[data-familia='manobra'] { --fam: var(--fam-manobra); }
 .emp-familias li[data-familia='defeito'] { --fam: var(--fam-defeito); }
+.emp-familias li[data-familia='cristal'] { --fam: var(--fam-cristal); }
 .emp-familias li[data-familia='marca'] { --fam: var(--fam-marca); }
 .emp-familias li {
   display: flex;

@@ -1596,3 +1596,78 @@ describe('EmperiumGame — ESPECIAL dispara sozinho', () => {
     expect(de('carla').marcas).toContain('exposto');
   });
 });
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+describe('EmperiumGame — o quebrador de Emperium', () => {
+  it('ESTILHACAR nao vale nada fora da Sala do Emperium', () => {
+    // Monge Disparar Esferas: Poder 1, ESTILHACAR 4.
+    const ana = makeClan('ana', ['mon-dilema']);
+    const bruno = makeClan('bruno', ['mon-combo']);
+    const state = makeState({ ana, bruno }, { tileId: 'sala-corredor' });
+    const res = resolveRoom(state, 'b1', [
+      { playerId: 'ana', commitment: { slot: 'b1', charInstIds: ids(ana), ordem: 'cerco', marcha: 0 } },
+      { playerId: 'bruno', commitment: { slot: 'b1', charInstIds: ids(bruno), ordem: 'cerco', marcha: 0 } },
+    ]);
+    // Poder 1 - 1 do Cerco = 0. Ele nao segura corredor nenhum.
+    expect(res.clas.find((f) => f.playerId === 'ana')!.poderBruto).toBe(0);
+  });
+
+  it('ESTILHACAR vale contra o cristal', () => {
+    const ana = makeClan('ana', ['mon-dilema']);
+    const carla = makeClan('carla', []);
+    const state = makeState({ ana, carla }, { castleOwnerId: 'carla', round: 6 });
+    const res = resolveEmperium(state, [
+      { playerId: 'ana', commitment: { slot: 'emperium', charInstIds: ids(ana), ordem: 'cerco', marcha: 0 } },
+    ]);
+    // Poder 1 + ESTILHACAR 4 - 1 do Cerco = 4.
+    expect(res.clas.find((f) => f.playerId === 'ana')!.poderBruto).toBe(4);
+  });
+
+  it('ARIETE atravessa o Escudo, e quem nao tem nao atravessa', () => {
+    const comAriete = makeClan('ana', ['mon-combo']);
+    transcenderTeste(comAriete, ids(comAriete)[0]!, 'tr-mon-asura');
+    const semAriete = makeClan('ana', ['bru-jupitel']);
+    transcenderTeste(semAriete, ids(semAriete)[0]!, 'tr-bru-meteoros');
+
+    const rodar = (atacante: Clan) => {
+      const carla = makeClan('carla', ['cav-bb', 'cav-bb', 'cav-bb']);
+      const state = makeState({ ana: atacante, carla }, { castleOwnerId: 'carla', round: 4 });
+      return resolveEmperium(state, [
+        { playerId: 'ana', commitment: { slot: 'emperium', charInstIds: ids(atacante), ordem: 'cerco', marcha: 0 } },
+        { playerId: 'carla', commitment: { slot: 'emperium', charInstIds: ids(carla), ordem: 'cerco', marcha: 0 } },
+      ]);
+    };
+
+    expect(rodar(semAriete).danoPorJogador!['ana']).toBe(0);
+    expect(rodar(comAriete).danoPorJogador!['ana']).toBeGreaterThan(0);
+  });
+
+  it('ARIETE nao gasta o Escudo — ele passa por fora', () => {
+    const asura = makeClan('ana', ['mon-combo']);
+    transcenderTeste(asura, ids(asura)[0]!, 'tr-mon-asura');
+
+    const comAna = makeState(
+      { ana: asura, bruno: makeClan('bruno', ['cav-bb']), carla: makeClan('carla', ['cav-bb', 'cav-bb']) },
+      { castleOwnerId: 'carla', round: 4 },
+    );
+    const res = resolveEmperium(comAna, [
+      { playerId: 'ana', commitment: { slot: 'emperium', charInstIds: Object.keys(comAna.clans['ana']!.chars), ordem: 'cerco', marcha: 0 } },
+      { playerId: 'bruno', commitment: { slot: 'emperium', charInstIds: Object.keys(comAna.clans['bruno']!.chars), ordem: 'cerco', marcha: 0 } },
+      { playerId: 'carla', commitment: { slot: 'emperium', charInstIds: Object.keys(comAna.clans['carla']!.chars), ordem: 'cerco', marcha: 0 } },
+    ]);
+
+    const semAna = makeState(
+      { bruno: makeClan('bruno', ['cav-bb']), carla: makeClan('carla', ['cav-bb', 'cav-bb']) },
+      { castleOwnerId: 'carla', round: 4 },
+    );
+    const ref = resolveEmperium(semAna, [
+      { playerId: 'bruno', commitment: { slot: 'emperium', charInstIds: Object.keys(semAna.clans['bruno']!.chars), ordem: 'cerco', marcha: 0 } },
+      { playerId: 'carla', commitment: { slot: 'emperium', charInstIds: Object.keys(semAna.clans['carla']!.chars), ordem: 'cerco', marcha: 0 } },
+    ]);
+
+    // O Bruno leva o mesmo dano com ou sem o ariete na sala: o quebrador
+    // passou por fora e nao gastou escudo para ninguem.
+    expect(res.danoPorJogador!['bruno']).toBe(ref.danoPorJogador!['bruno']);
+  });
+});

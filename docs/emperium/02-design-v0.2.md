@@ -92,7 +92,7 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 
 ---
 
-## 4. A gramática — 18 palavras-chave
+## 4. A gramática — 20 palavras-chave
 
 | Palavra-chave | Efeito |
 |---|---|
@@ -114,6 +114,8 @@ decisões, o que torna o problema do defensor solitário insolúvel por constru�
 | **FRÁGIL** | Cai antes dos outros do seu clã — só PROTEGER e DEVOÇÃO conseguem passar na frente dele. |
 | **BERSERK X** | +X de Poder, e ninguém consegue cobri-lo: é sempre a primeira baixa do seu clã. |
 | **MALDIÇÃO X** | −X de Poder deste personagem. Pura perda. |
+| **ESTILHAÇAR X** | +X de Poder, mas só na Sala do Emperium. Em qualquer outra sala ele não vale nada — é o especialista em cristal, inútil para segurar corredor. |
+| **ARÍETE** | O Poder deste personagem atravessa o Escudo do Emperium: vira dano no cristal sem passar pela absorção. Só existe em Transcendência. |
 
 Toda carta tem **no máximo 2** palavras-chave, mais no máximo **um Combo**.
 

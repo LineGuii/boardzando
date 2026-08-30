@@ -159,6 +159,12 @@ interface Faction {
   comboAtivo?: Combo;
   /** Os ESPECIAIS do grupo, que disparam sem declaracao. */
   especiais: Combo[];
+  /**
+   * Poder que ATRAVESSA o Escudo do Emperium (ARIETE). E a soma do Poder
+   * individual dos personagens com a palavra-chave, e nao o total da cla: o
+   * aríete passa, a escolta enfrenta o escudo como todo mundo.
+   */
+  poderAriete: number;
   /** Marcas que esta cla esta sofrendo. */
   marcas: Set<Marca>;
   /** Efeitos de combo aplicados a esta cla. */
@@ -211,6 +217,7 @@ function factionPower(
   let perfurar = 0;
   let temAnular = 0;
   let imuneMuralha = 0;
+  let poderAriete = 0;
 
   const ehDefensor = playerId !== null && state.castleOwnerId === playerId;
 
@@ -255,6 +262,12 @@ function factionPower(
       // Negativo de proposito: se alguem anular a Maldicao, o Poder volta.
       c.bonusAplicado.set('maldicao', -val('maldicao'));
     }
+    // ESTILHACAR X: +X so contra o cristal. Fora da Sala do Emperium a carta
+    // vale o Poder baixo que esta impresso nela, e e ai que ela se equilibra.
+    if (has('estilhacar') && slot === 'emperium') {
+      p += val('estilhacar');
+      c.bonusAplicado.set('estilhacar', val('estilhacar'));
+    }
     // RAJADA X: so na primeira rodada deste personagem nesta sala.
     if (has('rajada')) {
       const inst = playerId ? state.clans[playerId]?.chars[c.instId] : undefined;
@@ -275,6 +288,10 @@ function factionPower(
     muralha += val('muralha');
     perfurar += val('perfurar');
     if (c.keywords.has('anular')) temAnular += val('anular');
+
+    // ARIETE: o Poder DESTE personagem nao passa pelo Escudo. Somado a parte,
+    // porque o resto da cla continua enfrentando a absorcao normalmente.
+    if (has('ariete')) poderAriete += Math.max(0, p);
 
     total += p;
   }
@@ -347,6 +364,7 @@ function factionPower(
     penalidadeMarcha,
     bonusOrdem,
     especiais: [],
+    poderAriete,
     marcas: new Set<Marca>(),
     cancelaEsgotar: false,
     troco: false,
@@ -467,6 +485,8 @@ export const ANULAVEIS: readonly KeywordName[] = [
   'fragil',
   'berserk',
   'maldicao',
+  'estilhacar',
+  'ariete',
 ];
 
 /**
@@ -904,6 +924,7 @@ export function resolveRoom(
       penalidadeMarcha: 0,
       bonusOrdem: 0,
       especiais: [],
+      poderAriete: 0,
       marcas: new Set<Marca>(),
       cancelaEsgotar: false,
       troco: false,
@@ -1087,23 +1108,35 @@ export function resolveEmperium(
   const escudoBase = SHIELD_BY_ROUND[state.round - 1] ?? 2;
   let escudo = escudoDefensor + escudoBase;
 
-  // Absorcao crescente: o menor atacante primeiro.
-  const ordenados = [...atacantes].sort((a, b) => a.poderBruto - b.poderBruto);
+  /*
+   * ARIETE atravessa: o Poder do quebrador vira dano direto, sem tocar no
+   * Escudo, e sem gastá-lo. O resto da cla enfrenta a absorcao como sempre.
+   *
+   * A ordem crescente continua valendo para a parte que enfrenta o escudo —
+   * quem manda pouco e absorvido e ainda desgasta o escudo para o proximo.
+   */
+  const contraEscudo = (f: Faction) =>
+    Math.max(0, Math.max(0, f.poderBruto) - Math.max(0, f.poderAriete));
+
+  const ordenados = [...atacantes].sort((a, b) => contraEscudo(a) - contraEscudo(b));
   const dano: Record<PlayerId, number> = {};
   const bloqueados = new Set<PlayerId>();
 
   for (const f of ordenados) {
     if (!f.playerId) continue;
-    const p = Math.max(0, f.poderBruto);
+    const direto = Math.min(Math.max(0, f.poderAriete), Math.max(0, f.poderBruto));
+    const p = contraEscudo(f);
+    let passou = 0;
     if (escudo >= p) {
       escudo -= p;
-      bloqueados.add(f.playerId);
-      dano[f.playerId] = 0;
     } else {
-      const passou = p - escudo;
+      passou = p - escudo;
       escudo = 0;
-      dano[f.playerId] = (dano[f.playerId] ?? 0) + passou;
     }
+    const total = direto + passou;
+    dano[f.playerId] = (dano[f.playerId] ?? 0) + total;
+    // "Bloqueado" e quem nao arranhou o cristal — quem tem ariete quase nunca e.
+    if (total === 0) bloqueados.add(f.playerId);
   }
 
   const danoTotal = Object.values(dano).reduce((a, b) => a + b, 0);

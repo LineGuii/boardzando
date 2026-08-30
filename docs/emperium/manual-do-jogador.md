@@ -512,7 +512,7 @@ metade do exército.
 
 ---
 
-## 11. As 18 palavras-chave
+## 11. As 20 palavras-chave
 
 | Palavra-chave | Efeito |
 |---|---|
@@ -534,6 +534,8 @@ metade do exército.
 | **FRÁGIL** | Cai antes dos outros do seu clã — só PROTEGER e DEVOÇÃO conseguem passar na frente dele. |
 | **BERSERK X** | +X de Poder, e ninguém consegue cobri-lo: é sempre a primeira baixa do seu clã. |
 | **MALDIÇÃO X** | −X de Poder deste personagem. Pura perda. |
+| **ESTILHAÇAR X** | +X de Poder, mas só na Sala do Emperium. Em qualquer outra sala ele não vale nada — é o especialista em cristal, inútil para segurar corredor. |
+| **ARÍETE** | O Poder deste personagem atravessa o Escudo do Emperium: vira dano no cristal sem passar pela absorção. Só existe em Transcendência. |
 
 ---
 

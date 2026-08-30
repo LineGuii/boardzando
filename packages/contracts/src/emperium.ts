@@ -47,7 +47,16 @@ export type KeywordName =
   /** +X de Poder, e ninguem consegue cobri-lo: e sempre a primeira baixa. */
   | 'berserk'
   /** -X de Poder. Pura perda — e por isso a melhor isca para o Anular. */
-  | 'maldicao';
+  | 'maldicao'
+  /* ── O quebrador de Emperium ────────────────────────────────────────────
+   * As builds que arrebentavam o cristal e nao matavam ninguem. Nao ha
+   * penalidade escrita: quem carrega isto ja nasce com Poder baixo, e o
+   * equilibrio esta na carta, nao numa clausula extra.
+   * ─────────────────────────────────────────────────────────────────────── */
+  /** +X de Poder, mas SO na Sala do Emperium. Fora dela, nada. */
+  | 'estilhacar'
+  /** O Poder deste personagem atravessa o Escudo do Emperium. So transclasse. */
+  | 'ariete';
 
 /** Palavra-chave com seu valor X (ausente quando a keyword nao usa X). */
 export interface Keyword {
@@ -78,6 +87,8 @@ export const KEYWORD_LABEL: Readonly<Record<KeywordName, string>> = {
   fragil: 'FRÁGIL',
   berserk: 'BERSERK',
   maldicao: 'MALDIÇÃO',
+  estilhacar: 'ESTILHAÇAR',
+  ariete: 'ARÍETE',
 };
 
 /** Texto pronto de uma palavra-chave, com o X quando houver. */
@@ -231,7 +242,7 @@ export const DECK_I: readonly CharacterDef[] = [
 
   { id: 'mon-combo', nome: 'Monge Combo', classe: 'Monge', deck: 1, custo: 6, poder: 4, papel: 'vanguarda', slots: 1, keywords: [], build: 'Chain Combo' },
   { id: 'mon-aco', nome: 'Monge Corpo de Aço', classe: 'Monge', deck: 1, custo: 5, poder: 0, papel: 'vanguarda', slots: 2, keywords: [kw('proteger'), kw('esgotar')], build: 'Steel Body' , combo: sozinho('ESPECIAL: o maior clã inimigo fica PRESO.', { tipo: 'marca', marca: 'preso' })},
-  { id: 'mon-dilema', nome: 'Monge Disparar Esferas', classe: 'Monge', deck: 1, custo: 6, poder: 2, papel: 'vanguarda', slots: 1, keywords: [kw('perfurar', 3)], build: 'Investigate' },
+  { id: 'mon-dilema', nome: 'Monge Disparar Esferas', classe: 'Monge', deck: 1, custo: 6, poder: 1, papel: 'vanguarda', slots: 1, keywords: [kw('estilhacar', 4)], build: 'Throw Spirit Sphere' },
 
   { id: 'cac-armadilheiro', nome: 'Caçador Armadilheiro', classe: 'Caçador', deck: 1, custo: 6, poder: 2, papel: 'agil', slots: 1, keywords: [kw('muralha', 2)], build: 'Trapper' , combo: sozinho('ESPECIAL: o maior clã inimigo fica REVELADO.', { tipo: 'marca', marca: 'revelado' })},
   { id: 'cac-tiroduplo', nome: 'Caçador Rajada de Flechas', classe: 'Caçador', deck: 1, custo: 6, poder: 5, papel: 'agil', slots: 1, keywords: [kw('alcance'), kw('fragil')], build: 'Double Strafe' },
@@ -246,7 +257,7 @@ export const DECK_I: readonly CharacterDef[] = [
   { id: 'oda-servico', nome: 'Odalisca Serviço para Você', classe: 'Odalisca', deck: 1, custo: 6, poder: 1, papel: 'suporte', slots: 1, keywords: [kw('devocao', 2)], build: 'Service For You' , combo: comClasse('Monge', 'COMBO Monge: ninguém seu vai à Enfermaria por Esgotar.', { tipo: 'cancela-esgotar' })},
 
   { id: 'sup-teimoso', nome: 'Superaprendiz Teimoso', classe: 'Superaprendiz', deck: 1, custo: 3, poder: 1, papel: 'agil', slots: 3, keywords: [], build: 'Sobrevivência teimosa', special: 'teimoso' },
-  { id: 'sup-sorte', nome: 'Superaprendiz Sortudo', classe: 'Superaprendiz', deck: 1, custo: 4, poder: 1, papel: 'agil', slots: 1, keywords: [kw('solo', 3)], build: 'Sorte de principiante' },
+  { id: 'sup-sorte', nome: 'Superaprendiz Sortudo', classe: 'Superaprendiz', deck: 1, custo: 4, poder: 1, papel: 'agil', slots: 1, keywords: [kw('solo', 3), kw('estilhacar', 2)], build: 'Sorte de principiante' },
   { id: 'sup-improvisado', nome: 'Superaprendiz Improvisado', classe: 'Superaprendiz', deck: 1, custo: 4, poder: 2, papel: 'suporte', slots: 2, keywords: [kw('imitar', 1)], build: 'Faz de tudo' },
 ];
 
@@ -332,7 +343,7 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   { id: 'tr-arr-silenciosa', nome: 'Desordeiro — Marcha Silenciosa', classe: 'Arruaceiro', forma: 'Desordeiro', custo: 12, poderBonus: 2, keywords: [kw('oculto'), kw('mover', 2)], build: 'Chase Walk' , combo: sozinho('ESPECIAL: RAPTO — arranque 1 inimigo da sala.', { tipo: 'rapto' })},
 
   // Ferreiro
-  { id: 'tr-fer-carrocerada', nome: 'Mestre-Ferreiro — Carrocerada', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 11, poderBonus: 4, keywords: [], build: 'Cart Termination' , combo: sozinho('ESPECIAL: +1 de Poder a cada 3 zeny no seu bolso.', { tipo: 'poder-por-zeny', cada: 3 })},
+  { id: 'tr-fer-carrocerada', nome: 'Mestre-Ferreiro — Carrocerada', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 11, poderBonus: 1, keywords: [kw('estilhacar', 5)], build: 'Cart Termination' , combo: sozinho('ESPECIAL: +1 de Poder a cada 3 zeny no seu bolso.', { tipo: 'poder-por-zeny', cada: 3 })},
   { id: 'tr-fer-fundicao', nome: 'Mestre-Ferreiro — Fundição Suprema', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 9, poderBonus: 1, keywords: [], build: 'Forja lendária', special: 'forja-suprema' },
   { id: 'tr-fer-adrenalina', nome: 'Mestre-Ferreiro — Adrenalina Suprema', classe: 'Ferreiro', forma: 'Mestre-Ferreiro', custo: 10, poderBonus: 2, keywords: [kw('elo', 2)], build: 'Adrenaline Rush' },
 
@@ -347,7 +358,7 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   { id: 'tr-sac-julgamento', nome: 'Sumo Sacerdote — Julgamento', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 12, poderBonus: 5, keywords: [], build: 'Magnus Exorcismus' },
 
   // Monge
-  { id: 'tr-mon-asura', nome: 'Mestre — Punho de Asura', classe: 'Monge', forma: 'Mestre', custo: 14, poderBonus: 11, keywords: [kw('esgotar'), kw('maldicao', 3)], build: 'Asura Strike' },
+  { id: 'tr-mon-asura', nome: 'Mestre — Punho de Asura', classe: 'Monge', forma: 'Mestre', custo: 14, poderBonus: 8, keywords: [kw('esgotar'), kw('ariete')], build: 'Asura Strike' },
   { id: 'tr-mon-salto', nome: 'Mestre — Salto', classe: 'Monge', forma: 'Mestre', custo: 11, poderBonus: 3, keywords: [kw('mover', 2)], build: 'Body Relocation' },
   { id: 'tr-mon-aco', nome: 'Mestre — Corpo de Aço e Dilema', classe: 'Monge', forma: 'Mestre', custo: 10, poderBonus: 1, keywords: [kw('proteger')], build: 'Steel Body', special: 'imortal' },
 
@@ -635,6 +646,10 @@ export const KEYWORD_DESC: Readonly<Record<KeywordName, string>> = {
   berserk:
     '+X de Poder, e ninguém consegue cobri-lo: é sempre a primeira baixa do seu clã, antes de qualquer PROTEGER ou DEVOÇÃO.',
   maldicao: '−X de Poder deste personagem. Pura perda.',
+  estilhacar:
+    '+X de Poder, mas só na Sala do Emperium. Em qualquer outra sala ele não vale nada — é o especialista em cristal, inútil para segurar corredor.',
+  ariete:
+    'O Poder deste personagem atravessa o Escudo do Emperium: vira dano no cristal sem passar pela absorção. Só existe em Transcendência.',
 };
 
 export const MARCA_LABEL: Readonly<Record<Marca, string>> = {

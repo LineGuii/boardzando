@@ -263,6 +263,7 @@ export type FamiliaChave =
   | 'posicao'
   | 'manobra'
   | 'defeito'
+  | 'cristal'
   | 'marca';
 
 export const FAMILIA_ROTULO: Readonly<Record<FamiliaChave, string>> = {
@@ -271,6 +272,7 @@ export const FAMILIA_ROTULO: Readonly<Record<FamiliaChave, string>> = {
   posicao: 'Posição — muda onde e como você chega',
   manobra: 'Manobra — mexe no que o outro trouxe, ou no depois',
   defeito: 'Defeito — ruim para quem carrega, e por isso é isca de ANULAR',
+  cristal: 'Cristal — só serve contra o Emperium, e não segura sala nenhuma',
   marca: 'Marca — o que você faz ao clã inimigo',
 };
 
@@ -452,6 +454,23 @@ const praga = (
   </>
 );
 
+/** Estilhaçar: o cristal partindo — vale contra ele e contra mais nada. */
+const cristalPartido = (
+  <>
+    <path d="M8 1.6 12.8 5.4l-1.7 8.4H4.9L3.2 5.4 8 1.6Z" />
+    <path d="M8.8 3.6 6.4 8h3.1l-2.3 5" />
+  </>
+);
+
+/** Aríete: a máquina de cerco que passa por fora do escudo. */
+const arieteIcone = (
+  <>
+    <path d="M1.6 8h9.8" />
+    <path d="M11.4 5.6h3v4.8h-3z" />
+    <path d="M3.4 5.4v5.2M6 5.9v4.2" />
+  </>
+);
+
 interface ChaveDef {
   familia: FamiliaChave;
   icone: JSX.Element;
@@ -481,6 +500,10 @@ export const KEYWORD_CHAVE: Readonly<Record<string, ChaveDef>> = {
   fragil: { familia: 'defeito', icone: trincado },
   berserk: { familia: 'defeito', icone: furia },
   maldicao: { familia: 'defeito', icone: praga },
+
+  // O quebrador de Emperium: so serve contra o cristal.
+  estilhacar: { familia: 'cristal', icone: cristalPartido },
+  ariete: { familia: 'cristal', icone: arieteIcone },
 };
 
 export const MARCA_CHAVE: Readonly<Record<string, ChaveDef>> = {

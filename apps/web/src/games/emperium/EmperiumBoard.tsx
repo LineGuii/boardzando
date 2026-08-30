@@ -224,6 +224,8 @@ const ANULAVEIS_UI: readonly string[] = [
   'fragil',
   'berserk',
   'maldicao',
+  'estilhacar',
+  'ariete',
 ];
 
 /* ── Os dois conceitos visuais ───────────────────────────────────────────── */

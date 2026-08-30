@@ -187,7 +187,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
-| **Carrocerada** | 11z | +4 | — | *Cart Termination* |
+| **Carrocerada** | 11z | +1 | ESTILHAÇAR 5 | *Cart Termination* |
 | **Fundição Suprema** | 9z | +1 | — · *refino sem quebra e 1 grátis por rodada* | *Forja lendária* |
 | **Adrenalina Suprema** | 10z | +2 | ELO 2 | *Adrenaline Rush* |
 
@@ -241,13 +241,13 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 |---|---|---|---|---|---|---|---|
 | **Monge Combo** | 6z | 4 | 1.5 | Vanguarda | ◇ | — | *Chain Combo* |
 | **Monge Corpo de Aço** | 5z | 0 | — | Vanguarda | ◇◇ | PROTEGER · ESGOTAR | *Steel Body* |
-| **Monge Disparar Esferas** | 6z | 2 | 3.0 | Vanguarda | ◇ | PERFURAR 3 | *Investigate* |
+| **Monge Disparar Esferas** | 6z | 1 | 6.0 | Vanguarda | ◇ | ESTILHAÇAR 4 | *Throw Spirit Sphere* |
 
 - **Monge Corpo de Aço** — ESPECIAL: o maior clã inimigo fica PRESO.
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
 |---|---|---|---|---|
-| **Punho de Asura** | 14z | +11 | ESGOTAR · MALDIÇÃO 3 | *Asura Strike* |
+| **Punho de Asura** | 14z | +8 | ESGOTAR · ARÍETE | *Asura Strike* |
 | **Salto** | 11z | +3 | MOVER 2 | *Body Relocation* |
 | **Corpo de Aço e Dilema** | 10z | +1 | PROTEGER · *não pode sofrer baixa* | *Steel Body* |
 
@@ -319,7 +319,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 | Base | Custo | Poder | z/P | Papel | Slots | Palavras-chave | Build |
 |---|---|---|---|---|---|---|---|
 | **Superaprendiz Teimoso** | 3z | 1 | 3.0 | Ágil | ◇◇◇ | — | *Sobrevivência teimosa* |
-| **Superaprendiz Sortudo** | 4z | 1 | 4.0 | Ágil | ◇ | SOLO 3 | *Sorte de principiante* |
+| **Superaprendiz Sortudo** | 4z | 1 | 4.0 | Ágil | ◇ | SOLO 3 · ESTILHAÇAR 2 | *Sorte de principiante* |
 | **Superaprendiz Improvisado** | 4z | 2 | 2.0 | Suporte | ◇◇ | IMITAR 1 | *Faz de tudo* |
 
 | Transcendência | Custo | +Poder | Ganha | Origem |
