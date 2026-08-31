@@ -112,6 +112,12 @@ function makeState(
   };
 }
 
+interface CommitmentTeste {
+  ordem: OrderId;
+  combo?: string;
+  anulares?: { charInstId: string; alvoInstId: string; keyword: string }[];
+}
+
 const ids = (clan: Clan) => Object.keys(clan.chars);
 
 /** Empilha uma evolucao do Altar sobre um personagem ja existente. */
@@ -1669,5 +1675,152 @@ describe('EmperiumGame — o quebrador de Emperium', () => {
     // O Bruno leva o mesmo dano com ou sem o ariete na sala: o quebrador
     // passou por fora e nao gastou escudo para ninguem.
     expect(res.danoPorJogador!['bruno']).toBe(ref.danoPorJogador!['bruno']);
+  });
+});
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+describe('EmperiumGame — a Sala do Emperium usa o pipeline inteiro', () => {
+  const atacar = (
+    clans: Record<PlayerId, Clan>,
+    decls: Record<PlayerId, Partial<CommitmentTeste>> = {},
+    round = 4,
+  ) => {
+    const state = makeState(clans, { castleOwnerId: 'carla', round });
+    const res = resolveEmperium(
+      state,
+      Object.keys(clans).map((p) => ({
+        playerId: p,
+        commitment: {
+          slot: 'emperium' as const,
+          charInstIds: ids(clans[p]!),
+          ordem: (decls[p]?.ordem ?? 'cerco') as OrderId,
+          marcha: 0,
+          combo: decls[p]?.combo,
+          anulares: decls[p]?.anulares,
+        },
+      })),
+    );
+    return { res, de: (p: PlayerId) => res.clas.find((f) => f.playerId === p)! };
+  };
+
+  it('COMBO declarado vale no assalto final', () => {
+    // Alquimista Fogo Grego: COMBO Arcano -> +4 de Poder.
+    const semCombo = makeClan('ana', ['alq-fogogrego', 'bru-jupitel']);
+    const comCombo = makeClan('ana', ['alq-fogogrego', 'bru-jupitel']);
+    const carla = () => makeClan('carla', []);
+
+    const a = atacar({ ana: semCombo, carla: carla() }).de('ana').poderBruto;
+    const b = atacar(
+      { ana: comCombo, carla: carla() },
+      { ana: { combo: ids(comCombo)[0] } },
+    ).de('ana').poderBruto;
+    expect(b - a).toBe(4);
+  });
+
+  it('ESPECIAL dispara aqui tambem, sem declaracao', () => {
+    // Alquimista Boticario: ESPECIAL -> o maior cla inimigo fica EXPOSTO.
+    const ana = makeClan('ana', ['alq-boticario', 'mon-combo']);
+    const carla = makeClan('carla', ['sac-pneuma']);
+    const r = atacar({ ana, carla });
+    expect(r.de('carla').marcas).toContain('exposto');
+  });
+
+  it('MURALHA da defensora reduz o Poder de quem ataca o cristal', () => {
+    // Sacerdote Pneuma: MURALHA 2 na defesa.
+    const atacante = () => makeClan('ana', ['cav-bb', 'cav-bb']);
+    const semMuralha = atacar({ ana: atacante(), carla: makeClan('carla', ['mon-combo']) });
+    const comMuralha = atacar({ ana: atacante(), carla: makeClan('carla', ['sac-pneuma']) });
+
+    expect(semMuralha.de('ana').poderFinal).toBe(semMuralha.de('ana').poderBruto);
+    expect(comMuralha.de('ana').poderFinal).toBe(comMuralha.de('ana').poderBruto - 2);
+  });
+
+  it('ANULAR apontado funciona no assalto final', () => {
+    const carlaBase = () => makeClan('carla', ['sac-pneuma']);
+    const semAnular = atacar({ ana: makeClan('ana', ['bru-jupitel']), carla: carlaBase() });
+
+    const carla = carlaBase();
+    const ana = makeClan('ana', ['sab-solo']);
+    const comAnular = atacar(
+      { ana, carla },
+      {
+        ana: {
+          anulares: [{ charInstId: ids(ana)[0]!, alvoInstId: ids(carla)[0]!, keyword: 'muralha' }],
+        },
+      },
+    );
+    // Sem o Anular, a Muralha 2 da Pneuma corta o Poder da Ana.
+    expect(semAnular.de('ana').poderBruto - semAnular.de('ana').poderFinal).toBe(2);
+    // Com o Anular apontado nela, nao corta mais nada.
+    expect(comAnular.de('ana').poderBruto - comAnular.de('ana').poderFinal).toBe(0);
+  });
+
+  it('RAPTO arranca alguem do assalto final', () => {
+    // Desordeiro Marcha Silenciosa: ESPECIAL -> RAPTO.
+    const ana = makeClan('ana', ['arr-gatuno']);
+    transcenderTeste(ana, ids(ana)[0]!, 'tr-arr-silenciosa');
+    const carla = makeClan('carla', ['cav-bb', 'cav-bb']);
+    const r = atacar({ ana, carla });
+    expect(r.res.raptados).toHaveLength(1);
+  });
+
+  it('a EMBOSCADA cancela o bonus da Ordem alheia tambem aqui', () => {
+    const ana = makeClan('ana', ['mon-combo']);
+    const bruno = makeClan('bruno', ['mon-combo']);
+    const carla = makeClan('carla', []);
+    const r = atacar(
+      { ana, bruno, carla },
+      { ana: { ordem: 'emboscada' }, bruno: { ordem: 'investida' } },
+    );
+    expect(r.de('bruno').emboscado).toBe(true);
+  });
+
+  it('nao exibe combo que nao disparou', () => {
+    // Sabio Protecao de Solo exige um Bruxo junto; sozinho, nao acende.
+    const ana = makeClan('ana', ['sab-solo']);
+    const carla = makeClan('carla', []);
+    const r = atacar({ ana, carla }, { ana: { combo: ids(ana)[0] } });
+    expect(r.de('ana').combo).toBeUndefined();
+  });
+});
+
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+describe('EmperiumGame — ARIETE por combo', () => {
+  it('o combo estende a travessia do Escudo ao cla inteiro', () => {
+    // Criador Bomba de Esferas: COMBO Vanguarda -> a cla atravessa o Escudo.
+    const montar = () => {
+      const c = makeClan('ana', ['alq-homunculo', 'cav-bb']);
+      transcenderTeste(c, ids(c)[0]!, 'tr-alq-esferas');
+      return c;
+    };
+    const defensora = () => makeClan('carla', ['cav-bb', 'cav-bb', 'cav-bb']);
+
+    const rodar = (declara: boolean) => {
+      const ana = montar();
+      const carla = defensora();
+      const state = makeState({ ana, carla }, { castleOwnerId: 'carla', round: 4 });
+      return resolveEmperium(state, [
+        {
+          playerId: 'ana',
+          commitment: {
+            slot: 'emperium',
+            charInstIds: ids(ana),
+            ordem: 'cerco',
+            marcha: 0,
+            combo: declara ? ids(ana)[0] : undefined,
+          },
+        },
+        { playerId: 'carla', commitment: { slot: 'emperium', charInstIds: ids(carla), ordem: 'cerco', marcha: 0 } },
+      ]);
+    };
+
+    // Sem o combo, o escudo da defensora engole o ataque inteiro.
+    expect(rodar(false).danoPorJogador!['ana']).toBe(0);
+    // Com o combo, a cla inteira passa por fora do escudo.
+    const com = rodar(true);
+    expect(com.danoPorJogador!['ana']).toBeGreaterThan(0);
+    expect(com.clas.find((f) => f.playerId === 'ana')!.combo).toContain('Escudo do Emperium');
   });
 });

@@ -178,7 +178,9 @@ export type ComboEfeito =
   /** Arranca 1 personagem da maior cla inimiga; ele volta a Reserva do dono. */
   | { readonly tipo: 'rapto' }
   /** Se voce perder, a cla vencedora tambem sofre 1 baixa. Reflect Shield. */
-  | { readonly tipo: 'troco' };
+  | { readonly tipo: 'troco' }
+  /** O cla inteiro atravessa o Escudo do Emperium naquela sala. */
+  | { readonly tipo: 'ariete' };
 
 export interface Combo {
   readonly exige: ComboExige;
@@ -350,7 +352,7 @@ export const TRANSCENDENCIAS: readonly TranscendenceDef[] = [
   // Alquimista
   { id: 'tr-alq-acida', nome: 'Criador — Demonstração Ácida', classe: 'Alquimista', forma: 'Criador', custo: 12, poderBonus: 4, keywords: [kw('perfurar', 4)], build: 'Acid Demonstration' , combo: sozinho('ESPECIAL: o maior clã inimigo fica EXPOSTO e PRESO.', { tipo: 'marca', marca: 'exposto' })},
   { id: 'tr-alq-homunculo', nome: 'Criador — Homúnculo Superior', classe: 'Alquimista', forma: 'Criador', custo: 11, poderBonus: 3, keywords: [kw('elo', 2)], build: 'Homunculus S' , combo: sozinho('ESPECIAL: +3 de Poder — o homúnculo luta junto.', { tipo: 'poder', x: 3 })},
-  { id: 'tr-alq-esferas', nome: 'Criador — Bomba de Esferas', classe: 'Alquimista', forma: 'Criador', custo: 10, poderBonus: 1, keywords: [kw('muralha', 3)], build: 'Sphere Mine' },
+  { id: 'tr-alq-esferas', nome: 'Criador — Bomba de Esferas', classe: 'Alquimista', forma: 'Criador', custo: 10, poderBonus: 1, keywords: [kw('muralha', 3)], build: 'Sphere Mine' , combo: comPapel('vanguarda', 'COMBO Vanguarda: seu clã inteiro atravessa o Escudo do Emperium.', { tipo: 'ariete' })},
 
   // Sacerdote
   { id: 'tr-sac-assumptio', nome: 'Sumo Sacerdote — Assumptio', classe: 'Sacerdote', forma: 'Sumo Sacerdote', custo: 11, poderBonus: 2, keywords: [kw('devocao', 2)], build: 'Assumptio' },

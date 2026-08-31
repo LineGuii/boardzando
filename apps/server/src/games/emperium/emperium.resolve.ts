@@ -165,6 +165,11 @@ interface Faction {
    * aríete passa, a escolta enfrenta o escudo como todo mundo.
    */
   poderAriete: number;
+  /**
+   * O cla INTEIRO atravessa o Escudo, por combo. A palavra-chave ARIETE vale
+   * so para quem a carrega; o combo estende a escolta toda.
+   */
+  arieteTotal: boolean;
   /** Marcas que esta cla esta sofrendo. */
   marcas: Set<Marca>;
   /** Efeitos de combo aplicados a esta cla. */
@@ -365,6 +370,7 @@ function factionPower(
     bonusOrdem,
     especiais: [],
     poderAriete,
+    arieteTotal: false,
     marcas: new Set<Marca>(),
     cancelaEsgotar: false,
     troco: false,
@@ -415,6 +421,10 @@ function applyCombos(factions: Faction[], zenyDe: (p: PlayerId) => number): void
       }
       case 'troco':
         f.troco = true;
+        break;
+      case 'ariete':
+        // So faz diferenca na Sala do Emperium — nas outras nao ha Escudo.
+        f.arieteTotal = true;
         break;
       case 'marca': {
         const alvo = maiorInimiga(factions, f);
@@ -857,14 +867,25 @@ export function aplicarInfiltracoes(state: EmperiumState): string[] {
 /**
  * Resolve uma sala comum (nao-Emperium). Devolve o resultado; nao muta estado.
  */
-export function resolveRoom(
+/**
+ * O pipeline de uma sala, do zero ate o Poder final de cada cla.
+ *
+ * Vive separado porque as DUAS salas — a comum e a do Emperium — precisam
+ * passar exatamente pelas mesmas regras. Enquanto a Sala do Emperium tinha o
+ * proprio caminho, ela silenciosamente nao aplicava combos, ESPECIAIS, marcas,
+ * Muralha, Anular, Imitar nem Rapto: o assalto final era a unica sala do jogo
+ * onde metade do sistema nao existia — e o resultado ainda EXIBIA o texto do
+ * combo, como se ele tivesse disparado.
+ *
+ * Com o pipeline num lugar so, a proxima regra que entrar vale nas duas por
+ * construcao.
+ */
+function montarClas(
   state: EmperiumState,
   slot: RoomSlot,
   inputs: readonly RoomInput[],
-): RoomResolution {
+): { factions: Faction[]; raptados: string[] } {
   const room = state.rooms[slot];
-  const tile = room ? TILE_BY_ID.get(room.tileId) : undefined;
-  const effect = tile?.effect ?? 'nenhum';
 
   const emboscadores = inputs.filter(
     (i) => i.commitment.ordem === 'emboscada' && !i.commitment.semOrdem,
@@ -925,6 +946,7 @@ export function resolveRoom(
       bonusOrdem: 0,
       especiais: [],
       poderAriete: 0,
+      arieteTotal: false,
       marcas: new Set<Marca>(),
       cancelaEsgotar: false,
       troco: false,
@@ -967,6 +989,20 @@ export function resolveRoom(
   }
   applyAnular(factions, anulares);
   applyMuralha(factions);
+
+  return { factions, raptados };
+}
+
+export function resolveRoom(
+  state: EmperiumState,
+  slot: RoomSlot,
+  inputs: readonly RoomInput[],
+): RoomResolution {
+  const room = state.rooms[slot];
+  const tile = room ? TILE_BY_ID.get(room.tileId) : undefined;
+  const effect = tile?.effect ?? 'nenhum';
+
+  const { factions, raptados } = montarClas(state, slot, inputs);
 
   const maior = factions.reduce((m, f) => Math.max(m, f.poderFinal), -Infinity);
   const noTopo = factions.filter((f) => f.poderFinal === maior);
@@ -1031,7 +1067,7 @@ export function resolveRoom(
       : (vencedora?.playerId ?? null);
 
   const jogadoras = resultados.filter((f) => f.playerId !== null);
-  const semResistencia = jogadoras.length === 1 && guarnicao === 0;
+  const semResistencia = jogadoras.length === 1 && (room?.guarnicaoFixa ?? 0) === 0;
 
   return {
     slot,
@@ -1076,32 +1112,25 @@ export function resolveEmperium(
   inputs: readonly RoomInput[],
 ): RoomResolution {
   const defensor = state.castleOwnerId;
-  const emboscadores = inputs.filter((i) => i.commitment.ordem === 'emboscada').length;
 
-  let escudoDefensor = 0;
+  /*
+   * A Sala do Emperium passa pelo MESMO pipeline das outras: combos,
+   * ESPECIAIS, marcas, Imitar, Anular, Muralha e Rapto valem aqui como valem
+   * em qualquer sala. Ate a v0.5 ela tinha caminho proprio e nada disso
+   * acontecia — o assalto final era a unica sala onde metade do sistema nao
+   * existia.
+   *
+   * Duas regras nao se aplicam por natureza da sala, e nao por esquecimento:
+   *   - nao ha CONTROLE em disputa, entao ninguem "vence" a sala;
+   *   - o combo de TROCO ("se voce perder, o vencedor tambem sofre baixa")
+   *     fica inerte, porque nao existe vencedor para punir.
+   */
+  const { factions: todas, raptados } = montarClas(state, 'emperium', inputs);
+
   const atacantes: Faction[] = [];
-  const todas: Faction[] = [];
-
-  for (const input of inputs) {
-    if (input.commitment.consumivel === 'co-borboleta') continue;
-    const clan = state.clans[input.playerId];
-    if (!clan) continue;
-    const chars = input.commitment.charInstIds
-      .map((id) => computeChar(state, clan, id))
-      .filter((c): c is CharCompute => c !== null);
-    if (chars.length === 0) continue;
-    const f = factionPower(
-      state,
-      'emperium',
-      input.playerId,
-      chars,
-      input.commitment.ordem,
-      emboscadores === 1,
-      input.commitment.consumivel,
-      input.commitment.marcha ?? 0,
-    );
-    todas.push(f);
-    if (input.playerId === defensor) escudoDefensor += Math.max(0, f.poderBruto);
+  let escudoDefensor = 0;
+  for (const f of todas) {
+    if (f.playerId === defensor) escudoDefensor += Math.max(0, f.poderFinal);
     else atacantes.push(f);
   }
 
@@ -1115,8 +1144,13 @@ export function resolveEmperium(
    * A ordem crescente continua valendo para a parte que enfrenta o escudo —
    * quem manda pouco e absorvido e ainda desgasta o escudo para o proximo.
    */
-  const contraEscudo = (f: Faction) =>
-    Math.max(0, Math.max(0, f.poderBruto) - Math.max(0, f.poderAriete));
+  /** Quanto do Poder desta cla ATRAVESSA o Escudo. */
+  const atravessa = (f: Faction) =>
+    f.arieteTotal
+      ? Math.max(0, f.poderFinal)
+      : Math.min(Math.max(0, f.poderAriete), Math.max(0, f.poderFinal));
+
+  const contraEscudo = (f: Faction) => Math.max(0, Math.max(0, f.poderFinal) - atravessa(f));
 
   const ordenados = [...atacantes].sort((a, b) => contraEscudo(a) - contraEscudo(b));
   const dano: Record<PlayerId, number> = {};
@@ -1124,7 +1158,7 @@ export function resolveEmperium(
 
   for (const f of ordenados) {
     if (!f.playerId) continue;
-    const direto = Math.min(Math.max(0, f.poderAriete), Math.max(0, f.poderBruto));
+    const direto = atravessa(f);
     const p = contraEscudo(f);
     let passou = 0;
     if (escudo >= p) {
@@ -1156,7 +1190,7 @@ export function resolveEmperium(
     return {
       playerId: f.playerId,
       poderBruto: f.poderBruto,
-      poderFinal: f.poderBruto,
+      poderFinal: f.poderFinal,
       ordem: f.ordem,
       baixas,
       venceu: false,
@@ -1182,7 +1216,7 @@ export function resolveEmperium(
     let melhor: { pid: PlayerId; d: number; poder: number } | null = null;
     for (const [pid, d] of Object.entries(dano)) {
       if (d <= 0) continue;
-      const poder = todas.find((f) => f.playerId === pid)?.poderBruto ?? 0;
+      const poder = todas.find((f) => f.playerId === pid)?.poderFinal ?? 0;
       if (!melhor || d > melhor.d || (d === melhor.d && poder > melhor.poder)) {
         melhor = { pid, d, poder };
       }
@@ -1192,7 +1226,7 @@ export function resolveEmperium(
 
   const partes = resultados.map((f) => {
     const quem = f.playerId ?? 'a guarnicao';
-    if (f.playerId === defensor) return `${quem} escuda com ${f.poderBruto}`;
+    if (f.playerId === defensor) return `${quem} escuda com ${f.poderFinal}`;
     if (f.ordem === 'resguardo') return `${quem} resguardou-se`;
     const d = f.playerId ? (dano[f.playerId] ?? 0) : 0;
     return d > 0 ? `${quem} crava ${d}` : `${quem} foi absorvido`;
@@ -1209,7 +1243,7 @@ export function resolveEmperium(
     controladorAnterior: null,
     semDisputa: false,
     semResistencia: false,
-    raptados: [],
+    raptados,
     resumo,
     escudo: escudoDefensor + escudoBase,
     danoPorJogador: dano,

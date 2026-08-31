@@ -38,7 +38,7 @@ segunda olhada.
 | Transcendências | **42** (13 classes × 3) |
 | Desfechos possíveis | **126** (cada base × 3 caminhos) |
 | Bases com combo | 19 de 42 |
-| Transcendências com combo | 12 de 42 |
+| Transcendências com combo | 13 de 42 |
 | Custo das bases | 3–7 zeny |
 | Poder das bases | 0–5 |
 | Custo das evoluções | 7–14 zeny |
@@ -214,6 +214,7 @@ conferir se são simples de propósito ou só sem graça: Ferreiro Forjador, Mon
 
 - **Demonstração Ácida** — ESPECIAL: o maior clã inimigo fica EXPOSTO e PRESO.
 - **Homúnculo Superior** — ESPECIAL: +3 de Poder — o homúnculo luta junto.
+- **Bomba de Esferas** — COMBO Vanguarda: seu clã inteiro atravessa o Escudo do Emperium.
 
 > **Anotações:**
 

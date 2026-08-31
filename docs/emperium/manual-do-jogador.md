@@ -480,6 +480,13 @@ Pague **3 zeny** e role o d6:
 Qualquer um pode comprometer na Sala do Emperium. Quem não controla o Salão do Trono chega
 por Marcha Forçada e paga o preço em Poder.
 
+> **A Sala do Emperium segue as mesmas regras de todas as outras.** Combos e
+> ESPECIAIS disparam, marcas caem, MURALHA reduz Poder, ANULAR e IMITAR valem, e o
+> RAPTO arranca gente do assalto final. Duas coisas não se aplicam, e é pela natureza
+> da sala: **não há controle em disputa** — ninguém "vence" o Emperium, o cristal só
+> quebra —, e por isso o combo de **troco** fica inerte, já que não existe vencedor
+> para punir.
+
 ### O Escudo
 
 O Escudo é o **Poder do defensor naquela sala** mais o valor da rodada:
