@@ -1,0 +1,2233 @@
+{
+  "gerado": "2026-09-01T02:22:30.600Z",
+  "origem": "packages/contracts/src/emperium.ts",
+  "nota": "Backup completo das cartas ANTES de qualquer edicao pelo editor online. Restaurar = reescrever as tabelas do arquivo de origem a partir daqui.",
+  "bases": [
+    {
+      "id": "cav-bb",
+      "nome": "Cavaleiro Bola de Boliche",
+      "classe": "Cavaleiro",
+      "deck": 1,
+      "custo": 6,
+      "poder": 4,
+      "papel": "vanguarda",
+      "slots": 2,
+      "keywords": [
+        {
+          "kw": "elo",
+          "x": 1
+        }
+      ],
+      "build": "Bowling Bash",
+      "combo": {
+        "exige": {
+          "tipo": "classe",
+          "valor": "Templário"
+        },
+        "texto": "COMBO Templário: o maior clã inimigo fica PRESO.",
+        "efeito": {
+          "tipo": "marca",
+          "marca": "preso"
+        }
+      }
+    },
+    {
+      "id": "cav-lanca",
+      "nome": "Cavaleiro Lanceiro",
+      "classe": "Cavaleiro",
+      "deck": 1,
+      "custo": 5,
+      "poder": 3,
+      "papel": "vanguarda",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "perfurar",
+          "x": 2
+        }
+      ],
+      "build": "Pierce montado"
+    },
+    {
+      "id": "cav-provocador",
+      "nome": "Cavaleiro Provocador",
+      "classe": "Cavaleiro",
+      "deck": 1,
+      "custo": 5,
+      "poder": 2,
+      "papel": "vanguarda",
+      "slots": 2,
+      "keywords": [
+        {
+          "kw": "proteger"
+        }
+      ],
+      "build": "Provoke",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "arcano"
+        },
+        "texto": "COMBO Arcano: o maior clã inimigo fica EXPOSTO — ele veio atrás de você.",
+        "efeito": {
+          "tipo": "marca",
+          "marca": "exposto"
+        }
+      }
+    },
+    {
+      "id": "tem-escudeiro",
+      "nome": "Templário Escudeiro",
+      "classe": "Templário",
+      "deck": 1,
+      "custo": 5,
+      "poder": 2,
+      "papel": "vanguarda",
+      "slots": 2,
+      "keywords": [
+        {
+          "kw": "proteger"
+        }
+      ],
+      "build": "Tanque de escudo"
+    },
+    {
+      "id": "tem-redentor",
+      "nome": "Templário Redentor",
+      "classe": "Templário",
+      "deck": 1,
+      "custo": 6,
+      "poder": 2,
+      "papel": "vanguarda",
+      "slots": 2,
+      "keywords": [
+        {
+          "kw": "devocao",
+          "x": 2
+        }
+      ],
+      "build": "Sacrifice",
+      "combo": {
+        "exige": {
+          "tipo": "classe",
+          "valor": "Sacerdote"
+        },
+        "texto": "COMBO Sacerdote: seus Vanguardas não sofrem baixa nesta sala.",
+        "efeito": {
+          "tipo": "cobrir-papel",
+          "papel": "vanguarda"
+        }
+      }
+    },
+    {
+      "id": "tem-defensor",
+      "nome": "Templário Defensor",
+      "classe": "Templário",
+      "deck": 1,
+      "custo": 6,
+      "poder": 3,
+      "papel": "vanguarda",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 1
+        }
+      ],
+      "build": "Defender",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "arcano"
+        },
+        "texto": "COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.",
+        "efeito": {
+          "tipo": "cobrir-papel",
+          "papel": "arcano"
+        }
+      }
+    },
+    {
+      "id": "bru-tempestade",
+      "nome": "Bruxo Tempestade",
+      "classe": "Bruxo",
+      "deck": 1,
+      "custo": 7,
+      "poder": 3,
+      "papel": "arcano",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 2
+        },
+        {
+          "kw": "alcance"
+        }
+      ],
+      "build": "Storm Gust"
+    },
+    {
+      "id": "bru-jupitel",
+      "nome": "Bruxo Jupitel",
+      "classe": "Bruxo",
+      "deck": 1,
+      "custo": 5,
+      "poder": 4,
+      "papel": "arcano",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "alcance"
+        }
+      ],
+      "build": "Jupitel / Napalm"
+    },
+    {
+      "id": "bru-conjurador",
+      "nome": "Bruxo Conjurador",
+      "classe": "Bruxo",
+      "deck": 1,
+      "custo": 7,
+      "poder": 2,
+      "papel": "arcano",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 1
+        }
+      ],
+      "build": "Precast",
+      "combo": {
+        "exige": {
+          "tipo": "classe",
+          "valor": "Bardo"
+        },
+        "texto": "COMBO Bardo: +5 de Poder — a canção sustenta a conjuração.",
+        "efeito": {
+          "tipo": "poder",
+          "x": 5
+        }
+      }
+    },
+    {
+      "id": "sab-solo",
+      "nome": "Sábio Proteção de Solo",
+      "classe": "Sábio",
+      "deck": 1,
+      "custo": 6,
+      "poder": 2,
+      "papel": "arcano",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "anular"
+        }
+      ],
+      "build": "Land Protection",
+      "combo": {
+        "exige": {
+          "tipo": "classe",
+          "valor": "Bruxo"
+        },
+        "texto": "COMBO Bruxo: seus personagens ignoram toda a Muralha inimiga.",
+        "efeito": {
+          "tipo": "perfurar-total"
+        }
+      }
+    },
+    {
+      "id": "sab-encantador",
+      "nome": "Sábio Encantador",
+      "classe": "Sábio",
+      "deck": 1,
+      "custo": 5,
+      "poder": 2,
+      "papel": "arcano",
+      "slots": 2,
+      "keywords": [
+        {
+          "kw": "elo",
+          "x": 1
+        }
+      ],
+      "build": "Endow"
+    },
+    {
+      "id": "sab-petrificador",
+      "nome": "Sábio Petrificador",
+      "classe": "Sábio",
+      "deck": 1,
+      "custo": 6,
+      "poder": 3,
+      "papel": "arcano",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 1
+        }
+      ],
+      "build": "Stone Curse",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: o maior clã inimigo fica PRESO.",
+        "efeito": {
+          "tipo": "marca",
+          "marca": "preso"
+        }
+      }
+    },
+    {
+      "id": "mer-sonico",
+      "nome": "Mercenário Golpe Sônico",
+      "classe": "Mercenário",
+      "deck": 1,
+      "custo": 6,
+      "poder": 3,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "rajada",
+          "x": 3
+        }
+      ],
+      "build": "Sonic Blow",
+      "combo": {
+        "exige": {
+          "tipo": "classe",
+          "valor": "Alquimista"
+        },
+        "texto": "COMBO Alquimista: +4 de Poder — ele entra pela brecha.",
+        "efeito": {
+          "tipo": "poder",
+          "x": 4
+        }
+      }
+    },
+    {
+      "id": "mer-furtivo",
+      "nome": "Mercenário Furtivo",
+      "classe": "Mercenário",
+      "deck": 1,
+      "custo": 7,
+      "poder": 2,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "oculto"
+        }
+      ],
+      "build": "Cloaking"
+    },
+    {
+      "id": "mer-katar",
+      "nome": "Mercenário Katar",
+      "classe": "Mercenário",
+      "deck": 1,
+      "custo": 6,
+      "poder": 4,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "perfurar",
+          "x": 2
+        }
+      ],
+      "build": "Katar crítico"
+    },
+    {
+      "id": "arr-gatuno",
+      "nome": "Arruaceiro Gatuno",
+      "classe": "Arruaceiro",
+      "deck": 1,
+      "custo": 5,
+      "poder": 2,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "pilhar",
+          "x": 2
+        }
+      ],
+      "build": "Steal",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "agil"
+        },
+        "texto": "COMBO Agil: RAPTO — arranque 1 inimigo da sala.",
+        "efeito": {
+          "tipo": "rapto"
+        }
+      }
+    },
+    {
+      "id": "arr-saqueador",
+      "nome": "Arruaceiro Saqueador",
+      "classe": "Arruaceiro",
+      "deck": 1,
+      "custo": 6,
+      "poder": 3,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "anular"
+        }
+      ],
+      "build": "Strip"
+    },
+    {
+      "id": "arr-batedor",
+      "nome": "Arruaceiro Batedor",
+      "classe": "Arruaceiro",
+      "deck": 1,
+      "custo": 5,
+      "poder": 3,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "rajada",
+          "x": 2
+        }
+      ],
+      "build": "Back Stab"
+    },
+    {
+      "id": "fer-forjador",
+      "nome": "Ferreiro Forjador",
+      "classe": "Ferreiro",
+      "deck": 1,
+      "custo": 5,
+      "poder": 2,
+      "papel": "vanguarda",
+      "slots": 2,
+      "keywords": [],
+      "build": "Forja",
+      "special": "forja"
+    },
+    {
+      "id": "fer-mercador",
+      "nome": "Ferreiro Mercador",
+      "classe": "Ferreiro",
+      "deck": 1,
+      "custo": 4,
+      "poder": 1,
+      "papel": "vanguarda",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "pilhar",
+          "x": 3
+        }
+      ],
+      "build": "Overcharge",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: +1 de Poder a cada 5 zeny no seu bolso.",
+        "efeito": {
+          "tipo": "poder-por-zeny",
+          "cada": 5
+        }
+      }
+    },
+    {
+      "id": "fer-perfeicao",
+      "nome": "Ferreiro Perfeição de Armas",
+      "classe": "Ferreiro",
+      "deck": 1,
+      "custo": 6,
+      "poder": 2,
+      "papel": "vanguarda",
+      "slots": 2,
+      "keywords": [
+        {
+          "kw": "perfurar",
+          "x": 2
+        }
+      ],
+      "build": "Weapon Perfection",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "vanguarda"
+        },
+        "texto": "COMBO Vanguarda: seus personagens ignoram toda a Muralha inimiga.",
+        "efeito": {
+          "tipo": "perfurar-total"
+        }
+      }
+    },
+    {
+      "id": "alq-homunculo",
+      "nome": "Alquimista Homúnculo",
+      "classe": "Alquimista",
+      "deck": 1,
+      "custo": 6,
+      "poder": 2,
+      "papel": "suporte",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "elo",
+          "x": 1
+        }
+      ],
+      "build": "Bio-ethics"
+    },
+    {
+      "id": "alq-boticario",
+      "nome": "Alquimista Boticário",
+      "classe": "Alquimista",
+      "deck": 1,
+      "custo": 5,
+      "poder": 1,
+      "papel": "suporte",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "restaurar",
+          "x": 1
+        }
+      ],
+      "build": "Potion Pitcher",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: o maior clã inimigo fica EXPOSTO.",
+        "efeito": {
+          "tipo": "marca",
+          "marca": "exposto"
+        }
+      }
+    },
+    {
+      "id": "alq-fogogrego",
+      "nome": "Alquimista Fogo Grego",
+      "classe": "Alquimista",
+      "deck": 1,
+      "custo": 6,
+      "poder": 3,
+      "papel": "suporte",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "perfurar",
+          "x": 2
+        }
+      ],
+      "build": "Fogo grego",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "arcano"
+        },
+        "texto": "COMBO Arcano: +4 de Poder — o fogo pega no que o mago acendeu.",
+        "efeito": {
+          "tipo": "poder",
+          "x": 4
+        }
+      }
+    },
+    {
+      "id": "sac-suporte",
+      "nome": "Sacerdote Suporte",
+      "classe": "Sacerdote",
+      "deck": 1,
+      "custo": 6,
+      "poder": 1,
+      "papel": "suporte",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "elo",
+          "x": 2
+        }
+      ],
+      "build": "Full Support",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "vanguarda"
+        },
+        "texto": "COMBO Vanguarda: seu clã ganha MOVER 1.",
+        "efeito": {
+          "tipo": "mover",
+          "x": 1
+        }
+      }
+    },
+    {
+      "id": "sac-pneuma",
+      "nome": "Sacerdote Pneuma",
+      "classe": "Sacerdote",
+      "deck": 1,
+      "custo": 6,
+      "poder": 2,
+      "papel": "suporte",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 2
+        }
+      ],
+      "build": "Pneuma / Safety Wall"
+    },
+    {
+      "id": "sac-batalha",
+      "nome": "Sacerdote de Batalha",
+      "classe": "Sacerdote",
+      "deck": 1,
+      "custo": 5,
+      "poder": 3,
+      "papel": "suporte",
+      "slots": 2,
+      "keywords": [
+        {
+          "kw": "solo",
+          "x": 2
+        }
+      ],
+      "build": "Battle Priest"
+    },
+    {
+      "id": "mon-combo",
+      "nome": "Monge Combo",
+      "classe": "Monge",
+      "deck": 1,
+      "custo": 6,
+      "poder": 4,
+      "papel": "vanguarda",
+      "slots": 1,
+      "keywords": [],
+      "build": "Chain Combo"
+    },
+    {
+      "id": "mon-aco",
+      "nome": "Monge Corpo de Aço",
+      "classe": "Monge",
+      "deck": 1,
+      "custo": 5,
+      "poder": 0,
+      "papel": "vanguarda",
+      "slots": 2,
+      "keywords": [
+        {
+          "kw": "proteger"
+        },
+        {
+          "kw": "esgotar"
+        }
+      ],
+      "build": "Steel Body",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: o maior clã inimigo fica PRESO.",
+        "efeito": {
+          "tipo": "marca",
+          "marca": "preso"
+        }
+      }
+    },
+    {
+      "id": "mon-dilema",
+      "nome": "Monge Disparar Esferas",
+      "classe": "Monge",
+      "deck": 1,
+      "custo": 6,
+      "poder": 1,
+      "papel": "vanguarda",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "estilhacar",
+          "x": 4
+        }
+      ],
+      "build": "Throw Spirit Sphere"
+    },
+    {
+      "id": "cac-armadilheiro",
+      "nome": "Caçador Armadilheiro",
+      "classe": "Caçador",
+      "deck": 1,
+      "custo": 6,
+      "poder": 2,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 2
+        }
+      ],
+      "build": "Trapper",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: o maior clã inimigo fica REVELADO.",
+        "efeito": {
+          "tipo": "marca",
+          "marca": "revelado"
+        }
+      }
+    },
+    {
+      "id": "cac-tiroduplo",
+      "nome": "Caçador Rajada de Flechas",
+      "classe": "Caçador",
+      "deck": 1,
+      "custo": 6,
+      "poder": 5,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "alcance"
+        },
+        {
+          "kw": "fragil"
+        }
+      ],
+      "build": "Double Strafe"
+    },
+    {
+      "id": "cac-falcoeiro",
+      "nome": "Caçador Falcoeiro",
+      "classe": "Caçador",
+      "deck": 1,
+      "custo": 6,
+      "poder": 2,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "alcance"
+        }
+      ],
+      "build": "Falcão / Blitz Beat",
+      "special": "revela-oculto"
+    },
+    {
+      "id": "bar-cancao",
+      "nome": "Bardo Canção",
+      "classe": "Bardo",
+      "deck": 1,
+      "custo": 5,
+      "poder": 1,
+      "papel": "suporte",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "elo",
+          "x": 2
+        }
+      ],
+      "build": "Canções de grupo",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "arcano"
+        },
+        "texto": "COMBO Arcano: seus Arcanos ganham +3 de Poder.",
+        "efeito": {
+          "tipo": "rajada-papel",
+          "papel": "arcano",
+          "x": 3
+        }
+      }
+    },
+    {
+      "id": "bar-idun",
+      "nome": "Bardo Maçã de Idun",
+      "classe": "Bardo",
+      "deck": 1,
+      "custo": 5,
+      "poder": 1,
+      "papel": "suporte",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "restaurar",
+          "x": 1
+        }
+      ],
+      "build": "Apple of Idun"
+    },
+    {
+      "id": "bar-flecha",
+      "nome": "Bardo Flecha Musical",
+      "classe": "Bardo",
+      "deck": 1,
+      "custo": 6,
+      "poder": 4,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "alcance"
+        }
+      ],
+      "build": "Musical Strike"
+    },
+    {
+      "id": "oda-dancalenta",
+      "nome": "Odalisca Dança Lenta",
+      "classe": "Odalisca",
+      "deck": 1,
+      "custo": 6,
+      "poder": 2,
+      "papel": "suporte",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 2
+        }
+      ],
+      "build": "Slow Grace",
+      "combo": {
+        "exige": {
+          "tipo": "classe",
+          "valor": "Bardo"
+        },
+        "texto": "COMBO Bardo: +4 de Poder — o dueto.",
+        "efeito": {
+          "tipo": "poder",
+          "x": 4
+        }
+      }
+    },
+    {
+      "id": "oda-adaga",
+      "nome": "Odalisca Dança das Adagas",
+      "classe": "Odalisca",
+      "deck": 1,
+      "custo": 6,
+      "poder": 4,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "rajada",
+          "x": 2
+        }
+      ],
+      "build": "Throw Arrow"
+    },
+    {
+      "id": "oda-servico",
+      "nome": "Odalisca Serviço para Você",
+      "classe": "Odalisca",
+      "deck": 1,
+      "custo": 6,
+      "poder": 1,
+      "papel": "suporte",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "devocao",
+          "x": 2
+        }
+      ],
+      "build": "Service For You",
+      "combo": {
+        "exige": {
+          "tipo": "classe",
+          "valor": "Monge"
+        },
+        "texto": "COMBO Monge: ninguém seu vai à Enfermaria por Esgotar.",
+        "efeito": {
+          "tipo": "cancela-esgotar"
+        }
+      }
+    },
+    {
+      "id": "sup-teimoso",
+      "nome": "Superaprendiz Teimoso",
+      "classe": "Superaprendiz",
+      "deck": 1,
+      "custo": 3,
+      "poder": 1,
+      "papel": "agil",
+      "slots": 3,
+      "keywords": [],
+      "build": "Sobrevivência teimosa",
+      "special": "teimoso"
+    },
+    {
+      "id": "sup-sorte",
+      "nome": "Superaprendiz Sortudo",
+      "classe": "Superaprendiz",
+      "deck": 1,
+      "custo": 4,
+      "poder": 1,
+      "papel": "agil",
+      "slots": 1,
+      "keywords": [
+        {
+          "kw": "solo",
+          "x": 3
+        },
+        {
+          "kw": "estilhacar",
+          "x": 2
+        }
+      ],
+      "build": "Sorte de principiante"
+    },
+    {
+      "id": "sup-improvisado",
+      "nome": "Superaprendiz Improvisado",
+      "classe": "Superaprendiz",
+      "deck": 1,
+      "custo": 4,
+      "poder": 2,
+      "papel": "suporte",
+      "slots": 2,
+      "keywords": [
+        {
+          "kw": "imitar",
+          "x": 1
+        }
+      ],
+      "build": "Faz de tudo"
+    }
+  ],
+  "transcendencias": [
+    {
+      "id": "tr-cav-espiral",
+      "nome": "Lorde dos Cavaleiros — Espiral",
+      "classe": "Cavaleiro",
+      "forma": "Lorde dos Cavaleiros",
+      "custo": 11,
+      "poderBonus": 3,
+      "keywords": [
+        {
+          "kw": "perfurar",
+          "x": 4
+        }
+      ],
+      "build": "Spiral Pierce"
+    },
+    {
+      "id": "tr-cav-berserk",
+      "nome": "Lorde dos Cavaleiros — Fúria Berserk",
+      "classe": "Cavaleiro",
+      "forma": "Lorde dos Cavaleiros",
+      "custo": 12,
+      "poderBonus": 0,
+      "keywords": [
+        {
+          "kw": "berserk",
+          "x": 5
+        }
+      ],
+      "build": "Berserk"
+    },
+    {
+      "id": "tr-cav-montaria",
+      "nome": "Lorde dos Cavaleiros — Montaria",
+      "classe": "Cavaleiro",
+      "forma": "Lorde dos Cavaleiros",
+      "custo": 13,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "mover",
+          "x": 4
+        }
+      ],
+      "build": "Peco-Peco de guerra"
+    },
+    {
+      "id": "tr-tem-devocao",
+      "nome": "Paladino — Devoção",
+      "classe": "Templário",
+      "forma": "Paladino",
+      "custo": 11,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "devocao",
+          "x": 2
+        }
+      ],
+      "build": "Devotion",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "vanguarda"
+        },
+        "texto": "COMBO Vanguarda: se você perder, o vencedor também sofre 1 baixa.",
+        "efeito": {
+          "tipo": "troco"
+        }
+      }
+    },
+    {
+      "id": "tr-tem-corrente",
+      "nome": "Paladino — Corrente de Escudo",
+      "classe": "Templário",
+      "forma": "Paladino",
+      "custo": 11,
+      "poderBonus": 4,
+      "keywords": [
+        {
+          "kw": "proteger"
+        }
+      ],
+      "build": "Shield Chain",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "arcano"
+        },
+        "texto": "COMBO Arcano: seus Arcanos não sofrem baixa nesta sala.",
+        "efeito": {
+          "tipo": "cobrir-papel",
+          "papel": "arcano"
+        }
+      }
+    },
+    {
+      "id": "tr-tem-sacrificio",
+      "nome": "Paladino — Sacrifício",
+      "classe": "Templário",
+      "forma": "Paladino",
+      "custo": 10,
+      "poderBonus": 3,
+      "keywords": [
+        {
+          "kw": "rajada",
+          "x": 3
+        },
+        {
+          "kw": "esgotar"
+        }
+      ],
+      "build": "Sacrifice"
+    },
+    {
+      "id": "tr-bru-nevasca",
+      "nome": "Arquimago — Nevasca",
+      "classe": "Bruxo",
+      "forma": "Arquimago",
+      "custo": 11,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 2
+        }
+      ],
+      "build": "Storm Gust ampliado"
+    },
+    {
+      "id": "tr-bru-meteoros",
+      "nome": "Arquimago — Chuva de Meteoros",
+      "classe": "Bruxo",
+      "forma": "Arquimago",
+      "custo": 13,
+      "poderBonus": 5,
+      "keywords": [
+        {
+          "kw": "rajada",
+          "x": 3
+        }
+      ],
+      "build": "Meteor Storm"
+    },
+    {
+      "id": "tr-bru-ganbantein",
+      "nome": "Arquimago — Ganbantein",
+      "classe": "Bruxo",
+      "forma": "Arquimago",
+      "custo": 9,
+      "poderBonus": 1,
+      "keywords": [
+        {
+          "kw": "anular"
+        }
+      ],
+      "build": "Ganbantein",
+      "combo": {
+        "exige": {
+          "tipo": "classe",
+          "valor": "Sábio"
+        },
+        "texto": "COMBO Sábio: seus personagens ignoram toda a Muralha inimiga.",
+        "efeito": {
+          "tipo": "perfurar-total"
+        }
+      }
+    },
+    {
+      "id": "tr-sab-dissonancia",
+      "nome": "Professor — Dissonância",
+      "classe": "Sábio",
+      "forma": "Professor",
+      "custo": 10,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "anular"
+        }
+      ],
+      "build": "Dispell",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: o maior clã inimigo fica PRESO.",
+        "efeito": {
+          "tipo": "marca",
+          "marca": "preso"
+        }
+      }
+    },
+    {
+      "id": "tr-sab-duplocast",
+      "nome": "Professor — Duplo Cast",
+      "classe": "Sábio",
+      "forma": "Professor",
+      "custo": 11,
+      "poderBonus": 4,
+      "keywords": [],
+      "build": "Double Casting"
+    },
+    {
+      "id": "tr-sab-memorizar",
+      "nome": "Professor — Memorizar",
+      "classe": "Sábio",
+      "forma": "Professor",
+      "custo": 10,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "imitar"
+        }
+      ],
+      "build": "Memorize",
+      "combo": {
+        "exige": {
+          "tipo": "classe",
+          "valor": "Monge"
+        },
+        "texto": "COMBO Monge: ninguém seu vai à Enfermaria por Esgotar.",
+        "efeito": {
+          "tipo": "cancela-esgotar"
+        }
+      }
+    },
+    {
+      "id": "tr-mer-rompealma",
+      "nome": "Algoz — Rompe-Alma",
+      "classe": "Mercenário",
+      "forma": "Algoz",
+      "custo": 12,
+      "poderBonus": 5,
+      "keywords": [
+        {
+          "kw": "rajada",
+          "x": 2
+        }
+      ],
+      "build": "Soul Breaker"
+    },
+    {
+      "id": "tr-mer-presa",
+      "nome": "Algoz — Presa Sombria",
+      "classe": "Mercenário",
+      "forma": "Algoz",
+      "custo": 10,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "oculto"
+        }
+      ],
+      "build": "Grimtooth"
+    },
+    {
+      "id": "tr-mer-veneno",
+      "nome": "Algoz — Veneno Mortal",
+      "classe": "Mercenário",
+      "forma": "Algoz",
+      "custo": 11,
+      "poderBonus": 5,
+      "keywords": [
+        {
+          "kw": "perfurar",
+          "x": 3
+        },
+        {
+          "kw": "maldicao",
+          "x": 2
+        }
+      ],
+      "build": "Enchant Deadly Poison"
+    },
+    {
+      "id": "tr-arr-despojar",
+      "nome": "Desordeiro — Despojar Total",
+      "classe": "Arruaceiro",
+      "forma": "Desordeiro",
+      "custo": 10,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "anular"
+        },
+        {
+          "kw": "pilhar",
+          "x": 3
+        }
+      ],
+      "build": "Full Strip"
+    },
+    {
+      "id": "tr-arr-plagio",
+      "nome": "Desordeiro — Plágio",
+      "classe": "Arruaceiro",
+      "forma": "Desordeiro",
+      "custo": 10,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "imitar"
+        }
+      ],
+      "build": "Plagiarism"
+    },
+    {
+      "id": "tr-arr-silenciosa",
+      "nome": "Desordeiro — Marcha Silenciosa",
+      "classe": "Arruaceiro",
+      "forma": "Desordeiro",
+      "custo": 12,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "oculto"
+        },
+        {
+          "kw": "mover",
+          "x": 2
+        }
+      ],
+      "build": "Chase Walk",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: RAPTO — arranque 1 inimigo da sala.",
+        "efeito": {
+          "tipo": "rapto"
+        }
+      }
+    },
+    {
+      "id": "tr-fer-carrocerada",
+      "nome": "Mestre-Ferreiro — Carrocerada",
+      "classe": "Ferreiro",
+      "forma": "Mestre-Ferreiro",
+      "custo": 11,
+      "poderBonus": 1,
+      "keywords": [
+        {
+          "kw": "estilhacar",
+          "x": 5
+        }
+      ],
+      "build": "Cart Termination",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: +1 de Poder a cada 3 zeny no seu bolso.",
+        "efeito": {
+          "tipo": "poder-por-zeny",
+          "cada": 3
+        }
+      }
+    },
+    {
+      "id": "tr-fer-fundicao",
+      "nome": "Mestre-Ferreiro — Fundição Suprema",
+      "classe": "Ferreiro",
+      "forma": "Mestre-Ferreiro",
+      "custo": 9,
+      "poderBonus": 1,
+      "keywords": [],
+      "build": "Forja lendária",
+      "special": "forja-suprema"
+    },
+    {
+      "id": "tr-fer-adrenalina",
+      "nome": "Mestre-Ferreiro — Adrenalina Suprema",
+      "classe": "Ferreiro",
+      "forma": "Mestre-Ferreiro",
+      "custo": 10,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "elo",
+          "x": 2
+        }
+      ],
+      "build": "Adrenaline Rush"
+    },
+    {
+      "id": "tr-alq-acida",
+      "nome": "Criador — Demonstração Ácida",
+      "classe": "Alquimista",
+      "forma": "Criador",
+      "custo": 12,
+      "poderBonus": 4,
+      "keywords": [
+        {
+          "kw": "perfurar",
+          "x": 4
+        }
+      ],
+      "build": "Acid Demonstration",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: o maior clã inimigo fica EXPOSTO e PRESO.",
+        "efeito": {
+          "tipo": "marca",
+          "marca": "exposto"
+        }
+      }
+    },
+    {
+      "id": "tr-alq-homunculo",
+      "nome": "Criador — Homúnculo Superior",
+      "classe": "Alquimista",
+      "forma": "Criador",
+      "custo": 11,
+      "poderBonus": 3,
+      "keywords": [
+        {
+          "kw": "elo",
+          "x": 2
+        }
+      ],
+      "build": "Homunculus S",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: +3 de Poder — o homúnculo luta junto.",
+        "efeito": {
+          "tipo": "poder",
+          "x": 3
+        }
+      }
+    },
+    {
+      "id": "tr-alq-esferas",
+      "nome": "Criador — Bomba de Esferas",
+      "classe": "Alquimista",
+      "forma": "Criador",
+      "custo": 10,
+      "poderBonus": 1,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 3
+        }
+      ],
+      "build": "Sphere Mine",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "vanguarda"
+        },
+        "texto": "COMBO Vanguarda: seu clã inteiro atravessa o Escudo do Emperium.",
+        "efeito": {
+          "tipo": "ariete"
+        }
+      }
+    },
+    {
+      "id": "tr-sac-assumptio",
+      "nome": "Sumo Sacerdote — Assumptio",
+      "classe": "Sacerdote",
+      "forma": "Sumo Sacerdote",
+      "custo": 11,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "devocao",
+          "x": 2
+        }
+      ],
+      "build": "Assumptio"
+    },
+    {
+      "id": "tr-sac-ressurreicao",
+      "nome": "Sumo Sacerdote — Ressurreição",
+      "classe": "Sacerdote",
+      "forma": "Sumo Sacerdote",
+      "custo": 10,
+      "poderBonus": 1,
+      "keywords": [
+        {
+          "kw": "restaurar",
+          "x": 2
+        }
+      ],
+      "build": "Resurrection"
+    },
+    {
+      "id": "tr-sac-julgamento",
+      "nome": "Sumo Sacerdote — Julgamento",
+      "classe": "Sacerdote",
+      "forma": "Sumo Sacerdote",
+      "custo": 12,
+      "poderBonus": 5,
+      "keywords": [],
+      "build": "Magnus Exorcismus"
+    },
+    {
+      "id": "tr-mon-asura",
+      "nome": "Mestre — Punho de Asura",
+      "classe": "Monge",
+      "forma": "Mestre",
+      "custo": 14,
+      "poderBonus": 8,
+      "keywords": [
+        {
+          "kw": "esgotar"
+        },
+        {
+          "kw": "ariete"
+        }
+      ],
+      "build": "Asura Strike"
+    },
+    {
+      "id": "tr-mon-salto",
+      "nome": "Mestre — Salto",
+      "classe": "Monge",
+      "forma": "Mestre",
+      "custo": 11,
+      "poderBonus": 3,
+      "keywords": [
+        {
+          "kw": "mover",
+          "x": 2
+        }
+      ],
+      "build": "Body Relocation"
+    },
+    {
+      "id": "tr-mon-aco",
+      "nome": "Mestre — Corpo de Aço e Dilema",
+      "classe": "Monge",
+      "forma": "Mestre",
+      "custo": 10,
+      "poderBonus": 1,
+      "keywords": [
+        {
+          "kw": "proteger"
+        }
+      ],
+      "build": "Steel Body",
+      "special": "imortal"
+    },
+    {
+      "id": "tr-cac-flechas",
+      "nome": "Atirador de Elite — Chuva de Flechas",
+      "classe": "Caçador",
+      "forma": "Atirador de Elite",
+      "custo": 12,
+      "poderBonus": 5,
+      "keywords": [
+        {
+          "kw": "alcance"
+        }
+      ],
+      "build": "Arrow Storm"
+    },
+    {
+      "id": "tr-cac-armadilha",
+      "nome": "Atirador de Elite — Armadilha Suprema",
+      "classe": "Caçador",
+      "forma": "Atirador de Elite",
+      "custo": 10,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 3
+        }
+      ],
+      "build": "Trap Research"
+    },
+    {
+      "id": "tr-cac-falcao",
+      "nome": "Atirador de Elite — Olho de Falcão",
+      "classe": "Caçador",
+      "forma": "Atirador de Elite",
+      "custo": 10,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "anular"
+        }
+      ],
+      "build": "Falcon Assault",
+      "special": "revela-oculto",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: o maior clã inimigo fica REVELADO.",
+        "efeito": {
+          "tipo": "marca",
+          "marca": "revelado"
+        }
+      }
+    },
+    {
+      "id": "tr-bar-ensemble",
+      "nome": "Menestrel — Ensemble",
+      "classe": "Bardo",
+      "forma": "Menestrel",
+      "custo": 9,
+      "poderBonus": 2,
+      "keywords": [],
+      "build": "Ensemble",
+      "special": "ensemble"
+    },
+    {
+      "id": "tr-bar-cancao",
+      "nome": "Menestrel — Canção Longa",
+      "classe": "Bardo",
+      "forma": "Menestrel",
+      "custo": 10,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "elo",
+          "x": 2
+        }
+      ],
+      "build": "Longing for Freedom",
+      "combo": {
+        "exige": {
+          "tipo": "papel",
+          "valor": "vanguarda"
+        },
+        "texto": "COMBO Vanguarda: seu clã ganha MOVER 1.",
+        "efeito": {
+          "tipo": "mover",
+          "x": 1
+        }
+      }
+    },
+    {
+      "id": "tr-bar-vulcao",
+      "nome": "Menestrel — Vulcão de Flechas",
+      "classe": "Bardo",
+      "forma": "Menestrel",
+      "custo": 12,
+      "poderBonus": 5,
+      "keywords": [
+        {
+          "kw": "alcance"
+        }
+      ],
+      "build": "Arrow Vulcan"
+    },
+    {
+      "id": "tr-oda-marionete",
+      "nome": "Cigana — Marionete",
+      "classe": "Odalisca",
+      "forma": "Cigana",
+      "custo": 11,
+      "poderBonus": 0,
+      "keywords": [],
+      "build": "Marionette Control",
+      "special": "marionete"
+    },
+    {
+      "id": "tr-oda-tarot",
+      "nome": "Cigana — Tarô do Destino",
+      "classe": "Odalisca",
+      "forma": "Cigana",
+      "custo": 11,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "anular"
+        }
+      ],
+      "build": "Tarot Card of Fate",
+      "combo": {
+        "exige": {
+          "tipo": "nenhum"
+        },
+        "texto": "ESPECIAL: o maior clã inimigo fica EXPOSTO.",
+        "efeito": {
+          "tipo": "marca",
+          "marca": "exposto"
+        }
+      }
+    },
+    {
+      "id": "tr-oda-ritmo",
+      "nome": "Cigana — Ritmo Hipnótico",
+      "classe": "Odalisca",
+      "forma": "Cigana",
+      "custo": 10,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 3
+        }
+      ],
+      "build": "Slow Grace ampliado"
+    },
+    {
+      "id": "tr-sup-teimosia",
+      "nome": "Superaprendiz — Teimosia Absurda",
+      "classe": "Superaprendiz",
+      "forma": "Superaprendiz",
+      "custo": 8,
+      "poderBonus": 1,
+      "keywords": [],
+      "build": "Guardian Angel",
+      "slotsBonus": 1,
+      "special": "imortal"
+    },
+    {
+      "id": "tr-sup-sobrecarga",
+      "nome": "Superaprendiz — Sobrecarga",
+      "classe": "Superaprendiz",
+      "forma": "Superaprendiz",
+      "custo": 9,
+      "poderBonus": 4,
+      "keywords": [
+        {
+          "kw": "esgotar"
+        }
+      ],
+      "build": "Sobrecarga"
+    },
+    {
+      "id": "tr-sup-imitacao",
+      "nome": "Superaprendiz — Imitação Descarada",
+      "classe": "Superaprendiz",
+      "forma": "Superaprendiz",
+      "custo": 7,
+      "poderBonus": 2,
+      "keywords": [
+        {
+          "kw": "imitar",
+          "x": 2
+        }
+      ],
+      "build": "Cópia de tudo"
+    }
+  ],
+  "equipamentos": [
+    {
+      "id": "eq-bastarda",
+      "nome": "Espada Bastarda",
+      "kind": "arma",
+      "papeis": [
+        "vanguarda"
+      ],
+      "custo": 5,
+      "poder": 2,
+      "keywords": [],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-lanca",
+      "nome": "Lança de Cavalaria",
+      "kind": "arma",
+      "papeis": [
+        "vanguarda"
+      ],
+      "custo": 6,
+      "poder": 2,
+      "keywords": [
+        {
+          "kw": "perfurar",
+          "x": 1
+        }
+      ],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-machado",
+      "nome": "Machado de Guerra",
+      "kind": "arma",
+      "papeis": [
+        "vanguarda"
+      ],
+      "custo": 7,
+      "poder": 4,
+      "keywords": [],
+      "encaixes": 1,
+      "special": "penalidade-escudar"
+    },
+    {
+      "id": "eq-lamina-maldita",
+      "nome": "Lâmina Maldita",
+      "kind": "arma",
+      "papeis": [],
+      "custo": 6,
+      "poder": 7,
+      "keywords": [
+        {
+          "kw": "maldicao",
+          "x": 4
+        }
+      ],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-cajado",
+      "nome": "Cajado da Tempestade",
+      "kind": "arma",
+      "papeis": [
+        "arcano"
+      ],
+      "custo": 6,
+      "poder": 3,
+      "keywords": [],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-grimorio",
+      "nome": "Grimório",
+      "kind": "arma",
+      "papeis": [
+        "arcano"
+      ],
+      "custo": 5,
+      "poder": 1,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 1
+        }
+      ],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-varinha",
+      "nome": "Varinha de Anulação",
+      "kind": "arma",
+      "papeis": [
+        "arcano"
+      ],
+      "custo": 7,
+      "poder": 1,
+      "keywords": [
+        {
+          "kw": "anular"
+        }
+      ],
+      "encaixes": 0
+    },
+    {
+      "id": "eq-adaga",
+      "nome": "Adaga Gêmea",
+      "kind": "arma",
+      "papeis": [
+        "agil"
+      ],
+      "custo": 5,
+      "poder": 2,
+      "keywords": [
+        {
+          "kw": "rajada",
+          "x": 1
+        }
+      ],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-arco",
+      "nome": "Arco Composto",
+      "kind": "arma",
+      "papeis": [
+        "agil"
+      ],
+      "custo": 6,
+      "poder": 3,
+      "keywords": [],
+      "encaixes": 1,
+      "exige": "alcance"
+    },
+    {
+      "id": "eq-katar",
+      "nome": "Katar Sombria",
+      "kind": "arma",
+      "papeis": [
+        "agil"
+      ],
+      "custo": 7,
+      "poder": 3,
+      "keywords": [],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-alaude",
+      "nome": "Alaúde",
+      "kind": "arma",
+      "papeis": [
+        "suporte"
+      ],
+      "custo": 5,
+      "poder": 1,
+      "keywords": [
+        {
+          "kw": "elo",
+          "x": 1
+        }
+      ],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-chicote",
+      "nome": "Chicote de Seda",
+      "kind": "arma",
+      "papeis": [
+        "suporte"
+      ],
+      "custo": 5,
+      "poder": 2,
+      "keywords": [],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-maca",
+      "nome": "Maça Sagrada",
+      "kind": "arma",
+      "papeis": [
+        "suporte"
+      ],
+      "custo": 6,
+      "poder": 2,
+      "keywords": [
+        {
+          "kw": "restaurar",
+          "x": 1
+        }
+      ],
+      "encaixes": 0
+    },
+    {
+      "id": "eq-cota",
+      "nome": "Cota de Malha",
+      "kind": "armadura",
+      "papeis": [],
+      "custo": 4,
+      "poder": 1,
+      "keywords": [],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-completa",
+      "nome": "Armadura Completa",
+      "kind": "armadura",
+      "papeis": [
+        "vanguarda"
+      ],
+      "custo": 7,
+      "poder": 2,
+      "keywords": [
+        {
+          "kw": "proteger"
+        }
+      ],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-ninfa",
+      "nome": "Manto de Ninfa",
+      "kind": "armadura",
+      "papeis": [
+        "arcano",
+        "suporte"
+      ],
+      "custo": 6,
+      "poder": 0,
+      "keywords": [],
+      "encaixes": 1,
+      "special": "ignora-primeira-baixa"
+    },
+    {
+      "id": "eq-sombras",
+      "nome": "Traje de Sombras",
+      "kind": "armadura",
+      "papeis": [
+        "agil"
+      ],
+      "custo": 6,
+      "poder": 1,
+      "keywords": [
+        {
+          "kw": "oculto"
+        }
+      ],
+      "encaixes": 0
+    },
+    {
+      "id": "eq-escudo",
+      "nome": "Escudo Sagrado",
+      "kind": "armadura",
+      "papeis": [
+        "vanguarda"
+      ],
+      "custo": 5,
+      "poder": 0,
+      "keywords": [
+        {
+          "kw": "muralha",
+          "x": 1
+        }
+      ],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-botas",
+      "nome": "Botas de Fuga",
+      "kind": "armadura",
+      "papeis": [],
+      "custo": 4,
+      "poder": 0,
+      "keywords": [],
+      "encaixes": 0,
+      "special": "baixa-vai-reserva"
+    },
+    {
+      "id": "eq-elfico",
+      "nome": "Manto Élfico",
+      "kind": "armadura",
+      "papeis": [],
+      "custo": 5,
+      "poder": 1,
+      "keywords": [],
+      "encaixes": 0,
+      "special": "imune-anular"
+    },
+    {
+      "id": "eq-sabio",
+      "nome": "Vestes do Sábio",
+      "kind": "armadura",
+      "papeis": [
+        "arcano"
+      ],
+      "custo": 6,
+      "poder": 1,
+      "keywords": [
+        {
+          "kw": "perfurar",
+          "x": 2
+        }
+      ],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-runico",
+      "nome": "Peitoral Rúnico",
+      "kind": "armadura",
+      "papeis": [
+        "vanguarda"
+      ],
+      "custo": 8,
+      "poder": 3,
+      "keywords": [],
+      "encaixes": 1
+    },
+    {
+      "id": "eq-tunica",
+      "nome": "Túnica Simples",
+      "kind": "armadura",
+      "papeis": [],
+      "custo": 3,
+      "poder": 1,
+      "keywords": [],
+      "encaixes": 2
+    },
+    {
+      "id": "eq-anelmercador",
+      "nome": "Anel do Mercador",
+      "kind": "acessorio",
+      "papeis": [],
+      "custo": 5,
+      "poder": 0,
+      "keywords": [],
+      "encaixes": 0,
+      "special": "renda2"
+    },
+    {
+      "id": "eq-broche",
+      "nome": "Broche do Guildmaster",
+      "kind": "acessorio",
+      "papeis": [],
+      "custo": 6,
+      "poder": 0,
+      "keywords": [],
+      "encaixes": 0,
+      "special": "acao-extra"
+    },
+    {
+      "id": "eq-amuleto",
+      "nome": "Amuleto de Ferro",
+      "kind": "acessorio",
+      "papeis": [],
+      "custo": 4,
+      "poder": 0,
+      "keywords": [],
+      "encaixes": 0,
+      "special": "nunca-primeira-baixa"
+    },
+    {
+      "id": "eq-talisma",
+      "nome": "Talismã do Vento",
+      "kind": "acessorio",
+      "papeis": [],
+      "custo": 4,
+      "poder": 0,
+      "keywords": [
+        {
+          "kw": "mover",
+          "x": 1
+        }
+      ],
+      "encaixes": 0
+    },
+    {
+      "id": "eq-oculos",
+      "nome": "Oculos do Caçador",
+      "kind": "acessorio",
+      "papeis": [],
+      "custo": 5,
+      "poder": 0,
+      "keywords": [],
+      "encaixes": 0,
+      "special": "revela-oculto"
+    },
+    {
+      "id": "eq-colar",
+      "nome": "Colar de Zeny",
+      "kind": "acessorio",
+      "papeis": [],
+      "custo": 3,
+      "poder": 0,
+      "keywords": [
+        {
+          "kw": "pilhar",
+          "x": 2
+        }
+      ],
+      "encaixes": 0
+    },
+    {
+      "id": "eq-selo",
+      "nome": "Selo do Emperium",
+      "kind": "acessorio",
+      "papeis": [],
+      "custo": 8,
+      "poder": 0,
+      "keywords": [],
+      "encaixes": 0,
+      "special": "poder-emperium"
+    },
+    {
+      "id": "eq-pergaminho",
+      "nome": "Pergaminho Antigo",
+      "kind": "acessorio",
+      "papeis": [],
+      "custo": 5,
+      "poder": 0,
+      "keywords": [
+        {
+          "kw": "imitar"
+        }
+      ],
+      "encaixes": 0
+    }
+  ],
+  "monstros": [
+    {
+      "id": "mc-thara",
+      "nome": "Thara Frog",
+      "poder": 0,
+      "keywords": [],
+      "special": "ignora-primeira-baixa",
+      "texto": "Ignora a primeira baixa causada por personagem inimigo."
+    },
+    {
+      "id": "mc-raydric",
+      "nome": "Raydric",
+      "poder": 0,
+      "keywords": [],
+      "special": "bonus-defensor",
+      "texto": "+2 de Poder quando você é o dono do castelo."
+    },
+    {
+      "id": "mc-hydra",
+      "nome": "Hydra",
+      "poder": 0,
+      "keywords": [],
+      "special": "bonus-atacante",
+      "texto": "+2 de Poder quando você é atacante."
+    },
+    {
+      "id": "mc-marc",
+      "nome": "Marc",
+      "poder": 0,
+      "keywords": [],
+      "special": "imune-muralha",
+      "texto": "Imune a Muralha."
+    },
+    {
+      "id": "mc-angeling",
+      "nome": "Angeling",
+      "poder": 0,
+      "keywords": [],
+      "special": "imune-anular",
+      "texto": "Imune a Anular."
+    },
+    {
+      "id": "mc-ghostring",
+      "nome": "Ghostring",
+      "poder": 0,
+      "keywords": [],
+      "special": "ghostring",
+      "texto": "Não pode sofrer baixa. Poder reduzido à metade."
+    },
+    {
+      "id": "mc-poring",
+      "nome": "Poring",
+      "poder": 0,
+      "keywords": [],
+      "special": "poring",
+      "texto": "+3 zeny sempre que este personagem vence uma sala."
+    },
+    {
+      "id": "mc-baphomet",
+      "nome": "Baphomet",
+      "poder": 0,
+      "keywords": [
+        {
+          "kw": "elo",
+          "x": 1
+        }
+      ],
+      "texto": "Elo 1."
+    },
+    {
+      "id": "mc-doppel",
+      "nome": "Doppelganger",
+      "poder": 0,
+      "keywords": [
+        {
+          "kw": "rajada",
+          "x": 2
+        }
+      ],
+      "texto": "Rajada 2."
+    },
+    {
+      "id": "mc-horong",
+      "nome": "Horong",
+      "poder": 0,
+      "keywords": [],
+      "special": "revela-ocultos",
+      "texto": "Revela todos os inimigos ocultos desta sala."
+    },
+    {
+      "id": "mc-orcheroi",
+      "nome": "Orc Herói",
+      "poder": 0,
+      "keywords": [
+        {
+          "kw": "perfurar",
+          "x": 2
+        }
+      ],
+      "texto": "Perfurar 2."
+    }
+  ],
+  "consumiveis": [
+    {
+      "id": "co-pocao",
+      "nome": "Poção Branca",
+      "efeito": "Cancele 1 baixa sua nesta sala.",
+      "naSala": true
+    },
+    {
+      "id": "co-mosca",
+      "nome": "Asa de Mosca",
+      "efeito": "Mova 1 personagem seu para uma sala adjacente antes de revelar.",
+      "naSala": true
+    },
+    {
+      "id": "co-borboleta",
+      "nome": "Asa de Borboleta",
+      "efeito": "Retire o grupo do seu clã desta sala. Sem baixas, sem controle.",
+      "naSala": true
+    },
+    {
+      "id": "co-yggdrasil",
+      "nome": "Folha de Yggdrasil",
+      "efeito": "Traga 1 personagem da Enfermaria direto para esta sala.",
+      "naSala": true
+    },
+    {
+      "id": "co-acido",
+      "nome": "Frasco de Ácido",
+      "efeito": "+3 de Poder nesta sala, ignorando Muralha.",
+      "naSala": true
+    },
+    {
+      "id": "co-convocacao",
+      "nome": "Pergaminho de Convocação",
+      "efeito": "Um Guardião Poder 3 luta por você nesta sala, nesta rodada.",
+      "naSala": true
+    },
+    {
+      "id": "co-pedra",
+      "nome": "Elunium",
+      "efeito": "Refino automático, sem rolar.",
+      "naSala": false
+    },
+    {
+      "id": "co-fumaca",
+      "nome": "Fumaça",
+      "efeito": "Seus personagens nesta sala ficam Oculto.",
+      "naSala": true
+    }
+  ]
+}
