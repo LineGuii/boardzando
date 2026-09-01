@@ -89,9 +89,20 @@ section > h2 { font-size: 1rem; font-weight: 800; letter-spacing: .06em;
 
 .cab { display: grid; gap: 10px; align-items: center; padding: 8px 11px;
   grid-template-columns: minmax(0,1fr) auto auto auto auto auto; }
-.nome { font-weight: 700; min-width: 0; }
-.nome small { display: block; font-weight: 400; font-size: .72rem;
-  color: var(--tinta-fraca); }
+/* O nome e a descricao sao editaveis, mas continuam LENDO como titulo e
+   legenda: borda so no foco, para a tabela seguir escaneavel. */
+.nome { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.nome input { width: 100%; font: inherit; font-weight: 700; padding: 2px 4px;
+  border: 1px solid transparent; border-radius: 3px;
+  background: none; color: inherit; }
+.nome input.desc { font-weight: 400; font-size: .78rem; color: var(--tinta-fraca);
+  font-style: italic; }
+.nome input:hover { border-color: var(--pedra-borda); }
+.nome input:focus { border-color: var(--cristal); background: var(--pedra);
+  outline: none; font-style: normal; }
+.nome input.mudou { color: var(--ouro); border-color: var(--ouro); }
+.nome .id { font-size: .62rem; color: var(--tinta-fraca); padding-left: 5px;
+  font-family: ui-monospace, "Cascadia Mono", Menlo, monospace; }
 .campo { display: flex; flex-direction: column; gap: 2px; }
 .campo em { font-style: normal; font-size: .56rem; letter-spacing: .1em;
   text-transform: uppercase; color: var(--tinta-fraca); }
@@ -165,6 +176,8 @@ pre { margin: 0; max-height: 50vh; overflow: auto; padding: 11px;
     alterações e regerar esta página, a lista de mudanças volta a ficar vazia.
     <b>Combo x Especial:</b> quando “exige” for <b>nenhum</b>, o efeito dispara sozinho e o
     texto deve começar com <b>ESPECIAL:</b>; com classe ou papel, começa com <b>COMBO</b>.
+    O <b>id</b> e a <b>classe</b> não se editam aqui: o id é referenciado pelo código, pelos
+    testes e pelos documentos, e a classe decide quais Transcendências a carta pode tomar.
   </p>
 
   <div id="lista"></div>
@@ -388,7 +401,14 @@ function desenharLinha(c) {
 
   return '<div class="linha" data-id="' + id + '" data-papel="' + (c.papel || '') + '">' +
     '<div class="cab">' +
-    '<div class="nome">' + esc(valor(id, 'nome')) + '<small>' + esc(c.build || '') + ' · ' + id + '</small></div>' +
+    '<div class="nome">' +
+      '<input value="' + esc(valor(id, 'nome') || '') + '" data-id="' + id + '" data-texto="nome" ' +
+      'class="' + (mudou(id, 'nome') ? 'mudou' : '') + '" aria-label="Nome da carta" placeholder="Nome">' +
+      '<input value="' + esc(valor(id, 'build') || '') + '" data-id="' + id + '" data-texto="build" ' +
+      'class="desc ' + (mudou(id, 'build') ? 'mudou' : '') + '" aria-label="Descrição" ' +
+      'placeholder="Descrição — o build do Ragnarok que a carta representa">' +
+      '<span class="id">' + id + '</span>' +
+    '</div>' +
     campoNum(id, 'custo', 'Custo', 0, 30) +
     campoNum(id, poderCampo, ehTrans ? '+Poder' : 'Poder', -10, 30) +
     '<span class="zp" title="zeny por ponto de Poder">' + zp + '</span>' +
@@ -407,7 +427,8 @@ function desenhar() {
   const casa = (c) => {
     if (!q) return true;
     const kws = (valor(c.id, 'keywords') || []).map((k) => D.rotulos[k.kw] || k.kw).join(' ');
-    return (c.nome + ' ' + c._classe + ' ' + (c.build || '') + ' ' + kws).toLowerCase().includes(q);
+    const texto = [valor(c.id, 'nome'), c._classe, valor(c.id, 'build'), kws, c.id].join(' ');
+    return texto.toLowerCase().includes(q);
   };
 
   const grupos = new Map();
@@ -507,6 +528,42 @@ $('#lista').addEventListener('click', async (ev) => {
   }
 });
 
+/*
+ * Texto salva ENQUANTO se digita, com uma pausa curta para nao gravar letra
+ * por letra. E de proposito que isto NAO redesenha a lista: redesenhar tira o
+ * cursor do campo no meio da palavra.
+ */
+const pendentes = new Map();
+$('#lista').addEventListener('input', (ev) => {
+  const el = ev.target;
+  const campo = el.dataset.texto;
+  if (!campo) return;
+  const id = el.dataset.id;
+  clearTimeout(pendentes.get(el));
+  pendentes.set(
+    el,
+    setTimeout(async () => {
+      await definir(id, campo, el.value);
+      el.classList.toggle('mudou', mudou(id, campo));
+    }, 350),
+  );
+});
+
+/* Sair do campo grava na hora, sem esperar a pausa. */
+$('#lista').addEventListener(
+  'blur',
+  async (ev) => {
+    const el = ev.target;
+    const campo = el.dataset.texto;
+    if (!campo) return;
+    clearTimeout(pendentes.get(el));
+    pendentes.delete(el);
+    await definir(el.dataset.id, campo, el.value);
+    el.classList.toggle('mudou', mudou(el.dataset.id, campo));
+  },
+  true,
+);
+
 $('#busca').addEventListener('input', desenhar);
 
 /* ── Exportacao ── */
@@ -515,7 +572,9 @@ function montarDiff() {
   const out = {};
   for (const [id, campos] of Object.entries(edits)) {
     const base = PORID.get(id);
-    out[id] = { nome: base?.nome, de: {}, para: {} };
+    // Rotulo da carta separado do de/para: agora que o NOME e editavel,
+    // "nome" seria ao mesmo tempo o titulo e um campo alterado.
+    out[id] = { carta: base?.nome, de: {}, para: {} };
     for (const [k, v] of Object.entries(campos)) {
       out[id].de[k] = base?.[k] ?? null;
       out[id].para[k] = v;
